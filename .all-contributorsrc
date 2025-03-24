@@ -1,0 +1,25 @@
+{
+  "projectName": "urbis-workflows",
+  "projectOwner": "OpenUrbis",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "douglasgc",
+      "name": "Douglas Gabriel Cardoso",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32394842?v=4",
+      "profile": "https://github.com/douglasgc",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": false
+}
