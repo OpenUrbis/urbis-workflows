@@ -18,6 +18,18 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "RenanTashiro",
+      "name": "Renan Tashiro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13706026?v=4",
+      "profile": "https://github.com/RenanTashiro",
+      "contributions": [
+        "code",
+        "projectManagement",
+        "doc",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
