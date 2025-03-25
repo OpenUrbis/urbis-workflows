@@ -3,7 +3,7 @@ name: Publish NPM Packages
 on:
   push:
     branches:
-      - cicd/changesets
+      - master
 
 jobs:
   publish:
