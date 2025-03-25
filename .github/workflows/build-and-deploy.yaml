@@ -8,7 +8,7 @@ on:
 
 jobs:
   build_and_push:
-    name: Build and Push Docker Image
+    name: Build and Push - Web
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -95,48 +95,48 @@ jobs:
           tags: |
             openurbis/workflows-web:${{ startsWith(github.ref_name, 'staging/') && 'staging' || 'latest' }}
 
-  restart_deployment:
-    name: Restart Kubernetes Deployment
-    runs-on: ubuntu-latest
-    environment: ${{ startsWith(github.ref_name, 'staging/') && 'staging' || 'production' }}
-    needs: build_and_push
-    permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
-    steps:
-      - name: Log in to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  # restart_deployment:
+  #   name: Restart Deployment - Web
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ startsWith(github.ref_name, 'staging/') && 'staging' || 'production' }}
+  #   needs: build_and_push
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #     attestations: write
+  #     id-token: write
+  #   steps:
+  #     - name: Log in to Azure
+  #       uses: azure/login@v2
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Set Up kubectl
-        uses: azure/setup-kubectl@v3
+  #     - name: Set Up kubectl
+  #       uses: azure/setup-kubectl@v3
 
-      - name: Set Up kubelogin
-        uses: azure/use-kubelogin@v1
-        with:
-          kubelogin-version: 'v0.0.26'
+  #     - name: Set Up kubelogin
+  #       uses: azure/use-kubelogin@v1
+  #       with:
+  #         kubelogin-version: 'v0.0.26'
 
-      - name: Set AKS Context
-        id: set-context
-        uses: azure/aks-set-context@v3
-        with:
-          resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          cluster-name: ${{ secrets.AZURE_CLUSTER_NAME }}
-          admin: 'false'
-          use-kubelogin: 'true'
+  #     - name: Set AKS Context
+  #       id: set-context
+  #       uses: azure/aks-set-context@v3
+  #       with:
+  #         resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  #         cluster-name: ${{ secrets.AZURE_CLUSTER_NAME }}
+  #         admin: 'false'
+  #         use-kubelogin: 'true'
 
-      - name: Restart Kubernetes Deployment
-        env:
-          DEPLOYMENT_NAME_PROD: ${{ secrets.K8S_DEPLOYMENT_NAME_PROD }}
-          DEPLOYMENT_NAME_STAGING: ${{ secrets.K8S_DEPLOYMENT_NAME_STAGING }}
-        run: |
-          if [ "${{ env.ENVIRONMENT }}" = "staging" ]; then
-            kubectl rollout restart deployment $DEPLOYMENT_NAME_STAGING
-          else
-            kubectl rollout restart deployment $DEPLOYMENT_NAME_PROD
-          fi
+  #     - name: Restart Kubernetes Deployment
+  #       env:
+  #         DEPLOYMENT_NAME_PROD: ${{ secrets.K8S_DEPLOYMENT_NAME_PROD }}
+  #         DEPLOYMENT_NAME_STAGING: ${{ secrets.K8S_DEPLOYMENT_NAME_STAGING }}
+  #       run: |
+  #         if [ "${{ env.ENVIRONMENT }}" = "staging" ]; then
+  #           kubectl rollout restart deployment $DEPLOYMENT_NAME_STAGING
+  #         else
+  #           kubectl rollout restart deployment $DEPLOYMENT_NAME_PROD
+  #         fi
