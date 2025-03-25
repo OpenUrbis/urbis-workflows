@@ -2,14 +2,14 @@
 
 ![Capa do Repositório](docs/cover.svg)
 
-[![Build Status](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions)
+[![CI Pipeline](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml)
+[![Build and Push](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Version](https://img.shields.io/github/v/release/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/releases)
 [![Contribute](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/OpenUrbis/urbis-workflows/blob/main/docs/CONTRIBUTING.md)
-[![Repo Size](https://img.shields.io/github/repo-size/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows)
-[![Last Commit](https://img.shields.io/github/last-commit/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/commits/main)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/pulls)
-[![NPM Downloads](https://img.shields.io/npm/dt/urbis-workflows)](https://www.npmjs.com/package/urbis-workflows)
+<!-- [![NPM Downloads](https://img.shields.io/npm/dt/urbis-workflows)](https://www.npmjs.com/package/urbis-workflows) -->
+
 
 A generic workflow system for city governments, designed to streamline administrative processes, automate workflows, and enhance municipal efficiency with flexible, modular tools.
 
@@ -66,6 +66,7 @@ Explore the documentation to learn how to set up, use, and extend Urbis-Workflow
 - [Contributing Guide](docs/CONTRIBUTING.md) (How to contribute to the project)
 - [Commit Guidelines](docs/commit-guidelines.md) (How to format commit messages)
 - [Pull request Guidelines](docs/pull-request-guidelines.md) (How to format commit messages)
+- [Deploy Guidelines](docs/DEPLOY.md) (How to Deploy)
 
 ---
 
