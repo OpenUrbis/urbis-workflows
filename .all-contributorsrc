@@ -32,6 +32,16 @@
         "doc",
         "maintenance"
       ]
+    },
+    {
+      "login": "FernandoDorstSilva",
+      "name": "Fernando Dorst",
+      "avatar_url": "https://avatars.githubusercontent.com/u/112201931?v=4",
+      "profile": "https://github.com/FernandoDorstSilva",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
