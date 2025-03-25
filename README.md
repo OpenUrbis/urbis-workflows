@@ -64,7 +64,8 @@ Explore the documentation to learn how to set up, use, and extend Urbis-Workflow
 
 - [Full Documentation](http://docs.urbis.sampa.br/) (Full Documentation)
 - [Contributing Guide](docs/CONTRIBUTING.md) (How to contribute to the project)
-- [Commit Guidelines](docs/COMMIT-GUIDELINES.md) (How to format commit messages)
+- [Commit Guidelines](docs/commit-guidelines.md) (How to format commit messages)
+- [Pull request Guidelines](docs/pull-request-guidelines.md) (How to format commit messages)
 - [Deploy Guidelines](docs/DEPLOY.md) (How to Deploy)
 
 ---
