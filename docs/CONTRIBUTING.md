@@ -1,5 +1,8 @@
 # Contributing to Urbis-Workflows
 
+
+![Capa do Repositório](cover.svg)
+
 Thank you for your interest in contributing to [Urbis-Workflows](https://github.com/OpenUrbis/urbis-workflows)! We welcome contributions to both the codebase and documentation.
 
 ## Before You Start
