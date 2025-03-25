@@ -1,6 +1,8 @@
 
 # Commit Message Guidelines
 
+![Capa do Repositório](cover.svg)
+
 We follow a specific commit message format, inspired by Angular, to keep the history clear and enable automated changelog generation. Each commit message should follow this structure:
 
 ### Header Format
