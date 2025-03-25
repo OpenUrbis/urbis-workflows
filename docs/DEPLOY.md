@@ -36,6 +36,7 @@ The pipeline relies on environment variables to pass non-sensitive information. 
 - `ENVIRONMENT`: Automatically set to `staging` for pushes to `cicd/*` branches or when `staging` is in the reference name; otherwise, set to `production` for release tags without `staging`.
 
 If your application requires additional variables:
+
 - Add them as repository variables under **Settings** > **Secrets and Variables** > **Actions** > **Variables**.
 
 Review your project’s requirements and configure any necessary variables accordingly.
@@ -84,10 +85,12 @@ A `Dockerfile` must be present at the repository root for the pipeline to functi
 ### 6. Triggering the Pipeline
 
 The pipeline runs automatically in two scenarios:
+
 - **Push to branches matching `cicd/*`**: Triggered when code is pushed to branches like `cicd/feature-x`, deploying to the staging environment by default.
 - **Release publication**: Triggered when a release is created on GitHub. Deploys to production if the tag doesn’t contain `staging`; otherwise, deploys to staging.
 
 Ensure your branches and tags align with these triggers. For example:
+
 - Push to `cicd/my-feature` → Staging deployment
 - Release with tag `v1.0.0` → Production deployment
 - Release with tag `staging/v1.0.0` → Staging deployment

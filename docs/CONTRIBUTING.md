@@ -1,13 +1,12 @@
 # Contributing to Urbis-Workflows
 
-
 ![Capa do Repositório](cover.svg)
 
 Thank you for your interest in contributing to [Urbis-Workflows](https://github.com/OpenUrbis/urbis-workflows)! We welcome contributions to both the codebase and documentation.
 
 ## Before You Start
 
-Before submitting a *pull request* (PR), it is **strongly recommended** to [create an issue](https://github.com/OpenUrbis/urbis-workflows/issues/new) to discuss your proposed changes. This helps align your contributions with the project’s goals and avoids duplicated efforts.
+Before submitting a _pull request_ (PR), it is **strongly recommended** to [create an issue](https://github.com/OpenUrbis/urbis-workflows/issues/new) to discuss your proposed changes. This helps align your contributions with the project’s goals and avoids duplicated efforts.
 
 If you’re unsure whether your changes are needed, feel free to open an issue for discussion.
 
@@ -20,7 +19,7 @@ To contribute:
 3. Make your changes, ensuring they are well-formatted and pass tests.
 4. Write or update tests if necessary.
 5. Run `yarn build` and then run tests with `yarn test`.
-6. Push your branch and open a *pull request* (PR).
+6. Push your branch and open a _pull request_ (PR).
 
 Your PR will be reviewed and, if everything looks good, merged within a few days.
 
