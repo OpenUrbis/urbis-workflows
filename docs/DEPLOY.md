@@ -12,17 +12,17 @@ To enable the pipeline, you must configure secrets in your GitHub repository. Th
 - Go to **Settings** > **Secrets and Variables** > **Actions**.
 - Add the following secrets:
 
-| Secret Name                   | Description                               |
-| ----------------------------- | ----------------------------------------- |
-| `DOCKER_USERNAME`             | Your Docker Hub username                  |
-| `DOCKER_PASSWORD`             | Your Docker Hub password or access token  |
-| `AZURE_CLIENT_ID`             | Azure service principal client ID         |
-| `AZURE_TENANT_ID`             | Azure tenant ID                           |
-| `AZURE_SUBSCRIPTION_ID`       | Azure subscription ID                     |
-| `AZURE_RESOURCE_GROUP`        | Name of the Azure AKS resource group      |
-| `AZURE_CLUSTER_NAME`          | Name of the AKS cluster                   |
-| `K8S_DEPLOYMENT_NAME_PROD`    | Kubernetes deployment name for production |
-| `K8S_DEPLOYMENT_NAME_STAGING` | Kubernetes deployment name for staging    |
+| Secret Name                  | Description                                      |
+|------------------------------|--------------------------------------------------|
+| `DOCKER_USERNAME`            | Your Docker Hub username                         |
+| `DOCKER_PASSWORD`            | Your Docker Hub password or access token         |
+| `AZURE_CLIENT_ID`            | Azure service principal client ID                |
+| `AZURE_TENANT_ID`            | Azure tenant ID                                  |
+| `AZURE_SUBSCRIPTION_ID`      | Azure subscription ID                            |
+| `AZURE_RESOURCE_GROUP`       | Name of the Azure AKS resource group             |
+| `AZURE_CLUSTER_NAME`         | Name of the AKS cluster                          |
+| `K8S_DEPLOYMENT_NAME_PROD`   | Kubernetes deployment name for production        |
+| `K8S_DEPLOYMENT_NAME_STAGING`| Kubernetes deployment name for staging           |
 
 These secrets are used to authenticate with Docker Hub and Azure AKS during pipeline execution.
 
