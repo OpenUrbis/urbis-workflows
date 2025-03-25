@@ -1,4 +1,3 @@
-
 # Commit Message Guidelines
 
 ![Capa do Repositório](cover.svg)
@@ -12,6 +11,7 @@ We follow a specific commit message format, inspired by Angular, to keep the his
 ```
 
 - **Type**: Must be one of the following:
+
   - `build`: Changes to the build system or dependencies.
   - `ci`: Changes to CI configuration.
   - `docs`: Documentation-only changes.
@@ -33,8 +33,8 @@ We follow a specific commit message format, inspired by Angular, to keep the his
 
 ### Footer (Optional)
 
-- Used to note *breaking changes* or reference *issues*/PRs.
-- For *breaking changes*, start with `BREAKING CHANGE: ` followed by a description.
+- Used to note _breaking changes_ or reference _issues_/PRs.
+- For _breaking changes_, start with `BREAKING CHANGE: ` followed by a description.
 
 ### Full Example
 

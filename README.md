@@ -74,16 +74,19 @@ Explore the documentation to learn how to set up, use, and extend Urbis-Workflow
 To contribute to Urbis-Workflows, follow these steps:
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/OpenUrbis/urbis-workflows.git
    ```
 
 2. **Install dependencies**:
+
    ```bash
    yarn install
    ```
 
 3. **Start the development server**:
+
    ```bash
    yarn dev
    ```
@@ -119,6 +122,7 @@ For now, feel free to reach out via contas@urbis.sampa.br or open a discussion i
 ## Contributors
 
 A huge thanks to all our contributors! Your efforts make Urbis-Workflows better for everyone.
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -135,7 +139,6 @@ A huge thanks to all our contributors! Your efforts make Urbis-Workflows better 
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
 
 ---
 

@@ -12,17 +12,17 @@ To enable the pipeline, you must configure secrets in your GitHub repository. Th
 - Go to **Settings** > **Secrets and Variables** > **Actions**.
 - Add the following secrets:
 
-| Secret Name                  | Description                                      |
-|------------------------------|--------------------------------------------------|
-| `DOCKER_USERNAME`            | Your Docker Hub username                         |
-| `DOCKER_PASSWORD`            | Your Docker Hub password or access token         |
-| `AZURE_CLIENT_ID`            | Azure service principal client ID                |
-| `AZURE_TENANT_ID`            | Azure tenant ID                                  |
-| `AZURE_SUBSCRIPTION_ID`      | Azure subscription ID                            |
-| `AZURE_RESOURCE_GROUP`       | Name of the Azure AKS resource group             |
-| `AZURE_CLUSTER_NAME`         | Name of the AKS cluster                          |
-| `K8S_DEPLOYMENT_NAME_PROD`   | Kubernetes deployment name for production        |
-| `K8S_DEPLOYMENT_NAME_STAGING`| Kubernetes deployment name for staging           |
+| Secret Name                   | Description                               |
+| ----------------------------- | ----------------------------------------- |
+| `DOCKER_USERNAME`             | Your Docker Hub username                  |
+| `DOCKER_PASSWORD`             | Your Docker Hub password or access token  |
+| `AZURE_CLIENT_ID`             | Azure service principal client ID         |
+| `AZURE_TENANT_ID`             | Azure tenant ID                           |
+| `AZURE_SUBSCRIPTION_ID`       | Azure subscription ID                     |
+| `AZURE_RESOURCE_GROUP`        | Name of the Azure AKS resource group      |
+| `AZURE_CLUSTER_NAME`          | Name of the AKS cluster                   |
+| `K8S_DEPLOYMENT_NAME_PROD`    | Kubernetes deployment name for production |
+| `K8S_DEPLOYMENT_NAME_STAGING` | Kubernetes deployment name for staging    |
 
 These secrets are used to authenticate with Docker Hub and Azure AKS during pipeline execution.
 
@@ -36,6 +36,7 @@ The pipeline relies on environment variables to pass non-sensitive information. 
 - `ENVIRONMENT`: Automatically set to `staging` for pushes to `cicd/*` branches or when `staging` is in the reference name; otherwise, set to `production` for release tags without `staging`.
 
 If your application requires additional variables:
+
 - Add them as repository variables under **Settings** > **Secrets and Variables** > **Actions** > **Variables**.
 
 Review your project’s requirements and configure any necessary variables accordingly.
@@ -84,10 +85,12 @@ A `Dockerfile` must be present at the repository root for the pipeline to functi
 ### 6. Triggering the Pipeline
 
 The pipeline runs automatically in two scenarios:
+
 - **Push to branches matching `cicd/*`**: Triggered when code is pushed to branches like `cicd/feature-x`, deploying to the staging environment by default.
 - **Release publication**: Triggered when a release is created on GitHub. Deploys to production if the tag doesn’t contain `staging`; otherwise, deploys to staging.
 
 Ensure your branches and tags align with these triggers. For example:
+
 - Push to `cicd/my-feature` → Staging deployment
 - Release with tag `v1.0.0` → Production deployment
 - Release with tag `staging/v1.0.0` → Staging deployment
