@@ -98,7 +98,7 @@ jobs:
   restart_deployment:
     name: Restart Kubernetes Deployment
     runs-on: ubuntu-latest
-    environment: ${{ env.ENVIRONMENT }}
+    environment: ${{ startsWith(github.ref_name, 'staging/') && 'staging' || 'production' }}
     needs: build_and_push
     permissions:
       packages: write
