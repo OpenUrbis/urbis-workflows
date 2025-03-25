@@ -1,4 +1,3 @@
-# .github/workflows/ci.yml
 name: CI Pipeline
 
 # Runs on pushes and pull requests for all branches
@@ -10,9 +9,8 @@ on:
     branches:
       - '*'
 
-# Defines global environment variables
 env:
-  NODE_VERSION: '18' # Adjust according to your Node.js version
+  NODE_VERSION: '20' # Adjust according to your Node.js version
 
 jobs:
   build-and-test:
