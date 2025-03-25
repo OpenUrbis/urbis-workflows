@@ -113,8 +113,8 @@ A huge thanks to all our contributors! Your efforts make Urbis-Workflows better 
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/douglasgc"><img src="https://avatars.githubusercontent.com/u/32394842?v=4?s=100" width="100px;" alt="Douglas Gabriel Cardoso"/><br /><sub><b>Douglas Gabriel Cardoso</b></sub></a><br /><a href="https://github.com/OpenUrbis/urbis-workflows/commits?author=douglasgc" title="Code">💻</a> <a href="https://github.com/OpenUrbis/urbis-workflows/commits?author=douglasgc" title="Documentation">📖</a> <a href="#maintenance-douglasgc" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/RenanTashiro"><img src="https://avatars.githubusercontent.com/u/13706026?v=4?s=100" width="100px;" alt="Renan Tashiro"/><br /><sub><b>Renan Tashiro</b></sub></a><br /><a href="https://github.com/OpenUrbis/urbis-workflows/commits?author=RenanTashiro" title="Code">💻</a> <a href="#projectManagement-RenanTashiro" title="Project Management">📆</a> <a href="https://github.com/OpenUrbis/urbis-workflows/commits?author=RenanTashiro" title="Documentation">📖</a> <a href="#maintenance-RenanTashiro" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/douglasgc"><img src="https://avatars.githubusercontent.com/u/32394842?v=4?s=100" width="100px;" alt="Douglas Gabriel Cardoso"/><br /><sub><b>Douglas Gabriel Cardoso</b></sub></a><br /><a href="https://github.com/OpenUrbis/urbis-workflows/commits?author=douglasgc" title="Code">💻</a> <a href="https://github.com/OpenUrbis/urbis-workflows/commits?author=douglasgc" title="Documentation">📖</a> <a href="#maintenance-douglasgc" title="Maintenance">🚧</a></td>
     </tr>
   </tbody>
 </table>
