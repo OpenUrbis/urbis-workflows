@@ -8,8 +8,8 @@
 [![Version](https://img.shields.io/github/v/release/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/releases)
 [![Contribute](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/OpenUrbis/urbis-workflows/blob/main/docs/CONTRIBUTING.md)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/pulls)
-<!-- [![NPM Downloads](https://img.shields.io/npm/dt/urbis-workflows)](https://www.npmjs.com/package/urbis-workflows) -->
 
+<!-- [![NPM Downloads](https://img.shields.io/npm/dt/urbis-workflows)](https://www.npmjs.com/package/urbis-workflows) -->
 
 A generic workflow system for city governments, designed to streamline administrative processes, automate workflows, and enhance municipal efficiency with flexible, modular tools.
 
