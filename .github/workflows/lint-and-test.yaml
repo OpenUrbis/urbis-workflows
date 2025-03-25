@@ -61,7 +61,7 @@ jobs:
       - name: Run tests
         run: ${{ steps.detect-package-manager.outputs.runner }} turbo run test
 
-      # Optional: Turborepo cache setup
+      # Turborepo cache setup
       - name: Setup Turborepo cache
         uses: actions/cache@v3
         with:
