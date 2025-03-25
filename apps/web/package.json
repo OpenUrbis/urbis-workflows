@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "@open-urbis/web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@open-urbis/ui": "*",
+    "@open-urbis/types": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
