@@ -93,7 +93,7 @@ jobs:
           build-args: |
             APP_VERSION=${{ env.APP_VERSION }}
           tags: |
-            openurbis/workflows-web:${{ env.ENVIRONMENT == 'staging' && 'staging' || 'latest' }}
+            openurbis/workflows-web:${{ startsWith(github.ref_name, 'staging/') && 'staging' || 'latest' }}
 
   restart_deployment:
     name: Restart Kubernetes Deployment
