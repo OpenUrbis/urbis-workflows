@@ -42,6 +42,15 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "laysmorimoto",
+      "name": "laysmorimoto",
+      "avatar_url": "https://avatars.githubusercontent.com/u/171581826?v=4",
+      "profile": "https://github.com/laysmorimoto",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
