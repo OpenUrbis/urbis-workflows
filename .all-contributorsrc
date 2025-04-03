@@ -51,6 +51,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "junior-anzolin",
+      "name": "Junior Anzolin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32394862?v=4",
+      "profile": "https://github.com/junior-anzolin",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
