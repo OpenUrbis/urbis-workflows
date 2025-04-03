@@ -61,6 +61,16 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "h-pgy",
+      "name": "Henrique Pougy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41967884?v=4",
+      "profile": "https://github.com/h-pgy",
+      "contributions": [
+        "doc",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
