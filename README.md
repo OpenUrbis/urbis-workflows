@@ -4,7 +4,7 @@
 
 [![CI Pipeline](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml)
 [![Build and Push](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Version](https://img.shields.io/github/v/release/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/releases)
 [![Contribute](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/OpenUrbis/urbis-workflows/blob/main/docs/CONTRIBUTING.md)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/pulls)
