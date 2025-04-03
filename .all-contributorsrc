@@ -71,6 +71,18 @@
         "doc",
         "maintenance"
       ]
+    },
+    {
+      "login": "mauryascm",
+      "name": "mauryascm",
+      "avatar_url": "https://avatars.githubusercontent.com/u/166533566?v=4",
+      "profile": "https://github.com/mauryascm",
+      "contributions": [
+        "doc",
+        "maintenance",
+        "test",
+        "projectManagement"
+      ]
     }
   ],
   "contributorsPerLine": 7,
