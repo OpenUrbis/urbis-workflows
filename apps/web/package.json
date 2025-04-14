@@ -1,28 +1,96 @@
 {
   "name": "@open-urbis/web",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.4.14",
   "type": "module",
-  "scripts": {
-    "dev": "vite --clearScreen false",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "eslint \"src/**/*.ts\""
-  },
   "dependencies": {
-    "@open-urbis/ui": "*",
-    "@open-urbis/types": "*",
+    "@babel/parser": "^7.25.8",
+    "@chakra-ui/react": "^2.7.0",
+    "@chakra-ui/tabs": "^3.0.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@monaco-editor/react": "^4.6.0",
+    "@open-urbis/types": "^1.0.0",
+    "@open-urbis/ui": "^0.0.0",
+    "@react-input/mask": "^2.0.4",
+    "@types/node": "^20.1.4",
+    "@types/qrcode.react": "^3.0.0",
+    "@types/react": "^18.2.6",
+    "@types/react-dom": "^18.2.4",
+    "axios": "^1.4.0",
+    "date-fns": "^4.1.0",
+    "esprima-next": "^6.0.3",
+    "framer-motion": "^10.12.16",
+    "jsbarcode": "^3.11.6",
+    "jwt-decode": "^3.1.2",
+    "leaflet": "^1.9.4",
+    "lodash.debounce": "^4.0.8",
+    "lru-cache": "^11.0.2",
+    "monaco-editor": "^0.52.0",
+    "papaparse": "^5.4.1",
+    "proj4": "^2.9.0",
+    "qrcode.react": "^4.2.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-color": "^2.19.3",
+    "react-dom": "^18.2.0",
+    "react-hotkeys": "^2.0.0",
+    "react-icons": "^4.8.0",
+    "react-leaflet": "^4.2.1",
+    "react-number-format": "^5.4.0",
+    "react-router-dom": "^6.14.0",
+    "react-scripts": "5.0.1",
+    "react-simple-code-editor": "^0.13.1",
+    "reactflow": "^11.11.4",
+    "tailwindcss": "^3.3.2",
+    "web-vitals": "^2.1.4"
+  },
+  "overrides": {
+    "typescript": "^5.0.4"
   },
   "devDependencies": {
-    "@open-urbis/eslint-config": "*",
-    "@open-urbis/typescript-config": "*",
-    "@types/react": "^19.0.1",
-    "@types/react-dom": "^19.0.2",
-    "@vitejs/plugin-react": "^3.1.0",
-    "eslint": "^8.57.0",
-    "typescript": "5.5.4",
-    "vite": "^5.1.4"
-  }
+    "@open-urbis/eslint-config": "^0.0.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/esprima": "^4.0.6",
+    "@types/leaflet": "^1.9.3",
+    "@types/lodash.debounce": "^4.0.9",
+    "@types/lru-cache": "^7.10.10",
+    "@types/papaparse": "^5.3.14",
+    "@types/proj4": "^2.5.2",
+    "@types/react-color": "^3.0.8",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.23.0",
+    "@typescript-eslint/parser": "^8.23.0",
+    "eslint": "^8.57.1",
+    "file-loader": "^6.2.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.0.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint \"src/**/*.ts\""
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
