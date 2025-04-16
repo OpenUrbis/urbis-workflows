@@ -1,4 +1,4 @@
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import {
   IsOptional,
   IsBoolean,
@@ -12,7 +12,17 @@ import {
   IsUUID,
 } from "class-validator";
 import { JSONSchema7 } from "json-schema";
-import { IField, ToBoolean } from ".";
+import { IField } from ".";
+
+export function ToBoolean() {
+  return Transform(({ value }) => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") {
+      return value.toLowerCase() === "true";
+    }
+    return undefined;
+  });
+}
 
 /**
  * Enum representing privacy levels for response DTOs.
