@@ -9,6 +9,7 @@ import {
   ValidateNested,
   IsEnum,
   IsObject,
+  IsUUID,
 } from "class-validator";
 import { JSONSchema7 } from "json-schema";
 import { IField, ToBoolean } from ".";
@@ -49,6 +50,44 @@ export enum PrivacyLevelEnum {
   ANONYMIZED = 4,
 }
 
+export enum SensibilityLevelEnum {
+  NOT_APPLICABLE = 0,
+  PERSONAL = 1,
+  SENSITIVE = 2,
+  ANONYMIZED = 3,
+}
+
+export class EntityWithPermission {
+  @IsUUID()
+  id: string;
+
+  @IsString()
+  name: string;
+
+  @IsEnum(["read", "write"])
+  access: "read" | "write";
+}
+
+export class Permissions {
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EntityWithPermission)
+  users?: EntityWithPermission[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EntityWithPermission)
+  roles?: EntityWithPermission[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => EntityWithPermission)
+  groups?: EntityWithPermission[];
+}
+
 export class BaseOptions {
   @IsOptional()
   @IsBoolean()
@@ -58,6 +97,15 @@ export class BaseOptions {
   @IsOptional()
   @IsEnum(PrivacyLevelEnum)
   accessLevel?: PrivacyLevelEnum;
+
+  @IsOptional()
+  @IsEnum(SensibilityLevelEnum)
+  sensibilityLevel?: SensibilityLevelEnum;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => Permissions)
+  permissions?: Permissions;
 
   @IsOptional()
   @IsString()
