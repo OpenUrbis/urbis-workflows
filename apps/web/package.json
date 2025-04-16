@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.4.14",
   "type": "module",
+  "author": "Renan Tashiro",
   "dependencies": {
     "@babel/parser": "^7.25.8",
     "@chakra-ui/react": "^2.7.0",
