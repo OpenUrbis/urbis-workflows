@@ -132,7 +132,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
         delete: ["N"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [hotkeyContext]);
 
   const handleAddGlobalModule = async (globalModule: any) => {

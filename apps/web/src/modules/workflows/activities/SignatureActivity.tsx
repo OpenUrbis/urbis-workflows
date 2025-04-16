@@ -90,7 +90,7 @@ export const SignatureActivity: React.FC<SignatureActivityProps> = ({
   ) => {
     if (!block) return;
 
-    for (let field of block) {
+    for (const field of block) {
       if (field.type === "link") {
         const value = model?.[field.key];
         links.push(value);
@@ -223,7 +223,6 @@ export const SignatureActivity: React.FC<SignatureActivityProps> = ({
     };
 
     loadSignatures();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflow, activeStep, context, value]);
 
   const handleAcceptSignature = async () => {

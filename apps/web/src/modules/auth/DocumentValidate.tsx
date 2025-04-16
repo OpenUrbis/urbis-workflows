@@ -44,7 +44,6 @@ export function DocumentValidate(): JSX.Element {
         delete: ["E", "V"],
       });
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   const handleValidate = async (e?: React.FormEvent) => {

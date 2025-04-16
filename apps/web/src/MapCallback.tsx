@@ -17,7 +17,7 @@ function MapCallback(): JSX.Element {
     } else {
       navigate(`/workflows/${subjectId}/create?sql=${sql}`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   return <></>;

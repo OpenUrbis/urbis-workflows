@@ -9,8 +9,8 @@ import { Portal } from "@chakra-ui/react";
 import { FaTimes } from "react-icons/fa";
 
 // Global drawer management
+const drawerStateSetters: { [id: string]: (isOpen: boolean) => void } = {};
 let currentOpenDrawers: string[] = [];
-let drawerStateSetters: { [id: string]: (isOpen: boolean) => void } = {};
 let lastClosedDrawerId: string | null = null;
 
 export interface SideDrawerProps {

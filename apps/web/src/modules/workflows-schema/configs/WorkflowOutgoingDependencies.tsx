@@ -120,7 +120,7 @@ export const WorkflowOutgoingDependencies = ({
         delete: ["N"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [hotkeyContext]);
 
   return (

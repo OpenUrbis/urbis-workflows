@@ -115,7 +115,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
 
   useEffect(() => {
     fetchGlobalConstants();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   useEffect(() => {

@@ -104,7 +104,6 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
 
     // Call fetchUserIam
     fetchUserIam();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   const hasPermission = (permission: string): boolean => {

@@ -57,7 +57,6 @@ export const AddEnvironment: React.FC<AddEnvironmentProps> = ({
         delete: [fixedButton ? "S" : "N"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newEnvironmentForm, fixedButton]);
 
   const isValueValid = (value: any, type: ConstantTypeEnum): boolean => {
@@ -227,10 +226,11 @@ export function EnvironmentValueForm({
     switch (type) {
       case ConstantTypeEnum.STRING:
         return value;
-      case ConstantTypeEnum.NUMBER:
+      case ConstantTypeEnum.NUMBER: {
         if (value === "" || value === null || value === undefined) return 0;
         const num = Number(value);
         return isNaN(num) ? 0 : num;
+      }
       case ConstantTypeEnum.BOOLEAN:
         return value === "true";
       case ConstantTypeEnum.DATE:

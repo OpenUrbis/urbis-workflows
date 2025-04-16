@@ -59,11 +59,11 @@ export const AddFormsPreset: React.FC<AddFormPresetProps> = ({
         delete: ["S"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [newPresetForm, loading]);
 
   const handleFormTypeChange = (type: FormTypeEnum) => {
-    let formConfig: IField = {
+    const formConfig: IField = {
       type: FieldTypeEnum.Preset,
       key: crypto.randomUUID(),
       options: {

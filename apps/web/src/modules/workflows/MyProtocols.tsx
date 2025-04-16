@@ -116,7 +116,7 @@ export function MyProtocols(): JSX.Element {
 
   useEffect(() => {
     handleProtocols(currentPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [currentPage, stage]);
 
   const formatDate = (dateStr: string) => {

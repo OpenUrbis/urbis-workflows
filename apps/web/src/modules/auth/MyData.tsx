@@ -120,7 +120,7 @@ export function MyData(): JSX.Element {
         delete: ["S"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [profile, editProfile]);
 
   return (

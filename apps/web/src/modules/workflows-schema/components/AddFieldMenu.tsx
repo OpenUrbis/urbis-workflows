@@ -357,7 +357,7 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
         delete: ["C", "V"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [hotkeyContext, presetModalController, addFieldCallback]);
 
   const handleCloseModal = () => {

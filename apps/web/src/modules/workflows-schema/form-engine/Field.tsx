@@ -228,7 +228,7 @@ export const useFieldDynamic = (
       // component to be reactive to its own changes.
       modelCallback(field, value, context, general, validContext, onChange);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [
     context,
     field.expressions?.model,
@@ -247,7 +247,7 @@ export const useFieldDynamic = (
       setLoading,
       onChange
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [context, general.$data, field.expressions?.integration]);
 
   return { loading, visible, options, validState, setOptions };

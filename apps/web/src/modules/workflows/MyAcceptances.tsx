@@ -90,14 +90,15 @@ export function MyAcceptances(): JSX.Element {
       );
 
       setData(response.data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn(e);
+    }
 
     setLoading(false);
   };
 
   useEffect(() => {
     handleFetchAcceptances();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatDate = (dateStr: string) => {

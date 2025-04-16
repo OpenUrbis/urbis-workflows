@@ -118,7 +118,7 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [isOpen, hasChanges, hasSyntaxError]);
 
   const isSaveDisabled = !hasChanges || hasSyntaxError;

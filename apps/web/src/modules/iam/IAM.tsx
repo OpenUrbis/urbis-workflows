@@ -62,7 +62,7 @@ export function IAM(): JSX.Element {
         delete: ["Q", "A", "Z", "W"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   return (

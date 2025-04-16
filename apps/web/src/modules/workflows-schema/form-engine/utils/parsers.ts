@@ -18,7 +18,9 @@ export function parseFunctions(
         result[key] = loadFunctions(funcStr);
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn(e);
+  }
 
   return result;
 }
@@ -124,7 +126,7 @@ function parseExpressionsVariablesBlockUtil(
   parent: IField,
   fieldGlobal: IField
 ) {
-  for (let f of block) {
+  for (const f of block) {
     if (f.expressions?.model || f.expressions?.integration) {
       const paths = extractContextVariables(
         f.expressions.model ?? f.expressions.integration ?? ""
@@ -149,12 +151,12 @@ function extractFieldFromPath(
 ) {
   const fieldsRef: IField[] = [];
 
-  for (let path of paths) {
+  for (const path of paths) {
     const pathParts = path.split(".");
 
     if (pathParts[1] === "$global") {
       let fieldRef: IField = fieldGlobal;
-      for (let subpath of pathParts.slice(2)) {
+      for (const subpath of pathParts.slice(2)) {
         if (fieldRef.block) {
           const subField = fieldRef.block.find((f) => f.key === subpath);
 
@@ -202,10 +204,10 @@ function extractContextVariables(code: string): string[] {
     const ast = esprima.parseScript(code);
     const contextVariables: string[] = [];
 
-    function traverse(node: Node, path: string): void {
+    const traverse = (node: Node, path: string): void => {
       switch (node.type) {
         case "Program":
-          node.body.forEach((statement) => {
+          node.body.forEach((statement: any) => {
             if ("expression" in statement) {
               traverse(statement.expression, "");
             }
@@ -220,7 +222,7 @@ function extractContextVariables(code: string): string[] {
             path = "";
           }
           break;
-        case "MemberExpression":
+        case "MemberExpression": {
           const memberExpr = node as MemberExpression;
           if (memberExpr.computed) {
             traverse(
@@ -236,13 +238,14 @@ function extractContextVariables(code: string): string[] {
             traverse(memberExpr.object, newPath);
           }
           break;
+        }
         default:
           if ("left" in node && node.left) traverse(node.left, path);
           if ("right" in node && node.right) traverse(node.right, path);
           if ("expression" in node && node.expression)
             traverse(node.expression as Node, path);
       }
-    }
+    };
 
     traverse(ast as Node, "");
 

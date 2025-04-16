@@ -80,7 +80,7 @@ export function ContestUser(): JSX.Element {
       setDocument(documentParam);
       fetchUserByDocument(documentParam);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [location]);
 
   const handleSignUp = async (e?: React.FormEvent) => {
@@ -104,7 +104,6 @@ export function ContestUser(): JSX.Element {
         delete: ["U", "E"],
       });
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   return (

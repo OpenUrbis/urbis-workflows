@@ -958,7 +958,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   useEffect(() => {
     fetchSubject();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -975,7 +974,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
       // Refresh secondary data to get the latest constants and code modules
       fetchSecondaryData(workflowSchema);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
   useEffect(() => {
@@ -1014,12 +1012,11 @@ export function WorkflowSchemaEditor(): JSX.Element {
         delete: ["Q", "W", "E", "A", "Z", "M"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, workflowSchema, selectedTab]);
 
   const renderActivityEditor = (activity: ActivityTemplate, index: number) => {
     switch (activity.type) {
-      case ActivityTypeEnum.FORM:
+      case ActivityTypeEnum.FORM: {
         const formTemplate = activity.template as FormTemplate;
         return (
           <FieldEditable
@@ -1054,6 +1051,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
             general={editorGeneral}
           />
         );
+      }
       case ActivityTypeEnum.DOCUMENT:
         return (
           <ActivityDocumentEditor
@@ -1068,7 +1066,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
             }}
           />
         );
-      case ActivityTypeEnum.SIGNATURE:
+      case ActivityTypeEnum.SIGNATURE: {
         const signatureTemplate = activity.template as SignaturesTemplate;
         return (
           <div>
@@ -1085,6 +1083,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
             />
           </div>
         );
+      }
       case ActivityTypeEnum.TAX:
         return (
           <ActivityTaxEditor

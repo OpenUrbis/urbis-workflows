@@ -15,7 +15,10 @@ interface AuthContextType {
 }
 
 export const DefaultRouteContext = createContext<string>(
-  !!localStorage.getItem("token") ? "/workflows-schema" : "/login"
+  localStorage.getItem("token") !== undefined ||
+    localStorage.getItem("token") !== null
+    ? "/workflows-schema"
+    : "/login"
 );
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,

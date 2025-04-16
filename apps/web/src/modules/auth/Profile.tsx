@@ -50,7 +50,7 @@ export function Profile(): JSX.Element {
         delete: ["Q", "A", "Z"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   return (

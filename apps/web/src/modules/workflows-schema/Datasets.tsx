@@ -75,7 +75,7 @@ export const Datasets: React.FC = () => {
 
   useEffect(() => {
     fetchDatasets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export const Datasets: React.FC = () => {
         delete: ["N"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [loading, hotkeyContext]);
 
   const searchCallback = (search: string) => {

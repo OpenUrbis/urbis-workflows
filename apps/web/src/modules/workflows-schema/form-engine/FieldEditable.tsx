@@ -395,7 +395,7 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
                   onClick={() =>
                     setOptions({
                       ...options,
-                      open: !!!(options as BlockOptions).open,
+                      open: !(options as BlockOptions).open,
                     } as BlockOptions)
                   }
                 >

@@ -102,7 +102,7 @@ const hotkeyReducer = (
   action: HotkeyAction
 ): HotkeyState => {
   switch (action.type) {
-    case "SET_HOTKEY":
+    case "SET_HOTKEY": {
       const hotkeyKeyMap: { [k in Keys]?: string | string[] } = {};
 
       Object.keys(action.payload ?? {}).forEach((key) => {
@@ -119,15 +119,18 @@ const hotkeyReducer = (
           ...action.payload,
         },
       };
-    case "UNSET_HOTKEY":
+    }
+    case "UNSET_HOTKEY": {
       const newState = { ...state };
       action.delete?.forEach((key) => {
         delete newState.hotkeyKeyMap[key];
         delete newState.hotkeyHandlers[key];
       });
       return newState;
-    default:
+    }
+    default: {
       return state;
+    }
   }
 };
 

@@ -95,7 +95,6 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch users, roles, and groups when the drawer opens
@@ -138,7 +137,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     const existingIndex = permissions?.users?.findIndex(
       (u) => u.id === user.id
     );
-    let newUsers = [...(permissions?.users || [])];
+    const newUsers = [...(permissions?.users || [])];
 
     if (existingIndex !== undefined && existingIndex >= 0) {
       // If already exists with same access, remove it
@@ -167,7 +166,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     const existingIndex = permissions?.roles?.findIndex(
       (r) => r.id === role.id
     );
-    let newRoles = [...(permissions?.roles || [])];
+    const newRoles = [...(permissions?.roles || [])];
 
     if (existingIndex !== undefined && existingIndex >= 0) {
       // If already exists with same access, remove it
@@ -196,7 +195,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     const existingIndex = permissions?.groups?.findIndex(
       (g) => g.id === group.id
     );
-    let newGroups = [...(permissions?.groups || [])];
+    const newGroups = [...(permissions?.groups || [])];
 
     if (existingIndex !== undefined && existingIndex >= 0) {
       // If already exists with same access, remove it

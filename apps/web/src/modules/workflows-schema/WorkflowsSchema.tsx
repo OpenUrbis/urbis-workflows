@@ -86,7 +86,7 @@ export const WorkflowsSchema: React.FC = () => {
 
   useEffect(() => {
     fetchWorkflows();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [stage]);
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export const WorkflowsSchema: React.FC = () => {
         delete: ["N", "G", "T", "S", "E"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [workflows]);
 
   const buildHotkeys = () => ({

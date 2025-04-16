@@ -81,7 +81,7 @@ export const Step: React.FC<FieldStepProps> = ({
     setFlattenedFields(flattenedFields);
     // Initialize step refs array with the correct length
     stepRefs.current = flattenedFields.map(() => null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   // Add effect for initial left alignment
@@ -132,12 +132,12 @@ export const Step: React.FC<FieldStepProps> = ({
 
     setVisible(visibleObj);
     setLastVisibleStep(lastVisibleIndex);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [value]);
 
   useEffect(() => {
     setNextStepDisabled(!nextStepEnabled());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [valid, activeStep]);
 
   useEffect(() => {
@@ -164,7 +164,7 @@ export const Step: React.FC<FieldStepProps> = ({
         delete: ["right", "left", "S"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [field, valid, activeStep, nextStepDisabled]);
 
   const nextStepEnabled = () => {

@@ -107,7 +107,7 @@ const ConfirmModal: FC = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [isOpen]);
 
   const getIcon = () => {

@@ -140,7 +140,6 @@ function Header(): JSX.Element {
         payload: hotkeyMap,
       });
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [loading, filteredNavItems, isAuthenticated]);
 
   return (

@@ -123,7 +123,7 @@ export function UserAccess(): JSX.Element {
     return () => {
       // Cleanup
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   const filteredUsers = users.filter(

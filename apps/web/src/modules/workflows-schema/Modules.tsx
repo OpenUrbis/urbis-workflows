@@ -83,7 +83,7 @@ export const Modules: React.FC = () => {
         delete: ["N", "S"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [loading, selectedFunction]);
 
   const searchCallback = (search: string) => {

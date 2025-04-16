@@ -142,7 +142,7 @@ export const Environments: React.FC = () => {
 
   useEffect(() => {
     fetchEnvironments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   useEffect(() => {
@@ -160,7 +160,7 @@ export const Environments: React.FC = () => {
         delete: ["N", "S"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [loading]);
 
   const searchCallback = (search: string) => {

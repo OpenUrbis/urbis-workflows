@@ -54,7 +54,6 @@ export const IncomingActivity: React.FC<{
       setWorkflowId("");
       setError(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, value?.$metadata?.workflowId]);
 
   const fetchWorkflowData = async (id: string) => {

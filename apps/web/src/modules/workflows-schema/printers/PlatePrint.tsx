@@ -135,7 +135,7 @@ export const PlatePrint = (): JSX.Element => {
 
   useEffect(() => {
     fetchWorkflow();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   // Set QR code as loaded when the component is rendered

@@ -21,7 +21,7 @@ export function ProtocolValidate(): JSX.Element {
     }
 
     const observer = new MutationObserver((mutationsList) => {
-      for (let mutation of mutationsList) {
+      for (const mutation of mutationsList) {
         if (mutation.type === "childList") {
           try {
             const data = JSON.parse(mutation.target.textContent || "{}");
@@ -55,8 +55,8 @@ export function ProtocolValidate(): JSX.Element {
           }
         }
       } else {
-        for (let key in obj) {
-          if (obj.hasOwnProperty(key)) {
+        for (const key in obj) {
+          if (obj[key] !== undefined) {
             if (hasFalseLeaf(obj[key])) {
               return true;
             }

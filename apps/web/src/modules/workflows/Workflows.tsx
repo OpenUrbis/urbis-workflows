@@ -343,7 +343,7 @@ export function Workflows(): JSX.Element {
     if (!validObj) return false;
 
     // If we find a $complete key, return its value
-    if (validObj.hasOwnProperty("$complete")) {
+    if (validObj.$complete !== undefined) {
       return validObj.$complete === true;
     }
 
@@ -574,7 +574,7 @@ export function Workflows(): JSX.Element {
 
     // Otherwise, render normal activity types
     switch (activity.type) {
-      case ActivityTypeEnum.FORM:
+      case ActivityTypeEnum.FORM: {
         const formTemplate = activity.template as FormTemplate;
         const formValue = context[activity.namespace];
         const isFormCompleted =
@@ -653,7 +653,8 @@ export function Workflows(): JSX.Element {
             )}
           </>
         );
-      case ActivityTypeEnum.SIGNATURE:
+      }
+      case ActivityTypeEnum.SIGNATURE: {
         return (
           <SignatureActivity
             activity={
@@ -668,7 +669,8 @@ export function Workflows(): JSX.Element {
             onSignatureComplete={updateContext}
           />
         );
-      case ActivityTypeEnum.TAX:
+      }
+      case ActivityTypeEnum.TAX: {
         return (
           <TaxActivity
             activity={activity as ActivityTemplate & { template: TaxTemplate }}
@@ -679,7 +681,8 @@ export function Workflows(): JSX.Element {
             onTaxComplete={updateContext}
           />
         );
-      case ActivityTypeEnum.DOCUMENT:
+      }
+      case ActivityTypeEnum.DOCUMENT: {
         return (
           <DocumentActivity
             activity={
@@ -692,8 +695,10 @@ export function Workflows(): JSX.Element {
             onDocumentComplete={updateContext}
           />
         );
-      default:
+      }
+      default: {
         return <div>Activity type not supported</div>;
+      }
     }
   };
 
@@ -706,7 +711,6 @@ export function Workflows(): JSX.Element {
       }
     };
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -733,7 +737,6 @@ export function Workflows(): JSX.Element {
         setCanSubmit(isComplete);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflow?.schema?.activities, activeStep, valid]);
 
   return (

@@ -22,5 +22,7 @@ export async function downloadFile(dir: string | undefined, filename: string) {
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
-  } catch (error) {}
+  } catch (error) {
+    console.warn(error);
+  }
 }

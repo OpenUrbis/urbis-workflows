@@ -47,7 +47,7 @@ export const AddModule: React.FC<AddModuleProps> = ({
         delete: [fixedButton ? "S" : "N"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [newFunctionForm, fixedButton]);
 
   const addButton = (

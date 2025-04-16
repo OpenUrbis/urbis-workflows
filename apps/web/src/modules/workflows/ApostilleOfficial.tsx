@@ -90,7 +90,7 @@ export function ApostilleOfficial(): JSX.Element {
 
   useEffect(() => {
     fetchProtocol();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export function ApostilleOfficial(): JSX.Element {
         delete: ["S", "1", "2", "3", "4"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [loading, protocol]);
 
   const [subPage, setSubPage] = useState("subject");

@@ -191,7 +191,6 @@ function AccessibilityMenu(): JSX.Element {
       type: "SET_STYLE",
       payload: { fontSize, backgroundColor, textColor, buttonHoverColorWeight },
     });
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [
     backgroundColor,
     buttonHoverColorWeight,
@@ -224,7 +223,6 @@ function AccessibilityMenu(): JSX.Element {
         },
       });
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [loading, isAuthenticated, filteredMenuItems]);
 
   return (

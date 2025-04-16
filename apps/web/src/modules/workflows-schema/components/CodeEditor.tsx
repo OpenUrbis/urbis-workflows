@@ -31,7 +31,7 @@ export const CodeEditor = ({
     }
   }, [value, readOnly]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   const debouncedOnChange = useCallback(
     debounce((value: string) => {
       onChange(value);

@@ -50,7 +50,6 @@ export function ForgetPassword(): JSX.Element {
         delete: ["E", "R"],
       });
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   return (

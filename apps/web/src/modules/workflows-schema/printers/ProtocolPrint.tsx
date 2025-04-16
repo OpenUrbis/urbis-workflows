@@ -27,12 +27,13 @@ export const ProtocolPrint = (): JSX.Element => {
       delete response.data.id;
 
       setProtocol(response.data);
-    } catch (e) {}
+    } catch (e) {
+      console.warn(e);
+    }
   };
 
   useEffect(() => {
     fetchSubject();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const pdfPageStyle: React.CSSProperties = {

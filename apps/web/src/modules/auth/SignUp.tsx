@@ -125,7 +125,6 @@ export function SignUp(): JSX.Element {
         delete: ["U", "E"],
       });
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   return (

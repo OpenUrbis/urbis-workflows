@@ -60,7 +60,6 @@ export function ConfirmSignUp(): JSX.Element {
         delete: ["U"],
       });
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   return (

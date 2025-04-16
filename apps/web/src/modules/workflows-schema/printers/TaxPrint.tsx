@@ -339,7 +339,7 @@ export const TaxPrint = (): JSX.Element => {
 
   useEffect(() => {
     fetchWorkflow();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [id, version, taxId]);
 
   const element = document.querySelector("div.enabled");

@@ -71,7 +71,7 @@ const PromptModal: FC<PromptProps> = ({
     if (resolvePrompt) {
       onOpen();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [resolvePrompt, promptParams]);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const PromptModal: FC<PromptProps> = ({
 
     if (hasError !== resultValidate) setHasError(resultValidate);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [input]);
 
   const handleClose = () => {

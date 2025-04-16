@@ -38,7 +38,7 @@ export const DocumentPrint = (): JSX.Element => {
       // QR code is rendered as SVG, so it's loaded immediately
       setQRCodeLoaded(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [qrCodeRef.current]);
 
   const fetchWorkflow = async () => {
@@ -136,7 +136,7 @@ export const DocumentPrint = (): JSX.Element => {
 
   useEffect(() => {
     fetchWorkflow();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [id, version, documentId]);
 
   const isAllLoaded = isQRCodeLoaded && isLogoLoaded;

@@ -236,7 +236,6 @@ export function Document(): JSX.Element {
 
   useEffect(() => {
     fetchProtocol();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const COLOR_MAPPER: { [key: string]: string } = {

@@ -16,7 +16,6 @@ function Footer(): JSX.Element {
         D: () => navigate("/document-validate"),
       },
     });
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   return (

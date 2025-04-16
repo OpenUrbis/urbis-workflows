@@ -71,7 +71,6 @@ export function ConfirmForgetPassword(): JSX.Element {
         delete: ["R"],
       });
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 
   return (

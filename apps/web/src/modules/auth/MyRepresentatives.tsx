@@ -66,7 +66,7 @@ export function MyRepresentatives(): JSX.Element {
         delete: [],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   return (

@@ -66,7 +66,7 @@ export function SignUpEditor(): JSX.Element {
 
   useEffect(() => {
     fetchConfig();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export function SignUpEditor(): JSX.Element {
         delete: ["S"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [loading, config, hotkeyContext]);
 
   return (

@@ -46,7 +46,7 @@ export const AddSecret: React.FC<AddSecretProps> = ({
         delete: ["S"],
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [newSecretForm, loading]);
 
   const handleAddSecret = async () => {
