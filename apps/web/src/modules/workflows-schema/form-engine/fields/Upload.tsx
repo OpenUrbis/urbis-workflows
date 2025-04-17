@@ -115,7 +115,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
         }));
 
         const { data } = await axios.post(
-          `${process.env.REACT_APP_BACK_END_API}/datasets/generate-presigned-url`,
+          `${import.meta.env.VITE_BACK_END_API}/datasets/generate-presigned-url`,
           {
             dirName: options.dir,
             fileName: fileName,

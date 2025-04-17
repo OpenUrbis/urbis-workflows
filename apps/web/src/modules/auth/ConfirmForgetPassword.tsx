@@ -37,7 +37,7 @@ export function ConfirmForgetPassword(): JSX.Element {
       }
 
       const response = await axios.post(
-        `${process.env.REACT_APP_BACK_END_API}/users/confirm-forget-password`,
+        `${import.meta.env.VITE_BACK_END_API}/users/confirm-forget-password`,
         {
           email,
           code,

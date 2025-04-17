@@ -29,7 +29,7 @@ export function ConfirmSignUp(): JSX.Element {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BACK_END_API}/users/confirm-sign-up`,
+        `${import.meta.env.VITE_BACK_END_API}/users/confirm-sign-up`,
         {
           email,
           code,

@@ -3,7 +3,7 @@ import axios from "axios";
 export async function downloadFile(dir: string | undefined, filename: string) {
   try {
     const { data } = await axios.post(
-      `${process.env.REACT_APP_BACK_END_API}/datasets/generate-download-url`,
+      `${import.meta.env.VITE_BACK_END_API}/datasets/generate-download-url`,
       {
         dirName: dir,
         fileName: filename,

@@ -19,7 +19,7 @@ export function Apostille(): JSX.Element {
   const fetchProtocol = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/${id}`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/${id}`,
         {
           headers: {
             authorization: `${localStorage.getItem("token")}`,
@@ -48,7 +48,7 @@ export function Apostille(): JSX.Element {
     try {
       if (protocol) {
         await axios.put(
-          `${process.env.REACT_APP_BACK_END_API}/protocols/apostille/${id}`,
+          `${import.meta.env.VITE_BACK_END_API}/protocols/apostille/${id}`,
           {
             protocol,
             commitMessage,

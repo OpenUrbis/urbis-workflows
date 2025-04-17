@@ -24,7 +24,7 @@ export function ApostilleOfficial(): JSX.Element {
 
   const fetchProtocol = async () => {
     const response = await axios.get(
-      `${process.env.REACT_APP_BACK_END_API}/protocols/${id}`,
+      `${import.meta.env.VITE_BACK_END_API}/protocols/${id}`,
       {
         headers: {
           authorization: `${localStorage.getItem("token")}`,
@@ -55,7 +55,7 @@ export function ApostilleOfficial(): JSX.Element {
       setLoading(true);
 
       await axios.put(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/apostille/${id}/official`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/apostille/${id}/official`,
         {
           field: protocol.field,
           document: protocol.document ?? {},

@@ -110,7 +110,7 @@ export function integrationCallback(
             }
 
             const result = await axios.post(
-              `${process.env.REACT_APP_BACK_END_API}/integrations/call`,
+              `${import.meta.env.VITE_BACK_END_API}/integrations/call`,
               {
                 method: newValue.method,
                 url: newValue.url,

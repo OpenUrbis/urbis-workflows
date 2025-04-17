@@ -17,7 +17,7 @@ import { TreeList } from "./components/TreeList";
 import { VersionsMenu } from "./components/VersionsMenu";
 
 const api = new ApiClient({
-  baseURL: process.env.REACT_APP_BACK_END_API || "http://localhost:4000",
+  baseURL: import.meta.env.VITE_BACK_END_API || "http://localhost:4000",
   headers: {
     authorization: `Bearer ${localStorage.getItem("token") || ""}`,
   },

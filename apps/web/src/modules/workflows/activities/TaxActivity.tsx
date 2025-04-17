@@ -27,7 +27,7 @@ import { useSnackbar } from "../../../hooks/snackbar";
 import { useParams, useLocation } from "react-router-dom";
 
 const apiClient = new ApiClient({
-  baseURL: process.env.REACT_APP_BACK_END_API || "",
+  baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
     authorization: `Bearer ${localStorage.getItem("token") || ""}`,
   },

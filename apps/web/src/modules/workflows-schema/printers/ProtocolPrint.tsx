@@ -15,8 +15,8 @@ export const ProtocolPrint = (): JSX.Element => {
       const queryParams = new URLSearchParams(location.search);
       const redact = queryParams.get("redact") === "true";
       const apiUrl = redact
-        ? `${process.env.REACT_APP_BACK_END_API}/protocols/api/${id}/redact`
-        : `${process.env.REACT_APP_BACK_END_API}/protocols/api/${id}`;
+        ? `${import.meta.env.VITE_BACK_END_API}/protocols/api/${id}/redact`
+        : `${import.meta.env.VITE_BACK_END_API}/protocols/api/${id}`;
 
       const response = await axios.get(apiUrl, {
         headers: {

@@ -30,7 +30,7 @@ import { formatId } from "./activities/common";
 import { usePermissions } from "../../reducers/permission.context";
 
 const api = new ApiClient({
-  baseURL: process.env.REACT_APP_BACK_END_API || "",
+  baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   },

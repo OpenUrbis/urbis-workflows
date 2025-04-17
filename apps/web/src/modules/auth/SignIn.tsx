@@ -22,7 +22,7 @@ export function SignIn(): JSX.Element {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BACK_END_API}/users/sign-in`,
+        `${import.meta.env.VITE_BACK_END_API}/users/sign-in`,
         {
           email,
           password,
@@ -34,7 +34,7 @@ export function SignIn(): JSX.Element {
           response.data.AuthenticationResult.AccessToken
         );
 
-        window.location.href = process.env.REACT_APP_MAP as string;
+        window.location.href = import.meta.env.VITE_MAP as string;
       }
     } catch (error: any) {
       setError("Nome de usuário ou senha incorreto");

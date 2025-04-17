@@ -36,9 +36,7 @@ function Footer(): JSX.Element {
             <span>Consultar documento</span>
             <SL
               bg={
-                state.buttonHoverColorWeight === "200"
-                  ? "gray.200"
-                  : "gray.700"
+                state.buttonHoverColorWeight === "200" ? "gray.200" : "gray.700"
               }
             >
               D
@@ -51,18 +49,20 @@ function Footer(): JSX.Element {
                 : "text-gray-400 bg-gray-800"
             }`}
             onClick={() =>
-              (window.location.href = process.env.REACT_APP_MAP as string)
+              (window.location.href = import.meta.env.VITE_MAP as string)
             }
           >
             <span>Consultar mapa</span>
           </div>
           <div className="flex-grow"></div>
-          <div className={`text-sm ${
-            state.buttonHoverColorWeight === "200"
-              ? "text-gray-500"
-              : "text-gray-400"
-          }`}>
-            Versão: {`${process.env.REACT_APP_VERSION}`}
+          <div
+            className={`text-sm ${
+              state.buttonHoverColorWeight === "200"
+                ? "text-gray-500"
+                : "text-gray-400"
+            }`}
+          >
+            Versão: {`${import.meta.env.VITE_VERSION}`}
           </div>
         </div>
       )}

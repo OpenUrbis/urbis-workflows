@@ -8,7 +8,7 @@ import { ApiClient } from "../../api";
 import { RepresentativeLink } from "../../api/types/users.dto";
 
 const api = new ApiClient({
-  baseURL: process.env.REACT_APP_BACK_END_API || "",
+  baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   },

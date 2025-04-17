@@ -77,7 +77,7 @@ export function MyAcceptances(): JSX.Element {
   const handleFetchAcceptances = async (page = 1, limit = 10) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/acceptances/my`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/acceptances/my`,
         {
           params: {
             page,

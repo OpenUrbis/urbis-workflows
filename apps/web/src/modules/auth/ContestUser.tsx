@@ -31,7 +31,7 @@ export function ContestUser(): JSX.Element {
     try {
       const response = await axios.get(
         `${
-          process.env.REACT_APP_BACK_END_API
+          import.meta.env.VITE_BACK_END_API
         }/users/api/user/${encodeURIComponent(document)}`
       );
 
@@ -50,7 +50,7 @@ export function ContestUser(): JSX.Element {
   const fetchConfig = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACK_END_API}/users/config`
+        `${import.meta.env.VITE_BACK_END_API}/users/config`
       );
 
       if (response.data.config?.type === "block") {

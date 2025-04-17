@@ -60,7 +60,7 @@ export function Document(): JSX.Element {
 
   const fetchProtocol = async () => {
     const response = await axios.get(
-      `${process.env.REACT_APP_BACK_END_API}/protocols/${id}`,
+      `${import.meta.env.VITE_BACK_END_API}/protocols/${id}`,
       {
         headers: {
           authorization: `${localStorage.getItem("token")}`,
@@ -99,7 +99,7 @@ export function Document(): JSX.Element {
 
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/${id}/versions/${version}`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/${id}/versions/${version}`,
         {
           headers: {
             authorization: `${localStorage.getItem("token")}`,
@@ -134,7 +134,7 @@ export function Document(): JSX.Element {
 
     try {
       await axios.put(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/acceptance/${acceptance.id}/accept`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/acceptance/${acceptance.id}/accept`,
         {
           ...acceptanceForm,
         },
@@ -156,7 +156,7 @@ export function Document(): JSX.Element {
     setLoading(true);
 
     const response = await axios.get(
-      `${process.env.REACT_APP_BACK_END_API}/protocols/tax/${id}/browser`,
+      `${import.meta.env.VITE_BACK_END_API}/protocols/tax/${id}/browser`,
       {
         headers: {
           authorization: `${localStorage.getItem("token")}`,
@@ -172,7 +172,7 @@ export function Document(): JSX.Element {
     link.click();
 
     await axios.put(
-      `${process.env.REACT_APP_BACK_END_API}/protocols/mock/pay-tax/${id}`,
+      `${import.meta.env.VITE_BACK_END_API}/protocols/mock/pay-tax/${id}`,
       {},
       {
         headers: {
@@ -187,7 +187,7 @@ export function Document(): JSX.Element {
   const downloadDocument = async (version?: number) => {
     setLoading(true);
     const response = await axios.get(
-      `${process.env.REACT_APP_BACK_END_API}/protocols/document/${id}/browser`,
+      `${import.meta.env.VITE_BACK_END_API}/protocols/document/${id}/browser`,
       {
         params: {
           version,
@@ -212,7 +212,7 @@ export function Document(): JSX.Element {
   const downloadPlate = async (version?: number) => {
     setLoading(true);
     const response = await axios.get(
-      `${process.env.REACT_APP_BACK_END_API}/protocols/plate/${id}/browser`,
+      `${import.meta.env.VITE_BACK_END_API}/protocols/plate/${id}/browser`,
       {
         params: {
           version,

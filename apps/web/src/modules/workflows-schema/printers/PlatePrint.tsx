@@ -13,7 +13,7 @@ import { FindOneWorkflowResponse } from "../../../api/types/workflows.dto";
 import { QRCodeSVG } from "qrcode.react";
 
 const apiClient = new ApiClient({
-  baseURL: process.env.REACT_APP_BACK_END_API || "",
+  baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
     apiKey: localStorage.getItem("apiKey") || "",
   },

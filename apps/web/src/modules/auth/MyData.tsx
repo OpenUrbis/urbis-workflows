@@ -11,7 +11,7 @@ import { UserProfileResponse } from "../../api/types/users.dto";
 import { Input, MaskedInput } from "../../components";
 
 const api = new ApiClient({
-  baseURL: process.env.REACT_APP_BACK_END_API || "",
+  baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   },

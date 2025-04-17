@@ -81,7 +81,7 @@ const seiIntegrationField: IField = {
       type: FieldTypeEnum.Integration,
       options: {},
       expressions: {
-        integration: `{ method: 'GET', url: '${process.env.REACT_APP_BACK_END_API}/protocols/integrations/sei/legal-hypothesis' }`,
+        integration: `{ method: 'GET', url: '${import.meta.env.VITE_BACK_END_API}/protocols/integrations/sei/legal-hypothesis' }`,
       },
     },
     {

@@ -17,7 +17,7 @@ import { ApiClient } from "../../api";
 import { useSnackbar } from "../../hooks/snackbar";
 
 const api = new ApiClient({
-  baseURL: process.env.REACT_APP_BACK_END_API || "",
+  baseURL: import.meta.env.VITE_BACK_END_API || "",
 });
 
 export function SignUp(): JSX.Element {

@@ -19,7 +19,7 @@ export function ForgetPassword(): JSX.Element {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BACK_END_API}/users/forget-password`,
+        `${import.meta.env.VITE_BACK_END_API}/users/forget-password`,
         {
           email,
         }

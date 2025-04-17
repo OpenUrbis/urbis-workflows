@@ -55,7 +55,7 @@ export function DocumentValidate(): JSX.Element {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/checksum/${protocolId}`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/checksum/${protocolId}`,
         {
           documentType,
           checksum: hash,

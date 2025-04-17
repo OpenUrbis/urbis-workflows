@@ -58,7 +58,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
   const [isAddingLocal, setIsAddingLocal] = useState(false);
 
   const api = new ApiClient({
-    baseURL: process.env.REACT_APP_BACK_END_API || "",
+    baseURL: import.meta.env.VITE_BACK_END_API || "",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },

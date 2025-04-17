@@ -40,7 +40,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
     setLoading(LoadingTypes.SEI_UNITS);
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/integrations/sei/units`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/integrations/sei/units`,
         {
           headers: {
             authorization: `${localStorage.getItem("token")}`,
@@ -60,7 +60,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
 
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/integrations/sei/processes-types`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/integrations/sei/processes-types`,
         {
           params: {
             IdUnidade: integrations?.IdUnidade,
@@ -84,7 +84,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
 
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_BACK_END_API}/protocols/integrations/sei/documents-types`,
+        `${import.meta.env.VITE_BACK_END_API}/protocols/integrations/sei/documents-types`,
         {
           params: {
             IdUnidade: integrations?.IdUnidade,

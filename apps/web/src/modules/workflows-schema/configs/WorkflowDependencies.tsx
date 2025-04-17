@@ -25,7 +25,7 @@ import {
 import { Input, Select, SL, Textarea } from "../../../components";
 
 const apiClient = new ApiClient({
-  baseURL: process.env.REACT_APP_BACK_END_API || "",
+  baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
     authorization: `Bearer ${localStorage.getItem("token") || ""}`,
   },
