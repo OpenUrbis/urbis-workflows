@@ -105,7 +105,10 @@ export function integrationCallback(
       ) {
         (async () => {
           try {
-            setLoading && setLoading(true);
+            if (setLoading) {
+              setLoading(true);
+            }
+
             const result = await axios.post(
               `${process.env.REACT_APP_BACK_END_API}/integrations/call`,
               {
@@ -119,7 +122,11 @@ export function integrationCallback(
                 },
               }
             );
-            setLoading && setLoading(false);
+
+            if (setLoading) {
+              setLoading(false);
+            }
+
             onChange({
               ...result.data,
               $cache: newValue,
@@ -129,7 +136,10 @@ export function integrationCallback(
                 : {}),
             });
           } catch (e) {
-            setLoading && setLoading(false);
+            if (setLoading) {
+              setLoading(false);
+            }
+
             onChange({
               error: e,
               $cache: newValue,

@@ -152,9 +152,11 @@ export const loadConstantVariables = async (
 
 const compileModuleCode = async (
   code: string
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 ): Promise<{ [key: string]: Function }> => {
   try {
     // Create a temporary scope to evaluate the code
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     const scope: { [key: string]: Function } = {};
 
     // Use Babel to parse and transform the code

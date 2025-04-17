@@ -56,6 +56,7 @@ export interface FunctionDefinitions {
 }
 export interface ParsedFunctions {
   [namespace: string]: {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     [functionName: string]: Function;
   };
 }
