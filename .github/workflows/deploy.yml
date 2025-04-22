@@ -2,8 +2,8 @@ name: Deploy CI/CD
 
 on:
   push:
-    branches:
-      - master
+    # branches:
+    #   - master
     tags:
       - 'v*.*.*'
   pull_request:
