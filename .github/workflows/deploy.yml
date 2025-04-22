@@ -26,6 +26,13 @@ jobs:
         run: |
           TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "VITE_VERSION=$TAG" >> $GITHUB_ENV
+      - name: Set Environment Variables
+        id: set_env_vars
+        run: |
+          echo "VITE_BACK_END_API=${{ secrets.VITE_BACK_END_API }}" >> $GITHUB_ENV
+          echo "VITE_BACK_END_PDF=${{ secrets.VITE_BACK_END_PDF }}" >> $GITHUB_ENV
+          echo "VITE_ENV=${{ secrets.VITE_ENV }}" >> $GITHUB_ENV
+          echo "VITE_MAP=${{ secrets.VITE_MAP }}" >> $GITHUB_ENV
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -39,11 +46,6 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "apps/web/dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
-          env:
-            VITE_BACK_END_API: ${{ secrets.VITE_BACK_END_API }}
-            VITE_BACK_END_PDF: ${{ secrets.VITE_BACK_END_PDF }}
-            VITE_ENV: ${{ secrets.VITE_ENV }}
-            VITE_MAP: ${{ secrets.VITE_MAP }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
