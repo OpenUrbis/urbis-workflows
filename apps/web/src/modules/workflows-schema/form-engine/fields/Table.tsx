@@ -1,11 +1,11 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { FaTable } from "react-icons/fa";
 import { IField, IFormContext, TableOptions } from "@open-urbis/types";
 import { Field } from "../Field";
 import { StyleContext } from "../../../../reducers/style.reducer";
 
 export type FieldTableProps = {
-  table: IField[][];
+  table: IField[][] | string;
   options: TableOptions;
   value: any;
   valid: any;
@@ -26,8 +26,29 @@ export const Table: React.FC<FieldTableProps> = ({
   const styleContext = useContext(StyleContext);
   const [localValue, setLocalValue] = useState(value);
   const [localValid, setLocalValid] = useState(valid);
+  const [parsedTable, setParsedTable] = useState<IField[][] | null>(null);
 
-  if (!table?.length || !table[0]?.length) {
+  useEffect(() => {
+    if (typeof table === "string") {
+      try {
+        const parsed = JSON.parse(table);
+        if (
+          Array.isArray(parsed) &&
+          parsed.every((row) => Array.isArray(row))
+        ) {
+          setParsedTable(parsed);
+        } else {
+          setParsedTable(null);
+        }
+      } catch {
+        setParsedTable(null);
+      }
+    } else {
+      setParsedTable(table);
+    }
+  }, [table]);
+
+  if (!parsedTable?.length || !parsedTable[0]?.length) {
     return (
       <div className="flex items-start space-x-4 py-4 text-gray-500">
         <FaTable size={24} className="mt-1 opacity-50" />
@@ -51,7 +72,7 @@ export const Table: React.FC<FieldTableProps> = ({
 
   return (
     <div className="flex flex-col" style={{ width: options.width }}>
-      {table?.map((row, rowIndex) => {
+      {parsedTable.map((row, rowIndex) => {
         return (
           <div className="flex">
             {row.map((field) => {
@@ -88,7 +109,7 @@ export const Table: React.FC<FieldTableProps> = ({
               return (field.type as any) !== "none" ? (
                 <div
                   className={`border-x border-t ${
-                    rowIndex + 1 === table.length ? "border-b" : ""
+                    rowIndex + 1 === parsedTable.length ? "border-b" : ""
                   } ${field.type !== "array" ? "px-4 py-3" : ""}`}
                   style={{
                     width: `${
