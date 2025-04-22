@@ -1,9 +1,11 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy CI/CD
 
 on:
   push:
     branches:
       - master
+    tags:
+      - 'v*.*.*'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -19,6 +21,11 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Get Latest Tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "VITE_VERSION=$TAG" >> $GITHUB_ENV
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
