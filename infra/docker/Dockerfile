@@ -1,8 +1,8 @@
 # build stage
 FROM node:20-alpine AS build
 
-ARG REACT_APP_VERSION
-ENV REACT_APP_VERSION=$REACT_APP_VERSION
+ARG VITE_VERSION
+ENV VITE_VERSION=$VITE_VERSION
 
 # set working directory
 WORKDIR /app
