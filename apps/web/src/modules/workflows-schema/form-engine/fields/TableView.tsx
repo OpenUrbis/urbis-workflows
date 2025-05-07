@@ -1,8 +1,9 @@
-import { IField, IFormContext, TableOptions } from "@open-urbis/types";
+import { IField, IFormContext, TableOptions } from "@slui/types";
 import { FieldView } from "../FieldView";
+import { useState, useEffect } from "react";
 
 export type FieldTableViewProps = {
-  table: IField[][];
+  table: IField[][] | string;
   options: TableOptions;
   value: any;
   general: IFormContext;
@@ -14,9 +15,35 @@ export const TableView: React.FC<FieldTableViewProps> = ({
   value,
   general,
 }) => {
+  const [parsedTable, setParsedTable] = useState<IField[][] | null>(null);
+
+  useEffect(() => {
+    if (typeof table === "string") {
+      try {
+        const parsed = JSON.parse(table);
+        if (
+          Array.isArray(parsed) &&
+          parsed.every((row) => Array.isArray(row))
+        ) {
+          setParsedTable(parsed);
+        } else {
+          setParsedTable(null);
+        }
+      } catch {
+        setParsedTable(null);
+      }
+    } else {
+      setParsedTable(table);
+    }
+  }, [table]);
+
+  if (!parsedTable?.length || !parsedTable[0]?.length) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col" style={{ width: options.width }}>
-      {table?.map((row, rowIndex) => {
+      {parsedTable.map((row, rowIndex) => {
         return (
           <div className="flex">
             {row.map((field) => {
@@ -27,7 +54,7 @@ export const TableView: React.FC<FieldTableViewProps> = ({
               return (field.type as any) !== "none" ? (
                 <div
                   className={`border-x px-4 pt-3 border-t ${
-                    rowIndex + 1 === table.length ? "border-b" : ""
+                    rowIndex + 1 === parsedTable.length ? "border-b" : ""
                   }`}
                   style={{
                     width: `${
