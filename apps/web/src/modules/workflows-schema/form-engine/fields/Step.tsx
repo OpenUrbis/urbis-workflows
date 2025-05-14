@@ -31,7 +31,10 @@ const isCompleted = (obj: any): boolean => {
   if (typeof obj === "boolean") return obj;
   if (Array.isArray(obj)) return obj.every(isCompleted);
   if (typeof obj === "object" && obj !== null) {
-    return Object.values(obj).every(isCompleted);
+    // handle corner case when $complete is defined at the obj being evaluated
+    return Object.keys(obj).every((key) =>
+      key === "$complete" ? true : isCompleted(obj[key])
+    );
   }
   return false;
 };
@@ -81,7 +84,6 @@ export const Step: React.FC<FieldStepProps> = ({
     setFlattenedFields(flattenedFields);
     // Initialize step refs array with the correct length
     stepRefs.current = flattenedFields.map(() => null);
-    
   }, []);
 
   // Add effect for initial left alignment
@@ -132,12 +134,10 @@ export const Step: React.FC<FieldStepProps> = ({
 
     setVisible(visibleObj);
     setLastVisibleStep(lastVisibleIndex);
-    
   }, [value]);
 
   useEffect(() => {
     setNextStepDisabled(!nextStepEnabled());
-    
   }, [valid, activeStep]);
 
   useEffect(() => {
@@ -164,7 +164,6 @@ export const Step: React.FC<FieldStepProps> = ({
         delete: ["right", "left", "S"],
       });
     };
-    
   }, [field, valid, activeStep, nextStepDisabled]);
 
   const nextStepEnabled = () => {
