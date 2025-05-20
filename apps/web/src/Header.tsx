@@ -42,7 +42,7 @@ function Header(): JSX.Element {
     },
     {
       path: "/acceptances",
-      label: "Aceites",
+      label: "Assinaturas",
       shortcut: "3",
       permission: "workflow:read:findAll",
     },

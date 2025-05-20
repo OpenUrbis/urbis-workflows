@@ -147,7 +147,7 @@ export function Document(): JSX.Element {
 
       fetchProtocol();
     } catch (e) {
-      snackbar.error("Não foi possível realizar o aceite");
+      snackbar.error("Não foi possível realizar a assinatura");
       setLoading(false);
     }
   };
@@ -324,7 +324,7 @@ export function Document(): JSX.Element {
                   active={<StepNumber />}
                 />
               </StepIndicator>
-              <StepTitle>Aceites</StepTitle>
+              <StepTitle>Assinaturas</StepTitle>
               <StepSeparator></StepSeparator>
             </Step>
             <Step>
@@ -390,7 +390,7 @@ export function Document(): JSX.Element {
           {activeStep === 1 && protocol && acceptance?.status === "PENDING" && (
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-center py-6">
-                Realize o aceite como {acceptance.type}
+                Realize a assinatura como {acceptance.type}
               </h1>
               <Field
                 context={acceptanceForm}
@@ -431,7 +431,7 @@ export function Document(): JSX.Element {
 
           {activeStep === 1 && (
             <h1 className="text-xl md:text-2xl font-bold text-center py-6">
-              Lista dos Aceites
+              Lista das assinaturas
             </h1>
           )}
 
@@ -497,11 +497,11 @@ export function Document(): JSX.Element {
                           className="flex items-center space-x-2 cursor-pointer"
                         >
                           <FaExpand
-                            title="Mostrar formulário de aceite"
+                            title="Mostrar formulário de assinatura"
                             size={20}
                             className="cursor-pointer"
                           ></FaExpand>
-                          <span className="">Ver dados do aceite</span>
+                          <span className="">Ver dados da assinatura</span>
                         </div>
                       )}
                     </div>
@@ -518,7 +518,7 @@ export function Document(): JSX.Element {
                 style={{ minWidth: 685, maxHeight: "80vh" }}
                 bg={styleContext.state.backgroundColor}
               >
-                <ModalHeader>Dados do Aceite</ModalHeader>
+                <ModalHeader>Dados da assinatura</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody overflowY="auto" wordBreak="break-word">
                   <FieldView
@@ -542,7 +542,7 @@ export function Document(): JSX.Element {
           {activeStep === 2 && maxStepEnable < 2 && (
             <div className="flex flex-col space-y-4 justify-center text-center pt-6">
               <p className="text-lg">
-                É necessário realizar todos os aceites para liberar o pagamento
+                É necessário realizar todas as assinaturas para liberar o pagamento
                 da taxa.
               </p>
             </div>
@@ -572,7 +572,7 @@ export function Document(): JSX.Element {
           {activeStep === 3 && maxStepEnable < 3 && (
             <div className="flex flex-col space-y-4 justify-center text-center pt-6">
               <p className="text-lg">
-                Os seguinte documentos são prévias. Realize os aceites e
+                Os seguinte documentos são prévias. Realize as assinaturas e
                 pagamento da taxa para liberar o seu documento válido.
               </p>
             </div>
