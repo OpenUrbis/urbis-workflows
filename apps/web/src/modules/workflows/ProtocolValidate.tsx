@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { IFormContext } from "@open-urbis/types";
 import { Field } from "../workflows-schema/form-engine/Field";
 import { parseFunctions } from "../workflows-schema/form-engine/utils/parsers";
-import { removeApostilleKey } from "./Apostille";
 import { Protocol } from "../../types/global";
+import { removeApostilleKey } from "./utils";
 
 export function ProtocolValidate(): JSX.Element {
   const [protocol, setProtocol] = useState<Protocol | undefined>(undefined);

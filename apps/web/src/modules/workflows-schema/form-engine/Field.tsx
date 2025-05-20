@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import {
   ArrayOptions,
   BlockOptions,
@@ -228,7 +228,6 @@ export const useFieldDynamic = (
       // component to be reactive to its own changes.
       modelCallback(field, value, context, general, validContext, onChange);
     }
-    
   }, [
     context,
     field.expressions?.model,
@@ -247,218 +246,222 @@ export const useFieldDynamic = (
       setLoading,
       onChange
     );
-    
   }, [context, general.$data, field.expressions?.integration]);
 
   return { loading, visible, options, validState, setOptions };
 };
 
-export const Field: React.FC<FieldProps> = ({
-  parent,
-  context,
-  validContext,
-  general,
-  field,
-  value,
-  valid,
-  onChange,
-  onValidChange,
-}): JSX.Element => {
-  const { loading, visible, options, validState, setOptions } = useFieldDynamic(
-    field,
+export const Field: React.FC<FieldProps> = memo(
+  ({
+    parent,
     context,
     validContext,
     general,
+    field,
     value,
+    valid,
     onChange,
-    onValidChange
-  );
+    onValidChange,
+  }): JSX.Element => {
+    const { loading, visible, options, validState, setOptions } =
+      useFieldDynamic(
+        field,
+        context,
+        validContext,
+        general,
+        value,
+        onChange,
+        onValidChange
+      );
 
-  const [localValue, setLocalValue] = useState(value);
-  const [localValid, setLocalValid] = useState(valid);
-  const isOpen = (options as BlockOptions)?.open ?? true; // Default to true if not set
+    const [localValue, setLocalValue] = useState(value);
+    const [localValid, setLocalValid] = useState(valid);
+    const isOpen = (options as BlockOptions)?.open ?? true;
 
-  const FieldComponent = FIELD_COMPONENT_MAP[field.type] || (() => <></>);
+    const FieldComponent = FIELD_COMPONENT_MAP[field.type] || (() => <></>);
 
-  if (visible) {
-    return (
-      <div className="w-full">
-        {field.type === "title" && (
-          <Title key={field.key} options={field.options as any} />
-        )}
-        {field.type === "subtitle" && (
-          <div className="flex items-center space-x-4">
-            <Paragraph key={field.key} options={field.options as any} />
-            {(field.options as SubtitleOptions).tooltip && (
-              <div>
-                <HelpTooltipClickable
-                  tooltip={(field.options as SubtitleOptions).tooltip as string}
-                />
-              </div>
-            )}
-          </div>
-        )}
-        {field.type === "link" && <Link value={value} general={general} />}
-        {field.type === "integration" && (
-          <>
-            <Integration
-              field={field}
-              options={options as IntegrationOptions}
-              value={value}
-            />
-            {loading && <Spinner />}
-          </>
-        )}
-        {parent && InputFieldTypes.includes(field.type) && (
-          <>
-            <RenderLabelTooltip
-              parent={parent}
-              options={options}
-              field={field}
-              context={context}
-              general={general}
-            />
-            <FieldComponent
-              field={field}
-              key={field.key}
-              options={options}
-              general={general}
-              value={value}
-              valid={valid}
-              context={context}
-              onChange={onChange}
-              onValidChange={onValidChange}
-            />
-          </>
-        )}
-        {field.type === "block" && field.block && (
-          <div
-            className={`${
-              (field.options as BlockOptions).card
-                ? `w-full rounded ${
-                    (field.options as BlockOptions).hideCardBorder
-                      ? "border-none px-6 pt-6"
-                      : "border border-gray-200 p-6"
-                  }`
-                : ""
-            }`}
-          >
-            {(field.options as BlockOptions).card && (
-              <div className="flex items-center space-x-2 text-lg mb-6">
-                <div className="flex items-center space-x-3 flex-1">
-                  <label className="font-medium">
-                    {(field.options as BlockOptions).label}
-                  </label>
-                  {(field.options as BlockOptions).tooltip && (
-                    <HelpTooltipClickable
-                      tooltip={
-                        (field.options as BlockOptions).tooltip as string
-                      }
-                    />
-                  )}
+    if (visible) {
+      return (
+        <div className="w-full">
+          {field.type === "title" && (
+            <Title key={field.key} options={field.options as any} />
+          )}
+          {field.type === "subtitle" && (
+            <div className="flex items-center space-x-4">
+              <Paragraph key={field.key} options={field.options as any} />
+              {(field.options as SubtitleOptions).tooltip && (
+                <div>
+                  <HelpTooltipClickable
+                    tooltip={
+                      (field.options as SubtitleOptions).tooltip as string
+                    }
+                  />
                 </div>
-                {(field.options as BlockOptions).toggle !== false && (
-                  <div
-                    className="flex items-center space-x-2 cursor-pointer text-blue-500 hover:text-blue-700 transition-colors"
-                    onClick={() => {
-                      setOptions({
-                        ...options,
-                        open: !isOpen,
-                      } as BlockOptions);
-                    }}
-                  >
-                    {isOpen ? (
-                      <>
-                        <FaChevronUp size={14} />
-                        <span className="text-sm">Recolher</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaChevronDown size={14} />
-                        <span className="text-sm">Expandir</span>
-                      </>
+              )}
+            </div>
+          )}
+          {field.type === "link" && <Link value={value} general={general} />}
+          {field.type === "integration" && (
+            <>
+              <Integration
+                field={field}
+                options={options as IntegrationOptions}
+                value={value}
+              />
+              {loading && <Spinner />}
+            </>
+          )}
+          {parent && InputFieldTypes.includes(field.type) && (
+            <>
+              <RenderLabelTooltip
+                parent={parent}
+                options={options}
+                field={field}
+                context={context}
+                general={general}
+              />
+              <FieldComponent
+                field={field}
+                key={field.key}
+                options={options}
+                general={general}
+                value={value}
+                valid={valid}
+                context={context}
+                onChange={onChange}
+                onValidChange={onValidChange}
+              />
+            </>
+          )}
+          {field.type === "block" && field.block && (
+            <div
+              className={`${
+                (field.options as BlockOptions).card
+                  ? `w-full rounded ${
+                      (field.options as BlockOptions).hideCardBorder
+                        ? "border-none px-6 pt-6"
+                        : "border border-gray-200 p-6"
+                    }`
+                  : ""
+              }`}
+            >
+              {(field.options as BlockOptions).card && (
+                <div className="flex items-center space-x-2 text-lg mb-6">
+                  <div className="flex items-center space-x-3 flex-1">
+                    <label className="font-medium">
+                      {(field.options as BlockOptions).label}
+                    </label>
+                    {(field.options as BlockOptions).tooltip && (
+                      <HelpTooltipClickable
+                        tooltip={
+                          (field.options as BlockOptions).tooltip as string
+                        }
+                      />
                     )}
                   </div>
-                )}
-              </div>
-            )}
-            {isOpen && (
-              <FieldBlock
-                parent={{ ...field, options }}
-                field={field.block}
+                  {(field.options as BlockOptions).toggle !== false && (
+                    <div
+                      className="flex items-center space-x-2 cursor-pointer text-blue-500 hover:text-blue-700 transition-colors"
+                      onClick={() => {
+                        setOptions({
+                          ...options,
+                          open: !isOpen,
+                        } as BlockOptions);
+                      }}
+                    >
+                      {isOpen ? (
+                        <>
+                          <FaChevronUp size={14} />
+                          <span className="text-sm">Recolher</span>
+                        </>
+                      ) : (
+                        <>
+                          <FaChevronDown size={14} />
+                          <span className="text-sm">Expandir</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              {isOpen && (
+                <FieldBlock
+                  parent={{ ...field, options }}
+                  field={field.block}
+                  general={general}
+                  layout={(field.options as BlockOptions).layout}
+                  value={localValue}
+                  valid={localValid}
+                  onChange={(k, v) => {
+                    setLocalValue((current: any) => {
+                      const newLocalValue = { ...current, [k]: v };
+                      onChange(newLocalValue);
+                      return newLocalValue;
+                    });
+                  }}
+                  onValidChange={(k, v) => {
+                    setLocalValid((current: any) => {
+                      const newLocalValid = { ...current, [k]: v };
+                      onValidChange(newLocalValid);
+                      return newLocalValid;
+                    });
+                  }}
+                />
+              )}
+            </div>
+          )}
+          {field.type === "preset" && field.preset && (
+            <FieldBlock
+              parent={field}
+              field={field.preset}
+              general={general}
+              layout={(field.options as BlockOptions).layout}
+              value={localValue}
+              valid={localValid}
+              onChange={(k, v) => {
+                setLocalValue((current: any) => {
+                  const newLocalValue = { ...current, [k]: v };
+                  onChange(newLocalValue);
+                  return newLocalValue;
+                });
+              }}
+              onValidChange={(k, v) => {
+                setLocalValid((current: any) => {
+                  const newLocalValid = { ...current, [k]: v };
+                  onValidChange(newLocalValid);
+                  return newLocalValid;
+                });
+              }}
+            />
+          )}
+          {parent && field.type === "array" && (
+            <div>
+              <RenderLabelTooltip
+                parent={parent}
+                options={options}
+                field={field}
+                context={context}
                 general={general}
-                layout={(field.options as BlockOptions).layout}
-                value={localValue}
-                valid={localValid}
-                onChange={(k, v) => {
-                  setLocalValue((current: any) => {
-                    const newLocalValue = { ...current, [k]: v };
-                    onChange(newLocalValue);
-                    return newLocalValue;
-                  });
-                }}
-                onValidChange={(k, v) => {
-                  setLocalValid((current: any) => {
-                    const newLocalValid = { ...current, [k]: v };
-                    onValidChange(newLocalValid);
-                    return newLocalValid;
-                  });
-                }}
               />
-            )}
-          </div>
-        )}
-        {field.type === "preset" && field.preset && (
-          <FieldBlock
-            parent={field}
-            field={field.preset}
-            general={general}
-            layout={(field.options as BlockOptions).layout}
-            value={localValue}
-            valid={localValid}
-            onChange={(k, v) => {
-              setLocalValue((current: any) => {
-                const newLocalValue = { ...current, [k]: v };
-                onChange(newLocalValue);
-                return newLocalValue;
-              });
-            }}
-            onValidChange={(k, v) => {
-              setLocalValid((current: any) => {
-                const newLocalValid = { ...current, [k]: v };
-                onValidChange(newLocalValid);
-                return newLocalValid;
-              });
-            }}
-          />
-        )}
-        {parent && field.type === "array" && (
-          <div>
-            <RenderLabelTooltip
-              parent={parent}
-              options={options}
-              field={field}
-              context={context}
-              general={general}
-            />
-            <ArrayField
-              field={field}
-              options={options as ArrayOptions}
-              general={general}
-              value={value ?? []}
-              valid={valid ?? []}
-              onChange={onChange}
-              onValidChange={onValidChange}
-            />
-          </div>
-        )}
+              <ArrayField
+                field={field}
+                options={options as ArrayOptions}
+                general={general}
+                value={value ?? []}
+                valid={valid ?? []}
+                onChange={onChange}
+                onValidChange={onValidChange}
+              />
+            </div>
+          )}
 
-        <div className="mt-4">
-          <RenderValidState validState={validState} />
+          <div className="mt-4">
+            <RenderValidState validState={validState} />
+          </div>
         </div>
-      </div>
-    );
-  } else {
-    return <></>;
+      );
+    } else {
+      return <></>;
+    }
   }
-};
+);
