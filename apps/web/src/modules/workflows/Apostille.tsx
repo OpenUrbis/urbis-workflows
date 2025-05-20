@@ -7,6 +7,7 @@ import { parseExpressionsVariables } from "../workflows-schema/form-engine/utils
 import { parseFunctions } from "../workflows-schema/form-engine/utils/parsers";
 import { IFormContext } from "@open-urbis/types";
 import { Protocol } from "../../types/global";
+import { removeApostilleKey } from "./utils";
 
 export function Apostille(): JSX.Element {
   const navigate = useNavigate();
@@ -76,12 +77,10 @@ export function Apostille(): JSX.Element {
     if (lastStepkey && valid?.[lastStepkey]?.$complete === true) {
       handleApostille(context);
     }
-    
   }, [valid]);
 
   useEffect(() => {
     fetchProtocol();
-    
   }, []);
 
   const field = protocol ? JSON.parse(JSON.stringify(protocol.field)) : {};
@@ -146,17 +145,4 @@ export function Apostille(): JSX.Element {
       )}
     </div>
   );
-}
-
-export function removeApostilleKey(obj: any) {
-  if (typeof obj === "object" && obj !== null) {
-    for (const key in obj) {
-      if (key === "$apostille") {
-        delete obj[key];
-      } else if (typeof obj[key] === "object") {
-        removeApostilleKey(obj[key]);
-      }
-    }
-  }
-  return obj;
 }
