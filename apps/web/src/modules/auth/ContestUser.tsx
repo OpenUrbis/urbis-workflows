@@ -16,7 +16,7 @@ export function ContestUser(): JSX.Element {
   const [custom, setCustom] = useState({});
   const [valid, setValid] = useState({});
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
