@@ -11,6 +11,7 @@ import {
   IntegrationCallResponse,
   FindAllSecretVersionsResponse,
   FindOneSecretVersionResponse,
+  FindOneDecryptedSecretResponse,
 } from "../types/integrations.dto";
 import { CacheService, CacheOptions } from "../services/cache.service";
 
@@ -53,9 +54,12 @@ export class IntegrationsApiClient {
         entitiesHash: cachedHash,
       };
 
-      const response = await this.client.get<FindAllSecretsResponse>("/secrets", {
-        params,
-      });
+      const response = await this.client.get<FindAllSecretsResponse>(
+        "/secrets",
+        {
+          params,
+        }
+      );
 
       // If we get 304, use cached data
       if (!response.data && cachedData) {
@@ -264,6 +268,43 @@ export class IntegrationsApiClient {
         return cachedData.data;
       }
 
+      const newData = response.data;
+      IntegrationsApiClient.cache.set(cacheKey, newData);
+      return newData;
+    } catch (error) {
+      if (cachedData) {
+        return cachedData.data;
+      }
+      throw this.handleError(error);
+    }
+  }
+
+  // Get decrypted secret by ID with caching
+  async findOneDecryptedSecret(
+    id: string
+  ): Promise<FindOneDecryptedSecretResponse> {
+    const cacheKey = `secret:${id}:decrypted`;
+    const cachedData =
+      IntegrationsApiClient.cache.get<FindOneDecryptedSecretResponse>(cacheKey);
+
+    try {
+      const params: any = {};
+
+      // Add lastUpdate if we have cached data
+      if (cachedData) {
+        params.lastUpdate = cachedData.timestamp;
+      }
+
+      const response = await this.client.get(`/secrets/${id}/decrypted`, {
+        params,
+      });
+
+      // If we get 304, use cached data
+      if (response.data === "" && cachedData) {
+        return cachedData.data;
+      }
+
+      // If we have new data, update cache and return
       const newData = response.data;
       IntegrationsApiClient.cache.set(cacheKey, newData);
       return newData;
