@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, useNavigate } from "react-router-dom";
 import "./App.css";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -37,6 +37,42 @@ export default function App() {
   );
 }
 
+// Botão flutuante componente separado, para reutilizar se quiser
+function FloatingHelpButton() {
+  return (
+    <a
+      href="https://urbis.sampa.br/pt/ajuda"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        position: "fixed",
+        bottom: 50,        
+        left: 20,
+        width: 50,
+        height: 50,
+        borderRadius: "50%",
+        backgroundColor: "#007bff",
+        color: "white",
+        fontSize: 24,
+        border: "none",
+        cursor: "pointer",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        textDecoration: "none",
+        userSelect: "none",
+      }}
+      aria-label="Ajuda"
+      title="Ajuda"
+    >
+      ?
+    </a>
+  );
+}
+
+
 function Layout({
   shouldDisplayHeaderFooter,
   children,
@@ -49,6 +85,7 @@ function Layout({
       {shouldDisplayHeaderFooter && <Header />}
       {children}
       {shouldDisplayHeaderFooter && <Footer />}
+      <FloatingHelpButton />
     </div>
   );
 }
