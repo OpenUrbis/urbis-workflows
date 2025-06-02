@@ -37,7 +37,7 @@ export default function App() {
   );
 }
 
-// Botão flutuante componente separado, para reutilizar se quiser
+
 function FloatingHelpButton() {
   return (
     <a
