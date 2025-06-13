@@ -8,13 +8,21 @@ export function convertCoordinates(
   coordinates: [number, number][]
 ): { lat: number; lng: number }[] {
   const WGS84 = "EPSG:4326";
-  const epsg31983 = "+proj=utm +zone=23 +south +units=m +no_defs";
+  const epsg31983 = import.meta.env.VITE_PROJECTION_CONFIG || "+proj=utm +zone=23 +south +units=m +no_defs";
 
   return coordinates.map((coordinate: any) => {
-    const coord = proj4(epsg31983, WGS84, coordinate);
+    if (import.meta.env.VITE_USE_PROJECTION === "true") {
+      const coord = proj4(epsg31983, WGS84, coordinate);
+      return {
+        lat: coord[1],
+        lng: coord[0],
+      };
+    }
+    
+    // If no projection is needed, just map the coordinates directly
     return {
-      lat: coord[1],
-      lng: coord[0],
+      lat: coordinate[1],
+      lng: coordinate[0],
     };
   });
 }
