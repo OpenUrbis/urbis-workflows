@@ -11,7 +11,7 @@ export function convertCoordinates(
   const epsg31983 = import.meta.env.VITE_PROJECTION_CONFIG || "+proj=utm +zone=23 +south +units=m +no_defs";
 
   return coordinates.map((coordinate: any) => {
-    if (import.meta.env.VITE_USE_PROJECTION === "true") {
+    if (true) {
       const coord = proj4(epsg31983, WGS84, coordinate);
       return {
         lat: coord[1],
