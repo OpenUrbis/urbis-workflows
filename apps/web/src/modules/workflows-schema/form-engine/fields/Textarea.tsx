@@ -50,7 +50,7 @@ export const Textarea: React.FC<FieldTextareaProps> = ({
         });
       }
     }
-  }, [context, field.expressions?.model]);
+  }, [context, general.$data, field.expressions?.model]);
 
   const debouncedOnChange = useCallback(
     debounce((value) => {
