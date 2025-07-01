@@ -40,17 +40,18 @@ export const Textarea: React.FC<FieldTextareaProps> = ({
         `context["${field.key}"]`
       );
 
-      if (!processedExpression.includes(`context["${field.key}"]`)) {
+      if (
+        value === undefined ||
+        !processedExpression.includes(`context["${field.key}"]`)
+      ) {
         modelCallback(field, value, context, general, valid, (updatedValue) => {
           setValue(updatedValue);
           onChange(updatedValue);
         });
       }
     }
-    
   }, [context, field.expressions?.model]);
 
-  
   const debouncedOnChange = useCallback(
     debounce((value) => {
       onChange(value);
