@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useMemo } from "react";
 import { FaTable } from "react-icons/fa";
 import { IField, IFormContext, TableOptions } from "@open-urbis/types";
 import { Field } from "../Field";
@@ -27,6 +27,20 @@ export const Table: React.FC<FieldTableProps> = ({
   const [localValue, setLocalValue] = useState(value);
   const [localValid, setLocalValid] = useState(valid);
   const [parsedTable, setParsedTable] = useState<IField[][] | null>(null);
+
+  // Memoize the field value to prevent unnecessary re-renders
+  const getFieldValue = useMemo(() => {
+    return (fieldKey: string) => {
+      return localValue?.[fieldKey] ?? null;
+    };
+  }, [localValue]);
+
+  // Memoize the field valid state to prevent unnecessary re-renders
+  const getFieldValid = useMemo(() => {
+    return (fieldKey: string) => {
+      return localValid?.[fieldKey] ?? null;
+    };
+  }, [localValid]);
 
   useEffect(() => {
     if (typeof table === "string") {
@@ -74,17 +88,19 @@ export const Table: React.FC<FieldTableProps> = ({
     <div className="flex flex-col" style={{ width: options.width }}>
       {parsedTable.map((row, rowIndex) => {
         return (
-          <div className="flex">
-            {row.map((field) => {
+          <div className="flex" key={`row-${rowIndex}`}>
+            {row.map((field, colIndex) => {
+              const uniqueKey = `${rowIndex}-${colIndex}-${field.key || "empty"}`;
+
               if (field.type === "integration" || field.type === "link") {
                 return (
-                  <div className="w-0">
+                  <div className="w-0" key={uniqueKey}>
                     <Field
                       parent={field}
                       general={general}
                       field={field}
-                      value={localValue?.[field.key]}
-                      valid={localValid?.[field.key]}
+                      value={getFieldValue(field.key)}
+                      valid={getFieldValid(field.key)}
                       onChange={(v) => {
                         setLocalValue((value: any) => {
                           const newValue = { ...value, [field.key]: v };
@@ -108,6 +124,7 @@ export const Table: React.FC<FieldTableProps> = ({
 
               return (field.type as any) !== "none" ? (
                 <div
+                  key={uniqueKey}
                   className={`border-x border-t ${
                     rowIndex + 1 === parsedTable.length ? "border-b" : ""
                   } ${field.type !== "array" ? "px-4 py-3" : ""}`}
@@ -123,8 +140,8 @@ export const Table: React.FC<FieldTableProps> = ({
                     parent={field}
                     general={general}
                     field={field}
-                    value={localValue?.[field.key]}
-                    valid={localValid?.[field.key]}
+                    value={getFieldValue(field.key)}
+                    valid={getFieldValid(field.key)}
                     onChange={(v) => {
                       setLocalValue((value: any) => {
                         const newValue = { ...value, [field.key]: v };
@@ -145,6 +162,7 @@ export const Table: React.FC<FieldTableProps> = ({
                 </div>
               ) : (
                 <div
+                  key={uniqueKey}
                   className="border-x"
                   style={{
                     width: `${

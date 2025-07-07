@@ -16,7 +16,13 @@ export interface IntegrationRequestConfig {
   headers?: Record<string, any>;
   timeout?: number;
   withCredentials?: boolean;
-  responseType?: "arraybuffer" | "blob" | "document" | "json" | "text" | "stream";
+  responseType?:
+    | "arraybuffer"
+    | "blob"
+    | "document"
+    | "json"
+    | "text"
+    | "stream";
   auth?: {
     username: string;
     password: string;
@@ -38,8 +44,8 @@ export interface SecretMetadata {
   documentation: string;
   createdBy: UserData;
   updatedBy: UserData;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   commit: string;
 }
 
@@ -49,13 +55,35 @@ export interface SecretVersion {
   namespace: string;
   documentation: string;
   createdBy: UserData;
-  createdAt: Date;
+  createdAt: string;
   commit: string;
 }
 
 export interface CreateSecretResponse extends SecretMetadata {}
 
-export interface FindOneSecretResponse extends SecretMetadata {}
+export interface FindOneSecretResponse {
+  id: string;
+  label: string;
+  namespace: string;
+  documentation: string;
+  createdBy: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  updatedBy: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  commit: string;
+}
+
+export interface FindOneDecryptedSecretResponse extends FindOneSecretResponse {
+  value: string;
+}
 
 export interface FindAllSecretsResponse {
   secrets: SecretMetadata[];
@@ -87,4 +115,4 @@ export interface IntegrationCallResponse {
   statusCode: number;
   data: any;
   headers: Record<string, string>;
-} 
+}
