@@ -122,7 +122,7 @@ export interface TaxTemplate {
   taxes: TaxConfig[];
 }
 
-export type DocumentTemplateType = "document" | "plate" | "custom";
+export type DocumentTemplateType = "document" | "plate" | "custom" | "certificate";
 
 export interface LayerDescriptor {
   color: string;

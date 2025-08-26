@@ -39,6 +39,11 @@ import { Modules } from "./modules/workflows-schema/Modules";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { NotFound } from "./components/NotFound";
 import { IamError } from "./components/IamError";
+// RouteDefinitions.tsx
+// importe o componente:
+import DocumentCertificateEditor from "./modules/workflows-schema/activities/documents/DocumentCertificateEditor";
+// ^ ajuste o import se você não usa alias "@"; ex:
+// import DocumentCertificateEditor from "./modules/workflows-schema/activities/documents/DocumentCertificateEditor";
 
 const DefaultRoute = () => {
   const defaultRoute = useContext(DefaultRouteContext);
@@ -152,6 +157,10 @@ const RouteDefinitions = () => (
         </PublicWrapper>
       }
     />
+    <Route
+        path="/debug/document-certificado"
+        element={<DocumentCertificateEditor />}
+      />
     <Route
       path="/map-callback"
       element={
