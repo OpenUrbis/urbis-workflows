@@ -1,0 +1,142 @@
+name: Build and Push
+
+on:
+  release:
+    types: [published]
+  push:
+    branches: [cicd/*]
+
+jobs:
+  build_and_push:
+    name: Build and Push - Web
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Package Manager
+        id: detect-package-manager
+        run: |
+          if [ -f "${{ github.workspace }}/yarn.lock" ]; then
+            echo "manager=yarn" >> $GITHUB_OUTPUT
+            echo "command=install" >> $GITHUB_OUTPUT
+            echo "runner=yarn" >> $GITHUB_OUTPUT
+            exit 0
+          elif [ -f "${{ github.workspace }}/package.json" ]; then
+            echo "manager=npm" >> $GITHUB_OUTPUT
+            echo "command=ci" >> $GITHUB_OUTPUT
+            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "Unable to determine package manager"
+            exit 1
+          fi
+
+      - name: Set Up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: ${{ steps.detect-package-manager.outputs.manager }}
+
+      - name: Install Dependencies
+        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+
+      - name: Build with Turborepo
+        run: ${{ steps.detect-package-manager.outputs.runner }} turbo build
+
+      - name: Turborepo Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Set Environment Variables
+        run: |
+          echo "APP_VERSION=${GITHUB_REF_NAME##*/}" >> $GITHUB_ENV
+          if [[ "${{ github.event_name }}" == "push" || "${{ github.ref_name }}" =~ "staging" ]]; then
+            echo "ENVIRONMENT=staging" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=production" >> $GITHUB_ENV
+          fi
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker Layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infra/docker/Dockerfile
+          push: true
+          build-args: |
+            APP_VERSION=${{ env.APP_VERSION }}
+          tags: |
+            openurbis/workflows-web:${{ startsWith(github.ref_name, 'staging/') && 'staging' || 'latest' }}
+
+  # restart_deployment:
+  #   name: Restart Deployment - Web
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ startsWith(github.ref_name, 'staging/') && 'staging' || 'production' }}
+  #   needs: build_and_push
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #     attestations: write
+  #     id-token: write
+  #   steps:
+  #     - name: Log in to Azure
+  #       uses: azure/login@v2
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  #     - name: Set Up kubectl
+  #       uses: azure/setup-kubectl@v3
+
+  #     - name: Set Up kubelogin
+  #       uses: azure/use-kubelogin@v1
+  #       with:
+  #         kubelogin-version: 'v0.0.26'
+
+  #     - name: Set AKS Context
+  #       id: set-context
+  #       uses: azure/aks-set-context@v3
+  #       with:
+  #         resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  #         cluster-name: ${{ secrets.AZURE_CLUSTER_NAME }}
+  #         admin: 'false'
+  #         use-kubelogin: 'true'
+
+  #     - name: Restart Kubernetes Deployment
+  #       env:
+  #         DEPLOYMENT_NAME_PROD: ${{ secrets.K8S_DEPLOYMENT_NAME_PROD }}
+  #         DEPLOYMENT_NAME_STAGING: ${{ secrets.K8S_DEPLOYMENT_NAME_STAGING }}
+  #       run: |
+  #         if [ "${{ env.ENVIRONMENT }}" = "staging" ]; then
+  #           kubectl rollout restart deployment $DEPLOYMENT_NAME_STAGING
+  #         else
+  #           kubectl rollout restart deployment $DEPLOYMENT_NAME_PROD
+  #         fi
