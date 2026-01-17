@@ -50,7 +50,7 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.runner }} turbo build
 
       - name: NPM
-        `run: echo "${{ secrets.NPM_TOKEN }}" | base64`
+        run: echo "${{ secrets.NPM_TOKEN }}" | base64`
 
       - name: Turborepo Cache
         uses: actions/cache@v4
