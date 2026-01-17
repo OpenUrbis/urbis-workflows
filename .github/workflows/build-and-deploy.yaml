@@ -4,7 +4,7 @@ on:
   release:
     types: [published]
   push:
-    branches: [cicd/*]
+    branches: [cicd/*, master]
 
 jobs:
   build_and_push:
