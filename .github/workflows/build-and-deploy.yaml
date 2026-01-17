@@ -4,7 +4,7 @@ on:
   release:
     types: [published]
   push:
-    branches: [cicd/*, master]
+    branches: [cicd/*]
 
 jobs:
   build_and_push:
@@ -48,11 +48,6 @@ jobs:
 
       - name: Build with Turborepo
         run: ${{ steps.detect-package-manager.outputs.runner }} turbo build
-
-      - name: NPM
-        env:
-          MY_SECRET: ${{ secrets.NPM_TOKEN }}
-        run: echo "$MY_SECRET" | base64
 
 
       - name: Turborepo Cache
