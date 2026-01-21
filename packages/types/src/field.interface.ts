@@ -104,6 +104,10 @@ export class IFieldExpressions {
 
   @IsString()
   @IsOptional()
+  modelDescription?: string;
+
+  @IsString()
+  @IsOptional()
   visible?: string;
 
   @IsString()
