@@ -23,7 +23,7 @@ import { usePermissions } from "./reducers/permission.context";
 
 function Header(): JSX.Element {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isAuthenticated, signOut } = useContext(AuthContext);
+  const { isAuthenticated, signIn, signOut } = useContext(AuthContext);
   const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
   const { hasPermission, loading } = usePermissions();
@@ -222,7 +222,15 @@ function Header(): JSX.Element {
               )}
             </div>
             {window.innerWidth >= 640 && (
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 flex items-center gap-3">
+                {!isAuthenticated && (
+                  <button
+                    onClick={() => signIn()}
+                    className="inline-flex items-center px-4 py-2 rounded-full border text-sm font-medium transition-colors duration-200 cursor-pointer border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+                  >
+                    Entrar
+                  </button>
+                )}
                 <AccessibilityMenu />
               </div>
             )}
@@ -265,7 +273,7 @@ function Header(): JSX.Element {
                 <AccessibilityMenu />
                 <div className="text-center absolute bottom-0 ml-10 mb-6">
                   <div className="flex flex-col justify-center text-center space-y-6">
-                    {isAuthenticated && (
+                    {isAuthenticated ? (
                       <>
                         {/* eslint-disable-next-line */}
                         <a
@@ -284,6 +292,14 @@ function Header(): JSX.Element {
                           Sair
                         </a>
                       </>
+                    ) : (
+                      <a
+                        className="font-bold text-yellow-500 cursor-pointer"
+                        href="#"
+                        onClick={() => signIn()}
+                      >
+                        Entrar
+                      </a>
                     )}
                     <div className="text-xs">Versão mvp-0.0.0</div>
                   </div>

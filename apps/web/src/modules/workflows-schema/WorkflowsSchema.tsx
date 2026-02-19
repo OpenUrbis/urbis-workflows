@@ -31,25 +31,16 @@ import { CacheOptions } from "../../api/services/cache.service";
 import { PermissionGate } from "../../components/PermissionGate";
 import { usePermissions } from "../../reducers/permission.context";
 
-// Create a singleton instance
-const getApiClient = (() => {
-  let instance: ApiClient;
-
-  return (options?: { cacheOptions?: CacheOptions }) => {
-    if (!instance) {
-      instance = new ApiClient({
-        baseURL: import.meta.env.VITE_BACK_END_API || "",
-        headers: {
-          authorization: `Bearer ${getAccessToken() || ""}`,
-        },
-      });
-    }
-    return instance;
-  };
-})();
-
-// Use the singleton instance without expiration (default)
-const apiClient = getApiClient();
+// Create API client factory that uses current token
+const createApiClient = () => {
+  const token = getAccessToken();
+  return new ApiClient({
+    baseURL: import.meta.env.VITE_BACK_END_API || "",
+    headers: token
+      ? { authorization: `Bearer ${token}` }
+      : {},
+  });
+};
 
 export const WorkflowsSchema: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
@@ -77,7 +68,7 @@ export const WorkflowsSchema: React.FC = () => {
   const fetchWorkflows = async () => {
     setLoading(true);
     try {
-      const workflows = await apiClient.workflowsSchema.findAll(stage);
+      const workflows = await createApiClient().workflowsSchema.findAll(stage);
       setWorkflows(workflows.sort((a, b) => a.label.localeCompare(b.label)));
     } catch (error) {
       console.error("Error fetching workflows:", error);
@@ -143,7 +134,7 @@ export const WorkflowsSchema: React.FC = () => {
   const handleDuplicate = async (workflowId: string) => {
     setLoading(true);
     try {
-      const newWorkflow = await apiClient.workflowsSchema.copy(workflowId);
+      const newWorkflow = await createApiClient().workflowsSchema.copy(workflowId);
       setWorkflows([...workflows, newWorkflow]);
     } catch (error) {
       console.error("Error duplicating workflow:", error);

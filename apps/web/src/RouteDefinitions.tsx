@@ -26,6 +26,7 @@ import {
   DefaultRouteContext,
   PrivateWrapper,
   PublicWrapper,
+  PublicOrPrivateWrapper,
 } from "./reducers/auth.reducer";
 import { PlatePrint } from "./modules/workflows-schema/printers/PlatePrint";
 import { DocumentPrint } from "./modules/workflows-schema/printers/DocumentPrint";
@@ -150,21 +151,15 @@ const RouteDefinitions = () => (
       />
     </Route>
 
-    {/* Workflow Schema routes */}
+    {/* Workflow Schema routes - public landing page */}
     <Route
+      path="/workflows-schema"
       element={
-        <ProtectedRoute requiredPermission="workflow-schema:read:findAll" />
+        <PublicOrPrivateWrapper>
+          <WorkflowsSchema />
+        </PublicOrPrivateWrapper>
       }
-    >
-      <Route
-        path="/workflows-schema"
-        element={
-          <PrivateWrapper>
-            <WorkflowsSchema />
-          </PrivateWrapper>
-        }
-      />
-    </Route>
+    />
 
     <Route
       element={

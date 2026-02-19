@@ -61,7 +61,7 @@ const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const defaultRoute = isAuthenticated ? "/workflows-schema" : "/";
+  const defaultRoute = "/workflows-schema";
 
   return (
     <AuthContext.Provider
@@ -100,11 +100,24 @@ export const PrivateWrapper: FC<PrivateWrapperProps> = ({ children }) => {
   return isAuthenticated ? children : null;
 };
 
+/**
+ * Wrapper that renders children regardless of auth state.
+ * Used for pages that should be publicly viewable but may have
+ * enhanced functionality when authenticated.
+ */
+export const PublicOrPrivateWrapper: FC<PrivateWrapperProps> = ({ children }) => {
+  const { isLoading } = useContext(AuthContext);
+
+  if (isLoading) return null;
+
+  return <>{children}</>;
+};
+
 export const PublicWrapper: FC<PrivateWrapperProps> = ({ children }) => {
   const { isAuthenticated } = useContext(AuthContext);
   const location = useLocation();
 
-  const publicPaths = ["/", "/iam-error"];
+  const publicPaths = ["/", "/iam-error", "/workflows-schema"];
 
   if (isAuthenticated && publicPaths.includes(location.pathname)) {
     return <Navigate to="/workflows-schema" />;
