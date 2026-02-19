@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { FaPlus, FaTrash, FaCode, FaSave, FaRegCopy } from "react-icons/fa";
 import { Input, SL } from "../../components";
@@ -18,7 +19,7 @@ import { StyleContext } from "../../reducers/style.reducer";
 const codeModulesClient = new CodeModulesApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 

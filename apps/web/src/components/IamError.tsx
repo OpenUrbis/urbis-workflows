@@ -13,7 +13,7 @@ export const IamError: React.FC<IamErrorProps> = ({
   onRetry,
 }) => {
   const styleContext = useContext(StyleContext);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, signIn } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<Error | null>(propError || null);
@@ -82,21 +82,15 @@ export const IamError: React.FC<IamErrorProps> = ({
     checkAndClearRedirectFlag();
   }, [isAuthenticated]);
 
-  // The original redirect logic
-  // Only redirect to login if not authenticated and we don't have a stored error
-  // and we're not in the middle of displaying an IAM error
+  // Redirect to OIDC sign-in if not authenticated and we don't have a stored error
   useEffect(() => {
     const hasStoredError = sessionStorage.getItem("iamError");
     const isErrorPage = window.location.pathname === "/iam-error";
 
-    // Only redirect to login if:
-    // 1. Not authenticated
-    // 2. No stored IAM error
-    // 3. Not already on the error page
     if (!isAuthenticated && !hasStoredError && !isErrorPage) {
-      navigate("/login", { replace: true });
+      signIn();
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, signIn]);
 
   // Check for error information in URL parameters when component mounts
   useEffect(() => {

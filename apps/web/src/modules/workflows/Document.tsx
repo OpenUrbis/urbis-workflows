@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import {
   IconButton,
   Modal,
@@ -63,7 +64,7 @@ export function Document(): JSX.Element {
       `${import.meta.env.VITE_BACK_END_API}/protocols/${id}`,
       {
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -102,7 +103,7 @@ export function Document(): JSX.Element {
         `${import.meta.env.VITE_BACK_END_API}/protocols/${id}/versions/${version}`,
         {
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );
@@ -140,7 +141,7 @@ export function Document(): JSX.Element {
         },
         {
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );
@@ -159,7 +160,7 @@ export function Document(): JSX.Element {
       `${import.meta.env.VITE_BACK_END_API}/protocols/tax/${id}/browser`,
       {
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -176,7 +177,7 @@ export function Document(): JSX.Element {
       {},
       {
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -193,7 +194,7 @@ export function Document(): JSX.Element {
           version,
         },
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -218,7 +219,7 @@ export function Document(): JSX.Element {
           version,
         },
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );

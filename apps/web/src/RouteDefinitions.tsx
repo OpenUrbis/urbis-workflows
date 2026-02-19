@@ -2,21 +2,16 @@ import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import MapCallback from "./MapCallback";
 import {
-  ConfirmForgetPassword,
-  ConfirmSignUp,
   ContestUser,
   Datasets,
   DocumentValidate,
   Environments,
-  ForgetPassword,
   FormsPreset,
   IAM,
   MyProtocols,
   Profile,
   Workflows,
   Secrets,
-  SignIn,
-  SignUp,
   SignUpEditor,
   WorkflowSchemaEditor,
   WorkflowsSchema,
@@ -51,50 +46,10 @@ const RouteDefinitions = () => (
   <Routes>
     {/* Public routes */}
     <Route
-      path="/login"
-      element={
-        <PublicWrapper>
-          <SignIn />
-        </PublicWrapper>
-      }
-    />
-    <Route
-      path="/sign-up"
-      element={
-        <PublicWrapper>
-          <SignUp />
-        </PublicWrapper>
-      }
-    />
-    <Route
-      path="/confirm-sign-up"
-      element={
-        <PublicWrapper>
-          <ConfirmSignUp />
-        </PublicWrapper>
-      }
-    />
-    <Route
       path="/contest-user"
       element={
         <PublicWrapper>
           <ContestUser />
-        </PublicWrapper>
-      }
-    />
-    <Route
-      path="/forget-password"
-      element={
-        <PublicWrapper>
-          <ForgetPassword />
-        </PublicWrapper>
-      }
-    />
-    <Route
-      path="/confirm-forget-password"
-      element={
-        <PublicWrapper>
-          <ConfirmForgetPassword />
         </PublicWrapper>
       }
     />

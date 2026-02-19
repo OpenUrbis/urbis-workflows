@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import {
   FaPlus,
@@ -27,7 +28,7 @@ import { usePermissions } from "../../reducers/permission.context";
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "http://localhost:4000",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 

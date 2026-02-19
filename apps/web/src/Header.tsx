@@ -16,12 +16,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import AccessibilityMenu from "./AccessibilityMenu";
 import { AuthContext } from "./reducers/auth.reducer";
+
+const ACCOUNTS_URL = import.meta.env.VITE_ACCOUNTS_URL || "http://localhost:4200";
 import { SL } from "./components";
 import { usePermissions } from "./reducers/permission.context";
 
 function Header(): JSX.Element {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, signOut } = useContext(AuthContext);
   const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
   const { hasPermission, loading } = usePermissions();
@@ -108,7 +110,7 @@ function Header(): JSX.Element {
   }
 
   function handleRedirectProfile() {
-    navigate("/profile");
+    window.location.href = `${ACCOUNTS_URL}/profile`;
 
     if (isOpen) {
       onClose();
@@ -116,8 +118,7 @@ function Header(): JSX.Element {
   }
 
   function handleLogout(): void {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+    signOut();
   }
 
   // Setup hotkeys when permissions are loaded

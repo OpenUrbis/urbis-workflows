@@ -5,10 +5,12 @@ import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
 import { BlockOptions, FieldTypeEnum, IField } from "@open-urbis/types";
 import { Input, MaskedInput, SL } from "../../components";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
+import { AuthContext } from "../../reducers/auth.reducer";
 import { Field } from "../workflows-schema";
 
 export function ContestUser(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);
+  const { signIn } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [document, setDocument] = useState("");
@@ -178,7 +180,7 @@ export function ContestUser(): JSX.Element {
           Não deseja contestar mais?{" "}
           <button
             className="cursor-pointer hover:text-yellow-600 text-yellow-500 font-bold"
-            onClick={() => navigate("/login")}
+            onClick={() => signIn()}
           >
             Entrar <SL>E</SL>
           </button>

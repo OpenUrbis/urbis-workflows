@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
 import { FaSave } from "react-icons/fa";
@@ -13,7 +14,7 @@ import { Input, MaskedInput } from "../../components";
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
@@ -38,8 +39,7 @@ export function MyData(): JSX.Element {
         setEditProfile(data);
         setGeneral({ $user: data });
       } catch (error) {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+        console.error("Failed to fetch profile:", error);
       } finally {
         setIsLoading(false);
       }

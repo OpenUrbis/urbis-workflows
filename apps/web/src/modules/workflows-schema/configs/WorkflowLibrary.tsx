@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
   Spinner,
@@ -66,7 +67,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
   const api = new CodeModulesApiClient({
     baseURL: import.meta.env.VITE_BACK_END_API || "",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${getAccessToken()}`,
     },
   });
 

@@ -40,7 +40,7 @@ interface PermissionProviderProps {
 export const PermissionProvider: React.FC<PermissionProviderProps> = ({
   children,
 }) => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, accessToken } = useContext(AuthContext);
   const [userIam, setUserIam] = useState<UserIamDetailsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(isAuthenticated);
   const [error, setError] = useState<Error | null>(null);
@@ -48,7 +48,7 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
   const apiClient = new ApiClient({
     baseURL: import.meta.env.VITE_BACK_END_API || "",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
 

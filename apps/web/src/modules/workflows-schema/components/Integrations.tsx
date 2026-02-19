@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import { FormControl, FormLabel, Select, Spinner } from "@chakra-ui/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -43,7 +44,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
         `${import.meta.env.VITE_BACK_END_API}/protocols/integrations/sei/units`,
         {
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );
@@ -66,7 +67,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
             IdUnidade: integrations?.IdUnidade,
           },
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );
@@ -91,7 +92,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
             IdTipoProcedimento: integrations?.IdTipoProcedimento,
           },
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );

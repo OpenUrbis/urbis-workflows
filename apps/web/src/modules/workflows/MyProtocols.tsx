@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useEffect, useState, useContext } from "react";
 import {
   Table,
@@ -32,7 +33,7 @@ import { usePermissions } from "../../reducers/permission.context";
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 

@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import { Spinner } from "@chakra-ui/react";
 import { SL } from "../../components";
@@ -11,7 +12,7 @@ import { FaSave } from "react-icons/fa";
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 

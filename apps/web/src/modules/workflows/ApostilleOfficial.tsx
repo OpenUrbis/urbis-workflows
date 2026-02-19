@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Spinner } from "@chakra-ui/react";
@@ -27,7 +28,7 @@ export function ApostilleOfficial(): JSX.Element {
       `${import.meta.env.VITE_BACK_END_API}/protocols/${id}`,
       {
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -65,7 +66,7 @@ export function ApostilleOfficial(): JSX.Element {
         },
         {
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );

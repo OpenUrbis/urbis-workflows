@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../../auth/token";
 import { IField, IFieldOptionsType, IFormContext } from "@open-urbis/types";
 import axios from "axios";
 import { ValidState } from "../Field";
@@ -118,7 +119,7 @@ export function integrationCallback(
               },
               {
                 headers: {
-                  authorization: `Bearer ${localStorage.getItem("token")}`,
+                  authorization: `Bearer ${getAccessToken()}`,
                 },
               }
             );

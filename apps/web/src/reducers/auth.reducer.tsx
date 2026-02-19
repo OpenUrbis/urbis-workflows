@@ -1,54 +1,84 @@
 import {
   ReactNode,
   FC,
-  useState,
-  useEffect,
   useContext,
   createContext,
+  useEffect,
+  useCallback,
 } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import jwt_decode from "jwt-decode";
+import { Navigate, useLocation } from "react-router-dom";
+import { AuthProvider as OidcProvider, useAuth } from "react-oidc-context";
+import { oidcConfig } from "../auth/oidc-config";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>> | undefined;
+  accessToken: string | null;
+  signIn: () => void;
+  signOut: () => void;
+  isLoading: boolean;
 }
 
-export const DefaultRouteContext = createContext<string>(
-  localStorage.getItem("token") !== undefined ||
-    localStorage.getItem("token") !== null
-    ? "/workflows-schema"
-    : "/login"
-);
+export const DefaultRouteContext = createContext<string>("/workflows-schema");
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
-  setIsAuthenticated: undefined,
+  accessToken: null,
+  signIn: () => {},
+  signOut: () => {},
+  isLoading: true,
 });
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    !!localStorage.getItem("token")
-  );
+/**
+ * Inner component that bridges react-oidc-context to our AuthContext.
+ * Must be rendered inside OidcProvider.
+ */
+const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
+  const auth = useAuth();
 
-  const defaultRoute = isAuthenticated ? "/workflows-schema" : "/login";
+  const isAuthenticated = auth.isAuthenticated;
+  const accessToken = auth.user?.access_token ?? null;
+  const isLoading = auth.isLoading;
 
+  const signIn = useCallback(() => {
+    auth.signinRedirect();
+  }, [auth]);
+
+  const signOut = useCallback(() => {
+    auth.removeUser();
+    auth.signoutRedirect();
+  }, [auth]);
+
+  // Attempt silent sign-in on mount if not authenticated and not loading
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setIsAuthenticated(true);
+    if (!isAuthenticated && !isLoading && !auth.activeNavigator) {
+      auth.signinSilent().catch(() => {
+        // Silent sign-in failed — user will need to log in explicitly
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const defaultRoute = isAuthenticated ? "/workflows-schema" : "/";
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, accessToken, signIn, signOut, isLoading }}
+    >
       <DefaultRouteContext.Provider value={defaultRoute}>
         {children}
       </DefaultRouteContext.Provider>
     </AuthContext.Provider>
+  );
+};
+
+export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
+  return (
+    <OidcProvider {...oidcConfig}>
+      <AuthBridge>{children}</AuthBridge>
+    </OidcProvider>
   );
 };
 
@@ -57,27 +87,15 @@ interface PrivateWrapperProps {
 }
 
 export const PrivateWrapper: FC<PrivateWrapperProps> = ({ children }) => {
-  checkTokenAndLogout();
-
-  const authContext = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  if (!authContext) {
-    throw new Error("PrivateWrapper must be used within an AuthProvider");
-  }
-
-  const { isAuthenticated, setIsAuthenticated } = authContext;
+  const { isAuthenticated, isLoading, signIn } = useContext(AuthContext);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      setIsAuthenticated && setIsAuthenticated(true);
-    } else if (!isAuthenticated) {
-      navigate("/login");
+    if (!isAuthenticated && !isLoading) {
+      signIn();
     }
-    /* eslint-disable-next-line */
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isLoading, signIn]);
+
+  if (isLoading) return null;
 
   return isAuthenticated ? children : null;
 };
@@ -86,14 +104,7 @@ export const PublicWrapper: FC<PrivateWrapperProps> = ({ children }) => {
   const { isAuthenticated } = useContext(AuthContext);
   const location = useLocation();
 
-  const publicPaths = [
-    "/",
-    "/login",
-    "/sign-up",
-    "/confirm-sign-up",
-    "/forget-password",
-    "/confirm-forget-password",
-  ];
+  const publicPaths = ["/", "/iam-error"];
 
   if (isAuthenticated && publicPaths.includes(location.pathname)) {
     return <Navigate to="/workflows-schema" />;
@@ -101,24 +112,3 @@ export const PublicWrapper: FC<PrivateWrapperProps> = ({ children }) => {
 
   return <>{children}</>;
 };
-
-function checkTokenAndLogout() {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    return;
-  }
-
-  try {
-    const decoded: any = jwt_decode(token);
-
-    const current_time = Date.now().valueOf() / 1000;
-
-    if (decoded.exp < current_time) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-  } catch (err) {
-    console.log("Error decoding token:", err);
-  }
-}

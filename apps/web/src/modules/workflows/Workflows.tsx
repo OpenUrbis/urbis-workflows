@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useEffect, useState, useContext } from "react";
 import {
   Spinner,
@@ -64,7 +65,7 @@ import { usePermissions } from "../../reducers/permission.context";
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 

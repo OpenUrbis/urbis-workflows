@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../../auth/token";
 import axios from "axios";
 import React, { useCallback, useState, useContext } from "react";
 import { useSnackbar } from "../../../../hooks/snackbar";
@@ -123,7 +124,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
           },
           {
             headers: {
-              authorization: `Bearer ${localStorage.getItem("token")}`,
+              authorization: `Bearer ${getAccessToken()}`,
             },
           }
         );

@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useEffect, useState, useContext } from "react";
 import {
   Table,
@@ -84,7 +85,7 @@ export function MyAcceptances(): JSX.Element {
             limit,
           },
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );

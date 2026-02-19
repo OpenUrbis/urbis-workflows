@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { usePermissions } from "../reducers/permission.context";
 import { Spinner } from "@chakra-ui/react";
@@ -21,13 +21,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   fallbackPath = "/not-found",
 }) => {
   const styleContext = useContext(StyleContext);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, isLoading: authLoading, signIn } = useContext(AuthContext);
   const { hasPermission, loading, error } = usePermissions();
 
-  // If not authenticated, redirect to login
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  // If not authenticated and not loading, trigger OIDC sign-in
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      signIn();
+    }
+  }, [isAuthenticated, authLoading, signIn]);
+
+  // While auth is loading, show nothing
+  if (authLoading) return null;
+
+  // If not authenticated (sign-in redirect in progress), show nothing
+  if (!isAuthenticated) return null;
 
   // If there's an error loading permissions and the user is authenticated,
   // redirect to the IAM error page

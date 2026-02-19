@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   FormControl,
@@ -25,7 +26,7 @@ import { SideDrawer } from "../../../components/SideDrawer";
 const iamClient = new IamApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    Authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 

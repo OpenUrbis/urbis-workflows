@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -13,12 +14,14 @@ import {
 } from "@chakra-ui/react";
 import { Input, SL, Select } from "../../components";
 import { HotkeyContext, StyleContext } from "../../reducers";
+import { AuthContext } from "../../reducers/auth.reducer";
 import { useNavigate } from "react-router-dom";
 import { MdCheckCircle, MdOutlineError } from "react-icons/md";
 
 export function DocumentValidate(): JSX.Element {
   const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
+  const { signIn } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [valid, setValid] = useState(false);
@@ -33,7 +36,7 @@ export function DocumentValidate(): JSX.Element {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
-        E: () => navigate("/login"),
+        E: () => signIn(),
         V: () => hash && protocolId && documentType && handleValidate(),
       },
     });
@@ -181,12 +184,12 @@ export function DocumentValidate(): JSX.Element {
             </>
           )}
         </button>
-        {!localStorage.getItem("token") && (
+        {!getAccessToken() && (
           <div className="text-center pt-4">
             Quer entrar no sistema?{" "}
             <button
               className="cursor-pointer hover:text-yellow-600 text-yellow-500 font-bold"
-              onClick={() => navigate("/login")}
+              onClick={() => signIn()}
             >
               Entrar <SL>E</SL>
             </button>

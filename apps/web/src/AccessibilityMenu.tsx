@@ -25,7 +25,7 @@ function AccessibilityMenu(): JSX.Element {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, signOut } = useContext(AuthContext);
   const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
   const { hasPermission, loading } = usePermissions();
@@ -94,18 +94,7 @@ function AccessibilityMenu(): JSX.Element {
     });
 
     if (confirmed) {
-      // remove all local storage items
-      Object.keys(localStorage).forEach((key) => {
-        // exception accessibility settings
-        if (
-          key !== "textColor" &&
-          key !== "backgroundColor" &&
-          key !== "fontSize" &&
-          key !== "buttonHoverColorWeight"
-        )
-          localStorage.removeItem(key);
-      });
-      window.location.href = "/login";
+      signOut();
     }
   }
 

@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import {
   Menu,
   MenuButton,
@@ -47,7 +48,7 @@ import { SL } from "../../../components";
 const formsClient = new FormsApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 

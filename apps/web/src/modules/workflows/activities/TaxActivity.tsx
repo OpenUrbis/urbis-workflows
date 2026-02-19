@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import React, { useContext, useState, useEffect } from "react";
 import { Tooltip } from "@chakra-ui/react";
 import {
@@ -29,7 +30,7 @@ import { useParams, useLocation } from "react-router-dom";
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 

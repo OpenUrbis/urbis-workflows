@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import { Input, SL } from "../../components";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
@@ -39,7 +40,7 @@ const getApiClient = (() => {
       instance = new ApiClient({
         baseURL: import.meta.env.VITE_BACK_END_API || "",
         headers: {
-          authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          authorization: `Bearer ${getAccessToken() || ""}`,
         },
       });
     }

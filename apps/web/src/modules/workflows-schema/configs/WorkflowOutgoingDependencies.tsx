@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import { useState, useContext, useEffect } from "react";
 import { FaPlus, FaTrash, FaProjectDiagram } from "react-icons/fa";
 import {
@@ -27,7 +28,7 @@ import { ActivityDependenciesSelector } from "../components/ActivityDependencies
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 

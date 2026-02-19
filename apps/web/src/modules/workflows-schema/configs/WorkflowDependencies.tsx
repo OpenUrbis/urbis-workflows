@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import { useContext, useState, useEffect } from "react";
 import { FieldTypeEnum, IField, IFormContext } from "@open-urbis/types";
 import { FieldEditable } from "../form-engine/FieldEditable";
@@ -27,7 +28,7 @@ import { Input, Select, SL, Textarea } from "../../../components";
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 
