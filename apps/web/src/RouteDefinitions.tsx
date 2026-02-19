@@ -23,6 +23,7 @@ import { ApostilleOfficial } from "./modules/workflows/ApostilleOfficial";
 import { MyAcceptances } from "./modules/workflows/MyAcceptances";
 import { ProtocolValidate } from "./modules/workflows/ProtocolValidate";
 import {
+  AuthContext,
   DefaultRouteContext,
   PrivateWrapper,
   PublicWrapper,
@@ -41,6 +42,14 @@ import DocumentCertificateEditor from "./modules/workflows-schema/activities/doc
 const DefaultRoute = () => {
   const defaultRoute = useContext(DefaultRouteContext);
   return <Navigate to={defaultRoute} />;
+};
+
+const OidcCallbackRoute = () => {
+  const { isLoading } = useContext(AuthContext);
+
+  if (isLoading) return null;
+
+  return <Navigate to="/workflows-schema" replace />;
 };
 
 const RouteDefinitions = () => (
@@ -122,6 +131,7 @@ const RouteDefinitions = () => (
         </PublicWrapper>
       }
     />
+    <Route path="/callback" element={<OidcCallbackRoute />} />
     <Route path="/not-found" element={<NotFound />} />
 
     {/* IAM Error route */}

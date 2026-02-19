@@ -15,5 +15,8 @@ export const oidcConfig = {
   scope: "openid profile email",
   response_type: "code",
   automaticSilentRenew: true,
+  onSigninCallback: () => {
+    window.history.replaceState({}, document.title, "/workflows-schema");
+  },
   userStore: new WebStorageStateStore({ store: window.localStorage }),
 };
