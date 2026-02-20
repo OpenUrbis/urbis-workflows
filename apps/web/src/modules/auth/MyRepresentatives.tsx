@@ -70,7 +70,7 @@ export function MyRepresentatives(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight mb-4 text-foreground">
+      <h1 className="text-xl font-semibold tracking-tight mb-3 text-foreground">
         Meus Representantes
       </h1>
 
@@ -82,13 +82,13 @@ export function MyRepresentatives(): JSX.Element {
 
       {!loading && representatives.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12">
-          <div className="w-16 h-16 rounded-full mb-4 flex items-center justify-center bg-muted">
-            <FaUserFriends size={32} className="text-muted-foreground" />
+          <div className="w-14 h-14 rounded-full mb-3 flex items-center justify-center bg-muted">
+            <FaUserFriends size={26} className="text-muted-foreground" />
           </div>
-          <p className="text-lg font-medium mb-2 text-foreground">
+          <p className="text-base font-medium mb-1.5 text-foreground">
             Nenhum representante cadastrado
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Você não possui representantes ativos no momento
           </p>
         </div>

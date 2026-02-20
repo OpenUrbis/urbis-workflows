@@ -223,35 +223,45 @@ export const WorkflowsSchema: React.FC = () => {
         open={!!selectedDescription}
         onOpenChange={(open) => !open && setSelectedDescription(null)}
       >
-        <DialogContent className="max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>{selectedDescription?.label}</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-[640px] rounded-2xl border-muted/80 p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-3">
+            <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
+              {selectedDescription?.label}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
               Descrição completa do assunto selecionado.
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-[55vh] overflow-y-auto">
+          <div className="max-h-[55vh] overflow-y-auto px-6 pb-2">
             <div
-              className="prose dark:prose-invert max-w-none text-foreground"
+              className="max-w-none text-sm leading-6 text-foreground"
               dangerouslySetInnerHTML={{
                 __html: selectedDescription?.text || "",
               }}
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="px-6 py-4 border-t bg-muted/20 gap-2 sm:gap-3">
             <Button
+              type="button"
+              size="sm"
               onClick={() => {
                 setSelectedDescription(null);
                 if (selectedDescription) {
                   handleRequest(selectedDescription.id);
                 }
               }}
-              className="gap-2"
+              className="h-9 px-4 gap-2"
             >
               <span>Solicitar</span>
               <SL bg="yellow.700">Enter</SL>
             </Button>
-            <Button variant="outline" onClick={() => setSelectedDescription(null)}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-9 px-4"
+              onClick={() => setSelectedDescription(null)}
+            >
               Fechar
             </Button>
           </DialogFooter>
@@ -515,7 +525,7 @@ const WorkflowsList = ({
                           id: workflow.id,
                         })
                       }
-                      className={`text-sm mt-1 ${
+                      className={`h-auto px-0 py-0 text-xs mt-1 font-medium ${
                         styleContext.state.buttonHoverColorWeight === "200"
                           ? "text-blue-600 hover:text-blue-700"
                           : "text-blue-400 hover:text-blue-300"

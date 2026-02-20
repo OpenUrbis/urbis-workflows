@@ -344,12 +344,12 @@ export const Secrets: React.FC = () => {
 
   return (
     <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-start justify-between mb-6">
         <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">Segredos</h1>
         <Button
           type="button"
           size="sm"
-          className={`h-9 rounded-full px-4 gap-2 ${
+          className={`mt-4 h-9 rounded-full px-4 gap-2 ${
             styleContext.state.buttonHoverColorWeight === "200"
               ? "bg-yellow-600 hover:bg-yellow-700"
               : "bg-yellow-800 hover:bg-yellow-900"
@@ -382,6 +382,7 @@ export const Secrets: React.FC = () => {
             onSearchChange={searchCallback}
             icon={FaKey}
             iconColor="blue"
+            density="compact"
           />
         </div>
         <div className="flex flex-col p-6 w-9/12">
@@ -551,38 +552,33 @@ export const Secrets: React.FC = () => {
                           : "#374151",
                     }}
                   >
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="outline"
+                        size="sm"
                         onClick={handleRemoveSecret}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "bg-red-100 hover:bg-red-200 text-red-600"
-                            : "bg-red-900 hover:bg-red-800 text-red-300"
-                        }`}
+                        className="h-9 px-4 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                       >
                         <FaTrash className="text-sm" />
                         <span>Remover</span>
                       </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className={`h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 text-white ${
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "bg-yellow-600 hover:bg-yellow-700"
+                            : "bg-yellow-800 hover:bg-yellow-900"
+                        }`}
+                        onClick={handleSaveSecret}
+                        disabled={loading}
+                      >
+                        <FaSave size={14} />
+                        <span>Salvar</span>
+                        <SL bg="yellow.600">S</SL>
+                      </Button>
                     </div>
-                  </div>
-
-                  <div className="fixed bottom-16 right-4 flex space-x-4">
-                    <Button
-                      type="button"
-                      size="sm"
-                      className={`h-10 px-5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-yellow-600 hover:bg-yellow-700"
-                          : "bg-yellow-800 hover:bg-yellow-900"
-                      }`}
-                      onClick={handleSaveSecret}
-                      disabled={loading}
-                    >
-                      <FaSave size={14} />
-                      <span>Salvar</span> <SL bg="yellow.600">S</SL>
-                    </Button>
                   </div>
                 </>
               )}

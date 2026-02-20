@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { SL } from "../../components/ShortcutLabel";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { StyleContext } from "../../reducers";
+import { Button, Card } from "@open-urbis/map-ui";
 import { FaKey, FaUserTag, FaUsers, FaUserShield } from "react-icons/fa";
 import { Permissions, Roles, Groups, UserAccess } from ".";
 
@@ -66,12 +67,12 @@ export function IAM(): JSX.Element {
   }, []);
 
   return (
-    <div className="flex flex-col space-y-2 mb-20 px-20">
-      <h1 className="text-2xl md:text-3xl font-medium mb-6 text-left">
+    <div className="flex flex-col space-y-2 mb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl font-semibold mt-4 mb-6 tracking-tight text-foreground">
         Gerenciamento de Acesso (IAM)
       </h1>
 
-      <div
+      <Card
         className="flex flex-grow border rounded-lg overflow-hidden"
         style={{
           borderColor:
@@ -103,17 +104,19 @@ export function IAM(): JSX.Element {
               }`}
               key={menu.key}
             >
-              <button
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={() => setSubpage(menu.link)}
-                className="flex justify-between w-full items-center"
+                className="flex justify-between w-full items-center h-auto p-0 font-normal"
                 style={{ color: styleContext.state.textColor }}
               >
                 <div className="flex items-center space-x-3">
                   {menu.icon}
-                  <span>{menu.name}</span>
+                  <span className="text-sm font-medium">{menu.name}</span>
                 </div>
                 <SL>{menu.key}</SL>
-              </button>
+              </Button>
             </div>
           ))}
         </div>
@@ -128,7 +131,7 @@ export function IAM(): JSX.Element {
           {subpage === "groups" && <Groups />}
           {subpage === "useraccess" && <UserAccess />}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

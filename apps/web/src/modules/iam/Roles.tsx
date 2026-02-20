@@ -27,6 +27,7 @@ import {
   Select,
   FormHelperText,
 } from "@chakra-ui/react";
+import { Button as DSButton } from "@open-urbis/map-ui";
 import {
   FaEdit,
   FaPlus,
@@ -254,7 +255,7 @@ export function Roles(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-6 mb-20">
       <div className="flex justify-between items-center mb-4">
         <h2
           className="text-xl font-bold"
@@ -262,26 +263,19 @@ export function Roles(): JSX.Element {
         >
           Funções
         </h2>
-        <Button
-          leftIcon={<FaPlus />}
-          colorScheme="purple"
-          onClick={resetFormAndOpen}
+        <DSButton
+          type="button"
           size="sm"
-          bg={
+          onClick={resetFormAndOpen}
+          className={`h-9 rounded-lg px-4 gap-2 text-white ${
             styleContext.state.buttonHoverColorWeight === "200"
-              ? "purple.500"
-              : "purple.600"
-          }
-          _hover={{
-            bg:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "purple.600"
-                : "purple.700",
-          }}
-          color="white"
+              ? "bg-purple-500 hover:bg-purple-600"
+              : "bg-purple-600 hover:bg-purple-700"
+          }`}
         >
+          <FaPlus size={14} />
           Nova Função
-        </Button>
+        </DSButton>
       </div>
 
       {isLoading && roles.length === 0 ? (
@@ -307,23 +301,27 @@ export function Roles(): JSX.Element {
                 : "#374151",
           }}
         >
-          <Table variant="simple" size="md">
-            <Thead>
+          <Table variant="simple" size="sm" className="text-sm">
+            <Thead className="text-xs">
               <Tr>
                 <Th
                   width="40px"
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   style={{ color: styleContext.state.textColor }}
                 ></Th>
                 <Th
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   style={{ color: styleContext.state.textColor }}
                 >
@@ -331,9 +329,11 @@ export function Roles(): JSX.Element {
                 </Th>
                 <Th
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   style={{ color: styleContext.state.textColor }}
                 >
@@ -341,9 +341,11 @@ export function Roles(): JSX.Element {
                 </Th>
                 <Th
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   style={{ color: styleContext.state.textColor }}
                 >
@@ -353,9 +355,11 @@ export function Roles(): JSX.Element {
                   width="100px"
                   textAlign="right"
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   style={{ color: styleContext.state.textColor }}
                 >

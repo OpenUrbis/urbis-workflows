@@ -1,7 +1,6 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Button,
   FormControl,
   FormLabel,
   Input,
@@ -17,6 +16,7 @@ import {
   Tooltip,
   Badge,
 } from "@chakra-ui/react";
+import { Button as DSButton } from "@open-urbis/map-ui";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import { StyleContext } from "../../reducers";
 import { ApiClient } from "../../api";
@@ -193,26 +193,19 @@ export function Permissions(): JSX.Element {
         >
           Permissões
         </h2>
-        <Button
-          leftIcon={<FaPlus />}
-          colorScheme="orange"
-          onClick={resetFormAndOpen}
+        <DSButton
+          type="button"
           size="sm"
-          bg={
+          onClick={resetFormAndOpen}
+          className={`h-9 rounded-lg px-4 gap-2 text-white ${
             styleContext.state.buttonHoverColorWeight === "200"
-              ? "orange.500"
-              : "orange.600"
-          }
-          _hover={{
-            bg:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "orange.600"
-                : "orange.700",
-          }}
-          color="white"
+              ? "bg-orange-500 hover:bg-orange-600"
+              : "bg-orange-600 hover:bg-orange-700"
+          }`}
         >
+          <FaPlus size={14} />
           Nova Permissão
-        </Button>
+        </DSButton>
       </div>
 
       {isLoading && permissions.length === 0 ? (
@@ -241,16 +234,19 @@ export function Permissions(): JSX.Element {
           <div className="overflow-x-auto w-full">
             <Table
               variant="simple"
-              size="md"
+              size="sm"
+              className="text-sm"
               style={{ tableLayout: "fixed", width: "100%" }}
             >
-              <Thead>
+              <Thead className="text-xs">
                 <Tr>
                   <Th
                     className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
+                      `${
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "bg-gray-100"
+                          : "bg-gray-800"
+                      } text-xs font-semibold`
                     }
                     style={{
                       color: styleContext.state.textColor,
@@ -262,9 +258,11 @@ export function Permissions(): JSX.Element {
                   </Th>
                   <Th
                     className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
+                      `${
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "bg-gray-100"
+                          : "bg-gray-800"
+                      } text-xs font-semibold`
                     }
                     style={{
                       color: styleContext.state.textColor,
@@ -276,9 +274,11 @@ export function Permissions(): JSX.Element {
                   </Th>
                   <Th
                     className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
+                      `${
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "bg-gray-100"
+                          : "bg-gray-800"
+                      } text-xs font-semibold`
                     }
                     style={{
                       color: styleContext.state.textColor,
@@ -289,9 +289,11 @@ export function Permissions(): JSX.Element {
                   </Th>
                   <Th
                     className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
+                      `${
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "bg-gray-100"
+                          : "bg-gray-800"
+                      } text-xs font-semibold`
                     }
                     style={{
                       color: styleContext.state.textColor,

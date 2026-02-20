@@ -1,6 +1,7 @@
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@open-urbis/map-ui";
 import { FaFolder, FaFolderOpen } from "react-icons/fa";
@@ -33,6 +34,7 @@ export interface TreeListProps<T extends TreeItem> {
   onSearchChange?: (value: string) => void;
   getIcon?: (item: T) => { icon: IconType; color: string };
   selectedId?: string;
+  density?: "default" | "compact";
 }
 
 const createDirectoryTree = <T extends TreeItem>(
@@ -116,46 +118,50 @@ export const TreeList = <T extends TreeItem>({
   onSearchChange,
   getIcon,
   selectedId,
+  density = "default",
 }: TreeListProps<T>): JSX.Element => {
   const styleContext = useContext(StyleContext);
   const tree = createDirectoryTree(items);
 
   return (
-    <div className="flex flex-col">
-      <div
-        className="p-4 border-b "
-        style={{
-          borderColor:
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "#E5E7EB"
-              : "#374151",
-          backgroundColor: styleContext.state.backgroundColor,
-        }}
-      >
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-            <Search className="text-muted-foreground" size={16} />
+    <TooltipProvider>
+      <div className="flex flex-col">
+        <div
+          className="p-4 border-b "
+          style={{
+            borderColor:
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "#E5E7EB"
+                : "#374151",
+            backgroundColor: styleContext.state.backgroundColor,
+          }}
+        >
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+              <Search className="text-muted-foreground" size={16} />
+            </div>
+            <Input
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              className="h-10 pl-10"
+            />
           </div>
-          <Input
-            placeholder="Buscar..."
-            value={search}
-            onChange={(e) => onSearchChange?.(e.target.value)}
-            className="h-10 pl-10"
+        </div>
+        <div className="flex-grow overflow-y-auto p-2">
+          <DirectoryView
+            node={tree}
+            search={search}
+            onClick={onClick}
+            icon={defaultIcon}
+            iconColor={defaultIconColor}
+            getIcon={getIcon}
+            selectedId={selectedId}
+            density={density}
           />
         </div>
       </div>
-      <div className="flex-grow overflow-y-auto p-2">
-        <DirectoryView
-          node={tree}
-          search={search}
-          onClick={onClick}
-          icon={defaultIcon}
-          iconColor={defaultIconColor}
-          getIcon={getIcon}
-          selectedId={selectedId}
-        />
-      </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
@@ -168,6 +174,7 @@ const DirectoryView = <T extends TreeItem>({
   level = 0,
   getIcon,
   selectedId,
+  density = "default",
 }: {
   node: DirectoryNode<T>;
   search: string;
@@ -177,6 +184,7 @@ const DirectoryView = <T extends TreeItem>({
   level?: number;
   getIcon?: (item: T) => { icon: IconType; color: string };
   selectedId?: string;
+  density?: "default" | "compact";
 }) => {
   const styleContext = useContext(StyleContext);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -231,6 +239,10 @@ const DirectoryView = <T extends TreeItem>({
   const isRootWithOnlyFiles =
     level === 0 && filteredChildren.every(([, child]) => child.type === "file");
   const basePadding = isRootWithOnlyFiles ? 0 : level * 16;
+  const isCompact = density === "compact";
+  const folderOpenSize = isCompact ? 18 : 23;
+  const folderSize = isCompact ? 17 : 21;
+  const itemIconSize = isCompact ? 14 : 18;
 
   const handleFolderClick = (name: string) => {
     setExpandedItems((prev) => {
@@ -252,7 +264,7 @@ const DirectoryView = <T extends TreeItem>({
             <>
               <button
                 onClick={() => handleFolderClick(name)}
-                className={`w-full rounded-lg px-4 py-2 transition-all duration-200 ${
+                className={`w-full rounded-lg px-4 ${isCompact ? "py-1.5" : "py-2"} transition-all duration-200 ${
                   styleContext.state.buttonHoverColorWeight === "200"
                     ? "hover:bg-gray-200"
                     : "hover:bg-gray-700"
@@ -264,13 +276,19 @@ const DirectoryView = <T extends TreeItem>({
                 >
                   <span className="flex items-center">
                     {expandedItems.has(name) ? (
-                      <FaFolderOpen className="mr-3 text-yellow-500" size={23} />
+                      <FaFolderOpen
+                        className={`text-yellow-500 ${isCompact ? "mr-2" : "mr-3"}`}
+                        size={folderOpenSize}
+                      />
                     ) : (
-                      <FaFolder className="mr-3 text-yellow-500" size={21} />
+                      <FaFolder
+                        className={`text-yellow-500 ${isCompact ? "mr-2" : "mr-3"}`}
+                        size={folderSize}
+                      />
                     )}
                     <span
                       style={{ color: styleContext.state.textColor }}
-                      className="font-medium"
+                      className={`${isCompact ? "text-sm" : "text-base"} font-medium`}
                     >
                       {name}
                     </span>
@@ -291,6 +309,7 @@ const DirectoryView = <T extends TreeItem>({
                     level={level + 1}
                     getIcon={getIcon}
                     selectedId={selectedId}
+                    density={density}
                   />
                 </div>
               )}
@@ -331,19 +350,19 @@ const DirectoryView = <T extends TreeItem>({
                   >
                     <button
                       onClick={() => onClick(item)}
-                      className="flex items-center w-full py-2 px-4 rounded-lg hover:bg-opacity-75"
+                      className={`flex items-center w-full ${isCompact ? "py-1.5" : "py-2"} px-4 rounded-lg hover:bg-opacity-75`}
                     >
                       <div className="flex items-center w-full">
                         <Icon
-                          className={`mr-3 text-${itemIcon.color}-500 flex-shrink-0`}
-                          size={18}
+                          className={`text-${itemIcon.color}-500 flex-shrink-0 ${isCompact ? "mr-2" : "mr-3"}`}
+                          size={itemIconSize}
                         />
                         <div className="flex flex-col flex-grow min-w-0 text-left">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span
                                 style={{ color: styleContext.state.textColor }}
-                                className="font-medium truncate hover:text-yellow-600 transition-colors duration-200"
+                                className={`${isCompact ? "text-sm" : "text-base"} font-medium truncate hover:text-yellow-600 transition-colors duration-200`}
                               >
                                 {item.label}
                               </span>
@@ -355,7 +374,9 @@ const DirectoryView = <T extends TreeItem>({
                           {(search.trim() !== "" || item.namespace) && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="text-sm text-gray-500 dark:text-gray-400 truncate hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+                                <span
+                                  className={`${isCompact ? "text-xs" : "text-sm"} text-gray-500 dark:text-gray-400 truncate hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200`}
+                                >
                                   {item.namespace}
                                 </span>
                               </TooltipTrigger>

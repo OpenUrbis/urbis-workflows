@@ -25,11 +25,11 @@ import { FaInbox, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)]">
-      <FaInbox size={48} className="text-muted-foreground" />
-      <p className="text-xl font-medium mt-4 mb-2 text-foreground">
+      <FaInbox size={34} className="text-muted-foreground" />
+      <p className="text-lg font-medium mt-3 mb-1.5 text-foreground">
         Nenhuma assinatura encontrada
       </p>
-      <p className="text-base text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Você ainda não possui nenhuma assinatura registrada.
       </p>
     </div>

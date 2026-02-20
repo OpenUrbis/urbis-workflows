@@ -44,14 +44,14 @@ const api = new ApiClient({
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-300px)]">
-      <FaInbox size={48} className="text-muted-foreground" />
-      <p className="text-xl font-medium mt-4 mb-2 text-foreground">
+      <FaInbox size={34} className="text-muted-foreground" />
+      <p className="text-lg font-medium mt-3 mb-1.5 text-foreground">
         Nenhum protocolo encontrado
       </p>
-      <p className="text-base text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Você ainda não possui nenhum protocolo registrado.
       </p>
-      <p className="text-sm mt-2 text-muted-foreground">
+      <p className="text-xs mt-1.5 text-muted-foreground">
         Acesse a Carta de Assuntos para iniciar um novo protocolo.
       </p>
     </div>

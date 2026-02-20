@@ -349,23 +349,27 @@ export function UserAccess(): JSX.Element {
                 : "#374151",
           }}
         >
-          <Table variant="simple" size="md">
-            <Thead>
+          <Table variant="simple" size="sm" className="text-sm">
+            <Thead className="text-xs">
               <Tr>
                 <Th
                   width="40px"
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   color={styleContext.state.textColor}
                 ></Th>
                 <Th
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   color={styleContext.state.textColor}
                 >
@@ -373,9 +377,11 @@ export function UserAccess(): JSX.Element {
                 </Th>
                 <Th
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   color={styleContext.state.textColor}
                 >
@@ -383,9 +389,11 @@ export function UserAccess(): JSX.Element {
                 </Th>
                 <Th
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   color={styleContext.state.textColor}
                 >
@@ -395,9 +403,11 @@ export function UserAccess(): JSX.Element {
                   width="100px"
                   textAlign="right"
                   className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
+                    `${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-100"
+                        : "bg-gray-800"
+                    } text-xs font-semibold`
                   }
                   color={styleContext.state.textColor}
                 >
