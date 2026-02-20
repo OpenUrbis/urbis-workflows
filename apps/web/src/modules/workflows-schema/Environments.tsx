@@ -13,8 +13,8 @@ import {
   FaTable,
   FaCode,
 } from "react-icons/fa";
-import { Input, SL } from "../../components";
-import { Spinner, FormControl, FormLabel } from "@chakra-ui/react";
+import { SL } from "../../components";
+import { Button, Input, Label } from "@open-urbis/map-ui";
 import EditableHeader from "../../components/EditableHeader";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import {
@@ -32,6 +32,7 @@ import {
   ConstantTypeEnum,
 } from "../../api/types/constant-variables.dto";
 import { useSnackbar } from "../../hooks/snackbar";
+import { Loader2 } from "lucide-react";
 
 type VersionInfo = {
   id: string;
@@ -339,13 +340,15 @@ export const Environments: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-6 mb-24 px-20 min-h-[80vh]">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-medium text-left">
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
+      <div className="flex items-start justify-between mb-6">
+        <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
           Variáveis de Ambiente
         </h1>
-        <button
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white ${
+        <Button
+          type="button"
+          size="sm"
+          className={`mt-4 h-9 rounded-full px-4 gap-2 text-white ${
             styleContext.state.buttonHoverColorWeight === "200"
               ? "bg-yellow-600 hover:bg-yellow-700"
               : "bg-yellow-800 hover:bg-yellow-900"
@@ -358,7 +361,7 @@ export const Environments: React.FC = () => {
           <span className="text-sm opacity-75 ml-2">
             <SL bg="yellow.600">N</SL>
           </span>
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-grow border rounded-lg   shadow-sm overflow-hidden">
@@ -380,28 +383,31 @@ export const Environments: React.FC = () => {
             icon={FaFileAlt}
             iconColor="blue"
             getIcon={getConstantTypeIcon}
+            density="compact"
           />
         </div>
         <div className="flex flex-col p-6 w-9/12">
           {loading && (
             <div className="flex-grow flex items-center justify-center">
-              <Spinner size="xl" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
           {!loading && selectedEnvironment === null && addingEnvironment && (
             <AddEnvironment onAddEnvironment={handleAddEnvironment} />
           )}
           {!loading && selectedEnvironment === null && !addingEnvironment && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <FaFileAlt size={48} className="mb-4 opacity-50" />
-              <p className="text-xl font-medium mb-2">
+              <p className="text-xl font-medium mb-2 text-foreground">
                 Nenhuma variável selecionada
               </p>
               <p className="text-sm mb-6">
                 Selecione uma variável da lista ao lado ou crie uma nova
               </p>
-              <button
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white ${
+              <Button
+                type="button"
+                size="sm"
+                className={`h-9 rounded-full px-4 gap-2 text-white ${
                   styleContext.state.buttonHoverColorWeight === "200"
                     ? "bg-yellow-600 hover:bg-yellow-700"
                     : "bg-yellow-800 hover:bg-yellow-900"
@@ -413,7 +419,7 @@ export const Environments: React.FC = () => {
                 <span className="text-sm opacity-75 ml-2">
                   <SL bg="yellow.600">N</SL>
                 </span>
-              </button>
+              </Button>
             </div>
           )}
           {!loading && selectedEnvironment !== null && (
@@ -426,7 +432,7 @@ export const Environments: React.FC = () => {
                       onTextChange={(text) =>
                         handleSetEnvironment("label", text)
                       }
-                      className="text-xl md:text-3xl font-black text-center mb-3"
+                      className="text-lg md:text-2xl font-semibold text-center mb-3"
                     />
                     <EditableHeader
                       value={selectedEnvironment.documentation}
@@ -449,29 +455,29 @@ export const Environments: React.FC = () => {
 
               <div className="w-4/5 mx-auto">
                 <div className="flex flex-col space-y-4">
-                  <FormControl id="namespace">
-                    <FormLabel>Chave</FormLabel>
+                  <div id="namespace">
+                    <Label className="mb-1 block">Chave</Label>
                     <Input
                       type="text"
                       placeholder="dir0/dir1/filename"
-                      size="lg"
+                      className="h-10"
                       value={selectedEnvironment.namespace}
                       onChange={(e) =>
                         handleSetEnvironment("namespace", e.target.value)
                       }
                     />
-                  </FormControl>
-                  <FormControl id="type">
-                    <FormLabel>Tipo</FormLabel>
+                  </div>
+                  <div id="type">
+                    <Label className="mb-1 block">Tipo</Label>
                     <Input
                       type="text"
-                      size="lg"
+                      className="h-10"
                       value={getConstantTypeDescription(
                         selectedEnvironment.type
                       )}
                       readOnly
                     />
-                  </FormControl>
+                  </div>
                   <EnvironmentValueForm
                     value={selectedEnvironment.value}
                     type={selectedEnvironment.type}
@@ -492,45 +498,44 @@ export const Environments: React.FC = () => {
                       : "#374151",
                 }}
               >
-                <div className="flex gap-4">
-                  <button
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleDuplicate}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                    }`}
+                    className="h-9 px-4 gap-2"
+                    style={{ color: styleContext.state.textColor }}
                   >
                     <FaRegCopy className="text-sm" />
                     <span>Duplicar</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleRemoveEnvironment}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-red-100 hover:bg-red-200 text-red-600"
-                        : "bg-red-900 hover:bg-red-800 text-red-300"
-                    }`}
+                    className="h-9 px-4 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
                     <FaTrash className="text-sm" />
                     <span>Remover</span>
-                  </button>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className={`h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 text-white ${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-yellow-600 hover:bg-yellow-700"
+                        : "bg-yellow-800 hover:bg-yellow-900"
+                    }`}
+                    onClick={handleSaveEnvironment}
+                    disabled={loading}
+                  >
+                    <FaSave size={14} />
+                    <span>Salvar</span>
+                    <SL bg="yellow.600">S</SL>
+                  </Button>
                 </div>
-              </div>
-
-              <div className="fixed bottom-16 right-4 flex space-x-4">
-                <button
-                  className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-yellow-600 hover:bg-yellow-700"
-                      : "bg-yellow-800 hover:bg-yellow-900"
-                  }`}
-                  onClick={handleSaveEnvironment}
-                  disabled={loading}
-                >
-                  <FaSave size={14} />
-                  <span>Salvar</span> <SL bg="yellow.600">S</SL>
-                </button>
               </div>
             </>
           )}

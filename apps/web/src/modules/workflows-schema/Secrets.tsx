@@ -437,7 +437,7 @@ export const Secrets: React.FC = () => {
                           onTextChange={(text) =>
                             handleSetSecret("label", text)
                           }
-                          className="text-xl md:text-3xl font-black text-center mb-3"
+                          className="text-lg md:text-2xl font-semibold text-center mb-3"
                         />
                         <EditableHeader
                           value={selectedSecret.documentation}

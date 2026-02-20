@@ -1167,22 +1167,14 @@ export function WorkflowSchemaEditor(): JSX.Element {
                   )}
                   <div className="mb-4">
                     <EditableHeader
-                      value={workflowSchema.label ?? ""}
+                      value={workflowSchema.label}
                       onTextChange={(text) => {
                         updateSubject({ ...workflowSchema, label: text });
                       }}
-                      className="text-xl md:text-3xl font-medium text-center"
+                      className="text-lg md:text-2xl font-semibold text-center max-h-48 overflow-y-auto"
                       style={{ color: styleContext.state.textColor }}
                     />
                   </div>
-                  <EditableHeader
-                    html={workflowSchema.description ?? ""}
-                    onTextChange={(text) => {
-                      updateSubject({ ...workflowSchema, description: text });
-                    }}
-                    className="mb-2 text-center max-h-48 overflow-y-auto"
-                    style={{ color: styleContext.state.textColor }}
-                  />
                 </div>
                 {/* Version menu */}
                 <div className="w-48 flex-shrink-0">

@@ -366,14 +366,18 @@ export const FormsPreset: React.FC = () => {
 
   return (
     <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-start justify-between mb-6">
         <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
           Formulários
         </h1>
         <Button
           type="button"
           size="sm"
-          className="h-9 rounded-full px-4 gap-2 bg-yellow-500 hover:bg-yellow-600 text-white"
+          className={`mt-4 h-9 rounded-full px-4 gap-2 text-white ${
+            styleContext.state.buttonHoverColorWeight === "200"
+              ? "bg-yellow-600 hover:bg-yellow-700"
+              : "bg-yellow-800 hover:bg-yellow-900"
+          }`}
           onClick={handleAddPresetForm}
           disabled={loading}
         >
@@ -405,6 +409,7 @@ export const FormsPreset: React.FC = () => {
             iconColor="yellow"
             getIcon={getFormIcon}
             selectedId={selectedPreset?.id}
+            density="compact"
           />
         </div>
         <div className="flex flex-col p-6 w-9/12">
@@ -418,8 +423,8 @@ export const FormsPreset: React.FC = () => {
           )}
           {!loading && selectedPreset === null && !addingPreset && (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <FaMinus size={48} className="mb-4 opacity-50" />
-              <p className="text-xl font-medium mb-2 text-foreground">
+              <FaMinus size={40} className="mb-3 opacity-50" />
+              <p className="text-lg font-medium mb-1.5 text-foreground">
                 Nenhum formulário selecionado
               </p>
               <p className="text-sm mb-6">
@@ -428,7 +433,11 @@ export const FormsPreset: React.FC = () => {
               <Button
                 type="button"
                 size="sm"
-                className="h-9 rounded-full px-4 gap-2 bg-yellow-500 hover:bg-yellow-600 text-white"
+                className={`h-9 rounded-full px-4 gap-2 text-white ${
+                  styleContext.state.buttonHoverColorWeight === "200"
+                    ? "bg-yellow-600 hover:bg-yellow-700"
+                    : "bg-yellow-800 hover:bg-yellow-900"
+                }`}
                 onClick={handleAddPresetForm}
               >
                 <FaPlus size={16} />
@@ -447,7 +456,7 @@ export const FormsPreset: React.FC = () => {
                     <EditableHeader
                       value={selectedPreset.label}
                       onTextChange={(text) => handleSetPreset("label", text)}
-                      className="text-xl md:text-3xl font-medium text-center mb-3"
+                      className="text-lg md:text-2xl font-semibold text-center mb-3"
                     />
                     <EditableHeader
                       value={selectedPreset.documentation}
@@ -547,16 +556,13 @@ export const FormsPreset: React.FC = () => {
                   backgroundColor: styleContext.state.backgroundColor,
                 }}
               >
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
+                    size="sm"
                     onClick={handleCodeEditor}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100 hover:bg-gray-200"
-                        : "bg-gray-700 hover:bg-gray-600"
-                    }`}
+                    className="h-9 px-4 gap-2"
                     style={{ color: styleContext.state.textColor }}
                   >
                     <FaPen className="text-sm" />
@@ -564,13 +570,10 @@ export const FormsPreset: React.FC = () => {
                   </Button>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
+                    size="sm"
                     onClick={handleDuplicate}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100 hover:bg-gray-200"
-                        : "bg-gray-700 hover:bg-gray-600"
-                    }`}
+                    className="h-9 px-4 gap-2"
                     style={{ color: styleContext.state.textColor }}
                   >
                     <FaRegCopy className="text-sm" />
@@ -578,35 +581,30 @@ export const FormsPreset: React.FC = () => {
                   </Button>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
+                    size="sm"
                     onClick={handleRemovePreset}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-red-100 hover:bg-red-200 text-red-600"
-                        : "bg-red-900 hover:bg-red-800 text-red-300"
-                    }`}
+                    className="h-9 px-4 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
                     <FaTrash className="text-sm" />
                     <span>Remover</span>
                   </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className={`h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 text-white ${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-yellow-600 hover:bg-yellow-700"
+                        : "bg-yellow-800 hover:bg-yellow-900"
+                    }`}
+                    onClick={handleSavePreset}
+                    disabled={loading}
+                  >
+                    <FaSave size={14} />
+                    <span>Salvar</span>
+                    <SL bg="yellow.600">S</SL>
+                  </Button>
                 </div>
-              </div>
-
-              <div className="fixed bottom-16 right-4 flex space-x-4">
-                <Button
-                  type="button"
-                  size="sm"
-                  className={`h-10 px-5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-yellow-600 hover:bg-yellow-700"
-                      : "bg-yellow-800 hover:bg-yellow-900"
-                  }`}
-                  onClick={handleSavePreset}
-                  disabled={loading}
-                >
-                  <FaSave size={14} />
-                  <span>Salvar</span> <SL bg="yellow.600">S</SL>
-                </Button>
               </div>
             </>
           )}
