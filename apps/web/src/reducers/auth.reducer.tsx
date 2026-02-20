@@ -10,6 +10,35 @@ import { Navigate, useLocation } from "react-router-dom";
 import { AuthProvider as OidcProvider, useAuth } from "react-oidc-context";
 import { oidcConfig } from "../auth/oidc-config";
 
+function decodeJwtPayload(token?: string): Record<string, unknown> | null {
+  if (!token) return null;
+
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = atob(normalized);
+    return JSON.parse(decoded) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function pickString(
+  sources: Array<Record<string, unknown> | null | undefined>,
+  keys: string[],
+): string | undefined {
+  for (const source of sources) {
+    if (!source) continue;
+    for (const key of keys) {
+      const value = source[key];
+      if (typeof value === "string" && value.trim()) return value.trim();
+    }
+  }
+  return undefined;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   accessToken: string | null;
@@ -46,13 +75,25 @@ const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = auth.isAuthenticated;
   const accessToken = auth.user?.access_token ?? null;
+  const profile = (auth.user?.profile ?? null) as Record<string, unknown> | null;
+  const accessTokenPayload = decodeJwtPayload(accessToken ?? undefined);
+
+  const socialName = pickString(
+    [profile, accessTokenPayload],
+    ["socialName", "social_name", "preferred_username", "nickname"],
+  );
+  const name =
+    pickString([profile, accessTokenPayload], ["name", "given_name"]) ?? socialName;
+  const email = pickString(
+    [profile, accessTokenPayload],
+    ["email", "upn", "preferred_username"],
+  );
+
   const user = auth.user
     ? {
-        name: auth.user.profile?.name,
-        socialName:
-          (auth.user.profile?.social_name as string | undefined) ??
-          (auth.user.profile?.preferred_username as string | undefined),
-        email: auth.user.profile?.email,
+        name,
+        socialName,
+        email,
       }
     : null;
   const isLoading = auth.isLoading;

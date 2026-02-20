@@ -166,35 +166,46 @@ function Header(): JSX.Element {
           onLogin={signIn}
           onLogout={handleLogout}
           rightSlot={
-            isAuthenticated && administrativeItems.length > 0 ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="hidden cursor-pointer md:inline-flex h-9 rounded-full px-4"
-                  >
-                    Administração
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 bg-popover">
-                  <DropdownMenuLabel>Administrativo</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {administrativeItems.map((item) => (
-                    <DropdownMenuItem
-                      key={item.path}
-                      className="cursor-pointer"
-                      onSelect={(event) => {
-                        event.preventDefault();
-                        navigate(item.path);
-                      }}
+            <div className="hidden md:flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="cursor-pointer h-9 rounded-full px-4"
+                onClick={() => navigate("/document-validate")}
+              >
+                Consultar documento
+              </Button>
+
+              {isAuthenticated && administrativeItems.length > 0 ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="cursor-pointer h-9 rounded-full px-4"
                     >
-                      {item.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : undefined
+                      Administração
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64 bg-popover">
+                    <DropdownMenuLabel>Administrativo</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {administrativeItems.map((item) => (
+                      <DropdownMenuItem
+                        key={item.path}
+                        className="cursor-pointer"
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          navigate(item.path);
+                        }}
+                      >
+                        {item.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+            </div>
           }
         />
       </div>

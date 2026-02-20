@@ -30,6 +30,7 @@ import { WorkflowSchema } from "../../api/types/workflows-schema.dto";
 import { CacheOptions } from "../../api/services/cache.service";
 import { PermissionGate } from "../../components/PermissionGate";
 import { usePermissions } from "../../reducers/permission.context";
+import { AuthContext } from "../../reducers/auth.reducer";
 
 // Create API client factory that uses current token
 const createApiClient = () => {
@@ -45,9 +46,11 @@ const createApiClient = () => {
 export const WorkflowsSchema: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
+  const { isAuthenticated, signIn } = useContext(AuthContext);
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
+  const canCreateWorkflow = hasPermission("workflow:write:create");
 
   const [workflows, setWorkflows] = useState<WorkflowSchema[]>([]);
   const [search, setSearch] = useState("");
@@ -125,8 +128,18 @@ export const WorkflowsSchema: React.FC = () => {
     }
   };
 
-  const handleRequest = (workflowId: string) =>
+  const handleRequest = (workflowId: string) => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem(
+        "postLoginRedirectPath",
+        `/workflows/${workflowId}/create?stage=${stage}`,
+      );
+      signIn();
+      return;
+    }
+
     navigate(`/workflows/${workflowId}/create?stage=${stage}`);
+  };
 
   const handEditWorkflows = (workflowId: string) =>
     navigate(`/workflows-schema/${workflowId}`);
@@ -203,6 +216,8 @@ export const WorkflowsSchema: React.FC = () => {
             setStage={setStage}
             showEdit={showEdit}
             isGridView={isGridView}
+            isAuthenticated={isAuthenticated}
+            canCreateWorkflow={canCreateWorkflow}
             filteredWorkflows={filteredWorkflows}
             handleRequest={handleRequest}
             handEditWorkflows={handEditWorkflows}
@@ -343,6 +358,8 @@ const WorkflowContent = ({
   setStage,
   showEdit,
   isGridView,
+  isAuthenticated,
+  canCreateWorkflow,
   filteredWorkflows,
   handleRequest,
   handEditWorkflows,
@@ -354,6 +371,8 @@ const WorkflowContent = ({
   setStage: (stage: string) => void;
   showEdit: boolean;
   isGridView: boolean;
+  isAuthenticated: boolean;
+  canCreateWorkflow: boolean;
   filteredWorkflows: any[];
   handleRequest: (workflowId: string) => void;
   handEditWorkflows: (workflowId: string) => void;
@@ -366,6 +385,8 @@ const WorkflowContent = ({
   return (
     <WorkflowsList
       filteredWorkflows={filteredWorkflows}
+      isAuthenticated={isAuthenticated}
+      canCreateWorkflow={canCreateWorkflow}
       handleRequest={handleRequest}
       handEditWorkflows={handEditWorkflows}
       handleDuplicate={handleDuplicate}
@@ -472,6 +493,8 @@ const StageSelectorButton = ({
 
 const WorkflowsList = ({
   filteredWorkflows,
+  isAuthenticated,
+  canCreateWorkflow,
   handleRequest,
   handEditWorkflows,
   handleDuplicate,
@@ -481,6 +504,8 @@ const WorkflowsList = ({
   setSelectedDescription,
 }: {
   filteredWorkflows: any[];
+  isAuthenticated: boolean;
+  canCreateWorkflow: boolean;
   handleRequest: (workflowId: string) => void;
   handEditWorkflows: (workflowId: string) => void;
   handleDuplicate: (workflowId: string) => Promise<void>;
@@ -589,7 +614,7 @@ const WorkflowsList = ({
                   : "items-center space-x-3"
               }`}
             >
-              <PermissionGate permission="workflow:write:create">
+              {(canCreateWorkflow || !isAuthenticated) && (
                 <button
                   onClick={() => handleRequest(workflow.id)}
                   className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg transition-colors duration-200 font-medium min-w-[160px] justify-center ${
@@ -597,7 +622,7 @@ const WorkflowsList = ({
                       ? "bg-yellow-500 hover:bg-yellow-600 text-white"
                       : "bg-yellow-600 hover:bg-yellow-700 text-white"
                   }`}
-                  title="Solicitar"
+                  title={isAuthenticated ? "Solicitar" : "Entrar para solicitar"}
                 >
                   <FaPlus size={18} />
                   <span>Solicitar</span>
@@ -611,7 +636,7 @@ const WorkflowsList = ({
                     {`S+${index + 1}`}
                   </SL>
                 </button>
-              </PermissionGate>
+              )}
               {showEdit && (
                 <div
                   className={`flex ${

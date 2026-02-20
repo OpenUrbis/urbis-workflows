@@ -16,6 +16,13 @@ export const oidcConfig = {
   response_type: "code",
   automaticSilentRenew: true,
   onSigninCallback: () => {
+    const postLoginRedirectPath = sessionStorage.getItem("postLoginRedirectPath");
+    if (postLoginRedirectPath) {
+      sessionStorage.removeItem("postLoginRedirectPath");
+      window.history.replaceState({}, document.title, postLoginRedirectPath);
+      return;
+    }
+
     window.history.replaceState({}, document.title, "/workflows-schema");
   },
   userStore: new WebStorageStateStore({ store: window.localStorage }),

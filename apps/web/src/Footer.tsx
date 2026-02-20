@@ -1,22 +1,17 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { StyleContext } from "./reducers/style.reducer";
-import { HotkeyContext } from "./reducers/hotkeys.reducer";
-import { useNavigate } from "react-router-dom";
-import { SL } from "./components";
+
+const APP_MENU_ITEMS = [
+  { label: "Mosaico", href: "https://urbis.prefeitura.sp.gov.br" },
+  { label: "Mapa", href: "https://mapa.urbis.prefeitura.sp.gov.br" },
+  { label: "Viabiliza", href: "https://viabiliza.urbis.prefeitura.sp.gov.br", active: true },
+  { label: "Dados Abertos", href: "https://dadosabertos.urbis.prefeitura.sp.gov.br" },
+  { label: "Doc. técnica", href: "https://docs.urbis.prefeitura.sp.gov.br/" },
+  { label: "Legis", href: "https://docs.urbis.prefeitura.sp.gov.br/docs/legis" },
+];
 
 function Footer(): JSX.Element {
   const { state } = useContext(StyleContext);
-  const hotkeyContext = useContext(HotkeyContext);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    hotkeyContext.dispatch({
-      type: "SET_HOTKEY",
-      payload: {
-        D: () => navigate("/document-validate"),
-      },
-    });
-  }, []);
 
   return (
     <footer
@@ -24,36 +19,20 @@ function Footer(): JSX.Element {
       style={{ backgroundColor: state.backgroundColor, zIndex: 1000 }}
     >
       {window.innerWidth > 768 && (
-        <div className="flex space-x-4 flex-wrap">
-          <div
-            className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-sm transition-colors duration-200 cursor-pointer ${
-              state.buttonHoverColorWeight === "200"
-                ? "text-gray-600 bg-gray-100"
-                : "text-gray-400 bg-gray-800"
-            }`}
-            onClick={() => navigate("/document-validate")}
-          >
-            <span>Consultar documento</span>
-            <SL
-              bg={
-                state.buttonHoverColorWeight === "200" ? "gray.200" : "gray.700"
-              }
+        <div className="flex flex-wrap items-center gap-2">
+          {APP_MENU_ITEMS.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className={`inline-flex items-center rounded-full border border-input h-8 px-4 text-sm transition-colors ${
+                item.active
+                  ? "bg-accent text-accent-foreground"
+                  : "bg-transparent hover:bg-accent"
+              }`}
             >
-              D
-            </SL>
-          </div>
-          <div
-            className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-sm transition-colors duration-200 cursor-pointer ${
-              state.buttonHoverColorWeight === "200"
-                ? "text-gray-600 bg-gray-100"
-                : "text-gray-400 bg-gray-800"
-            }`}
-            onClick={() =>
-              (window.location.href = import.meta.env.VITE_MAP as string)
-            }
-          >
-            <span>Consultar mapa</span>
-          </div>
+              {item.label}
+            </a>
+          ))}
           <div className="flex-grow"></div>
           <div
             className={`text-sm ${
