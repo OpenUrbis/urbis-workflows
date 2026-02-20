@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import { Input as InputBase } from "../../../../components";
+import { Input as DSInput } from "@open-urbis/map-ui";
 import { evalFieldExpression, modelCallback } from "../utils/expressions";
 import debounce from "lodash.debounce";
 import { NumericFormat } from "react-number-format";
@@ -153,14 +153,15 @@ export const Input: React.FC<FieldInputProps> = ({
       );
     default:
       return (
-        <InputBase
+        <DSInput
           key={fieldKey}
           type={options?.type ?? "text"}
           placeholder={options?.placeholder}
-          size="lg"
+          className="h-11"
           onChange={handleChange}
           value={value}
           readOnly={isReadonly}
+          disabled={isReadonly}
           autoFocus={options?.autoFocus}
         />
       );

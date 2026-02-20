@@ -1,4 +1,3 @@
-import { Checkbox as CheckboxBase } from "@chakra-ui/react";
 import { useContext } from "react";
 import { FaCheckSquare } from "react-icons/fa";
 import { IField, IFormContext, CheckboxOptions } from "@open-urbis/types";
@@ -52,35 +51,35 @@ export const Checkbox: React.FC<FieldCheckboxProps> = ({
     <div>
       {options?.items?.map((item: { label: string; value: any }) => (
         <div key={item.label} className="mb-1">
-          <CheckboxBase
+          <label
             key={fieldKey + "#" + item.label}
-            size="lg"
-            isChecked={value[item.value] === true}
-            colorScheme="yellow"
-            className={isReadonly ? "cursor-not-allowed" : ""}
-            borderRadius="md"
-            sx={{
-              "span.chakra-checkbox__control": {
-                borderRadius: "0.375rem",
-              },
-            }}
+            className={`inline-flex items-center gap-2 ${
+              isReadonly ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+            }`}
+          >
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+              checked={value[item.value] === true}
+              disabled={isReadonly}
             onChange={(e) => {
+              const nextValue = { ...(value ?? {}) };
+
               if (e.target.checked) {
-                value[item.value] = true;
+                nextValue[item.value] = true;
               } else {
-                delete value[item.value];
+                delete nextValue[item.value];
               }
 
-              if (Object.keys(value).length === 0) {
+              if (Object.keys(nextValue).length === 0) {
                 onChange(undefined);
               } else {
-                onChange(value);
+                onChange(nextValue);
               }
             }}
-            disabled={isReadonly}
-          >
-            {item.label}
-          </CheckboxBase>
+            />
+            <span>{item.label}</span>
+          </label>
         </div>
       ))}
     </div>

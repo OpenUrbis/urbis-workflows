@@ -1,14 +1,4 @@
-import {
-  Stepper,
-  Step as StepContainer,
-  useSteps,
-  Box,
-  StepIndicator,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Center,
-} from "@chakra-ui/react";
+import { Button } from "@open-urbis/map-ui";
 import { IField, IFormContext, BlockOptions } from "@open-urbis/types";
 import { Field } from "../Field";
 import { HelpTooltipClickable, SL } from "../../../../components";
@@ -49,10 +39,7 @@ export const Step: React.FC<FieldStepProps> = ({
 }) => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
-  const { activeStep, setActiveStep } = useSteps({
-    index: 0,
-    count: field?.length ?? 0,
-  });
+  const [activeStep, setActiveStep] = useState(0);
   const [visible, setVisible] = useState<{ [key: string]: boolean }>({});
   const [nextStepDisabled, setNextStepDisabled] = useState(false);
   const [lastVisibleStep, setLastVisibleStep] = useState(field.length - 1);
@@ -240,140 +227,68 @@ export const Step: React.FC<FieldStepProps> = ({
         className="flex justify-start"
         style={{ overflowX: "auto", whiteSpace: "nowrap" }}
       >
-        <Stepper
-          size="lg"
-          index={activeStep}
-          sx={{
-            border: "none",
-            boxShadow: "none",
-            gap: 0,
-            "& > *": {
-              flex: "0 0 auto",
-            },
-          }}
-          colorScheme="transparent"
-          className="space-x-20 overflow-visible"
-        >
-          {flattenedFields?.map((f, index) =>
-            visible[f.key] !== false ? (
-              <StepContainer
+        <div className="flex items-center space-x-8 overflow-visible">
+          {flattenedFields?.map((f, index) => {
+            if (visible[f.key] === false) return null;
+
+            const isStepActive = index === activeStep;
+            const isStepComplete = index < activeStep;
+
+            return (
+              <div
                 key={index}
                 ref={(el) => (stepRefs.current[index] = el)}
+                className="flex items-center"
               >
-                <StepIndicator
-                  sx={{
-                    border: "none",
-                    boxShadow: "none",
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRerender(false);
+                    setActiveStep(index);
+                    setTimeout(() => setRerender(true), 0);
                   }}
+                  className="flex flex-col items-start gap-2"
                 >
-                  <StepStatus
-                    complete={
-                      <Center
-                        w="36px"
-                        h="36px"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "green.400"
-                            : "green.900"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "white"
-                            : "green.200"
-                        }
-                        border="3px solid"
-                        borderColor={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "green.300"
-                            : "green.400"
-                        }
-                        borderRadius="12px"
-                        _hover={{
-                          bg: "green.600",
-                        }}
-                      >
-                        <FaCheck size={14} />
-                      </Center>
-                    }
-                    incomplete={
-                      <Center
-                        w="36px"
-                        h="36px"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.100"
-                            : "gray.800"
-                        }
-                        border="3px solid"
-                        borderColor={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.600"
-                        }
-                        borderRadius="12px"
-                        _hover={{
-                          bg: "gray.100",
-                          borderColor: "gray.300",
-                        }}
-                      >
-                        <FaCircle
-                          size={8}
-                          color={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "#CBD5E0"
-                              : "#4A5568"
-                          }
-                        />
-                      </Center>
-                    }
-                    active={
-                      <Center
-                        w="36px"
-                        h="36px"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "green.400"
-                            : "green.600"
-                        }
-                        border="3px solid"
-                        borderColor={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "green.300"
-                            : "green.400"
-                        }
-                        borderRadius="12px"
-                        color="white"
-                        _hover={{
-                          bg: "green.500",
-                          borderColor: "green.300",
-                        }}
-                      >
-                        <FaCircle size={8} />
-                      </Center>
-                    }
-                  />
-                </StepIndicator>
-                <Box className={window.innerWidth <= 500 ? "mt-2" : ""}>
-                  <StepTitle className="flex items-center space-x-2">
-                    <div className="flex items-center">
-                      <span>{(f.options as BlockOptions).label}</span>
-                    </div>
+                  <div
+                    className={`h-9 w-9 rounded-xl border-2 flex items-center justify-center transition-colors ${
+                      isStepActive || isStepComplete
+                        ? styleContext.state.buttonHoverColorWeight === "200"
+                          ? "bg-green-500 border-green-400 text-white"
+                          : "bg-green-700 border-green-500 text-white"
+                        : styleContext.state.buttonHoverColorWeight === "200"
+                          ? "bg-gray-100 border-gray-200 text-gray-400"
+                          : "bg-gray-800 border-gray-600 text-gray-500"
+                    }`}
+                  >
+                    {isStepComplete ? <FaCheck size={14} /> : <FaCircle size={8} />}
+                  </div>
+                  <div className={`flex items-center space-x-2 ${window.innerWidth <= 500 ? "mt-2" : ""}`}>
+                    <span style={{ color: styleContext.state.textColor }}>
+                      {(f.options as BlockOptions).label}
+                    </span>
                     {(f.options as BlockOptions).tooltip && (
                       <div className="pb-1">
                         <HelpTooltipClickable
-                          tooltip={
-                            (f.options as BlockOptions).tooltip as string
-                          }
+                          tooltip={(f.options as BlockOptions).tooltip as string}
                         />
                       </div>
                     )}
-                  </StepTitle>
-                </Box>
-                <StepSeparator />
-              </StepContainer>
-            ) : null
-          )}
-        </Stepper>
+                  </div>
+                </button>
+
+                {index < flattenedFields.length - 1 && (
+                  <div
+                    className={`mx-4 h-px w-10 ${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "bg-gray-300"
+                        : "bg-gray-600"
+                    }`}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
       {flattenedFields[activeStep] !== undefined && rerender && (
         <>
@@ -402,8 +317,11 @@ export const Step: React.FC<FieldStepProps> = ({
           </div>
           <div className="flex justify-start mt-6">
             {activeStep > 0 && (
-              <button
-                className={`px-6 py-2.5 rounded-lg mr-5 ${
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={`mr-5 px-6 ${
                   styleContext.state.buttonHoverColorWeight === "200"
                     ? "hover:bg-gray-200"
                     : "hover:bg-gray-700"
@@ -412,13 +330,15 @@ export const Step: React.FC<FieldStepProps> = ({
                 style={{ color: styleContext.state.textColor }}
               >
                 Anterior <SL className="ml-2">←</SL>
-              </button>
+              </Button>
             )}
             {flattenedFields.length > 1 &&
               (activeStep === 0 ||
                 activeStep !== flattenedFields.length - 1) && (
-                <button
-                  className={`px-6 py-2.5 rounded-lg text-white ${
+                <Button
+                  type="button"
+                  size="sm"
+                  className={`px-6 text-white ${
                     nextStepDisabled ? "opacity-50 cursor-not-allowed" : ""
                   } ${
                     styleContext.state.buttonHoverColorWeight === "200"
@@ -432,7 +352,7 @@ export const Step: React.FC<FieldStepProps> = ({
                   <SL className="ml-2" bg="yellow.500">
                     →
                   </SL>
-                </button>
+                </Button>
               )}
           </div>
         </>
