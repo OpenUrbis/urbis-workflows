@@ -45,19 +45,19 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
   const [loading, setLoading] = useState<boolean>(isAuthenticated);
   const [error, setError] = useState<Error | null>(null);
 
-  const apiClient = new ApiClient({
-    baseURL: import.meta.env.VITE_BACK_END_API || "",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
   const fetchUserIam = async () => {
-    // Don't fetch if not authenticated
-    if (!isAuthenticated) {
+    // Don't fetch if not authenticated or token not ready yet
+    if (!isAuthenticated || !accessToken) {
       setLoading(false);
       return;
     }
+
+    const apiClient = new ApiClient({
+      baseURL: import.meta.env.VITE_BACK_END_API || "",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     try {
       setLoading(true);
@@ -104,7 +104,7 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
 
     // Call fetchUserIam
     fetchUserIam();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, accessToken]);
 
   const hasPermission = (permission: string): boolean => {
     // If not authenticated, always return false
