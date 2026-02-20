@@ -1,30 +1,22 @@
 import React, { useContext, useEffect } from "react";
-import { MdMenu } from "react-icons/md";
-import logo from "./assets/logo.png";
-import { StyleContext } from "./reducers/style.reducer";
 import { HotkeyContext, withNoModifiers } from "./reducers/hotkeys.reducer";
 import { GlobalHotKeys } from "react-hotkeys";
-import {
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  Flex,
-  IconButton,
-  useDisclosure,
-} from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import AccessibilityMenu from "./AccessibilityMenu";
 import { AuthContext } from "./reducers/auth.reducer";
-
-const ACCOUNTS_URL = import.meta.env.VITE_ACCOUNTS_URL || "http://localhost:4200";
-import { SL } from "./components";
+import { UrbisHeader } from "@open-urbis/map-ui";
+import { Button } from "@open-urbis/map-ui/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@open-urbis/map-ui/ui/dropdown-menu";
 import { usePermissions } from "./reducers/permission.context";
 
 function Header(): JSX.Element {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isAuthenticated, signIn, signOut } = useContext(AuthContext);
-  const styleContext = useContext(StyleContext);
+  const { isAuthenticated, user, signIn, signOut } = useContext(AuthContext);
   const hotkeyContext = useContext(HotkeyContext);
   const { hasPermission, loading } = usePermissions();
   const navigate = useNavigate();
@@ -94,31 +86,33 @@ function Header(): JSX.Element {
 
   // Filter navItems based on permissions
   const filteredNavItems = navItems.filter(
-    (item) => !item.permission || hasPermission(item.permission)
+    (item) => !item.permission || hasPermission(item.permission),
   );
-
-  function handleRedirectHome() {
-    navigate("/");
-
-    if (isOpen) {
-      onClose();
-    }
-  }
+  const administrativeItems = [
+    { path: "/representations", label: "Representações" },
+    ...filteredNavItems
+      .filter((item) => item.mobile)
+      .map((item) => ({ path: item.path, label: item.label })),
+  ];
 
   function handleRedirect(path: string) {
     navigate(path);
   }
 
-  function handleRedirectProfile() {
-    window.location.href = `${ACCOUNTS_URL}/profile`;
-
-    if (isOpen) {
-      onClose();
-    }
-  }
-
   function handleLogout(): void {
     signOut();
+  }
+
+  function handleInternalNavCapture(event: React.MouseEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement | null;
+    const anchor = target?.closest("a") as HTMLAnchorElement | null;
+    if (!anchor) return;
+
+    const href = anchor.getAttribute("href");
+    if (!href || !href.startsWith("/")) return;
+
+    event.preventDefault();
+    navigate(href);
   }
 
   // Setup hotkeys when permissions are loaded
@@ -131,7 +125,7 @@ function Header(): JSX.Element {
       filteredNavItems.forEach((item) => {
         if (item.shortcut && !item.mobile) {
           hotkeyMap[item.shortcut] = withNoModifiers(() =>
-            handleRedirect(item.path)
+            handleRedirect(item.path),
           );
         }
       });
@@ -145,170 +139,65 @@ function Header(): JSX.Element {
 
   return (
     <>
-      <style>
-        {`
-          html { 
-            font-size: ${styleContext.state.fontSize}%; 
-          } 
-          body {
-            color: ${styleContext.state.textColor}; 
-            background-color: ${styleContext.state.backgroundColor}; 
-          }
-        `}
-      </style>
       <GlobalHotKeys
         keyMap={hotkeyContext.state.hotkeyKeyMap}
         handlers={hotkeyContext.state.hotkeyHandlers}
         allowChanges={true}
       />
-      <header>
-        <div className="mb-6 px-4 sm:px-6 md:px-8 lg:px-24 py-4 md:py-6 flex items-center">
-          {window.innerWidth >= 640 && (
-            <div className="flex-shrink-0 mr-6">
-              <img
-                className="cursor-pointer"
-                onClick={handleRedirectHome}
-                src={logo}
-                alt=""
-                style={{ height: "50px", maxHeight: "70px" }}
-              />
-            </div>
-          )}
-          <div className="flex-1 flex items-center justify-between">
-            <div className="flex flex-wrap gap-2 md:gap-3 lg:gap-4">
-              {isAuthenticated && (
-                <>
-                  {filteredNavItems
-                    .filter((item) => !item.mobile)
-                    .map((item) => (
-                      <div
-                        key={item.path}
-                        onClick={() => handleRedirect(item.path)}
-                        className={`relative inline-flex items-center px-2.5 sm:px-3 md:px-4 py-1.5 md:py-2 rounded-full border text-sm md:text-base transition-colors duration-200 font-medium cursor-pointer ${
-                          window.location.pathname === item.path
-                            ? styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                              ? "bg-gray-200 text-gray-800 border-gray-300"
-                              : "bg-gray-700 text-gray-200 border-gray-600"
-                            : styleContext.state.buttonHoverColorWeight ===
-                                "200"
-                              ? "text-gray-600 hover:bg-gray-100 border-gray-200"
-                              : "text-gray-400 hover:bg-gray-700 border-gray-700"
-                        }`}
-                        style={{
-                          display:
-                            window.innerWidth >= 640 ? "inline-flex" : "none",
-                        }}
-                      >
-                        <span className="whitespace-nowrap">{item.label}</span>
-                        <SL
-                          className="ml-1.5 md:ml-2"
-                          size="sm"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? window.location.pathname === item.path
-                                ? "gray.200"
-                                : "gray.100"
-                              : window.location.pathname === item.path
-                                ? "gray.700"
-                                : "gray.600"
-                          }
-                        >
-                          {item.shortcut}
-                        </SL>
-                      </div>
-                    ))}
-                </>
-              )}
-            </div>
-            {window.innerWidth >= 640 && (
-              <div className="flex-shrink-0 flex items-center gap-3">
-                {!isAuthenticated && (
-                  <button
-                    onClick={() => signIn()}
-                    className="inline-flex items-center px-4 py-2 rounded-full border text-sm font-medium transition-colors duration-200 cursor-pointer border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+      <div onClickCapture={handleInternalNavCapture}>
+        <UrbisHeader
+          logoSrc="/logo.png"
+          logoAlt="Logotipo da Prefeitura de São Paulo"
+          logoHref="https://viabiliza.urbis.prefeitura.sp.gov.br"
+          badgeText="Viabiliza"
+          menuItems={
+            isAuthenticated
+              ? filteredNavItems
+                  .filter((item) => !item.mobile)
+                  .map((item) => ({
+                    label: item.label,
+                    href: item.path,
+                    active: window.location.pathname === item.path,
+                  }))
+              : []
+          }
+          isAuthenticated={isAuthenticated}
+          user={user ?? undefined}
+          onLogin={signIn}
+          onLogout={handleLogout}
+          rightSlot={
+            isAuthenticated && administrativeItems.length > 0 ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden cursor-pointer md:inline-flex h-9 rounded-full px-4"
                   >
-                    Entrar
-                  </button>
-                )}
-                <AccessibilityMenu />
-              </div>
-            )}
-          </div>
-          {window.innerWidth < 640 && (
-            <IconButton
-              aria-label="Open menu"
-              icon={<MdMenu size={24} />}
-              variant="outline"
-              onClick={onOpen}
-            />
-          )}
-        </div>
-
-        {window.innerWidth < 640 && (
-          <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
-            <DrawerContent
-              className="p-8"
-              style={{
-                backgroundColor: styleContext.state.backgroundColor,
-              }}
-            >
-              <DrawerBody>
-                <Flex justifyContent="flex-end">
-                  <DrawerCloseButton size="lg" />
-                </Flex>
-                <div className="flex flex-col font-bold justify-center text-center space-y-6">
-                  {filteredNavItems.map((item) => (
-                    // eslint-disable-next-line
-                    <a
+                    Administração
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 bg-popover">
+                  <DropdownMenuLabel>Administrativo</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {administrativeItems.map((item) => (
+                    <DropdownMenuItem
                       key={item.path}
-                      href="#"
-                      onClick={() => handleRedirect(item.path)}
+                      className="cursor-pointer"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        navigate(item.path);
+                      }}
                     >
                       {item.label}
-                    </a>
+                    </DropdownMenuItem>
                   ))}
-                </div>
-                <div className="font-bold pt-6">Opções de acessibilidade</div>
-                <AccessibilityMenu />
-                <div className="text-center absolute bottom-0 ml-10 mb-6">
-                  <div className="flex flex-col justify-center text-center space-y-6">
-                    {isAuthenticated ? (
-                      <>
-                        {/* eslint-disable-next-line */}
-                        <a
-                          className="font-bold"
-                          href="#"
-                          onClick={handleRedirectProfile}
-                        >
-                          Perfil
-                        </a>
-                        {/* eslint-disable-next-line */}
-                        <a
-                          className="font-bold"
-                          href="#"
-                          onClick={handleLogout}
-                        >
-                          Sair
-                        </a>
-                      </>
-                    ) : (
-                      <a
-                        className="font-bold text-yellow-500 cursor-pointer"
-                        href="#"
-                        onClick={() => signIn()}
-                      >
-                        Entrar
-                      </a>
-                    )}
-                    <div className="text-xs">Versão mvp-0.0.0</div>
-                  </div>
-                </div>
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
-        )}
-      </header>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : undefined
+          }
+        />
+      </div>
     </>
   );
 }

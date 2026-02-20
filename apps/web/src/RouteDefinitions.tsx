@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import MapCallback from "./MapCallback";
 import {
@@ -50,6 +50,16 @@ const OidcCallbackRoute = () => {
   if (isLoading) return null;
 
   return <Navigate to="/workflows-schema" replace />;
+};
+
+const ACCOUNTS_URL = import.meta.env.VITE_ACCOUNTS_URL || "http://localhost:4200";
+
+const AccountsProfileRedirect = () => {
+  useEffect(() => {
+    window.location.href = `${ACCOUNTS_URL}/profile`;
+  }, []);
+
+  return null;
 };
 
 const RouteDefinitions = () => (
@@ -345,16 +355,19 @@ const RouteDefinitions = () => (
       />
     </Route>
 
-    {/* Profile route - accessible to all authenticated users */}
+    {/* Representations route - local workflow context */}
     <Route element={<ProtectedRoute />}>
       <Route
-        path="/profile"
+        path="/representations"
         element={
           <PrivateWrapper>
             <Profile />
           </PrivateWrapper>
         }
       />
+
+      {/* Profile route now points to Accounts (source of truth for profile data) */}
+      <Route path="/profile" element={<AccountsProfileRedirect />} />
     </Route>
 
     {/* SignUpEditor route */}

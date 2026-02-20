@@ -13,6 +13,11 @@ import { oidcConfig } from "../auth/oidc-config";
 interface AuthContextType {
   isAuthenticated: boolean;
   accessToken: string | null;
+  user: {
+    name?: string;
+    socialName?: string;
+    email?: string;
+  } | null;
   signIn: () => void;
   signOut: () => void;
   isLoading: boolean;
@@ -22,6 +27,7 @@ export const DefaultRouteContext = createContext<string>("/workflows-schema");
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   accessToken: null,
+  user: null,
   signIn: () => {},
   signOut: () => {},
   isLoading: true,
@@ -40,6 +46,15 @@ const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = auth.isAuthenticated;
   const accessToken = auth.user?.access_token ?? null;
+  const user = auth.user
+    ? {
+        name: auth.user.profile?.name,
+        socialName:
+          (auth.user.profile?.social_name as string | undefined) ??
+          (auth.user.profile?.preferred_username as string | undefined),
+        email: auth.user.profile?.email,
+      }
+    : null;
   const isLoading = auth.isLoading;
 
   const signIn = useCallback(() => {
@@ -65,7 +80,7 @@ const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, accessToken, signIn, signOut, isLoading }}
+      value={{ isAuthenticated, accessToken, user, signIn, signOut, isLoading }}
     >
       <DefaultRouteContext.Provider value={defaultRoute}>
         {children}

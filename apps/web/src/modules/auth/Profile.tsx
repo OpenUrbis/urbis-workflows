@@ -1,29 +1,27 @@
 import React, { useContext, useEffect, useState } from "react";
 import { SL } from "../../components/ShortcutLabel";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
-import { MyData } from "./MyData";
 import { StyleContext } from "../../reducers";
 import { MyRepresentations } from "./MyRepresentation";
 import { MyRepresentatives } from "./MyRepresentatives";
-import { FaUser, FaUserFriends, FaUserPlus } from "react-icons/fa";
+import { FaUserFriends, FaUserPlus } from "react-icons/fa";
 
 export function Profile(): JSX.Element {
   const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
-  const [subpage, setSubpage] = useState<string>("mydata");
+  const [subpage, setSubpage] = useState<string>("myrepresentations");
 
   const menus = [
-    { name: "Meus dados", link: "mydata", key: "1", icon: <FaUser /> },
     {
       name: "Minhas representações",
       link: "myrepresentations",
-      key: "2",
+      key: "1",
       icon: <FaUserFriends />,
     },
     {
       name: "Meus representantes",
       link: "myrepresentatives",
-      key: "3",
+      key: "2",
       icon: <FaUserPlus />,
     },
   ];
@@ -32,9 +30,6 @@ export function Profile(): JSX.Element {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
-        Q: () => {
-          setSubpage("mydata");
-        },
         A: () => {
           setSubpage("myrepresentations");
         },
@@ -47,7 +42,7 @@ export function Profile(): JSX.Element {
     return () => {
       hotkeyContext.dispatch({
         type: "UNSET_HOTKEY",
-        delete: ["Q", "A", "Z"],
+        delete: ["A", "Z"],
       });
     };
     
@@ -56,7 +51,7 @@ export function Profile(): JSX.Element {
   return (
     <div className="flex flex-col space-y-2 mb-20 px-20">
       <h1 className="text-2xl md:text-3xl font-medium mb-6 text-left">
-        Meu Perfil
+        Representações
       </h1>
 
       <div className="flex flex-grow border rounded-lg overflow-hidden">
@@ -98,7 +93,6 @@ export function Profile(): JSX.Element {
           ))}
         </div>
         <div className="flex flex-col p-6 w-9/12 overflow-y-auto">
-          {subpage === "mydata" && <MyData />}
           {subpage === "myrepresentations" && <MyRepresentations />}
           {subpage === "myrepresentatives" && <MyRepresentatives />}
         </div>
