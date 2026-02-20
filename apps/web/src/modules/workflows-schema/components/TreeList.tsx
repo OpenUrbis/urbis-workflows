@@ -1,19 +1,14 @@
 import {
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionIcon,
-  AccordionPanel,
-  Box,
-  InputGroup,
-  InputLeftElement,
   Tooltip,
-} from "@chakra-ui/react";
-import { FaFolder, FaFolderOpen, FaSearch } from "react-icons/fa";
+  TooltipContent,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
+import { FaFolder, FaFolderOpen } from "react-icons/fa";
+import { Search } from "lucide-react";
 import { IconType } from "react-icons";
 import { useContext, useState, useEffect } from "react";
 import { StyleContext } from "../../../reducers";
-import { Input } from "../../../components";
+import { Input } from "@open-urbis/map-ui";
 
 export interface TreeItem {
   id: string;
@@ -137,29 +132,17 @@ export const TreeList = <T extends TreeItem>({
           backgroundColor: styleContext.state.backgroundColor,
         }}
       >
-        <InputGroup size="lg">
-          <InputLeftElement
-            pointerEvents="none"
-            height="100%"
-            className="z-10"
-            children={
-              <FaSearch
-                className={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "text-gray-500"
-                    : "text-gray-300"
-                }
-                size={16}
-              />
-            }
-          />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+            <Search className="text-muted-foreground" size={16} />
+          </div>
           <Input
             placeholder="Buscar..."
             value={search}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            paddingLeft="2.5rem"
+            className="h-10 pl-10"
           />
-        </InputGroup>
+        </div>
       </div>
       <div className="flex-grow overflow-y-auto p-2">
         <DirectoryView
@@ -234,7 +217,7 @@ const DirectoryView = <T extends TreeItem>({
     if (search.trim() !== "") {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-          <FaSearch size={32} className="mb-4 opacity-50" />
+          <Search size={32} className="mb-4 opacity-50" />
           <p className="text-lg font-medium mb-1">
             Nenhuma entidade encontrada
           </p>
@@ -262,68 +245,55 @@ const DirectoryView = <T extends TreeItem>({
   };
 
   return (
-    <Accordion
-      allowToggle
-      border={0}
-      className="space-y-1"
-      index={Array.from(expandedItems).map((name) =>
-        filteredChildren.findIndex(([n]) => n === name)
-      )}
-    >
+    <div className="space-y-1">
       {filteredChildren.map(([name, child]) => (
-        <AccordionItem
-          key={name}
-          border={0}
-          className="rounded-lg overflow-hidden"
-        >
+        <div key={name} className="rounded-lg overflow-hidden">
           {child.type === "directory" ? (
             <>
-              <AccordionButton
+              <button
                 onClick={() => handleFolderClick(name)}
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.200"
-                      : "gray.700",
-                }}
-                className="rounded-lg"
-                transition="all 0.2s"
-                px={4}
-                py={2}
+                className={`w-full rounded-lg px-4 py-2 transition-all duration-200 ${
+                  styleContext.state.buttonHoverColorWeight === "200"
+                    ? "hover:bg-gray-200"
+                    : "hover:bg-gray-700"
+                }`}
               >
-                <Box
+                <span
                   style={{ paddingLeft: `${basePadding}px` }}
-                  as="span"
-                  flex="1"
-                  textAlign="left"
-                  className="flex items-center"
+                  className="flex items-center justify-between"
                 >
-                  {expandedItems.has(name) ? (
-                    <FaFolderOpen className="mr-3 text-yellow-500" size={23} />
-                  ) : (
-                    <FaFolder className="mr-3 text-yellow-500" size={21} />
-                  )}
-                  <span
-                    style={{ color: styleContext.state.textColor }}
-                    className="font-medium"
-                  >
-                    {name}
+                  <span className="flex items-center">
+                    {expandedItems.has(name) ? (
+                      <FaFolderOpen className="mr-3 text-yellow-500" size={23} />
+                    ) : (
+                      <FaFolder className="mr-3 text-yellow-500" size={21} />
+                    )}
+                    <span
+                      style={{ color: styleContext.state.textColor }}
+                      className="font-medium"
+                    >
+                      {name}
+                    </span>
                   </span>
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <AccordionPanel pb={2} pt={1}>
-                <DirectoryView
-                  node={child}
-                  search={search}
-                  onClick={onClick}
-                  icon={DefaultIcon}
-                  iconColor={defaultIconColor}
-                  level={level + 1}
-                  getIcon={getIcon}
-                  selectedId={selectedId}
-                />
-              </AccordionPanel>
+                  <span className="text-muted-foreground text-xs">
+                    {expandedItems.has(name) ? "−" : "+"}
+                  </span>
+                </span>
+              </button>
+              {expandedItems.has(name) && (
+                <div className="pt-1 pb-2">
+                  <DirectoryView
+                    node={child}
+                    search={search}
+                    onClick={onClick}
+                    icon={DefaultIcon}
+                    iconColor={defaultIconColor}
+                    level={level + 1}
+                    getIcon={getIcon}
+                    selectedId={selectedId}
+                  />
+                </div>
+              )}
             </>
           ) : (
             child.items
@@ -369,29 +339,31 @@ const DirectoryView = <T extends TreeItem>({
                           size={18}
                         />
                         <div className="flex flex-col flex-grow min-w-0 text-left">
-                          <Tooltip
-                            label={item.label}
-                            isDisabled={item.label.length <= 30}
-                            placement="top"
-                            hasArrow
-                          >
-                            <span
-                              style={{ color: styleContext.state.textColor }}
-                              className="font-medium truncate hover:text-yellow-600 transition-colors duration-200"
-                            >
-                              {item.label}
-                            </span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                style={{ color: styleContext.state.textColor }}
+                                className="font-medium truncate hover:text-yellow-600 transition-colors duration-200"
+                              >
+                                {item.label}
+                              </span>
+                            </TooltipTrigger>
+                            {item.label.length > 30 && (
+                              <TooltipContent side="top">{item.label}</TooltipContent>
+                            )}
                           </Tooltip>
                           {(search.trim() !== "" || item.namespace) && (
-                            <Tooltip
-                              label={item.namespace}
-                              isDisabled={item.namespace.length <= 40}
-                              placement="bottom"
-                              hasArrow
-                            >
-                              <span className="text-sm text-gray-500 dark:text-gray-400 truncate hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
-                                {item.namespace}
-                              </span>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="text-sm text-gray-500 dark:text-gray-400 truncate hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+                                  {item.namespace}
+                                </span>
+                              </TooltipTrigger>
+                              {item.namespace.length > 40 && (
+                                <TooltipContent side="bottom">
+                                  {item.namespace}
+                                </TooltipContent>
+                              )}
                             </Tooltip>
                           )}
                         </div>
@@ -401,8 +373,8 @@ const DirectoryView = <T extends TreeItem>({
                 );
               })
           )}
-        </AccordionItem>
+        </div>
       ))}
-    </Accordion>
+    </div>
   );
 };

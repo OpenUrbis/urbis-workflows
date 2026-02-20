@@ -8,11 +8,12 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
-import { Input, SL } from "../../components";
-import { Spinner } from "@chakra-ui/react";
+import { SL } from "../../components";
 import EditableHeader from "../../components/EditableHeader";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { StyleContext } from "../../reducers/style.reducer";
+import { Button, Input, Label } from "@open-urbis/map-ui";
+import { Loader2 } from "lucide-react";
 import { AddSecret } from "./components/AddSecret";
 import { ApiClient } from "../../api";
 import {
@@ -342,11 +343,13 @@ export const Secrets: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-6 mb-24 px-20 min-h-[80vh]">
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-medium text-left">Segredos</h1>
-        <button
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white ${
+        <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">Segredos</h1>
+        <Button
+          type="button"
+          size="sm"
+          className={`h-9 rounded-full px-4 gap-2 ${
             styleContext.state.buttonHoverColorWeight === "200"
               ? "bg-yellow-600 hover:bg-yellow-700"
               : "bg-yellow-800 hover:bg-yellow-900"
@@ -359,7 +362,7 @@ export const Secrets: React.FC = () => {
           <span className="text-sm opacity-75 ml-2">
             <SL bg="yellow.600">N</SL>
           </span>
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden">
@@ -384,23 +387,25 @@ export const Secrets: React.FC = () => {
         <div className="flex flex-col p-6 w-9/12">
           {loading && !selectedSecret && (
             <div className="flex-grow flex items-center justify-center">
-              <Spinner size="xl" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
           {!loading && selectedSecret === null && addingSecret && (
             <AddSecret onAddSecret={handleAddSecret} />
           )}
           {!loading && selectedSecret === null && !addingSecret && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <FaKey size={48} className="mb-4 opacity-50" />
-              <p className="text-xl font-medium mb-2">
+              <p className="text-xl font-medium mb-2 text-foreground">
                 Nenhum segredo selecionado
               </p>
               <p className="text-sm mb-6">
                 Selecione um segredo da lista ao lado ou crie um novo
               </p>
-              <button
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white ${
+              <Button
+                type="button"
+                size="sm"
+                className={`h-9 rounded-full px-4 gap-2 ${
                   styleContext.state.buttonHoverColorWeight === "200"
                     ? "bg-yellow-600 hover:bg-yellow-700"
                     : "bg-yellow-800 hover:bg-yellow-900"
@@ -412,14 +417,14 @@ export const Secrets: React.FC = () => {
                 <span className="text-sm opacity-75 ml-2">
                   <SL bg="yellow.600">N</SL>
                 </span>
-              </button>
+              </Button>
             </div>
           )}
           {selectedSecret !== null && (
             <>
               {loading ? (
                 <div className="flex-grow flex items-center justify-center">
-                  <Spinner size="xl" />
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : (
                 <>
@@ -455,25 +460,25 @@ export const Secrets: React.FC = () => {
                   <div className="w-4/5 mx-auto">
                     <div className="flex flex-col space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <Label className="block text-sm font-medium mb-1">
                           ID
-                        </label>
+                        </Label>
                         <Input
                           type="text"
                           placeholder="ID"
-                          size="lg"
+                          className="h-10"
                           value={selectedSecret.id}
                           readOnly
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <Label className="block text-sm font-medium mb-1">
                           Chave
-                        </label>
+                        </Label>
                         <Input
                           type="text"
                           placeholder="dir0/dir1/filename"
-                          size="lg"
+                          className="h-10"
                           value={selectedSecret.namespace}
                           onChange={(e) =>
                             handleSetSecret("namespace", e.target.value)
@@ -481,48 +486,51 @@ export const Secrets: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <Label className="block text-sm font-medium mb-1">
                           Valor atual
-                        </label>
+                        </Label>
                         <div className="relative">
                           <Input
                             type="text"
                             placeholder="O valor do segredo está oculto por segurança"
-                            size="lg"
+                            className="h-10"
                             readOnly
                             value={
                               showDecrypted ? decryptedValue || "" : "********"
                             }
                           />
                           {canViewDecrypted && (
-                            <button
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
                               onClick={handleToggleDecrypted}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
                               disabled={loadingDecrypted}
                             >
                               {loadingDecrypted ? (
-                                <Spinner size="sm" />
+                                <Loader2 className="h-4 w-4 animate-spin" />
                               ) : showDecrypted ? (
                                 <FaEyeSlash size={16} />
                               ) : (
                                 <FaEye size={16} />
                               )}
-                            </button>
+                            </Button>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           Por motivos de segurança, o valor atual do segredo não
                           é exibido.
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <Label className="block text-sm font-medium mb-1">
                           Novo valor
-                        </label>
+                        </Label>
                         <Input
                           type="text"
                           placeholder="Digite o novo valor do segredo"
-                          size="lg"
+                          className="h-10"
                           value={selectedSecret.newValue || ""}
                           onChange={(e) =>
                             handleSetSecret("newValue", e.target.value)
@@ -544,7 +552,9 @@ export const Secrets: React.FC = () => {
                     }}
                   >
                     <div className="flex gap-4">
-                      <button
+                      <Button
+                        type="button"
+                        variant="ghost"
                         onClick={handleRemoveSecret}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
                           styleContext.state.buttonHoverColorWeight === "200"
@@ -554,13 +564,15 @@ export const Secrets: React.FC = () => {
                       >
                         <FaTrash className="text-sm" />
                         <span>Remover</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
                   <div className="fixed bottom-16 right-4 flex space-x-4">
-                    <button
-                      className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
+                    <Button
+                      type="button"
+                      size="sm"
+                      className={`h-10 px-5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
                         styleContext.state.buttonHoverColorWeight === "200"
                           ? "bg-yellow-600 hover:bg-yellow-700"
                           : "bg-yellow-800 hover:bg-yellow-900"
@@ -570,7 +582,7 @@ export const Secrets: React.FC = () => {
                     >
                       <FaSave size={14} />
                       <span>Salvar</span> <SL bg="yellow.600">S</SL>
-                    </button>
+                    </Button>
                   </div>
                 </>
               )}

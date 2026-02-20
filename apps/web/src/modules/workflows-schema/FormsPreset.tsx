@@ -10,8 +10,9 @@ import {
   FaList,
 } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
-import { Input, SL } from "../../components";
-import { Spinner, FormControl, FormLabel } from "@chakra-ui/react";
+import { SL } from "../../components";
+import { Button, Input, Label } from "@open-urbis/map-ui";
+import { Loader2 } from "lucide-react";
 import EditableHeader from "../../components/EditableHeader";
 import { FormEditor } from "./components/FormEditor";
 import { TreeList } from "./components/TreeList";
@@ -364,13 +365,15 @@ export const FormsPreset: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-6 mb-24 px-20 min-h-[80vh]">
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-medium text-left">
+        <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
           Formulários
         </h1>
-        <button
-          className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 font-medium"
+        <Button
+          type="button"
+          size="sm"
+          className="h-9 rounded-full px-4 gap-2 bg-yellow-500 hover:bg-yellow-600 text-white"
           onClick={handleAddPresetForm}
           disabled={loading}
         >
@@ -379,7 +382,7 @@ export const FormsPreset: React.FC = () => {
           <span className="text-sm opacity-75 ml-2">
             <SL bg="yellow.600">N</SL>
           </span>
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden">
@@ -407,23 +410,25 @@ export const FormsPreset: React.FC = () => {
         <div className="flex flex-col p-6 w-9/12">
           {loading && (
             <div className="flex-grow flex items-center justify-center">
-              <Spinner size="xl" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
           {!loading && selectedPreset === null && addingPreset && (
             <AddFormsPreset onAddPreset={handleAddPreset} />
           )}
           {!loading && selectedPreset === null && !addingPreset && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <FaMinus size={48} className="mb-4 opacity-50" />
-              <p className="text-xl font-medium mb-2">
+              <p className="text-xl font-medium mb-2 text-foreground">
                 Nenhum formulário selecionado
               </p>
               <p className="text-sm mb-6">
                 Selecione um formulário da lista ao lado ou crie um novo
               </p>
-              <button
-                className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 font-medium"
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 rounded-full px-4 gap-2 bg-yellow-500 hover:bg-yellow-600 text-white"
                 onClick={handleAddPresetForm}
               >
                 <FaPlus size={16} />
@@ -431,7 +436,7 @@ export const FormsPreset: React.FC = () => {
                 <span className="text-sm opacity-75 ml-2">
                   <SL bg="yellow.600">N</SL>
                 </span>
-              </button>
+              </Button>
             </div>
           )}
           {!loading && selectedPreset !== null && (
@@ -486,18 +491,18 @@ export const FormsPreset: React.FC = () => {
 
               <div className="w-4/5 mx-auto">
                 <div className="flex flex-col space-y-4 mb-8">
-                  <FormControl id="namespace">
-                    <FormLabel>Chave</FormLabel>
+                  <div id="namespace">
+                    <Label className="mb-1 block">Chave</Label>
                     <Input
                       type="text"
                       placeholder="dir0/dir1/filename"
-                      size="lg"
+                      className="h-10"
                       value={selectedPreset.namespace}
                       onChange={(e) =>
                         handleSetPreset("namespace", e.target.value)
                       }
                     />
-                  </FormControl>
+                  </div>
                 </div>
 
                 {selectedPreset.type === "step" ? (
@@ -543,7 +548,9 @@ export const FormsPreset: React.FC = () => {
                 }}
               >
                 <div className="flex gap-4">
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
                     onClick={handleCodeEditor}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
                       styleContext.state.buttonHoverColorWeight === "200"
@@ -554,8 +561,10 @@ export const FormsPreset: React.FC = () => {
                   >
                     <FaPen className="text-sm" />
                     <span>Código</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
                     onClick={handleDuplicate}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
                       styleContext.state.buttonHoverColorWeight === "200"
@@ -566,8 +575,10 @@ export const FormsPreset: React.FC = () => {
                   >
                     <FaRegCopy className="text-sm" />
                     <span>Duplicar</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
                     onClick={handleRemovePreset}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
                       styleContext.state.buttonHoverColorWeight === "200"
@@ -577,13 +588,15 @@ export const FormsPreset: React.FC = () => {
                   >
                     <FaTrash className="text-sm" />
                     <span>Remover</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               <div className="fixed bottom-16 right-4 flex space-x-4">
-                <button
-                  className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
+                <Button
+                  type="button"
+                  size="sm"
+                  className={`h-10 px-5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
                     styleContext.state.buttonHoverColorWeight === "200"
                       ? "bg-yellow-600 hover:bg-yellow-700"
                       : "bg-yellow-800 hover:bg-yellow-900"
@@ -593,7 +606,7 @@ export const FormsPreset: React.FC = () => {
                 >
                   <FaSave size={14} />
                   <span>Salvar</span> <SL bg="yellow.600">S</SL>
-                </button>
+                </Button>
               </div>
             </>
           )}

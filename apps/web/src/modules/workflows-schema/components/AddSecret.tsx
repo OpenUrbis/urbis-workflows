@@ -1,6 +1,7 @@
-import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
-import { Input, SL, Textarea } from "../../../components";
+import { Button, Input, Label, Textarea } from "@open-urbis/map-ui";
+import { Loader2 } from "lucide-react";
+import { SL } from "../../../components";
 import { HotkeyContext } from "../../../reducers";
 import { CreateSecretHttpDto } from "../../../api/types/integrations.dto";
 import { FaPlus } from "react-icons/fa";
@@ -57,7 +58,7 @@ export const AddSecret: React.FC<AddSecretProps> = ({
   if (loading) {
     return (
       <div className="flex-grow flex items-center justify-center">
-        <Spinner size="xl" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -65,14 +66,14 @@ export const AddSecret: React.FC<AddSecretProps> = ({
   return (
     <div className="flex flex-col w-full mb-24">
       <div className="flex flex-col mx-auto w-4/5 space-y-4">
-        <label className="text-2xl md:text-3xl font-black mb-2">
+        <label className="text-2xl font-semibold tracking-tight mb-2 text-foreground">
           Adicionar Segredo
         </label>
-        <FormControl id="namespace">
-          <FormLabel>Chave</FormLabel>
+        <div id="namespace">
+          <Label className="mb-1 block">Chave</Label>
           <Input
             placeholder="common/cpf"
-            size="lg"
+            className="h-10"
             value={newSecretForm?.namespace}
             onChange={(e) =>
               setNewSecretForm({
@@ -81,12 +82,12 @@ export const AddSecret: React.FC<AddSecretProps> = ({
               })
             }
           />
-        </FormControl>
-        <FormControl id="label">
-          <FormLabel>Título</FormLabel>
+        </div>
+        <div id="label">
+          <Label className="mb-1 block">Título</Label>
           <Input
             placeholder="Título do segredo"
-            size="lg"
+            className="h-10"
             value={newSecretForm?.label}
             onChange={(e) =>
               setNewSecretForm({
@@ -95,12 +96,12 @@ export const AddSecret: React.FC<AddSecretProps> = ({
               })
             }
           />
-        </FormControl>
-        <FormControl id="documentation">
-          <FormLabel>Descrição</FormLabel>
+        </div>
+        <div id="documentation">
+          <Label className="mb-1 block">Descrição</Label>
           <Textarea
             placeholder="Descrição do segredo"
-            size="lg"
+            className="min-h-[100px]"
             value={newSecretForm?.documentation}
             onChange={(e) =>
               setNewSecretForm({
@@ -109,12 +110,12 @@ export const AddSecret: React.FC<AddSecretProps> = ({
               })
             }
           />
-        </FormControl>
-        <FormControl id="value">
-          <FormLabel>Valor</FormLabel>
+        </div>
+        <div id="value">
+          <Label className="mb-1 block">Valor</Label>
           <Input
             placeholder="Valor do segredo"
-            size="lg"
+            className="h-10"
             value={newSecretForm?.value}
             onChange={(e) =>
               setNewSecretForm({
@@ -123,10 +124,12 @@ export const AddSecret: React.FC<AddSecretProps> = ({
               })
             }
           />
-        </FormControl>
+        </div>
         <div className="fixed bottom-16 right-4 flex space-x-4">
-          <button
-            className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80"
+          <Button
+            type="button"
+            size="sm"
+            className="h-10 px-5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80"
             disabled={
               loading ||
               !newSecretForm.label ||
@@ -137,7 +140,7 @@ export const AddSecret: React.FC<AddSecretProps> = ({
           >
             <FaPlus size={14} />
             <span>Adicionar</span> <SL bg="yellow.600">S</SL>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -49,8 +49,8 @@ export function Profile(): JSX.Element {
   }, []);
 
   return (
-    <div className="flex flex-col space-y-2 mb-20 px-20">
-      <h1 className="text-2xl md:text-3xl font-medium mb-6 text-left">
+    <div className="flex flex-col space-y-2 mb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl font-semibold mt-4 mb-6 tracking-tight text-foreground">
         Representações
       </h1>
 
@@ -85,7 +85,7 @@ export function Profile(): JSX.Element {
               >
                 <div className="flex items-center space-x-3">
                   {menu.icon}
-                  <span>{menu.name}</span>
+                  <span className="text-sm font-medium">{menu.name}</span>
                 </div>
                 <SL>{menu.key}</SL>
               </button>

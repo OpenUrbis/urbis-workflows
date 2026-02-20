@@ -1,6 +1,6 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
-import { Input, SL } from "../../components";
+import { SL } from "../../components";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { StyleContext } from "../../reducers/style.reducer";
 import { BsFillGridFill } from "react-icons/bs";
@@ -8,26 +8,28 @@ import {
   FaEdit,
   FaPlus,
   FaThList,
-  FaSearch,
   FaCode,
   FaRocket,
   FaFlask,
-  FaTimes,
   FaClone,
 } from "react-icons/fa";
+import { Loader2, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
-  Spinner,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@chakra-ui/react";
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+} from "@open-urbis/map-ui";
 import { ApiClient } from "../../api";
 import { WorkflowSchema } from "../../api/types/workflows-schema.dto";
-import { CacheOptions } from "../../api/services/cache.service";
 import { PermissionGate } from "../../components/PermissionGate";
 import { usePermissions } from "../../reducers/permission.context";
 import { AuthContext } from "../../reducers/auth.reducer";
@@ -160,16 +162,15 @@ export const WorkflowsSchema: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col space-y-8 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1
-        className="text-2xl md:text-3xl font-medium mt-6"
-        style={{ color: styleContext.state.textColor }}
+        className="text-2xl font-semibold mt-4 tracking-tight text-foreground"
       >
         Carta de Assuntos
       </h1>
       {showEdit && <StageSelectorButton stage={stage} setStage={setStage} />}
       {loading ? (
-        <LoadingSpinner styleContext={styleContext} />
+        <LoadingSpinner />
       ) : (
         <>
           <div className="flex justify-between items-center">
@@ -177,30 +178,21 @@ export const WorkflowsSchema: React.FC = () => {
               <div className="flex-grow relative">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                    <FaSearch
-                      className={
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "text-gray-500"
-                          : "text-gray-300"
-                      }
+                    <Search
+                      className="text-muted-foreground"
                       size={16}
                     />
                   </div>
                   <Input
                     type="text"
                     placeholder="Buscar assunto..."
-                    size="lg"
                     value={search}
                     onChange={(e: any) => setSearch(e.target.value)}
-                    className={`w-full pl-10 transition-all duration-200 ${
+                    className={`w-full h-10 pl-10 text-sm transition-all duration-200 ${
                       styleContext.state.buttonHoverColorWeight === "200"
                         ? "focus:ring-2 focus:ring-yellow-200 border-gray-200"
-                        : "focus:ring-2 focus:ring-yellow-600 border-gray-600 bg-gray-800"
+                        : "focus:ring-2 focus:ring-yellow-600 border-gray-700"
                     }`}
-                    style={{
-                      color: styleContext.state.textColor,
-                      paddingLeft: "2.5rem",
-                    }}
                   />
                 </div>
               </div>
@@ -227,128 +219,53 @@ export const WorkflowsSchema: React.FC = () => {
           />
         </>
       )}
-      <Modal
-        isOpen={!!selectedDescription}
-        onClose={() => setSelectedDescription(null)}
-        motionPreset="slideInBottom"
-        isCentered
+      <Dialog
+        open={!!selectedDescription}
+        onOpenChange={(open) => !open && setSelectedDescription(null)}
       >
-        <ModalOverlay backdropFilter="blur(4px)" />
-        <ModalContent
-          className="shadow-xl"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            maxWidth: "600px",
-          }}
-        >
-          <ModalHeader className="px-6 pt-4 pb-4 border-b">
-            <div className="flex justify-between">
-              <span
-                className="text-xl font-bold mt-2 mr-3"
-                style={{ color: styleContext.state.textColor }}
-              >
-                {selectedDescription?.label}
-              </span>
-              <div>
-                <button
-                  onClick={() => setSelectedDescription(null)}
-                  className="hover:bg-opacity-10 rounded p-1.5 transition-colors duration-150"
-                  style={{
-                    color:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#6B7280"
-                        : "#9CA3AF",
-                    backgroundColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "rgba(107, 114, 128, 0.1)"
-                        : "rgba(156, 163, 175, 0.1)",
-                  }}
-                >
-                  <FaTimes size={12} />
-                </button>
-              </div>
-            </div>
-          </ModalHeader>
-          <ModalBody className="px-6 py-6 overflow-y-auto">
+        <DialogContent className="max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{selectedDescription?.label}</DialogTitle>
+            <DialogDescription>
+              Descrição completa do assunto selecionado.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[55vh] overflow-y-auto">
             <div
-              className="prose dark:prose-invert max-w-none"
-              style={{ color: styleContext.state.textColor }}
+              className="prose dark:prose-invert max-w-none text-foreground"
               dangerouslySetInnerHTML={{
                 __html: selectedDescription?.text || "",
               }}
             />
-          </ModalBody>
-          <ModalFooter className="px-6 pt-4 pb-4 border-t space-x-3">
-            <button
-              className="px-6 py-2.5 rounded-lg font-medium text-white transition-colors flex items-center space-x-2"
+          </div>
+          <DialogFooter>
+            <Button
               onClick={() => {
                 setSelectedDescription(null);
                 if (selectedDescription) {
                   handleRequest(selectedDescription.id);
                 }
               }}
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#eab308"
-                    : "#854d0e",
-              }}
+              className="gap-2"
             >
               <span>Solicitar</span>
-              <SL
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "yellow.600"
-                    : "yellow.800"
-                }
-              >
-                Enter
-              </SL>
-            </button>
-            <button
-              className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              onClick={() => setSelectedDescription(null)}
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#f3f4f6"
-                    : "#1f2937",
-                color: styleContext.state.textColor,
-              }}
-            >
-              <span>Fechar</span>
-              <SL
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.100"
-                    : "gray.600"
-                }
-              >
-                esc
-              </SL>
-            </button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              <SL bg="yellow.700">Enter</SL>
+            </Button>
+            <Button variant="outline" onClick={() => setSelectedDescription(null)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-const LoadingSpinner = ({ styleContext }: { styleContext: any }) => {
+const LoadingSpinner = () => {
   return (
     <div className="flex flex-col items-center justify-center pt-10 space-y-4">
-      <Spinner
-        size="xl"
-        color={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "yellow.500"
-            : "yellow.300"
-        }
-        thickness="3px"
-      />
-      <span style={{ color: styleContext.state.textColor }}>
-        Carregando assuntos...
-      </span>
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <span className="text-sm text-muted-foreground">Carregando assuntos...</span>
     </div>
   );
 };
@@ -415,9 +332,11 @@ const StageSelectorButton = ({
       <div className="flex items-center space-x-2">
         {canEditWorkflowSchema ? (
           <>
-            <button
+            <Button
               onClick={() => setStage("development")}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 font-medium ${
+              variant={stage === "development" ? "secondary" : "ghost"}
+              size="sm"
+              className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "development"
                   ? styleContext.state.buttonHoverColorWeight === "200"
                     ? "bg-gray-200 text-gray-800"
@@ -429,10 +348,12 @@ const StageSelectorButton = ({
             >
               <FaCode size={16} />
               <span>Desenvolvimento</span>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setStage("staging")}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 font-medium ${
+              variant={stage === "staging" ? "secondary" : "ghost"}
+              size="sm"
+              className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "staging"
                   ? styleContext.state.buttonHoverColorWeight === "200"
                     ? "bg-gray-200 text-gray-800"
@@ -444,10 +365,12 @@ const StageSelectorButton = ({
             >
               <FaFlask size={16} />
               <span>Homologação</span>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setStage("production")}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 font-medium ${
+              variant={stage === "production" ? "secondary" : "ghost"}
+              size="sm"
+              className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "production"
                   ? styleContext.state.buttonHoverColorWeight === "200"
                     ? "bg-gray-200 text-gray-800"
@@ -459,14 +382,15 @@ const StageSelectorButton = ({
             >
               <FaRocket size={16} />
               <span>Produção</span>
-            </button>
+            </Button>
           </>
         ) : null}
       </div>
       <PermissionGate permission="workflow-schema:write:create">
-        <button
+        <Button
           onClick={() => navigate("/workflows-schema/new")}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 font-medium ${
+          size="sm"
+          className={`h-9 rounded-full px-4 gap-2 ${
             styleContext.state.buttonHoverColorWeight === "200"
               ? "bg-yellow-500 hover:bg-yellow-600 text-white"
               : "bg-yellow-600 hover:bg-yellow-700 text-white"
@@ -485,7 +409,7 @@ const StageSelectorButton = ({
               N
             </SL>
           </span>
-        </button>
+        </Button>
       </PermissionGate>
     </div>
   );
@@ -547,10 +471,10 @@ const WorkflowsList = ({
       }
     >
       {filteredWorkflows.map((workflow, index) => (
-        <div
+        <Card
           key={workflow.id}
-          className={`group p-4 rounded-lg border transition-all duration-200 ${
-            isGridView ? "hover:shadow-md" : "hover:bg-opacity-50"
+          className={`group rounded-2xl border transition-all duration-200 ${
+            isGridView ? "hover:shadow-sm" : "hover:bg-opacity-50"
           } ${
             styleContext.state.buttonHoverColorWeight === "200"
               ? "border-gray-200 hover:border-yellow-400 hover:bg-gray-50"
@@ -558,36 +482,32 @@ const WorkflowsList = ({
           }`}
           style={{ backgroundColor: styleContext.state.backgroundColor }}
         >
+          <CardContent className="p-5">
           <div
             className={`flex ${
-              isGridView ? "flex-col h-full" : "space-x-4"
+              isGridView ? "flex-col h-full" : "space-x-5"
             } justify-between`}
           >
             <div className="flex-grow">
-              <div className="flex items-center space-x-2 mb-2">
+              <div className="flex items-center space-x-2 mb-3">
                 <h3
-                  className="font-medium text-lg"
-                  style={{ color: styleContext.state.textColor }}
+                  className="text-lg font-semibold leading-tight text-foreground"
                 >
                   {workflow.label}
                 </h3>
               </div>
               <div className="relative">
-                <div
-                  className={`text-sm ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "text-gray-600"
-                      : "text-gray-400"
-                  }`}
-                >
+                <div className="text-sm text-muted-foreground">
                   <div
-                    className={`${workflow.description.length > 100 ? "line-clamp-3" : ""}`}
+                    className={`text-sm leading-relaxed ${workflow.description.length > 100 ? "line-clamp-3" : ""}`}
                     dangerouslySetInnerHTML={{
                       __html: workflow.description,
                     }}
                   />
                   {workflow.description.length > 100 && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         setSelectedDescription({
                           text: workflow.description,
@@ -602,22 +522,23 @@ const WorkflowsList = ({
                       }`}
                     >
                       Ver mais
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
             </div>
-            <div
+            <CardFooter
               className={`flex ${
                 isGridView
-                  ? "flex-col space-y-3 mt-auto pt-4"
+                  ? "flex-col space-y-2 mt-auto pt-4"
                   : "items-center space-x-3"
               }`}
             >
               {(canCreateWorkflow || !isAuthenticated) && (
-                <button
+                <Button
                   onClick={() => handleRequest(workflow.id)}
-                  className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg transition-colors duration-200 font-medium min-w-[160px] justify-center ${
+                  size="sm"
+                  className={`h-9 rounded-full px-5 gap-2 min-w-[150px] ${
                     styleContext.state.buttonHoverColorWeight === "200"
                       ? "bg-yellow-500 hover:bg-yellow-600 text-white"
                       : "bg-yellow-600 hover:bg-yellow-700 text-white"
@@ -635,7 +556,7 @@ const WorkflowsList = ({
                   >
                     {`S+${index + 1}`}
                   </SL>
-                </button>
+                </Button>
               )}
               {showEdit && (
                 <div
@@ -644,9 +565,11 @@ const WorkflowsList = ({
                   }`}
                 >
                   <PermissionGate permission="workflow-schema:write:update">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handEditWorkflows(workflow.id)}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
+                      className={`h-8 px-3 rounded-md gap-2 ${
                         styleContext.state.buttonHoverColorWeight === "200"
                           ? "text-gray-600 hover:bg-gray-200"
                           : "text-gray-400 hover:bg-gray-700"
@@ -656,12 +579,14 @@ const WorkflowsList = ({
                       <FaEdit size={18} />
                       <span>Editar</span>
                       <SL>{`E+${index + 1}`}</SL>
-                    </button>
+                    </Button>
                   </PermissionGate>
                   <PermissionGate permission="workflow-schema:write:copy">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDuplicate(workflow.id)}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
+                      className={`h-8 px-3 rounded-md gap-2 ${
                         styleContext.state.buttonHoverColorWeight === "200"
                           ? "text-gray-600 hover:bg-gray-200"
                           : "text-gray-400 hover:bg-gray-700"
@@ -671,17 +596,18 @@ const WorkflowsList = ({
                       <FaClone size={18} />
                       <span>Duplicar</span>
                       <SL>{`D+${index + 1}`}</SL>
-                    </button>
+                    </Button>
                   </PermissionGate>
                 </div>
               )}
-            </div>
+            </CardFooter>
           </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
       {filteredWorkflows.length === 0 && (
         <div className="flex flex-col items-center justify-center text-center">
-          <FaSearch
+          <Search
             size={48}
             className={`mb-4 opacity-50 ${
               styleContext.state.buttonHoverColorWeight === "200"
@@ -727,10 +653,13 @@ const ViewButton = ({
 }) => {
   return (
     <div className="flex items-center space-x-2">
-      <button
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
         title={title}
         onClick={onClick}
-        className={`p-2 rounded transition-all duration-200 ${
+        className={`h-8 w-8 transition-all duration-200 ${
           active
             ? styleContext.state.buttonHoverColorWeight === "200"
               ? "bg-white text-yellow-600 shadow-sm"
@@ -741,7 +670,7 @@ const ViewButton = ({
         }`}
       >
         {icon}
-      </button>
+      </Button>
       <SL>{shortcut}</SL>
     </div>
   );
@@ -757,9 +686,9 @@ const ViewButtons = ({
   styleContext: any;
 }) => {
   return (
-    <div className="flex items-center space-x-3.5">
+    <div className="flex items-center space-x-2">
       <div
-        className={`flex items-center space-x-2 p-1.5 rounded-lg transition-colors duration-150 ${
+        className={`flex items-center space-x-1 p-1 rounded-lg transition-colors duration-150 ${
           styleContext.state.buttonHoverColorWeight === "200"
             ? "bg-gray-100"
             : "bg-gray-800"
@@ -767,7 +696,7 @@ const ViewButtons = ({
       >
         <ViewButton
           active={isGridView}
-          icon={<BsFillGridFill size={24} />}
+          icon={<BsFillGridFill size={18} />}
           onClick={() => setView(false)}
           title="Visualização em grade"
           shortcut="G"
@@ -775,7 +704,7 @@ const ViewButtons = ({
         />
         <ViewButton
           active={!isGridView}
-          icon={<FaThList size={24} />}
+          icon={<FaThList size={18} />}
           onClick={() => setView(true)}
           title="Visualização em lista"
           shortcut="T"
