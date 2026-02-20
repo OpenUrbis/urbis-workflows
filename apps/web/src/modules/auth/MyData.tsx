@@ -1,6 +1,6 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
-import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
+import { Loader2 } from "lucide-react";
 import { FaSave } from "react-icons/fa";
 import { BlockOptions, FieldTypeEnum, IField } from "@open-urbis/types";
 import { SL } from "../../components/ShortcutLabel";
@@ -10,6 +10,15 @@ import { Field } from "../workflows-schema";
 import { ApiClient } from "../../api";
 import { UserProfileResponse } from "../../api/types/users.dto";
 import { Input, MaskedInput } from "../../components";
+
+const FormControl = ({ children, ...props }: any) => <div {...props}>{children}</div>;
+const FormLabel = ({ children, ...props }: any) => <label {...props}>{children}</label>;
+const Spinner = ({ size = "md" }: any) => (
+  <Loader2
+    className={`mx-auto animate-spin ${size === "xl" ? "h-10 w-10" : size === "lg" ? "h-8 w-8" : "h-5 w-5"}`}
+    aria-hidden="true"
+  />
+);
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
