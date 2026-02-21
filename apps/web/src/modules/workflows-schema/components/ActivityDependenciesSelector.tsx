@@ -3,16 +3,13 @@ import {
   FormControl,
   FormLabel,
   FormHelperText,
-  Checkbox,
-  Tooltip,
   Badge,
-  Input,
-  InputGroup,
-  InputLeftElement,
 } from "@chakra-ui/react";
+import { Button as DSButton, Input as DSInput } from "@open-urbis/map-ui";
 import { FaProjectDiagram, FaSearch, FaTimes } from "react-icons/fa";
 import { ActivityTemplate } from "../../../api/types/schema";
 import { SideDrawer } from "../../../components/SideDrawer";
+import { Tooltip } from "../../../components";
 
 export interface ActivityDependenciesSelectorProps {
   activities: ActivityTemplate[];
@@ -126,7 +123,7 @@ export const ActivityDependenciesSelector: React.FC<
               ))
             )}
           </div>
-          <button
+          <DSButton
             onClick={handleOpen}
             className={`flex items-center px-4 py-3 rounded-lg transition-colors duration-150 w-full ${
               isOpen
@@ -167,7 +164,7 @@ export const ActivityDependenciesSelector: React.FC<
                 </span>
               </div>
             </div>
-          </button>
+          </DSButton>
         </div>
         <FormHelperText style={{ color: styleContext.state.textColor }}>
           {helperText}
@@ -194,16 +191,12 @@ export const ActivityDependenciesSelector: React.FC<
                   : "#374151",
             }}
           >
-            <InputGroup size="lg">
-              <InputLeftElement
-                pointerEvents="none"
-                height="100%"
-                children={<FaSearch className="text-gray-400" />}
-              />
-              <Input
+            <div className="relative">
+              <DSInput
                 placeholder="Buscar atividades..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 text-base transition-colors duration-200 border rounded-lg"
                 style={{
                   backgroundColor: styleContext.state.backgroundColor,
                   color: styleContext.state.textColor,
@@ -212,24 +205,11 @@ export const ActivityDependenciesSelector: React.FC<
                       ? "#E5E7EB"
                       : "#374151",
                 }}
-                _hover={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#D1D5DB"
-                      : "#4B5563",
-                }}
-                _focus={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#a855f7"
-                      : "#7e22ce",
-                  boxShadow:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "0 0 0 1px #a855f7"
-                      : "0 0 0 1px #7e22ce",
-                }}
               />
-            </InputGroup>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <FaSearch className="text-gray-400" />
+              </div>
+            </div>
           </div>
 
           <div className="p-4">
@@ -280,33 +260,44 @@ export const ActivityDependenciesSelector: React.FC<
                       }}
                     >
                       <div className="flex items-center w-full">
-                        <Checkbox
-                          isChecked={isSelected}
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
                           onChange={(e) => {
                             e.stopPropagation();
                             handleToggleDependency(activity.id);
                           }}
-                          colorScheme="purple"
-                          size="lg"
-                          className="mr-3"
-                          borderRadius="md"
+                          className="mr-3 h-5 w-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                           onClick={(e) => e.stopPropagation()}
-                          sx={{
-                            "span.chakra-checkbox__control": {
-                              borderRadius: "0.375rem",
-                            },
-                          }}
                         />
                         <div className="flex-1">
-                          <Tooltip
-                            label={activity.documentation}
-                            placement="top"
-                            hasArrow
-                            isDisabled={
-                              !activity.documentation ||
-                              activity.documentation.length <= 60
-                            }
-                          >
+                          {activity.documentation &&
+                          activity.documentation.length > 60 ? (
+                            <Tooltip label={activity.documentation}>
+                              <div>
+                                <p
+                                  className="font-medium"
+                                  style={{
+                                    color: styleContext.state.textColor,
+                                  }}
+                                >
+                                  {activity.label}
+                                </p>
+                                <p
+                                  className="text-sm"
+                                  style={{
+                                    color:
+                                      styleContext.state
+                                        .buttonHoverColorWeight === "200"
+                                        ? "#6B7280"
+                                        : "#9CA3AF",
+                                  }}
+                                >
+                                  {activity.namespace}
+                                </p>
+                              </div>
+                            </Tooltip>
+                          ) : (
                             <div>
                               <p
                                 className="font-medium"
@@ -320,8 +311,8 @@ export const ActivityDependenciesSelector: React.FC<
                                 className="text-sm"
                                 style={{
                                   color:
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
+                                    styleContext.state.buttonHoverColorWeight ===
+                                    "200"
                                       ? "#6B7280"
                                       : "#9CA3AF",
                                 }}
@@ -329,7 +320,7 @@ export const ActivityDependenciesSelector: React.FC<
                                 {activity.namespace}
                               </p>
                             </div>
-                          </Tooltip>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -460,7 +460,7 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
         >
           {fieldOptionEditor}
           {renderFieldContent(
-            <div className="p-6 w-full border rounded space-y-4">
+            <div className="p-6 w-full border rounded-md space-y-4">
               <div className="flex items-center w-full">
                 <Tooltip label="Campo do tipo preset" placement="top">
                   <div

@@ -2,16 +2,23 @@ import { getAccessToken } from "../../../auth/token";
 import { useState, useContext, useEffect } from "react";
 import { FaPlus, FaTrash, FaProjectDiagram } from "react-icons/fa";
 import {
+  Select as DSSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@open-urbis/map-ui";
+import {
   FormControl,
-  FormLabel,
   FormHelperText,
+  FormLabel,
   IconButton,
-  Tooltip,
+  Input,
+  SL,
   Spinner,
-  Button,
-  Menu,
-  MenuButton,
-} from "@chakra-ui/react";
+  Textarea,
+  Tooltip,
+} from "../../../components";
 import { IFormContext } from "@open-urbis/types";
 import { Outgoing, ActivityTemplate } from "../../../api/types/schema";
 import { WorkflowSchema } from "../../../api/types/workflows-schema.dto";
@@ -22,7 +29,6 @@ import {
   HotkeyContext,
   withNoModifiers,
 } from "../../../reducers/hotkeys.reducer";
-import { Input, Select, SL, Textarea } from "../../../components";
 import { ActivityDependenciesSelector } from "../components/ActivityDependenciesSelector";
 
 const apiClient = new ApiClient({
@@ -227,38 +233,33 @@ export const WorkflowOutgoingDependencies = ({
           )}
         </div>
         <div className="mt-4">
-          <Menu>
-            <MenuButton
-              as={Button}
-              leftIcon={<FaPlus />}
-              onClick={handleAddOutgoing}
-              className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2"
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e",
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e";
-              }}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <span>Dependência</span>
-                <SL bg="yellow.600">N</SL>
-              </div>
-            </MenuButton>
-          </Menu>
+          <button
+            onClick={handleAddOutgoing}
+            className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
+            style={{
+              backgroundColor:
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#ca8a04"
+                  : "#854d0e",
+              color: "#ffffff",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#a16207"
+                  : "#713f12";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#ca8a04"
+                  : "#854d0e";
+            }}
+          >
+            <FaPlus size={14} />
+            <span>Dependência</span>
+            <SL bg="yellow.600">N</SL>
+          </button>
         </div>
       </div>
 
@@ -365,26 +366,32 @@ export const WorkflowOutgoingDependencies = ({
                     </div>
                   ) : (
                     <>
-                      <Select
+                      <DSSelect
                         value={
                           outgoing.find((out) => out.id === selectedOutgoingId)
                             ?.outgoingTo || ""
                         }
-                        onChange={(e) =>
+                        onValueChange={(value) =>
                           handleChangeOutgoingField(
                             "outgoingTo",
-                            e.target.value
+                            value === "__none__" ? "" : value
                           )
                         }
-                        placeholder="Selecione o fluxo de destino"
-                        size="lg"
                       >
-                        {availableWorkflows.map((workflow) => (
-                          <option key={workflow.id} value={workflow.id}>
-                            {workflow.label}
-                          </option>
-                        ))}
-                      </Select>
+                        <SelectTrigger className="h-11 w-full">
+                          <SelectValue placeholder="Selecione o fluxo de destino" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">
+                            Selecione o fluxo de destino
+                          </SelectItem>
+                          {availableWorkflows.map((workflow) => (
+                            <SelectItem key={workflow.id} value={workflow.id}>
+                              {workflow.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </DSSelect>
                       <FormHelperText
                         style={{ color: styleContext.state.textColor }}
                       >
@@ -430,7 +437,7 @@ export const WorkflowOutgoingDependencies = ({
             </p>
             <button
               onClick={handleAddOutgoing}
-              className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
+              className="h-11 rounded-xl px-4 shadow-sm inline-flex items-center justify-center gap-2 transition-colors duration-150 font-semibold"
               style={{
                 backgroundColor:
                   styleContext.state.buttonHoverColorWeight === "200"

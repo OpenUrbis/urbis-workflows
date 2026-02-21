@@ -1,4 +1,5 @@
 export * from "./Confirm";
+export * from "./ChakraCompat";
 export * from "./EditableHeader";
 export * from "./HelpTooltipCliclable";
 export * from "./IamError";

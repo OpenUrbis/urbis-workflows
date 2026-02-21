@@ -88,7 +88,7 @@ const StepMenu: React.FC<StepMenuProps> = ({
           <Button
             type="button"
             size="sm"
-            className={`px-4 py-2.5 rounded flex items-center justify-center gap-2 text-white ${
+            className={`h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 text-white ${
               styleContext.state.buttonHoverColorWeight === "200"
                 ? "bg-yellow-600 hover:bg-yellow-700"
                 : "bg-yellow-800 hover:bg-yellow-900"

@@ -5,23 +5,14 @@ import {
   FormLabel,
   FormHelperText,
   Badge,
-  Stack,
-  Text,
-  Box,
-  Checkbox,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Tabs,
-  Spinner,
-  Center,
 } from "@chakra-ui/react";
+import { Input as DSInput } from "@open-urbis/map-ui";
 import { FaLock, FaSearch, FaTimes } from "react-icons/fa";
 import { User, Role, Group } from "../../../api/types/iam.dto";
 import { IamApiClient } from "../../../api/clients/iam.client";
 import InfoTooltip from "../../../components/InfoTooltip";
 import { SideDrawer } from "../../../components/SideDrawer";
+import { Spinner } from "../../../components";
 
 const iamClient = new IamApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -244,17 +235,9 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     const access = getAccess(entity.id);
 
     return (
-      <Box
+      <div
         key={entity.id}
-        p={3}
-        borderRadius="lg"
-        _hover={{
-          bg:
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "rgba(243, 244, 246, 0.8)"
-              : "rgba(31, 41, 55, 0.5)",
-        }}
-        className="flex items-center justify-between cursor-pointer transition-colors duration-150"
+        className="flex items-center justify-between cursor-pointer transition-colors duration-150 p-3 rounded-lg"
         style={{
           backgroundColor: access
             ? styleContext.state.buttonHoverColorWeight === "200"
@@ -263,58 +246,54 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
             : "transparent",
           color: styleContext.state.textColor,
         }}
+        onMouseEnter={(e) => {
+          if (!access) {
+            e.currentTarget.style.backgroundColor =
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "rgba(243, 244, 246, 0.8)"
+                : "rgba(31, 41, 55, 0.5)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!access) {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }
+        }}
       >
-        <Text fontWeight="medium">{entity.name}</Text>
-        <Stack direction="row" spacing={4}>
-          <Checkbox
-            isChecked={access === "read" || access === "write"}
-            onChange={() => {
-              if (access === "read") {
-                // If read is already checked, uncheck it
-                // Explicitly cast null to any to avoid type errors
-                handleToggle(entity, null as any);
-              } else {
-                // Otherwise check it
-                handleToggle(entity, "read");
-              }
-            }}
-            colorScheme="teal"
-            size="lg"
-            borderRadius="md"
-            className="mr-3"
-            sx={{
-              "span.chakra-checkbox__control": {
-                borderRadius: "0.375rem",
-              },
-            }}
-          >
-            Leitura
-          </Checkbox>
-          <Checkbox
-            isChecked={access === "write"}
-            onChange={() => {
-              if (access === "write") {
-                // If write is already checked, change to read only
-                handleToggle(entity, "read");
-              } else {
-                // Otherwise check it (which includes read access)
-                handleToggle(entity, "write");
-              }
-            }}
-            colorScheme="teal"
-            borderRadius="md"
-            size="lg"
-            className="mr-3"
-            sx={{
-              "span.chakra-checkbox__control": {
-                borderRadius: "0.375rem",
-              },
-            }}
-          >
-            Escrita
-          </Checkbox>
-        </Stack>
-      </Box>
+        <span className="font-medium">{entity.name}</span>
+        <div className="flex items-center gap-6">
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={access === "read" || access === "write"}
+              onChange={() => {
+                if (access === "read") {
+                  handleToggle(entity, null as any);
+                } else {
+                  handleToggle(entity, "read");
+                }
+              }}
+              className="h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+            />
+            <span>Leitura</span>
+          </label>
+          <label className="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={access === "write"}
+              onChange={() => {
+                if (access === "write") {
+                  handleToggle(entity, "read");
+                } else {
+                  handleToggle(entity, "write");
+                }
+              }}
+              className="h-5 w-5 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+            />
+            <span>Escrita</span>
+          </label>
+        </div>
+      </div>
     );
   };
 
@@ -392,20 +371,19 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   <div className="relative group">
                     <InfoTooltip
                       content={
-                        <Box>
-                          <Text fontWeight="bold" mb={2}>
+                        <div>
+                          <p className="mb-2 text-sm font-bold">
                             Usuários adicionais:
-                          </Text>
+                          </p>
                           {(permissions?.users?.length || 0) > 3 &&
                             permissions?.users?.slice(3).map((user) => (
-                              <Text key={user.id} mb={1} fontSize="sm">
+                              <p key={user.id} className="mb-1 text-sm">
                                 • {user.name} (
                                 {user.access === "write" ? "E" : "L"})
-                              </Text>
+                              </p>
                             ))}
-                        </Box>
+                        </div>
                       }
-                      placement="top"
                       showIcon={false}
                     >
                       <Badge
@@ -474,20 +452,19 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   <div className="relative group">
                     <InfoTooltip
                       content={
-                        <Box>
-                          <Text fontWeight="bold" mb={2}>
+                        <div>
+                          <p className="mb-2 text-sm font-bold">
                             Papéis adicionais:
-                          </Text>
+                          </p>
                           {(permissions?.roles?.length || 0) > 3 &&
                             permissions?.roles?.slice(3).map((role) => (
-                              <Text key={role.id} mb={1} fontSize="sm">
+                              <p key={role.id} className="mb-1 text-sm">
                                 • {role.name} (
                                 {role.access === "write" ? "E" : "L"})
-                              </Text>
+                              </p>
                             ))}
-                        </Box>
+                        </div>
                       }
-                      placement="top"
                       showIcon={false}
                     >
                       <Badge
@@ -556,20 +533,19 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   <div className="relative group">
                     <InfoTooltip
                       content={
-                        <Box>
-                          <Text fontWeight="bold" mb={2}>
+                        <div>
+                          <p className="mb-2 text-sm font-bold">
                             Grupos adicionais:
-                          </Text>
+                          </p>
                           {(permissions?.groups?.length || 0) > 3 &&
                             permissions?.groups?.slice(3).map((group) => (
-                              <Text key={group.id} mb={1} fontSize="sm">
+                              <p key={group.id} className="mb-1 text-sm">
                                 • {group.name} (
                                 {group.access === "write" ? "E" : "L"})
-                              </Text>
+                              </p>
                             ))}
-                        </Box>
+                        </div>
                       }
-                      placement="top"
                       showIcon={false}
                     >
                       <Badge
@@ -661,7 +637,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
         >
           <div className="p-4">
             <div className="relative">
-              <input
+              <DSInput
                 placeholder="Buscar usuários, papéis ou grupos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -689,40 +665,51 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
           </div>
 
           {loading ? (
-            <Center py={10}>
+            <div className="flex justify-center py-10">
               <Spinner />
-            </Center>
+            </div>
           ) : (
-            <Tabs
-              isFitted
-              variant="enclosed"
-              index={tabIndex}
-              onChange={setTabIndex}
-              colorScheme="teal"
-            >
-              <TabList
-                className="mx-4"
+            <div>
+              <div
+                className="mx-4 mb-4 grid grid-cols-3 rounded-lg border p-1"
                 style={{
                   borderColor:
                     styleContext.state.buttonHoverColorWeight === "200"
                       ? "#E5E7EB"
                       : "#374151",
+                  backgroundColor:
+                    styleContext.state.buttonHoverColorWeight === "200"
+                      ? "#F9FAFB"
+                      : "#111827",
                 }}
               >
-                <Tab style={{ color: styleContext.state.textColor }}>
-                  Grupos
-                </Tab>
-                <Tab style={{ color: styleContext.state.textColor }}>
-                  Funções
-                </Tab>
-                <Tab style={{ color: styleContext.state.textColor }}>
-                  Usuários
-                </Tab>
-              </TabList>
+                {[
+                  { index: 0, label: "Grupos" },
+                  { index: 1, label: "Funções" },
+                  { index: 2, label: "Usuários" },
+                ].map((tab) => (
+                  <button
+                    key={tab.index}
+                    type="button"
+                    onClick={() => setTabIndex(tab.index)}
+                    className="rounded-md px-3 py-2 text-sm font-medium transition-colors"
+                    style={{
+                      color: styleContext.state.textColor,
+                      backgroundColor:
+                        tabIndex === tab.index
+                          ? styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#FFFFFF"
+                            : "#1F2937"
+                          : "transparent",
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
 
-              <TabPanels>
-                <TabPanel>
-                  {/* Groups Content */}
+              <div className="px-4 pb-4">
+                {tabIndex === 0 && (
                   <div>
                     {filteredGroups.length === 0 ? (
                       <div
@@ -740,20 +727,16 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                           : "Nenhum grupo disponível"}
                       </div>
                     ) : (
-                      <Stack spacing={2}>
+                      <div className="space-y-2">
                         {filteredGroups.map((group) =>
-                          renderEntityItem(
-                            group,
-                            getGroupAccess,
-                            handleToggleGroup
-                          )
+                          renderEntityItem(group, getGroupAccess, handleToggleGroup)
                         )}
-                      </Stack>
+                      </div>
                     )}
                   </div>
-                </TabPanel>
-                <TabPanel>
-                  {/* Roles Content */}
+                )}
+
+                {tabIndex === 1 && (
                   <div>
                     {filteredRoles.length === 0 ? (
                       <div
@@ -771,20 +754,16 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                           : "Nenhuma função disponível"}
                       </div>
                     ) : (
-                      <Stack spacing={2}>
+                      <div className="space-y-2">
                         {filteredRoles.map((role) =>
-                          renderEntityItem(
-                            role,
-                            getRoleAccess,
-                            handleToggleRole
-                          )
+                          renderEntityItem(role, getRoleAccess, handleToggleRole)
                         )}
-                      </Stack>
+                      </div>
                     )}
                   </div>
-                </TabPanel>
-                <TabPanel>
-                  {/* Users Content */}
+                )}
+
+                {tabIndex === 2 && (
                   <div>
                     {filteredUsers.length === 0 ? (
                       <div
@@ -802,20 +781,16 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                           : "Nenhum usuário disponível"}
                       </div>
                     ) : (
-                      <Stack spacing={2}>
+                      <div className="space-y-2">
                         {filteredUsers.map((user) =>
-                          renderEntityItem(
-                            user,
-                            getUserAccess,
-                            handleToggleUser
-                          )
+                          renderEntityItem(user, getUserAccess, handleToggleUser)
                         )}
-                      </Stack>
+                      </div>
                     )}
                   </div>
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
+                )}
+              </div>
+            </div>
           )}
         </SideDrawer>
       )}

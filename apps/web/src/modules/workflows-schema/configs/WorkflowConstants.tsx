@@ -6,16 +6,17 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  Button,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
 } from "@chakra-ui/react";
 import { FaPlus, FaGlobe, FaCode } from "react-icons/fa";
+import {
+  Button as DSButton,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@open-urbis/map-ui";
 import { ApiClient } from "../../../api";
 import { ConstantVariable } from "../../../api/types/schema";
 import { AddEnvironment } from "../components/AddEnvironment";
@@ -262,9 +263,8 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
         <div className="mt-4">
           <Menu>
             <MenuButton
-              as={Button}
-              leftIcon={<FaPlus />}
-              className="bg-yellow-600 hover:bg-yellow-700 w-full px-4 py-2.5 rounded flex items-center justify-center space-x-2"
+              as={DSButton}
+              className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
               bg={
                 styleContext.state.buttonHoverColorWeight === "200"
                   ? "#ca8a04"
@@ -279,6 +279,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
               }}
             >
               <div className="flex items-center justify-center space-x-2">
+                <FaPlus size={14} />
                 <span>Variável</span>
                 <SL bg="yellow.600">N</SL>
               </div>
@@ -372,9 +373,8 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
             </p>
             <Menu>
               <MenuButton
-                as={Button}
-                leftIcon={<FaPlus />}
-                className="px-4 py-2.5 rounded flex items-center justify-center"
+                as={DSButton}
+                className="h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
                 bg={
                   styleContext.state.buttonHoverColorWeight === "200"
                     ? "#ca8a04"
@@ -389,6 +389,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
                 }}
               >
                 <div className="flex items-center justify-center space-x-2">
+                  <FaPlus size={14} />
                   <span>Variável</span>
                   <SL bg="yellow.600">N</SL>
                 </div>
@@ -449,20 +450,24 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
         )}
       </div>
 
-      <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
-        <ModalOverlay />
-        <ModalContent
-          bg={styleContext.state.backgroundColor}
-          borderColor={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.200"
-              : "gray.600"
-          }
+      <Dialog open={isOpen} onOpenChange={(open) => !open && handleCloseModal()}>
+        <DialogContent
+          className="max-w-3xl"
+          style={{
+            backgroundColor: styleContext.state.backgroundColor,
+            borderColor:
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "#E5E7EB"
+                : "#4B5563",
+            color: styleContext.state.textColor,
+          }}
         >
-          <ModalHeader style={{ color: styleContext.state.textColor }}>
-            Importar variável global
-          </ModalHeader>
-          <ModalBody>
+          <DialogHeader>
+            <DialogTitle style={{ color: styleContext.state.textColor }}>
+              Importar variável global
+            </DialogTitle>
+          </DialogHeader>
+          <div>
             <TreeList
               items={globalConstants}
               search={globalSearch}
@@ -471,29 +476,14 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
               icon={FaGlobe}
               iconColor="green"
             />
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              onClick={handleCloseModal}
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-                color: styleContext.state.textColor,
-              }}
-              _hover={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#D1D5DB"
-                    : "#4B5563",
-              }}
-            >
+          </div>
+          <DialogFooter>
+            <DSButton variant="outline" onClick={handleCloseModal}>
               Cancelar
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            </DSButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

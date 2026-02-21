@@ -1,19 +1,15 @@
 import { getAccessToken } from "../../../auth/token";
 import { useContext, useState, useEffect } from "react";
 import { FieldTypeEnum, IField, IFormContext } from "@open-urbis/types";
+import {
+  Select as DSSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@open-urbis/map-ui";
 import { FieldEditable } from "../form-engine/FieldEditable";
 import { FaPlus, FaTrash, FaProjectDiagram } from "react-icons/fa";
-import {
-  IconButton,
-  FormControl,
-  FormLabel,
-  Tooltip,
-  FormHelperText,
-  Spinner,
-  Button,
-  Menu,
-  MenuButton,
-} from "@chakra-ui/react";
 import { Incoming } from "../../../api/types/schema";
 import { StyleContext } from "../../../reducers";
 import { ApiClient } from "../../../api";
@@ -23,7 +19,17 @@ import {
   HotkeyContext,
   withNoModifiers,
 } from "../../../reducers/hotkeys.reducer";
-import { Input, Select, SL, Textarea } from "../../../components";
+import {
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  IconButton,
+  Input,
+  SL,
+  Spinner,
+  Textarea,
+  Tooltip,
+} from "../../../components";
 
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -246,38 +252,33 @@ export const WorkflowDependencies = ({
           )}
         </div>
         <div className="mt-4">
-          <Menu>
-            <MenuButton
-              as={Button}
-              leftIcon={<FaPlus />}
-              onClick={handleAddIncoming}
-              className="w-full px-4 py-2.5 rounded flex items-center justify-center space-x-2"
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e",
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e";
-              }}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <span>Dependência</span>
-                <SL bg="yellow.600">N</SL>
-              </div>
-            </MenuButton>
-          </Menu>
+          <button
+            onClick={handleAddIncoming}
+            className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
+            style={{
+              backgroundColor:
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#ca8a04"
+                  : "#854d0e",
+              color: "#ffffff",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#a16207"
+                  : "#713f12";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#ca8a04"
+                  : "#854d0e";
+            }}
+          >
+            <FaPlus size={14} />
+            <span>Dependência</span>
+            <SL bg="yellow.600">N</SL>
+          </button>
         </div>
       </div>
 
@@ -380,24 +381,30 @@ export const WorkflowDependencies = ({
                       <span>Carregando fluxos...</span>
                     </div>
                   ) : (
-                    <Select
+                    <DSSelect
                       value={
                         incoming.find((inc) => inc.id === selectedIncomingId)
                           ?.dependsOn || ""
                       }
-                      onChange={(e) =>
-                        handleChangeIncomingField("dependsOn", e.target.value)
+                      onValueChange={(value) =>
+                        handleChangeIncomingField(
+                          "dependsOn",
+                          value === "__none__" ? "" : value
+                        )
                       }
-                      size="lg"
-                      width="100%"
                     >
-                      <option value="">Selecione um fluxo</option>
-                      {availableWorkflows.map((workflow) => (
-                        <option key={workflow.id} value={workflow.id}>
-                          {workflow.label}
-                        </option>
-                      ))}
-                    </Select>
+                      <SelectTrigger className="h-11 w-full">
+                        <SelectValue placeholder="Selecione um fluxo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Selecione um fluxo</SelectItem>
+                        {availableWorkflows.map((workflow) => (
+                          <SelectItem key={workflow.id} value={workflow.id}>
+                            {workflow.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </DSSelect>
                   )}
                   <FormHelperText
                     className="mb-6"
@@ -457,7 +464,7 @@ export const WorkflowDependencies = ({
             </p>
             <button
               onClick={handleAddIncoming}
-              className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
+              className="h-11 rounded-xl px-4 shadow-sm inline-flex items-center justify-center gap-2 transition-colors duration-150 font-semibold"
               style={{
                 backgroundColor:
                   styleContext.state.buttonHoverColorWeight === "200"

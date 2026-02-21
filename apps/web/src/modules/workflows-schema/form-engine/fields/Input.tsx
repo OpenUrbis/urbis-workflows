@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Input as DSInput } from "@open-urbis/map-ui";
 import { evalFieldExpression, modelCallback } from "../utils/expressions";
 import debounce from "lodash.debounce";
 import { NumericFormat } from "react-number-format";
-import { MaskedInput } from "../../../../components";
+import { InputMask } from "@react-input/mask";
 import { IField, IFormContext, InputOptions } from "@open-urbis/types";
-import { StyleContext } from "../../../../reducers/style.reducer";
 
 export type FieldInputProps = {
   field: IField;
@@ -29,9 +28,6 @@ export const Input: React.FC<FieldInputProps> = ({
   valid,
 }) => {
   const [value, setValue] = useState(propValue);
-  const styleContext = useContext(StyleContext);
-  const lightBgColor = "#fafafa";
-  const darkBgColor = "#2D3748";
 
   useEffect(() => {
     const modelExpression = field?.expressions?.model;
@@ -103,16 +99,29 @@ export const Input: React.FC<FieldInputProps> = ({
     : value;
 
   if (mask && mask.length > 0) {
+    const convertedMask = String(maskValue ?? "")
+      .replace(/9/g, "_")
+      .replace(/a/g, "@")
+      .replace(/\*/g, "#");
+
     return (
-      <MaskedInput
+      <InputMask
+        component={DSInput}
         key={fieldKey}
-        mask={maskValue}
+        mask={convertedMask}
+        replacement={{
+          _: /\d/,
+          "@": /[a-zA-Z]/,
+          "#": /./,
+        }}
         value={value}
         onChange={handleChange}
         placeholder={options?.placeholder}
-        size="lg"
+        className="h-11"
         readOnly={isReadonly}
         disabled={isReadonly}
+        autoFocus={options?.autoFocus}
+        separate
       />
     );
   }
@@ -123,17 +132,8 @@ export const Input: React.FC<FieldInputProps> = ({
     case "percentage":
       return (
         <NumericFormat
-          className={`w-full bg-transparent border border-gray-200 rounded-md px-4 py-2.5 ${
-            isReadonly ? "cursor-not-allowed opacity-50" : ""
-          }`}
-          style={{
-            fontSize: "1.125rem",
-            backgroundColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? lightBgColor
-                : darkBgColor,
-            color: styleContext.state.textColor,
-          }}
+          customInput={DSInput}
+          className="h-11"
           placeholder={options?.placeholder}
           thousandSeparator="."
           decimalSeparator=","
@@ -149,6 +149,7 @@ export const Input: React.FC<FieldInputProps> = ({
             } as React.ChangeEvent<HTMLInputElement>)
           }
           disabled={isReadonly}
+          readOnly={isReadonly}
         />
       );
     default:

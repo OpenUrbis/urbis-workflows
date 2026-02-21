@@ -16,6 +16,7 @@ import {
   ModalFooter,
 } from "@chakra-ui/react";
 import { FaPlus, FaCode, FaGlobe } from "react-icons/fa";
+import { Button as DSButton } from "@open-urbis/map-ui";
 import { CodeModulesApiClient } from "../../../api/clients/code-modules.client";
 import { CodeModule } from "../../../api/types/schema";
 import { AddModule } from "../components/AddModule";
@@ -247,9 +248,8 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
         <div className="mt-4">
           <Menu>
             <MenuButton
-              as={Button}
-              leftIcon={<FaPlus />}
-              className="bg-yellow-600 hover:bg-yellow-700 w-full px-4 py-2.5 rounded flex items-center justify-center space-x-2"
+              as={DSButton}
+              className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
               bg={
                 styleContext.state.buttonHoverColorWeight === "200"
                   ? "#ca8a04"
@@ -264,6 +264,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
               }}
             >
               <div className="flex items-center justify-center space-x-2">
+                <FaPlus size={14} />
                 <span>Módulo</span>
                 <SL bg="yellow.600">N</SL>
               </div>
@@ -354,9 +355,8 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
             </p>
             <Menu>
               <MenuButton
-                as={Button}
-                leftIcon={<FaPlus />}
-                className="px-4 py-2.5 rounded flex items-center justify-center"
+                as={DSButton}
+                className="h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
                 bg={
                   styleContext.state.buttonHoverColorWeight === "200"
                     ? "#ca8a04"
@@ -371,6 +371,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
                 }}
               >
                 <div className="flex items-center justify-center space-x-2">
+                  <FaPlus size={14} />
                   <span>Módulo</span>
                   <SL bg="yellow.600">N</SL>
                 </div>

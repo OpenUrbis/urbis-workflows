@@ -158,7 +158,7 @@ export const FormEditor: React.FC<FormEditorProps> = ({
                       general={general}
                       onChange={(config) => handleSetField(index, config)}
                     />
-                    <div className="w-full p-6 border rounded space-y-4">
+                    <div className="w-full p-6 border rounded-lg space-y-4">
                       <div className="flex items-center w-full">
                         <Tooltip label="Campo do tipo preset" placement="top">
                           <div className={`flex items-center space-x-2 px-2 py-1.5 rounded-lg ${
