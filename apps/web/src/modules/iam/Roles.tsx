@@ -1,10 +1,8 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Button,
   FormControl,
   FormLabel,
-  Input,
   Spinner,
   Table,
   Tbody,
@@ -12,7 +10,6 @@ import {
   Th,
   Thead,
   Tr,
-  Textarea,
   IconButton,
   Badge,
   Checkbox,
@@ -20,14 +17,20 @@ import {
   Box,
   Divider,
   Text,
-  InputGroup,
-  InputLeftElement,
   Flex,
   Collapse,
-  Select,
   FormHelperText,
 } from "@chakra-ui/react";
-import { Button as DSButton } from "@open-urbis/map-ui";
+import {
+  Button as DSButton,
+  Input as DSInput,
+  Select as DSSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea as DSTextarea,
+} from "@open-urbis/map-ui";
 import {
   FaEdit,
   FaPlus,
@@ -311,7 +314,7 @@ export function Roles(): JSX.Element {
                       styleContext.state.buttonHoverColorWeight === "200"
                         ? "bg-gray-100"
                         : "bg-gray-800"
-                    } text-xs font-semibold`
+                    } px-3 py-3 text-xs font-semibold tracking-wide`
                   }
                   style={{ color: styleContext.state.textColor }}
                 ></Th>
@@ -321,7 +324,7 @@ export function Roles(): JSX.Element {
                       styleContext.state.buttonHoverColorWeight === "200"
                         ? "bg-gray-100"
                         : "bg-gray-800"
-                    } text-xs font-semibold`
+                    } px-4 py-3 text-xs font-semibold tracking-wide`
                   }
                   style={{ color: styleContext.state.textColor }}
                 >
@@ -333,7 +336,7 @@ export function Roles(): JSX.Element {
                       styleContext.state.buttonHoverColorWeight === "200"
                         ? "bg-gray-100"
                         : "bg-gray-800"
-                    } text-xs font-semibold`
+                    } px-4 py-3 text-xs font-semibold tracking-wide`
                   }
                   style={{ color: styleContext.state.textColor }}
                 >
@@ -345,7 +348,7 @@ export function Roles(): JSX.Element {
                       styleContext.state.buttonHoverColorWeight === "200"
                         ? "bg-gray-100"
                         : "bg-gray-800"
-                    } text-xs font-semibold`
+                    } px-4 py-3 text-xs font-semibold tracking-wide`
                   }
                   style={{ color: styleContext.state.textColor }}
                 >
@@ -359,7 +362,7 @@ export function Roles(): JSX.Element {
                       styleContext.state.buttonHoverColorWeight === "200"
                         ? "bg-gray-100"
                         : "bg-gray-800"
-                    } text-xs font-semibold`
+                    } px-4 py-3 text-xs font-semibold tracking-wide`
                   }
                   style={{ color: styleContext.state.textColor }}
                 >
@@ -435,8 +438,8 @@ export function Roles(): JSX.Element {
                               <ClickableBadge
                                 colorScheme="purple"
                                 variant="solid"
-                                className="flex items-center py-1 hover:opacity-80 transition-opacity"
-                                borderRadius="md"
+                                className="flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium leading-4 hover:opacity-80 transition-opacity"
+                                borderRadius="full"
                                 bg={
                                   styleContext.state.buttonHoverColorWeight ===
                                   "200"
@@ -450,7 +453,7 @@ export function Roles(): JSX.Element {
                                     : "purple.200"
                                 }
                               >
-                                <span className="mx-1">{permission.code}</span>
+                                {permission.code}
                               </ClickableBadge>
                             </InfoTooltip>
                           ))
@@ -482,10 +485,10 @@ export function Roles(): JSX.Element {
                           >
                             <ClickableBadge
                               colorScheme="gray"
-                              py="1"
+                              py="0.5"
                               px="2"
-                              className="hover:opacity-80 transition-opacity"
-                              borderRadius="md"
+                              className="rounded-full text-[10px] font-medium leading-4 hover:opacity-80 transition-opacity"
+                              borderRadius="full"
                               bg={
                                 styleContext.state.buttonHoverColorWeight ===
                                 "200"
@@ -586,10 +589,10 @@ export function Roles(): JSX.Element {
                             >
                               <ClickableBadge
                                 colorScheme="purple"
-                                py="1"
+                                py="0.5"
                                 px="2"
-                                className="hover:opacity-80 transition-opacity"
-                                borderRadius="md"
+                                className="rounded-full text-[10px] font-medium leading-4 hover:opacity-80 transition-opacity"
+                                borderRadius="full"
                                 bg={
                                   styleContext.state.buttonHoverColorWeight ===
                                   "200"
@@ -750,7 +753,7 @@ export function Roles(): JSX.Element {
                   <Td
                     colSpan={5}
                     className="text-center py-4"
-                    style={{ color: styleContext.state.textColor }}
+                    style={{ color: "var(--muted-foreground)" }}
                   >
                     Nenhuma função encontrada
                   </Td>
@@ -776,15 +779,7 @@ export function Roles(): JSX.Element {
           }}
         >
           <div className="overflow-y-auto">
-            <div
-              className="p-4 border-b"
-              style={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-              }}
-            >
+            <div className="p-4 border-b border-border">
               <FormControl id="name" mb={4} isRequired>
                 <FormLabel
                   style={{
@@ -794,40 +789,13 @@ export function Roles(): JSX.Element {
                 >
                   Nome da Função
                 </FormLabel>
-                <Input
+                <DSInput
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Ex: Administrador de Fluxos"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  py={3}
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#3182CE"
-                        : "#4299E1",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #3182CE"
-                        : "0 0 0 1px #4299E1",
-                  }}
+                  className="h-11 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </FormControl>
 
@@ -840,38 +808,12 @@ export function Roles(): JSX.Element {
                 >
                   Descrição
                 </FormLabel>
-                <Textarea
+                <DSTextarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Descrição detalhada da função..."
-                  borderRadius="md"
-                  borderWidth="1px"
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#3182CE"
-                        : "#4299E1",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #3182CE"
-                        : "0 0 0 1px #4299E1",
-                  }}
+                  className="min-h-[112px] bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </FormControl>
 
@@ -884,31 +826,26 @@ export function Roles(): JSX.Element {
                 >
                   Nível de Acesso
                 </FormLabel>
-                <Select
-                  name="accessLevel"
-                  value={formData.accessLevel}
-                  onChange={(e) =>
+                <DSSelect
+                  value={String(formData.accessLevel)}
+                  onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      accessLevel: parseInt(e.target.value),
+                      accessLevel: parseInt(value, 10),
                     })
                   }
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
                 >
-                  <option value={0}>Público</option>
-                  <option value={1}>Registrado</option>
-                  <option value={2}>Restrito</option>
-                  <option value={3}>Confidencial</option>
-                  <option value={4}>Anônimo</option>
-                </Select>
+                  <SelectTrigger className="h-11 w-full bg-background text-foreground border-border">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[2000]">
+                    <SelectItem value="0">Público</SelectItem>
+                    <SelectItem value="1">Registrado</SelectItem>
+                    <SelectItem value="2">Restrito</SelectItem>
+                    <SelectItem value="3">Confidencial</SelectItem>
+                    <SelectItem value="4">Anônimo</SelectItem>
+                  </SelectContent>
+                </DSSelect>
                 <FormHelperText
                   style={{
                     color:
@@ -931,55 +868,23 @@ export function Roles(): JSX.Element {
               </p>
 
               <div className="mb-4">
-                <div
-                  className="relative"
-                  style={{
-                    color: styleContext.state.textColor,
-                  }}
-                >
-                  <InputGroup size="lg">
-                    <InputLeftElement
-                      pointerEvents="none"
-                      height="100%"
-                      children={<FaSearch className="text-gray-400" />}
-                    />
-                    <Input
-                      placeholder="Buscar permissões..."
-                      value={permissionFilter}
-                      onChange={(e) => setPermissionFilter(e.target.value)}
-                      style={{
-                        backgroundColor: styleContext.state.backgroundColor,
-                        color: styleContext.state.textColor,
-                        borderColor:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#E5E7EB"
-                            : "#374151",
-                      }}
-                      _hover={{
-                        borderColor:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#D1D5DB"
-                            : "#4B5563",
-                      }}
-                      _focus={{
-                        borderColor:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#3182CE"
-                            : "#4299E1",
-                        boxShadow:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "0 0 0 1px #3182CE"
-                            : "0 0 0 1px #4299E1",
-                      }}
-                    />
-                  </InputGroup>
+                <div className="relative">
+                  <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <DSInput
+                    placeholder="Buscar permissões..."
+                    value={permissionFilter}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPermissionFilter(e.target.value)
+                    }
+                    className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+                  />
                 </div>
               </div>
 
               {Object.entries(groupedPermissions).length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                  <FaSearch size={32} className="mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-1">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <FaSearch size={32} className="mb-4 opacity-60" />
+                  <p className="text-lg font-medium mb-1 text-foreground">
                     Nenhuma permissão encontrada
                   </p>
                   <p className="text-sm">Tente buscar com outros termos</p>
@@ -1092,35 +997,14 @@ export function Roles(): JSX.Element {
             </div>
           </div>
 
-          <div
-            className="absolute bottom-0 left-0 right-0 p-4 border-t flex justify-end space-x-3 z-10"
-            style={{
-              borderColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#E5E7EB"
-                  : "#374151",
-              backgroundColor: styleContext.state.backgroundColor,
-            }}
-          >
-            <Button
-              colorScheme="purple"
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background flex justify-end space-x-3 z-10">
+            <DSButton
+              type="button"
               onClick={handleSave}
-              isLoading={isLoading}
-              size="md"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "purple.500"
-                  : "purple.600"
-              }
-              _hover={{
-                bg:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "purple.600"
-                    : "purple.700",
-              }}
+              disabled={isLoading}
             >
               {isEdit ? "Atualizar" : "Criar"} Função
-            </Button>
+            </DSButton>
           </div>
         </SideDrawer>
       )}

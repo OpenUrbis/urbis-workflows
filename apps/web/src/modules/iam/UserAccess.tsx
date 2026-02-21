@@ -1,7 +1,6 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Button,
   Spinner,
   Table,
   Tbody,
@@ -16,22 +15,26 @@ import {
   Text,
   Flex,
   Collapse,
-  Input,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
   Stack,
-  Checkbox,
   Divider,
-  InputGroup,
-  InputLeftElement,
   FormControl,
   FormLabel,
-  Select,
   FormHelperText,
 } from "@chakra-ui/react";
+import {
+  Button as DSButton,
+  Input as DSInput,
+  Select as DSSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@open-urbis/map-ui";
 import {
   FaEdit,
   FaSearch,
@@ -286,43 +289,16 @@ export function UserAccess(): JSX.Element {
         <h2 className="text-xl font-bold" color={styleContext.state.textColor}>
           Acesso de Usuários
         </h2>
-        <div className="relative">
-          <InputGroup size="lg" width="300px">
-            <InputLeftElement
-              pointerEvents="none"
-              height="100%"
-              children={<FaSearch className="text-gray-400" />}
-            />
-            <Input
-              placeholder="Buscar usuários..."
-              value={userFilter}
-              onChange={(e) => setUserFilter(e.target.value)}
-              style={{
-                backgroundColor: styleContext.state.backgroundColor,
-                color: styleContext.state.textColor,
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-              }}
-              _hover={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#D1D5DB"
-                    : "#4B5563",
-              }}
-              _focus={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#8B5CF6"
-                    : "#7C3AED",
-                boxShadow:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "0 0 0 1px #8B5CF6"
-                    : "0 0 0 1px #7C3AED",
-              }}
-            />
-          </InputGroup>
+        <div className="relative w-[300px]">
+          <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <DSInput
+            placeholder="Buscar usuários..."
+            value={userFilter}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setUserFilter(e.target.value)
+            }
+            className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+          />
         </div>
       </div>
 
@@ -631,9 +607,11 @@ export function UserAccess(): JSX.Element {
                   <Td
                     colSpan={6}
                     className="text-center py-8"
-                    color={styleContext.state.textColor}
+                    color="var(--foreground)"
                   >
-                    <Text fontSize="md">Nenhum usuário encontrado</Text>
+                    <Text fontSize="md" color="var(--muted-foreground)">
+                      Nenhum usuário encontrado
+                    </Text>
                   </Td>
                 </Tr>
               )}
@@ -660,15 +638,7 @@ export function UserAccess(): JSX.Element {
         >
           <div className="overflow-y-auto">
             {selectedUser && (
-              <div
-                className="pt-4 px-4"
-                style={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#E5E7EB"
-                      : "#374151",
-                }}
-              >
+              <div className="pt-4 px-4 border-b border-border">
                 <Text
                   fontSize="md"
                   fontWeight="medium"
@@ -699,31 +669,26 @@ export function UserAccess(): JSX.Element {
                 >
                   Nível de Acesso
                 </FormLabel>
-                <Select
-                  name="accessLevel"
-                  value={formData.accessLevel}
-                  onChange={(e) =>
+                <DSSelect
+                  value={String(formData.accessLevel)}
+                  onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      accessLevel: parseInt(e.target.value),
+                      accessLevel: parseInt(value, 10),
                     })
                   }
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
                 >
-                  <option value={0}>Público</option>
-                  <option value={1}>Registrado</option>
-                  <option value={2}>Restrito</option>
-                  <option value={3}>Confidencial</option>
-                  <option value={4}>Anônimo</option>
-                </Select>
+                  <SelectTrigger className="h-11 w-full bg-background text-foreground border-border">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[2000]">
+                    <SelectItem value="0">Público</SelectItem>
+                    <SelectItem value="1">Registrado</SelectItem>
+                    <SelectItem value="2">Restrito</SelectItem>
+                    <SelectItem value="3">Confidencial</SelectItem>
+                    <SelectItem value="4">Anônimo</SelectItem>
+                  </SelectContent>
+                </DSSelect>
                 <FormHelperText
                   style={{
                     color:
@@ -767,57 +732,26 @@ export function UserAccess(): JSX.Element {
                 <TabPanels className="-mx-4 mt-2">
                   <TabPanel>
                     <div className="mb-4">
-                      <InputGroup size="lg">
-                        <InputLeftElement
-                          pointerEvents="none"
-                          height="100%"
-                          children={<FaSearch className="text-gray-400" />}
-                        />
-                        <Input
+                      <div className="relative">
+                        <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <DSInput
                           placeholder="Buscar grupos..."
                           value={searchText.groups}
-                          onChange={(e) =>
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             setSearchText({
                               ...searchText,
                               groups: e.target.value,
                             })
                           }
-                          style={{
-                            backgroundColor: styleContext.state.backgroundColor,
-                            color: styleContext.state.textColor,
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#E5E7EB"
-                                : "#374151",
-                          }}
-                          _hover={{
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#D1D5DB"
-                                : "#4B5563",
-                          }}
-                          _focus={{
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#14B8A6"
-                                : "#0D9488",
-                            boxShadow:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "0 0 0 1px #14B8A6"
-                                : "0 0 0 1px #0D9488",
-                          }}
+                          className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                         />
-                      </InputGroup>
+                      </div>
                     </div>
 
                     {filteredGroups.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                        <FaSearch size={32} className="mb-4 opacity-50" />
-                        <p className="text-lg font-medium mb-1">
+                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                        <FaSearch size={32} className="mb-4 opacity-60" />
+                        <p className="text-lg font-medium mb-1 text-foreground">
                           Nenhum grupo encontrado
                         </p>
                         <p className="text-sm">
@@ -856,22 +790,15 @@ export function UserAccess(): JSX.Element {
                             }}
                           >
                             <div className="flex items-center w-full">
-                              <Checkbox
-                                isChecked={formData.groupIds.includes(group.id)}
+                              <input
+                                type="checkbox"
+                                checked={formData.groupIds.includes(group.id)}
                                 onChange={(e) => {
                                   e.stopPropagation();
                                   handleCheckboxChange("group", group.id);
                                 }}
-                                colorScheme="teal"
-                                size="lg"
-                                className="mr-3"
-                                borderRadius="md"
                                 onClick={(e) => e.stopPropagation()}
-                                sx={{
-                                  "span.chakra-checkbox__control": {
-                                    borderRadius: "0.375rem",
-                                  },
-                                }}
+                                className="mr-3 h-4 w-4 rounded border-border bg-background text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                               />
                               <div className="flex-1">
                                 <Text
@@ -927,57 +854,26 @@ export function UserAccess(): JSX.Element {
 
                   <TabPanel>
                     <div className="mb-4">
-                      <InputGroup size="lg">
-                        <InputLeftElement
-                          pointerEvents="none"
-                          height="100%"
-                          children={<FaSearch className="text-gray-400" />}
-                        />
-                        <Input
+                      <div className="relative">
+                        <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <DSInput
                           placeholder="Buscar funções..."
                           value={searchText.roles}
-                          onChange={(e) =>
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             setSearchText({
                               ...searchText,
                               roles: e.target.value,
                             })
                           }
-                          style={{
-                            backgroundColor: styleContext.state.backgroundColor,
-                            color: styleContext.state.textColor,
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#E5E7EB"
-                                : "#374151",
-                          }}
-                          _hover={{
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#D1D5DB"
-                                : "#4B5563",
-                          }}
-                          _focus={{
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#8B5CF6"
-                                : "#7C3AED",
-                            boxShadow:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "0 0 0 1px #8B5CF6"
-                                : "0 0 0 1px #7C3AED",
-                          }}
+                          className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                         />
-                      </InputGroup>
+                      </div>
                     </div>
 
                     {filteredRoles.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                        <FaSearch size={32} className="mb-4 opacity-50" />
-                        <p className="text-lg font-medium mb-1">
+                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                        <FaSearch size={32} className="mb-4 opacity-60" />
+                        <p className="text-lg font-medium mb-1 text-foreground">
                           Nenhuma função encontrada
                         </p>
                         <p className="text-sm">
@@ -1016,22 +912,15 @@ export function UserAccess(): JSX.Element {
                             }}
                           >
                             <div className="flex items-center w-full">
-                              <Checkbox
-                                isChecked={formData.roleIds.includes(role.id)}
+                              <input
+                                type="checkbox"
+                                checked={formData.roleIds.includes(role.id)}
                                 onChange={(e) => {
                                   e.stopPropagation();
                                   handleCheckboxChange("role", role.id);
                                 }}
-                                colorScheme="purple"
-                                size="lg"
-                                className="mr-3"
-                                borderRadius="md"
                                 onClick={(e) => e.stopPropagation()}
-                                sx={{
-                                  "span.chakra-checkbox__control": {
-                                    borderRadius: "0.375rem",
-                                  },
-                                }}
+                                className="mr-3 h-4 w-4 rounded border-border bg-background text-violet-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                               />
                               <div className="flex-1">
                                 <Text
@@ -1092,57 +981,26 @@ export function UserAccess(): JSX.Element {
 
                   <TabPanel>
                     <div className="mb-4">
-                      <InputGroup size="lg">
-                        <InputLeftElement
-                          pointerEvents="none"
-                          height="100%"
-                          children={<FaSearch className="text-gray-400" />}
-                        />
-                        <Input
+                      <div className="relative">
+                        <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <DSInput
                           placeholder="Buscar permissões..."
                           value={searchText.permissions}
-                          onChange={(e) =>
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                             setSearchText({
                               ...searchText,
                               permissions: e.target.value,
                             })
                           }
-                          style={{
-                            backgroundColor: styleContext.state.backgroundColor,
-                            color: styleContext.state.textColor,
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#E5E7EB"
-                                : "#374151",
-                          }}
-                          _hover={{
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#D1D5DB"
-                                : "#4B5563",
-                          }}
-                          _focus={{
-                            borderColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F97316"
-                                : "#EA580C",
-                            boxShadow:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "0 0 0 1px #F97316"
-                                : "0 0 0 1px #EA580C",
-                          }}
+                          className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                         />
-                      </InputGroup>
+                      </div>
                     </div>
 
                     {Object.keys(groupedPermissions).length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                        <FaSearch size={32} className="mb-4 opacity-50" />
-                        <p className="text-lg font-medium mb-1">
+                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                        <FaSearch size={32} className="mb-4 opacity-60" />
+                        <p className="text-lg font-medium mb-1 text-foreground">
                           Nenhuma permissão encontrada
                         </p>
                         <p className="text-sm">
@@ -1198,8 +1056,9 @@ export function UserAccess(): JSX.Element {
                                     }}
                                   >
                                     <div className="flex items-center w-full">
-                                      <Checkbox
-                                        isChecked={formData.permissionIds.includes(
+                                      <input
+                                        type="checkbox"
+                                        checked={formData.permissionIds.includes(
                                           permission.id
                                         )}
                                         onChange={(e) => {
@@ -1209,16 +1068,8 @@ export function UserAccess(): JSX.Element {
                                             permission.id
                                           );
                                         }}
-                                        colorScheme="orange"
-                                        size="lg"
-                                        className="mr-3"
-                                        borderRadius="md"
                                         onClick={(e) => e.stopPropagation()}
-                                        sx={{
-                                          "span.chakra-checkbox__control": {
-                                            borderRadius: "0.375rem",
-                                          },
-                                        }}
+                                        className="mr-3 h-4 w-4 rounded border-border bg-background text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                       />
                                       <div className="flex-1">
                                         <Text
@@ -1268,35 +1119,15 @@ export function UserAccess(): JSX.Element {
               </Tabs>
             </div>
 
-            <div
-              className="absolute bottom-0 left-0 right-0 p-4 border-t flex justify-end space-x-3 z-10"
-              style={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-                backgroundColor: styleContext.state.backgroundColor,
-              }}
-            >
-              <Button
-                colorScheme="blue"
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background flex justify-end space-x-3 z-10">
+              <DSButton
+                type="button"
                 onClick={handleSave}
-                isLoading={isLoading}
-                size="md"
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "blue.500"
-                    : "blue.600"
-                }
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "blue.600"
-                      : "blue.700",
-                }}
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {selectedUser ? "Atualizar" : "Criar"} Acesso
-              </Button>
+              </DSButton>
             </div>
           </div>
         </SideDrawer>

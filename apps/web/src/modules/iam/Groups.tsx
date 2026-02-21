@@ -1,10 +1,8 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Button,
   FormControl,
   FormLabel,
-  Input,
   Spinner,
   Table,
   Tbody,
@@ -12,7 +10,6 @@ import {
   Th,
   Thead,
   Tr,
-  Textarea,
   IconButton,
   Badge,
   Checkbox,
@@ -22,12 +19,18 @@ import {
   Divider,
   Flex,
   Collapse,
-  InputGroup,
-  InputLeftElement,
-  Select,
   FormHelperText,
 } from "@chakra-ui/react";
-import { Button as DSButton } from "@open-urbis/map-ui";
+import {
+  Button as DSButton,
+  Input as DSInput,
+  Select as DSSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea as DSTextarea,
+} from "@open-urbis/map-ui";
 import {
   FaEdit,
   FaPlus,
@@ -757,7 +760,7 @@ export function Groups(): JSX.Element {
                   <Td
                     colSpan={5}
                     className="text-center py-4"
-                    style={{ color: styleContext.state.textColor }}
+                    style={{ color: "var(--muted-foreground)" }}
                   >
                     Nenhum grupo encontrado
                   </Td>
@@ -783,15 +786,7 @@ export function Groups(): JSX.Element {
           }}
         >
           <div className="overflow-y-auto">
-            <div
-              className="p-4 border-b"
-              style={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-              }}
-            >
+            <div className="p-4 border-b border-border">
               <FormControl id="name" mb={4} isRequired>
                 <FormLabel
                   style={{
@@ -801,40 +796,13 @@ export function Groups(): JSX.Element {
                 >
                   Nome do Grupo
                 </FormLabel>
-                <Input
+                <DSInput
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="Ex: Administradores"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  py={3}
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#14B8A6"
-                        : "#0D9488",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #14B8A6"
-                        : "0 0 0 1px #0D9488",
-                  }}
+                  placeholder="Ex: Equipe de Aprovação"
+                  className="h-11 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </FormControl>
 
@@ -847,38 +815,12 @@ export function Groups(): JSX.Element {
                 >
                   Descrição
                 </FormLabel>
-                <Textarea
+                <DSTextarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Descrição detalhada do grupo..."
-                  borderRadius="md"
-                  borderWidth="1px"
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#14B8A6"
-                        : "#0D9488",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #14B8A6"
-                        : "0 0 0 1px #0D9488",
-                  }}
+                  className="min-h-[112px] bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </FormControl>
 
@@ -891,30 +833,25 @@ export function Groups(): JSX.Element {
                 >
                   Nível de Acesso
                 </FormLabel>
-                <Select
-                  name="accessLevel"
-                  value={formData.accessLevel}
-                  onChange={(e) =>
+                <DSSelect
+                  value={String(formData.accessLevel)}
+                  onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      accessLevel: parseInt(e.target.value),
+                      accessLevel: parseInt(value, 10),
                     })
                   }
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
                 >
-                  <option value={0}>Público</option>
-                  <option value={1}>Registrado</option>
-                  <option value={2}>Restrito</option>
-                  <option value={3}>Confidencial</option>
-                </Select>
+                  <SelectTrigger className="h-11 w-full bg-background text-foreground border-border">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[2000]">
+                    <SelectItem value="0">Público</SelectItem>
+                    <SelectItem value="1">Registrado</SelectItem>
+                    <SelectItem value="2">Restrito</SelectItem>
+                    <SelectItem value="3">Confidencial</SelectItem>
+                  </SelectContent>
+                </DSSelect>
                 <FormHelperText
                   style={{
                     color:
@@ -936,54 +873,22 @@ export function Groups(): JSX.Element {
                 Selecione as funções para este grupo:
               </p>
 
-              <div
-                className="relative mb-4"
-                style={{
-                  color: styleContext.state.textColor,
-                }}
-              >
-                <InputGroup size="lg">
-                  <InputLeftElement
-                    pointerEvents="none"
-                    height="100%"
-                    children={<FaSearch className="text-gray-400" />}
-                  />
-                  <Input
-                    placeholder="Buscar funções..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                      color: styleContext.state.textColor,
-                      borderColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#E5E7EB"
-                          : "#374151",
-                    }}
-                    _hover={{
-                      borderColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#D1D5DB"
-                          : "#4B5563",
-                    }}
-                    _focus={{
-                      borderColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#14B8A6"
-                          : "#0D9488",
-                      boxShadow:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "0 0 0 1px #14B8A6"
-                          : "0 0 0 1px #0D9488",
-                    }}
-                  />
-                </InputGroup>
+              <div className="relative mb-4">
+                <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <DSInput
+                  placeholder="Buscar funções..."
+                  value={searchTerm}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchTerm(e.target.value)
+                  }
+                  className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+                />
               </div>
 
               {filteredRoles.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                  <FaSearch size={32} className="mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-1">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <FaSearch size={32} className="mb-4 opacity-60" />
+                  <p className="text-lg font-medium mb-1 text-foreground">
                     Nenhuma função encontrada
                   </p>
                   <p className="text-sm">Tente buscar com outros termos</p>
@@ -1089,35 +994,15 @@ export function Groups(): JSX.Element {
             </div>
           </div>
 
-          <div
-            className="absolute bottom-0 left-0 right-0 p-4 border-t flex justify-end space-x-3 z-10"
-            style={{
-              borderColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#E5E7EB"
-                  : "#374151",
-              backgroundColor: styleContext.state.backgroundColor,
-            }}
-          >
-            <Button
-              colorScheme="teal"
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background flex justify-end space-x-3 z-10">
+            <DSButton
+              type="button"
               onClick={handleSave}
-              isLoading={isLoading}
-              size="md"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "teal.500"
-                  : "teal.600"
-              }
-              _hover={{
-                bg:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "teal.600"
-                    : "teal.700",
-              }}
+              disabled={isLoading}
+              className="bg-teal-600 hover:bg-teal-700 text-white"
             >
               {isEdit ? "Atualizar" : "Criar"} Grupo
-            </Button>
+            </DSButton>
           </div>
         </SideDrawer>
       )}

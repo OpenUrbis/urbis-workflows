@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   FormControl,
   FormLabel,
-  Input,
   Spinner,
   Table,
   Tbody,
@@ -11,12 +10,15 @@ import {
   Th,
   Thead,
   Tr,
-  Textarea,
   IconButton,
   Tooltip,
   Badge,
 } from "@chakra-ui/react";
-import { Button as DSButton } from "@open-urbis/map-ui";
+import {
+  Button as DSButton,
+  Input as DSInput,
+  Textarea as DSTextarea,
+} from "@open-urbis/map-ui";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import { StyleContext } from "../../reducers";
 import { ApiClient } from "../../api";
@@ -463,7 +465,7 @@ export function Permissions(): JSX.Element {
                     <Td
                       colSpan={4}
                       className="text-center py-4"
-                      style={{ color: styleContext.state.textColor }}
+                      style={{ color: "var(--muted-foreground)" }}
                     >
                       Nenhuma permissão encontrada
                     </Td>
@@ -494,15 +496,7 @@ export function Permissions(): JSX.Element {
           }
         >
           <div className="overflow-y-auto">
-            <div
-              className="p-4 border-b"
-              style={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-              }}
-            >
+            <div className="p-4 border-b border-border">
               <FormControl id="name" mb={4} isRequired>
                 <FormLabel
                   style={{
@@ -512,40 +506,13 @@ export function Permissions(): JSX.Element {
                 >
                   Nome da Permissão
                 </FormLabel>
-                <Input
+                <DSInput
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Ex: Visualizar Fluxos de Trabalho"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  py={3}
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#F97316"
-                        : "#EA580C",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #F97316"
-                        : "0 0 0 1px #EA580C",
-                  }}
+                  className="h-11 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </FormControl>
 
@@ -558,40 +525,13 @@ export function Permissions(): JSX.Element {
                 >
                   Código
                 </FormLabel>
-                <Input
+                <DSInput
                   type="text"
                   name="code"
                   value={formData.code}
                   onChange={handleInputChange}
                   placeholder="Ex: workflow:read:*"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  py={3}
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#F97316"
-                        : "#EA580C",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #F97316"
-                        : "0 0 0 1px #EA580C",
-                  }}
+                  className="h-11 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
                 <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Formato: dominio:tipo_operacao:acao (use * para curingas)
@@ -607,72 +547,26 @@ export function Permissions(): JSX.Element {
                 >
                   Descrição
                 </FormLabel>
-                <Textarea
+                <DSTextarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Descrição detalhada da permissão..."
-                  borderRadius="md"
-                  borderWidth="1px"
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#F97316"
-                        : "#EA580C",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #F97316"
-                        : "0 0 0 1px #EA580C",
-                  }}
+                  className="min-h-[112px] bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </FormControl>
             </div>
           </div>
 
-          <div
-            className="absolute bottom-0 left-0 right-0 p-4 border-t flex justify-end space-x-3 z-10"
-            style={{
-              borderColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#E5E7EB"
-                  : "#374151",
-              backgroundColor: styleContext.state.backgroundColor,
-            }}
-          >
-            <Button
-              colorScheme="orange"
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background flex justify-end space-x-3 z-10">
+            <DSButton
+              type="button"
               onClick={handleSave}
-              isLoading={isLoading}
-              size="md"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "orange.500"
-                  : "orange.600"
-              }
-              _hover={{
-                bg:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "orange.600"
-                    : "orange.700",
-              }}
+              disabled={isLoading}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
             >
               {isEdit ? "Atualizar" : "Criar"} Permissão
-            </Button>
+            </DSButton>
           </div>
         </SideDrawer>
       )}

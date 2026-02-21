@@ -54,6 +54,47 @@ const StyleProvider = ({ children }: any) => {
     document.documentElement.style.colorScheme = isDarkMode ? "dark" : "light";
   }, [state.buttonHoverColorWeight]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+
+    const syncStyleStateFromRootTheme = () => {
+      const isDarkMode = root.classList.contains("dark");
+      const targetStyle = isDarkMode
+        ? {
+            buttonHoverColorWeight: "800" as const,
+            textColor: "#ffffff" as const,
+            backgroundColor: "#000000" as const,
+          }
+        : {
+            buttonHoverColorWeight: "200" as const,
+            textColor: "#000000" as const,
+            backgroundColor: "#f5f5f5" as const,
+          };
+
+      const isOutOfSync =
+        state.buttonHoverColorWeight !== targetStyle.buttonHoverColorWeight ||
+        state.textColor !== targetStyle.textColor ||
+        state.backgroundColor !== targetStyle.backgroundColor;
+
+      if (isOutOfSync) {
+        dispatch({ type: "SET_STYLE", payload: targetStyle });
+        localStorage.setItem(
+          "buttonHoverColorWeight",
+          targetStyle.buttonHoverColorWeight,
+        );
+        localStorage.setItem("textColor", targetStyle.textColor);
+        localStorage.setItem("backgroundColor", targetStyle.backgroundColor);
+      }
+    };
+
+    syncStyleStateFromRootTheme();
+
+    const observer = new MutationObserver(syncStyleStateFromRootTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
+  }, [state.buttonHoverColorWeight, state.textColor, state.backgroundColor]);
+
   return (
     <StyleContext.Provider value={{ state, dispatch }}>
       {children}
