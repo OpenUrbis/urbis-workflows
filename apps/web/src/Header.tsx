@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { HotkeyContext, withNoModifiers } from "./reducers/hotkeys.reducer";
 import { GlobalHotKeys } from "react-hotkeys";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,9 @@ function Header(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);
   const { hasPermission, loading } = usePermissions();
   const navigate = useNavigate();
+  const [isDarkMode, setIsDarkMode] = useState(() =>
+    document.documentElement.classList.contains("dark"),
+  );
 
   const navItems = [
     {
@@ -137,6 +140,18 @@ function Header(): JSX.Element {
     }
   }, [loading, filteredNavItems, isAuthenticated]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const syncTheme = () => setIsDarkMode(root.classList.contains("dark"));
+
+    syncTheme();
+
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <GlobalHotKeys
@@ -146,7 +161,8 @@ function Header(): JSX.Element {
       />
       <div onClickCapture={handleInternalNavCapture}>
         <UrbisHeader
-          logoSrc="/logo.png"
+          key={`urbis-header-${isDarkMode ? "dark" : "light"}`}
+          logoSrc={isDarkMode ? "/logo_escuro.svg" : "/logo.png"}
           logoAlt="Logotipo da Prefeitura de São Paulo"
           logoHref="https://viabiliza.urbis.prefeitura.sp.gov.br"
           badgeText="Viabiliza"

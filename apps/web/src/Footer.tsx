@@ -1,5 +1,4 @@
-import React, { useContext } from "react";
-import { StyleContext } from "./reducers/style.reducer";
+import React from "react";
 
 const APP_MENU_ITEMS = [
   { label: "Mosaico", href: "https://urbis.prefeitura.sp.gov.br" },
@@ -11,12 +10,9 @@ const APP_MENU_ITEMS = [
 ];
 
 function Footer(): JSX.Element {
-  const { state } = useContext(StyleContext);
-
   return (
     <footer
-      className="fixed bottom-0 mx-auto w-full text-center py-4 px-6"
-      style={{ backgroundColor: state.backgroundColor, zIndex: 1000 }}
+      className="fixed bottom-0 mx-auto w-full text-center py-4 px-6 z-[1000] border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
     >
       {window.innerWidth > 768 && (
         <div className="flex flex-wrap items-center gap-2">
@@ -34,13 +30,7 @@ function Footer(): JSX.Element {
             </a>
           ))}
           <div className="flex-grow"></div>
-          <div
-            className={`text-sm ${
-              state.buttonHoverColorWeight === "200"
-                ? "text-gray-500"
-                : "text-gray-400"
-            }`}
-          >
+          <div className="text-sm text-muted-foreground">
             Versão: {`${import.meta.env.VITE_VERSION}`}
           </div>
         </div>

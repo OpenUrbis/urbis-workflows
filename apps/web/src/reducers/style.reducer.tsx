@@ -1,4 +1,4 @@
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useEffect, useReducer } from "react";
 
 interface StyleState {
   fontSize: number;
@@ -18,13 +18,13 @@ const initialState: StyleState = {
     : 100,
   buttonHoverColorWeight: localStorage.getItem("buttonHoverColorWeight")
     ? (localStorage.getItem("buttonHoverColorWeight") as any)
-    : "200",
+    : "800",
   textColor: localStorage.getItem("textColor")
     ? (localStorage.getItem("textColor") as any)
-    : "#000000",
+    : "#ffffff",
   backgroundColor: localStorage.getItem("backgroundColor")
     ? (localStorage.getItem("backgroundColor") as any)
-    : "#f5f5f5",
+    : "#000000",
 };
 
 const StyleContext = createContext<StyleContextProps>({
@@ -46,6 +46,13 @@ const styleReducer = (
 
 const StyleProvider = ({ children }: any) => {
   const [state, dispatch] = useReducer(styleReducer, initialState);
+
+  useEffect(() => {
+    const isDarkMode = state.buttonHoverColorWeight === "800";
+
+    document.documentElement.classList.toggle("dark", isDarkMode);
+    document.documentElement.style.colorScheme = isDarkMode ? "dark" : "light";
+  }, [state.buttonHoverColorWeight]);
 
   return (
     <StyleContext.Provider value={{ state, dispatch }}>

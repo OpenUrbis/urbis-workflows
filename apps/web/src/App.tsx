@@ -45,7 +45,7 @@ function Layout({
   children: React.ReactNode;
 }) {
   return (
-    <div id="application">
+    <div id="application" className="min-h-screen bg-background text-foreground">
       {shouldDisplayHeaderFooter && <Header />}
       {children}
       {shouldDisplayHeaderFooter && <Footer />}

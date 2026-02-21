@@ -259,7 +259,7 @@ export const WorkflowsSchema: React.FC = () => {
               type="button"
               size="sm"
               variant="outline"
-              className="h-9 px-4"
+              className="h-9 px-4 border-border bg-background hover:bg-muted text-foreground"
               onClick={() => setSelectedDescription(null)}
             >
               Fechar
@@ -348,12 +348,8 @@ const StageSelectorButton = ({
               size="sm"
               className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "development"
-                  ? styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-200 text-gray-800"
-                    : "bg-gray-700 text-gray-200"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "text-gray-600 hover:bg-gray-100"
-                    : "text-gray-400 hover:bg-gray-700"
+                  ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
               }`}
             >
               <FaCode size={16} />
@@ -365,12 +361,8 @@ const StageSelectorButton = ({
               size="sm"
               className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "staging"
-                  ? styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-200 text-gray-800"
-                    : "bg-gray-700 text-gray-200"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "text-gray-600 hover:bg-gray-100"
-                    : "text-gray-400 hover:bg-gray-700"
+                  ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
               }`}
             >
               <FaFlask size={16} />
@@ -382,12 +374,8 @@ const StageSelectorButton = ({
               size="sm"
               className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "production"
-                  ? styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-200 text-gray-800"
-                    : "bg-gray-700 text-gray-200"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "text-gray-600 hover:bg-gray-100"
-                    : "text-gray-400 hover:bg-gray-700"
+                  ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
               }`}
             >
               <FaRocket size={16} />
@@ -485,12 +473,7 @@ const WorkflowsList = ({
           key={workflow.id}
           className={`group rounded-2xl border transition-all duration-200 ${
             isGridView ? "hover:shadow-sm" : "hover:bg-opacity-50"
-          } ${
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "border-gray-200 hover:border-yellow-400 hover:bg-gray-50"
-              : "border-gray-700 hover:border-yellow-500 hover:bg-gray-800"
-          }`}
-          style={{ backgroundColor: styleContext.state.backgroundColor }}
+          } border-border bg-card text-card-foreground hover:border-yellow-500/70 hover:bg-muted/30`}
         >
           <CardContent className="p-5">
           <div
@@ -525,11 +508,7 @@ const WorkflowsList = ({
                           id: workflow.id,
                         })
                       }
-                      className={`h-auto px-0 py-0 text-xs mt-1 font-medium ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "text-blue-600 hover:text-blue-700"
-                          : "text-blue-400 hover:text-blue-300"
-                      }`}
+                      className="h-auto px-0 py-0 text-xs mt-1 font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                     >
                       Ver mais
                     </Button>
@@ -617,27 +596,11 @@ const WorkflowsList = ({
       ))}
       {filteredWorkflows.length === 0 && (
         <div className="flex flex-col items-center justify-center text-center">
-          <Search
-            size={48}
-            className={`mb-4 opacity-50 ${
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "text-gray-400"
-                : "text-gray-500"
-            }`}
-          />
-          <p
-            className="text-xl font-medium mb-2"
-            style={{ color: styleContext.state.textColor }}
-          >
+          <Search size={48} className="mb-4 text-muted-foreground/60" />
+          <p className="text-xl font-medium mb-2 text-foreground">
             Nenhum assunto encontrado
           </p>
-          <p
-            className={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "text-sm text-gray-500"
-                : "text-sm text-gray-400"
-            }
-          >
+          <p className="text-sm text-muted-foreground">
             Tente ajustar sua busca ou criar um novo assunto
           </p>
         </div>
@@ -671,12 +634,8 @@ const ViewButton = ({
         onClick={onClick}
         className={`h-8 w-8 transition-all duration-200 ${
           active
-            ? styleContext.state.buttonHoverColorWeight === "200"
-              ? "bg-white text-yellow-600 shadow-sm"
-              : "bg-gray-700 text-yellow-400 shadow-sm"
-            : styleContext.state.buttonHoverColorWeight === "200"
-              ? "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
-              : "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
+            ? "bg-card text-yellow-500 border border-border shadow-sm"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
         }`}
       >
         {icon}
@@ -698,11 +657,7 @@ const ViewButtons = ({
   return (
     <div className="flex items-center space-x-2">
       <div
-        className={`flex items-center space-x-1 p-1 rounded-lg transition-colors duration-150 ${
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "bg-gray-100"
-            : "bg-gray-800"
-        }`}
+        className="flex items-center space-x-1 p-1 rounded-lg border border-border bg-muted/60 transition-colors duration-150"
       >
         <ViewButton
           active={isGridView}
