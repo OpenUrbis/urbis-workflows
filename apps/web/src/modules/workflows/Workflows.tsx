@@ -86,7 +86,8 @@ export function Workflows(): JSX.Element {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const styleContext = useContext(StyleContext);
-  const { userIam, hasActivityAccess } = usePermissions();
+  const { userIam, hasActivityAccess, loading: permissionsLoading } =
+    usePermissions();
   const isCreating = location.pathname.endsWith("/create");
   const [showQRModal, setShowQRModal] = useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
@@ -424,6 +425,14 @@ export function Workflows(): JSX.Element {
           apiClient={apiClient}
           styleContext={styleContext}
         />
+      );
+    }
+
+    if (permissionsLoading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
       );
     }
 

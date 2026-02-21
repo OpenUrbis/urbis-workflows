@@ -40,15 +40,33 @@ interface PermissionProviderProps {
 export const PermissionProvider: React.FC<PermissionProviderProps> = ({
   children,
 }) => {
-  const { isAuthenticated, accessToken } = useContext(AuthContext);
+  const {
+    isAuthenticated,
+    accessToken,
+    isLoading: authLoading,
+  } = useContext(AuthContext);
   const [userIam, setUserIam] = useState<UserIamDetailsResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(isAuthenticated);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchUserIam = async () => {
-    // Don't fetch if not authenticated or token not ready yet
-    if (!isAuthenticated || !accessToken) {
+    // Wait for auth flow resolution before deciding permission state
+    if (authLoading) {
+      setLoading(true);
+      return;
+    }
+
+    // No authenticated user means no IAM permissions to load
+    if (!isAuthenticated) {
+      setUserIam(null);
+      setError(null);
       setLoading(false);
+      return;
+    }
+
+    // Authenticated but token not ready yet: keep loading to avoid false denies
+    if (!accessToken) {
+      setLoading(true);
       return;
     }
 
@@ -104,7 +122,7 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
 
     // Call fetchUserIam
     fetchUserIam();
-  }, [isAuthenticated, accessToken]);
+  }, [isAuthenticated, accessToken, authLoading]);
 
   const hasPermission = (permission: string): boolean => {
     // If not authenticated, always return false
