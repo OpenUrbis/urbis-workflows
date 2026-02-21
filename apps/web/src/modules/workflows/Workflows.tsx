@@ -1,19 +1,20 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useEffect, useState, useContext } from "react";
 import {
-  Spinner,
-  useSteps,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Tooltip,
-  Badge,
-} from "@chakra-ui/react";
+  Button as DSButton,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Tooltip as DSTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { IFormContext } from "@open-urbis/types";
+import { Loader2 } from "lucide-react";
 import { Field } from "../workflows-schema/form-engine/Field";
 import { ApiClient } from "../../api";
 import {
@@ -31,7 +32,6 @@ import {
 } from "../../api/types/schema";
 import { ActivityStateEnum } from "../../api/types/workflows.dto";
 import { StyleContext } from "../../reducers/style.reducer";
-import { SL } from "../../components";
 import {
   FaTimes,
   FaExclamationTriangle,
@@ -118,10 +118,7 @@ export function Workflows(): JSX.Element {
   const [incomingListOpen, setIncomingListOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { activeStep, setActiveStep } = useSteps({
-    index: 0,
-    count: workflow?.schema?.activities?.length ?? 0,
-  });
+  const [activeStep, setActiveStep] = useState(0);
 
   const fetchWorkflow = async () => {
     try {
@@ -633,7 +630,7 @@ export function Workflows(): JSX.Element {
             {/* Show submit button for editable forms in existing workflows */}
             {isFormEditable && (
               <div className="mt-6 flex justify-end">
-                <button
+                <DSButton
                   className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 ${
                     canSubmit && !isSubmitting
                       ? "bg-yellow-600 hover:bg-yellow-700 text-white"
@@ -646,10 +643,10 @@ export function Workflows(): JSX.Element {
                   }
                 >
                   {isSubmitting ? (
-                    <Spinner size="sm" color="white" className="mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
                   <span>Enviar</span>
-                </button>
+                </DSButton>
               </div>
             )}
           </>
@@ -740,11 +737,23 @@ export function Workflows(): JSX.Element {
     }
   }, [workflow?.schema?.activities, activeStep, valid]);
 
+  useEffect(() => {
+    const activityCount = workflow?.schema?.activities?.length ?? 0;
+    if (activityCount === 0) {
+      setActiveStep(0);
+      return;
+    }
+
+    if (activeStep >= activityCount) {
+      setActiveStep(activityCount - 1);
+    }
+  }, [workflow?.schema?.activities?.length, activeStep]);
+
   return (
     <div className="flex flex-col space-y-6 sm:px-0 md:px-6 mt-6 mb-24">
       {loading ? (
         <div className="pt-10 text-center">
-          <Spinner size="xl" />
+          <Loader2 className="mx-auto h-10 w-10 animate-spin" />
         </div>
       ) : workflow ? (
         <>
@@ -755,23 +764,26 @@ export function Workflows(): JSX.Element {
             >
               {isCreating && isLocalDraft && (
                 <div className="mb-4 flex items-center justify-center space-x-4">
-                  <Tooltip
-                    label="As alterações feitas neste formulário são salvas automaticamente apenas neste dispositivo. Para salvar permanentemente, clique em 'Solicitar'."
-                    placement="top"
-                    hasArrow
-                  >
-                    <div
-                      className={`flex items-center px-4 py-2 rounded-lg ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-yellow-900 text-yellow-200"
-                      }`}
-                    >
-                      <FaExclamationTriangle className="mr-2" size={14} />
-                      <span>Rascunho salvo apenas neste dispositivo</span>
-                    </div>
-                  </Tooltip>
-                  <button
+                  <TooltipProvider>
+                    <DSTooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`flex items-center px-4 py-2 rounded-lg ${
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-yellow-900 text-yellow-200"
+                          }`}
+                        >
+                          <FaExclamationTriangle className="mr-2" size={14} />
+                          <span>Rascunho salvo apenas neste dispositivo</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-sm">
+                        As alterações feitas neste formulário são salvas automaticamente apenas neste dispositivo. Para salvar permanentemente, clique em "Solicitar".
+                      </TooltipContent>
+                    </DSTooltip>
+                  </TooltipProvider>
+                  <DSButton
                     onClick={handleDiscardDraft}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
                       styleContext.state.buttonHoverColorWeight === "200"
@@ -781,7 +793,7 @@ export function Workflows(): JSX.Element {
                   >
                     <FaTrash size={14} />
                     <span>Descartar Rascunho</span>
-                  </button>
+                  </DSButton>
                 </div>
               )}
 
@@ -793,32 +805,35 @@ export function Workflows(): JSX.Element {
                       {workflow.label}
                     </h1>
                     <div className="flex items-center space-x-1">
-                      <Badge
-                        colorScheme={isCreating ? "yellow" : "blue"}
-                        fontSize="sm"
-                        className="mt-2"
+                      <span
+                        className={`mt-2 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                          isCreating
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
                       >
                         {formatId(isCreating ? workflow.id : (id as string))}
-                      </Badge>
-                      <Tooltip
-                        label="Copiado!"
-                        placement="top"
-                        hasArrow
-                        isOpen={isTooltipOpen}
-                      >
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              isCreating ? workflow.id : (id as string)
-                            );
-                            setIsTooltipOpen(true);
-                            setTimeout(() => setIsTooltipOpen(false), 1500);
-                          }}
-                          className="mt-2 p-1 rounded hover:bg-gray-100 transition-colors"
-                        >
-                          <FaLink size={12} />
-                        </button>
-                      </Tooltip>
+                      </span>
+                      <TooltipProvider>
+                        <DSTooltip open={isTooltipOpen}>
+                          <TooltipTrigger asChild>
+                            <DSButton
+                              onClick={() => {
+                                navigator.clipboard.writeText(
+                                  isCreating ? workflow.id : (id as string)
+                                );
+                                setIsTooltipOpen(true);
+                                setTimeout(() => setIsTooltipOpen(false), 1500);
+                              }}
+                              variant="ghost"
+                              className="mt-2 p-1 rounded hover:bg-gray-100 transition-colors"
+                            >
+                              <FaLink size={12} />
+                            </DSButton>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">Copiado!</TooltipContent>
+                        </DSTooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                   {workflow.description && (
@@ -834,21 +849,24 @@ export function Workflows(): JSX.Element {
                         }}
                       />
                       {workflow.description.length > 200 && (
-                        <button
-                          onClick={() =>
+                        <DSButton
+                          onClick={() => {
                             setSelectedDescription({
                               text: workflow.description,
                               label: workflow.label,
                             })
-                          }
+                          }}
+                          variant="ghost"
                           className={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "text-blue-600 hover:text-blue-700"
-                              : "text-blue-400 hover:text-blue-300"
+                            `h-auto p-0 ${
+                              styleContext.state.buttonHoverColorWeight === "200"
+                                ? "text-blue-600 hover:text-blue-700"
+                                : "text-blue-400 hover:text-blue-300"
+                            }`
                           }
                         >
                           Ver mais
-                        </button>
+                        </DSButton>
                       )}
                     </div>
                   )}
@@ -898,34 +916,35 @@ export function Workflows(): JSX.Element {
 
                 {/* QR Code */}
                 <div className="ml-6">
-                  <Tooltip
-                    label={`Escaneie para acessar ${
-                      isCreating ? "o modelo" : "o protocolo"
-                    }`}
-                    placement="left"
-                    hasArrow
-                  >
-                    <div
-                      onClick={() => setShowQRModal(true)}
-                      className={`p-3 rounded-lg cursor-pointer transition-all ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-gray-100"
-                          : "bg-gray-800"
-                      }`}
-                    >
-                      <QRCodeSVG
-                        value={`${window.location.origin}${
-                          isCreating
-                            ? `/workflows-schema/${workflow.id}`
-                            : `/workflows/${id}`
-                        }`}
-                        size={120}
-                        level="H"
-                        marginSize={6}
-                        className="rounded-lg"
-                      />
-                    </div>
-                  </Tooltip>
+                  <TooltipProvider>
+                    <DSTooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          onClick={() => setShowQRModal(true)}
+                          className={`p-3 rounded-lg cursor-pointer transition-all ${
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "bg-gray-100"
+                              : "bg-gray-800"
+                          }`}
+                        >
+                          <QRCodeSVG
+                            value={`${window.location.origin}${
+                              isCreating
+                                ? `/workflows-schema/${workflow.id}`
+                                : `/workflows/${id}`
+                            }`}
+                            size={120}
+                            level="H"
+                            marginSize={6}
+                            className="rounded-lg"
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">
+                        Escaneie para acessar {isCreating ? "o modelo" : "o protocolo"}
+                      </TooltipContent>
+                    </DSTooltip>
+                  </TooltipProvider>
                 </div>
               </div>
               {/* End of Header Section */}
@@ -988,7 +1007,7 @@ export function Workflows(): JSX.Element {
             <div className="w-3/4 pl-6">
               {loading ? (
                 <div className="flex items-center justify-center h-64">
-                  <Spinner size="lg" />
+                  <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : (
                 workflow.schema?.activities?.[activeStep] && (
@@ -1013,7 +1032,7 @@ export function Workflows(): JSX.Element {
           {/* Request Button - Only show when creating */}
           {isCreating && (
             <div className="fixed bottom-16 right-4">
-              <button
+              <DSButton
                 className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 ${
                   canSubmit
                     ? "bg-yellow-600 hover:bg-yellow-700 text-white"
@@ -1026,40 +1045,37 @@ export function Workflows(): JSX.Element {
                 }
               >
                 {loading ? (
-                  <Spinner size="sm" color="white" className="mr-2" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
                 <span>Solicitar</span>{" "}
-              </button>
+              </DSButton>
             </div>
           )}
         </>
       ) : null}
 
-      <Modal
-        isOpen={!!selectedDescription}
-        onClose={() => setSelectedDescription(null)}
-        motionPreset="slideInBottom"
-        isCentered
+      <Dialog
+        open={!!selectedDescription}
+        onOpenChange={(open) => !open && setSelectedDescription(null)}
       >
-        <ModalOverlay backdropFilter="blur(4px)" />
-        <ModalContent
-          className="shadow-xl"
+        <DialogContent
+          className="shadow-xl max-w-[600px]"
           style={{
             backgroundColor: styleContext.state.backgroundColor,
-            maxWidth: "600px",
           }}
         >
-          <ModalHeader className="px-6 pt-4 pb-4 border-b">
+          <DialogHeader className="px-6 pt-4 pb-4 border-b">
             <div className="flex justify-between">
-              <span
+              <DialogTitle
                 className="text-xl font-bold mt-2 mr-3"
                 style={{ color: styleContext.state.textColor }}
               >
                 {selectedDescription?.label}
-              </span>
+              </DialogTitle>
               <div>
-                <button
+                <DSButton
                   onClick={() => setSelectedDescription(null)}
+                  variant="ghost"
                   className="hover:bg-opacity-10 rounded p-1.5 transition-colors duration-150"
                   style={{
                     color:
@@ -1073,11 +1089,11 @@ export function Workflows(): JSX.Element {
                   }}
                 >
                   <FaTimes size={12} />
-                </button>
+                </DSButton>
               </div>
             </div>
-          </ModalHeader>
-          <ModalBody className="px-6 py-6 overflow-y-auto">
+          </DialogHeader>
+          <div className="px-6 py-6 overflow-y-auto">
             <div
               className="prose dark:prose-invert max-w-none"
               style={{ color: styleContext.state.textColor }}
@@ -1085,9 +1101,10 @@ export function Workflows(): JSX.Element {
                 __html: selectedDescription?.text || "",
               }}
             />
-          </ModalBody>
-          <ModalFooter className="px-6 pt-4 pb-4 border-t space-x-3">
-            <button
+          </div>
+          <DialogFooter className="px-6 pt-4 pb-4 border-t space-x-3">
+            <DSButton
+              variant="outline"
               className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2"
               onClick={() => setSelectedDescription(null)}
               style={{
@@ -1099,38 +1116,25 @@ export function Workflows(): JSX.Element {
               }}
             >
               <span>Fechar</span>
-              <SL
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.100"
-                    : "gray.600"
-                }
-              >
-                esc
-              </SL>
-            </button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            </DSButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* QR Code Modal */}
       {workflow && (
-        <Modal
-          isOpen={showQRModal}
-          onClose={() => setShowQRModal(false)}
-          motionPreset="slideInBottom"
-          isCentered
+        <Dialog
+          open={showQRModal}
+          onOpenChange={(open) => !open && setShowQRModal(false)}
         >
-          <ModalOverlay backdropFilter="blur(4px)" />
-          <ModalContent
-            className="py-4"
+          <DialogContent
+            className="py-4 max-w-[350px]"
             style={{
               backgroundColor: styleContext.state.backgroundColor,
-              maxWidth: "350px",
               maxHeight: "350px",
             }}
           >
-            <ModalBody className="">
+            <div>
               <QRCodeSVG
                 value={`${window.location.origin}${
                   isCreating
@@ -1142,9 +1146,9 @@ export function Workflows(): JSX.Element {
                 marginSize={6}
                 className="rounded-lg"
               />
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
