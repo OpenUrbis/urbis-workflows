@@ -33,13 +33,13 @@ function EmptyState() {
         className="text-xl font-medium mt-4 mb-2"
         style={{ color: styleContext.state.textColor }}
       >
-        Nenhuma assinatura encontrada
+        Nenhum aceite encontrado
       </p>
       <p
         className="text-base"
         style={{ color: styleContext.state.textColor, opacity: 0.7 }}
       >
-        Você ainda não possui nenhuma assinatura registrada.
+        Você ainda não possui nenhum aceite registrado.
       </p>
     </div>
   );
@@ -118,7 +118,7 @@ export function MyAcceptances(): JSX.Element {
         className="text-2xl md:text-3xl font-medium mt-6"
         style={{ color: styleContext.state.textColor }}
       >
-        Minhas Assinaturas
+        Meus Aceites
       </h1>
 
       {loading ? (
