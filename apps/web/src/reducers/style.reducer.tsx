@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useReducer } from "react";
+import React, { createContext, useEffect, useReducer, useRef } from "react";
 
 interface StyleState {
   fontSize: number;
@@ -53,6 +53,11 @@ const styleReducer = (
 
 const StyleProvider = ({ children }: any) => {
   const [state, dispatch] = useReducer(styleReducer, initialState);
+  const stateRef = useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     const isDarkMode = state.buttonHoverColorWeight === "800";
@@ -71,6 +76,42 @@ const StyleProvider = ({ children }: any) => {
     state.fontSize,
     state.textColor,
   ]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    const syncStyleStateFromRootTheme = () => {
+      const isDarkMode = root.classList.contains("dark");
+      const targetStyle = isDarkMode
+        ? {
+            buttonHoverColorWeight: "800" as const,
+            textColor: "#ffffff" as const,
+            backgroundColor: "#000000" as const,
+          }
+        : {
+            buttonHoverColorWeight: "200" as const,
+            textColor: "#000000" as const,
+            backgroundColor: "#f5f5f5" as const,
+          };
+
+      const current = stateRef.current;
+      const isOutOfSync =
+        current.buttonHoverColorWeight !== targetStyle.buttonHoverColorWeight ||
+        current.textColor !== targetStyle.textColor ||
+        current.backgroundColor !== targetStyle.backgroundColor;
+
+      if (isOutOfSync) {
+        dispatch({ type: "SET_STYLE", payload: targetStyle });
+      }
+    };
+
+    syncStyleStateFromRootTheme();
+
+    const observer = new MutationObserver(syncStyleStateFromRootTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <StyleContext.Provider value={{ state, dispatch }}>

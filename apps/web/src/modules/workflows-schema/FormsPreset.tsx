@@ -389,17 +389,8 @@ export const FormsPreset: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden">
-        <div
-          className="w-3/12 border-r"
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-            backgroundColor: styleContext.state.backgroundColor,
-          }}
-        >
+      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden border-border bg-card text-card-foreground">
+        <div className="w-3/12 border-r border-border bg-card">
           <TreeList
             items={presets}
             search={search}
@@ -546,16 +537,7 @@ export const FormsPreset: React.FC = () => {
 
               <div className="flex-grow" />
 
-              <div
-                className="flex justify-end items-center px-8 py-4 border-t mt-8"
-                style={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#E5E7EB"
-                      : "#374151",
-                  backgroundColor: styleContext.state.backgroundColor,
-                }}
-              >
+              <div className="flex justify-end items-center px-8 py-4 border-t border-border bg-card mt-8">
                 <div className="flex gap-3">
                   <Button
                     type="button"

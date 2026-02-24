@@ -7,8 +7,7 @@ import {
 import { FaFolder, FaFolderOpen } from "react-icons/fa";
 import { Search } from "lucide-react";
 import { IconType } from "react-icons";
-import { useContext, useState, useEffect } from "react";
-import { StyleContext } from "../../../reducers";
+import { useState, useEffect } from "react";
 import { Input } from "@open-urbis/map-ui";
 
 export interface TreeItem {
@@ -120,22 +119,12 @@ export const TreeList = <T extends TreeItem>({
   selectedId,
   density = "default",
 }: TreeListProps<T>): JSX.Element => {
-  const styleContext = useContext(StyleContext);
   const tree = createDirectoryTree(items);
 
   return (
     <TooltipProvider>
       <div className="flex flex-col">
-        <div
-          className="p-4 border-b "
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-            backgroundColor: styleContext.state.backgroundColor,
-          }}
-        >
+        <div className="p-4 border-b border-border bg-card">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
               <Search className="text-muted-foreground" size={16} />
@@ -148,7 +137,7 @@ export const TreeList = <T extends TreeItem>({
             />
           </div>
         </div>
-        <div className="flex-grow overflow-y-auto p-2">
+        <div className="flex-grow overflow-y-auto p-2 bg-card">
           <DirectoryView
             node={tree}
             search={search}
@@ -186,7 +175,6 @@ const DirectoryView = <T extends TreeItem>({
   selectedId?: string;
   density?: "default" | "compact";
 }) => {
-  const styleContext = useContext(StyleContext);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
@@ -264,11 +252,7 @@ const DirectoryView = <T extends TreeItem>({
             <>
               <button
                 onClick={() => handleFolderClick(name)}
-                className={`w-full rounded-lg px-4 ${isCompact ? "py-1.5" : "py-2"} transition-all duration-200 ${
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "hover:bg-gray-200"
-                    : "hover:bg-gray-700"
-                }`}
+                className={`w-full rounded-lg px-4 ${isCompact ? "py-1.5" : "py-2"} transition-all duration-200 hover:bg-muted`}
               >
                 <span
                   style={{ paddingLeft: `${basePadding}px` }}
@@ -287,8 +271,7 @@ const DirectoryView = <T extends TreeItem>({
                       />
                     )}
                     <span
-                      style={{ color: styleContext.state.textColor }}
-                      className={`${isCompact ? "text-sm" : "text-base"} font-medium`}
+                      className={`${isCompact ? "text-sm" : "text-base"} font-medium text-foreground`}
                     >
                       {name}
                     </span>
@@ -332,18 +315,15 @@ const DirectoryView = <T extends TreeItem>({
                 return (
                   <div
                     key={item.id}
-                    className="transition-colors duration-150 rounded-lg"
+                    className={`transition-colors duration-150 rounded-lg ${
+                      isSelected
+                        ? "bg-muted"
+                        : hoveredItem === item.id
+                          ? "bg-muted/70"
+                          : ""
+                    }`}
                     style={{
                       paddingLeft: `${isRootWithOnlyFiles ? 16 : (level + 1) * 16}px`,
-                      backgroundColor: isSelected
-                        ? styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#E5E7EB"
-                          : "#374151"
-                        : hoveredItem === item.id
-                          ? styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#F3F4F6"
-                            : "#4B5563"
-                          : "transparent",
                     }}
                     onMouseEnter={() => setHoveredItem(item.id)}
                     onMouseLeave={() => setHoveredItem(null)}
@@ -361,8 +341,7 @@ const DirectoryView = <T extends TreeItem>({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span
-                                style={{ color: styleContext.state.textColor }}
-                                className={`${isCompact ? "text-sm" : "text-base"} font-medium truncate hover:text-yellow-600 transition-colors duration-200`}
+                                className={`${isCompact ? "text-sm" : "text-base"} font-medium truncate text-foreground hover:text-yellow-600 transition-colors duration-200`}
                               >
                                 {item.label}
                               </span>
@@ -375,7 +354,7 @@ const DirectoryView = <T extends TreeItem>({
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span
-                                  className={`${isCompact ? "text-xs" : "text-sm"} text-gray-500 dark:text-gray-400 truncate hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200`}
+                                  className={`${isCompact ? "text-xs" : "text-sm"} text-muted-foreground truncate hover:text-foreground transition-colors duration-200`}
                                 >
                                   {item.namespace}
                                 </span>
