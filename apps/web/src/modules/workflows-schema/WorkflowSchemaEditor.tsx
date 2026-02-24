@@ -1928,7 +1928,12 @@ export function WorkflowSchemaEditor(): JSX.Element {
             </h3>
 
             <FormControl className="mb-6">
-              <FormLabel>Nível de Acesso Global</FormLabel>
+              <FormLabel
+                className="text-foreground"
+                style={{ color: styleContext.state.textColor }}
+              >
+                Nível de Acesso Global
+              </FormLabel>
               <DSSelect
                 value={String(
                   workflowSchema?.schema?.control?.accessLevel ??
