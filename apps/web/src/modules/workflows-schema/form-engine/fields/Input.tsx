@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef, memo } from "react";
 import { Input as DSInput } from "@open-urbis/map-ui";
 import { evalFieldExpression, modelCallback } from "../utils/expressions";
 import debounce from "lodash.debounce";
@@ -17,7 +17,7 @@ export type FieldInputProps = {
   general: IFormContext;
 };
 
-export const Input: React.FC<FieldInputProps> = ({
+export const Input: React.FC<FieldInputProps> = memo(({
   field,
   fieldKey,
   onChange,
@@ -49,11 +49,14 @@ export const Input: React.FC<FieldInputProps> = ({
     }
   }, [context, general.$data, field.expressions?.model]);
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   const debouncedOnChange = useCallback(
-    debounce((value) => {
-      onChange(value);
+    debounce((value: any) => {
+      onChangeRef.current(value);
     }, 300),
-    [onChange]
+    []
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +91,12 @@ export const Input: React.FC<FieldInputProps> = ({
       debouncedOnChange(newValue);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      debouncedOnChange.cancel();
+    };
+  }, [debouncedOnChange]);
 
   const isReadonly =
     options.readOnly === true ||
@@ -167,4 +176,4 @@ export const Input: React.FC<FieldInputProps> = ({
         />
       );
   }
-};
+});

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef, memo } from "react";
 import { Textarea as DSTextarea } from "@open-urbis/map-ui";
 import debounce from "lodash.debounce";
 import { IField, IFormContext, TextAreaOptions } from "@open-urbis/types";
@@ -16,7 +16,7 @@ export type FieldTextareaProps = {
   onChange: (value: string) => void;
 };
 
-export const Textarea: React.FC<FieldTextareaProps> = ({
+export const Textarea: React.FC<FieldTextareaProps> = memo(({
   field,
   fieldKey,
   onChange,
@@ -48,12 +48,21 @@ export const Textarea: React.FC<FieldTextareaProps> = ({
     }
   }, [context, general.$data, field.expressions?.model]);
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   const debouncedOnChange = useCallback(
-    debounce((value) => {
-      onChange(value);
+    debounce((value: any) => {
+      onChangeRef.current(value);
     }, 300),
-    [onChange]
+    []
   );
+
+  useEffect(() => {
+    return () => {
+      debouncedOnChange.cancel();
+    };
+  }, [debouncedOnChange]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { selectionStart, selectionEnd } = e.target;
@@ -119,4 +128,4 @@ export const Textarea: React.FC<FieldTextareaProps> = ({
       autoFocus={options.autoFocus}
     />
   );
-};
+});

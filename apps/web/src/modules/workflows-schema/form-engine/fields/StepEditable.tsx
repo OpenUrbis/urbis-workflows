@@ -187,7 +187,6 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const [rerender, setRerender] = useState<boolean>(true);
   const styleContext = useContext(StyleContext);
   const [isPresetDialogOpen, setIsPresetDialogOpen] = useState(false);
   const [stepPresets, setStepPresets] = useState<any[]>([]);
@@ -305,7 +304,7 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
         if (field?.type === "preset" && field?.preset) {
           field.preset.forEach((presetField) => {
             flattened.push({
-              ...structuredClone(presetField),
+              ...presetField,
               presetKey: field.key,
               presetIndex: index,
               isPreset: true,
@@ -314,7 +313,7 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
           });
         } else {
           flattened.push({
-            ...structuredClone(field),
+            ...field,
             stepIndex: stepIndex++,
           });
         }
@@ -408,6 +407,43 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
     [field, flattenedFields]
   );
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const onValidChangeRef = useRef(onValidChange);
+  onValidChangeRef.current = onValidChange;
+  const onConfigChangeRef = useRef(onConfigChange);
+  onConfigChangeRef.current = onConfigChange;
+  const fieldRef = useRef(field);
+  fieldRef.current = field;
+
+  const activeStepRef = useRef(activeStep);
+  activeStepRef.current = activeStep;
+  const flattenedFieldsRef = useRef(flattenedFields);
+  flattenedFieldsRef.current = flattenedFields;
+
+  const handleFieldChange = useCallback((v: any) => {
+    const key = flattenedFieldsRef.current[activeStepRef.current]?.key;
+    if (key) onChangeRef.current(key, v);
+  }, []);
+
+  const handleFieldValidChange = useCallback((valid: any) => {
+    const key = flattenedFieldsRef.current[activeStepRef.current]?.key;
+    if (key) onValidChangeRef.current(key, valid);
+  }, []);
+
+  const handleFieldConfigChange = useCallback((config: IField) => {
+    const activeField = flattenedFieldsRef.current[activeStepRef.current];
+    const targetIndex = activeField?.isPreset
+      ? activeField.presetIndex
+      : activeStepRef.current;
+
+    if (targetIndex !== undefined) {
+      const newFields = [...fieldRef.current];
+      newFields[targetIndex] = config;
+      onConfigChangeRef.current(cleanupFieldStructure(newFields) as IField[]);
+    }
+  }, []);
+
   return (
     <>
       <div
@@ -498,10 +534,6 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
                     type="button"
                     onClick={() => {
                       setActiveStep(index);
-                      setRerender(false);
-                      setTimeout(() => {
-                        setRerender(true);
-                      }, 0);
                     }}
                     className="cursor-pointer flex items-center"
                   >
@@ -624,9 +656,8 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
         </TooltipProvider>
       </div>
 
-      <div>
+      <div key={activeStep}>
         {flattenedFields.length > 0 &&
-          rerender &&
           flattenedFields[activeStep] &&
           (flattenedFields[activeStep].isPreset ? (
             <Field
@@ -637,12 +668,8 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
               field={flattenedFields[activeStep]}
               value={value?.[flattenedFields[activeStep]?.key] ?? {}}
               valid={valid?.[flattenedFields[activeStep]?.key] ?? {}}
-              onChange={(v) => {
-                onChange(flattenedFields[activeStep]?.key, v);
-              }}
-              onValidChange={(valid: any) => {
-                onValidChange(flattenedFields[activeStep].key, valid);
-              }}
+              onChange={handleFieldChange}
+              onValidChange={handleFieldValidChange}
             />
           ) : (
             <FieldEditable
@@ -653,23 +680,9 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
               field={flattenedFields[activeStep]}
               value={value?.[flattenedFields[activeStep]?.key] ?? {}}
               valid={valid?.[flattenedFields[activeStep]?.key] ?? {}}
-              onChange={(v) => {
-                onChange(flattenedFields[activeStep]?.key, v);
-              }}
-              onValidChange={(valid: any) => {
-                onValidChange(flattenedFields[activeStep].key, valid);
-              }}
-              onConfigChange={(config: IField) => {
-                const targetIndex = flattenedFields[activeStep].isPreset
-                  ? flattenedFields[activeStep].presetIndex
-                  : activeStep;
-
-                if (targetIndex !== undefined) {
-                  const newFields = [...field];
-                  newFields[targetIndex] = config;
-                  onConfigChange(cleanupFieldStructure(newFields) as IField[]);
-                }
-              }}
+              onChange={handleFieldChange}
+              onValidChange={handleFieldValidChange}
+              onConfigChange={handleFieldConfigChange}
               onRemove={() => {}}
             />
           ))}

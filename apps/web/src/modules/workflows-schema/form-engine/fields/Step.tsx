@@ -3,7 +3,7 @@ import { IField, IFormContext, BlockOptions } from "@open-urbis/types";
 import { Field } from "../Field";
 import { HelpTooltipClickable, SL } from "../../../../components";
 import { HotkeyContext, StyleContext } from "../../../../reducers";
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { visibleCallback } from "../utils/expressions";
 import { FaCircle, FaCheck } from "react-icons/fa";
 
@@ -44,7 +44,6 @@ export const Step: React.FC<FieldStepProps> = ({
   const [nextStepDisabled, setNextStepDisabled] = useState(false);
   const [lastVisibleStep, setLastVisibleStep] = useState(field.length - 1);
   const [flattenedFields, setFlattenedFields] = useState<IField[]>([]);
-  const [rerender, setRerender] = useState<boolean>(true);
 
   // Add refs for scroll handling
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -56,10 +55,10 @@ export const Step: React.FC<FieldStepProps> = ({
     fields.forEach((f) => {
       if (f?.type === "preset" && f?.preset) {
         f.preset.forEach((presetField) => {
-          flattened.push(JSON.parse(JSON.stringify(presetField)));
+          flattened.push(presetField);
         });
       } else {
-        flattened.push(JSON.parse(JSON.stringify(f)));
+        flattened.push(f);
       }
     });
 
@@ -100,27 +99,41 @@ export const Step: React.FC<FieldStepProps> = ({
     }
   }, [activeStep]);
 
-  useEffect(() => {
-    const visibleObj: { [key: string]: boolean } = {};
-    let lastVisibleIndex = 0;
+  const visibilityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const updateVisibility = (f: any, index: number) => {
-      if (f.expressions?.visible) {
-        visibleCallback(f, value, general, valid, (visible: boolean) => {
-          visibleObj[f.key] = visible;
-          if (visible !== false) {
-            lastVisibleIndex = index;
-          }
-        });
-      } else {
-        lastVisibleIndex = index;
+  useEffect(() => {
+    if (visibilityTimerRef.current) {
+      clearTimeout(visibilityTimerRef.current);
+    }
+
+    visibilityTimerRef.current = setTimeout(() => {
+      const visibleObj: { [key: string]: boolean } = {};
+      let lastVisibleIndex = 0;
+
+      const updateVisibility = (f: any, index: number) => {
+        if (f.expressions?.visible) {
+          visibleCallback(f, value, general, valid, (visible: boolean) => {
+            visibleObj[f.key] = visible;
+            if (visible !== false) {
+              lastVisibleIndex = index;
+            }
+          });
+        } else {
+          lastVisibleIndex = index;
+        }
+      };
+
+      flattenedFields.forEach((f, index) => updateVisibility(f, index));
+
+      setVisible(visibleObj);
+      setLastVisibleStep(lastVisibleIndex);
+    }, 150);
+
+    return () => {
+      if (visibilityTimerRef.current) {
+        clearTimeout(visibilityTimerRef.current);
       }
     };
-
-    flattenedFields.forEach((f, index) => updateVisibility(f, index));
-
-    setVisible(visibleObj);
-    setLastVisibleStep(lastVisibleIndex);
   }, [value]);
 
   useEffect(() => {
@@ -176,6 +189,33 @@ export const Step: React.FC<FieldStepProps> = ({
     return checkIfIsValid(valid?.[stepKey]);
   };
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const onValidChangeRef = useRef(onValidChange);
+  onValidChangeRef.current = onValidChange;
+
+  const handleFieldChange = useCallback((value: any) => {
+    const key = flattenedFieldsRef.current[activeStepRef.current]?.key;
+    if (key) onChangeRef.current(key, value);
+  }, []);
+
+  const handleFieldValidChange = useCallback((valid: any) => {
+    const key = flattenedFieldsRef.current[activeStepRef.current]?.key;
+    if (!key) return;
+    onValidChangeRef.current(key, valid);
+    onValidChangeRef.current(
+      "$complete",
+      activeStepRef.current === flattenedFieldsRef.current.length - 1
+        ? isCompleted(valid)
+        : false
+    );
+  }, []);
+
+  const activeStepRef = useRef(activeStep);
+  activeStepRef.current = activeStep;
+  const flattenedFieldsRef = useRef(flattenedFields);
+  flattenedFieldsRef.current = flattenedFields;
+
   const setPreviousStep = (step: number) => {
     let previousStepIndex = step - 1;
 
@@ -187,11 +227,7 @@ export const Step: React.FC<FieldStepProps> = ({
     }
 
     if (previousStepIndex >= 0) {
-      setRerender(false);
       setActiveStep(previousStepIndex);
-      setTimeout(() => {
-        setRerender(true);
-      }, 0);
     }
 
     onValidChange("$complete", false);
@@ -208,11 +244,7 @@ export const Step: React.FC<FieldStepProps> = ({
     }
 
     if (!nextStepDisabled && nextStepIndex < (flattenedFields?.length ?? 1)) {
-      setRerender(false);
       setActiveStep(nextStepIndex);
-      setTimeout(() => {
-        setRerender(true);
-      }, 0);
       onValidChange(
         "$complete",
         nextStepIndex === lastVisibleStep ? isCompleted(valid) : false
@@ -243,9 +275,7 @@ export const Step: React.FC<FieldStepProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    setRerender(false);
                     setActiveStep(index);
-                    setTimeout(() => setRerender(true), 0);
                   }}
                   className="flex items-center gap-2"
                 >
@@ -290,9 +320,9 @@ export const Step: React.FC<FieldStepProps> = ({
           })}
         </div>
       </div>
-      {flattenedFields[activeStep] !== undefined && rerender && (
+      {flattenedFields[activeStep] !== undefined && (
         <>
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center mt-6" key={activeStep}>
             <Field
               parent={flattenedFields[activeStep]}
               context={value}
@@ -301,18 +331,8 @@ export const Step: React.FC<FieldStepProps> = ({
               field={flattenedFields[activeStep]}
               value={value?.[flattenedFields[activeStep].key]}
               valid={valid?.[flattenedFields[activeStep].key]}
-              onChange={(value) => {
-                onChange(flattenedFields[activeStep].key, value);
-              }}
-              onValidChange={(valid: any) => {
-                onValidChange(flattenedFields[activeStep].key, valid);
-                onValidChange(
-                  "$complete",
-                  activeStep === flattenedFields.length - 1
-                    ? isCompleted(valid)
-                    : false
-                );
-              }}
+              onChange={handleFieldChange}
+              onValidChange={handleFieldValidChange}
             />
           </div>
           <div className="flex justify-start mt-6">

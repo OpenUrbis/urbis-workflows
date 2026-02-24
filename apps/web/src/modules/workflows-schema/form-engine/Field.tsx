@@ -219,12 +219,19 @@ export const useFieldDynamic = (
     field.expressions?.visible
   );
 
+  const isInitialRun = useRef(true);
+
   useEffect(() => {
     if (hasExpressions) {
       const serialized = JSON.stringify(context);
       if (serialized === prevContextRef.current) return;
       prevContextRef.current = serialized;
+    } else if (!isInitialRun.current) {
+      // Fields without expressions don't need to re-run callbacks
+      // after the initial mount — context changes are irrelevant to them.
+      return;
     }
+    isInitialRun.current = false;
 
     optionCallback(field, context, general, validContext, setOptions);
     validCallback(
@@ -258,11 +265,11 @@ export const useFieldDynamic = (
   const prevIntegrationContextRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (field.expressions?.integration) {
-      const serialized = JSON.stringify(context);
-      if (serialized === prevIntegrationContextRef.current) return;
-      prevIntegrationContextRef.current = serialized;
-    }
+    if (!field.expressions?.integration) return;
+
+    const serialized = JSON.stringify(context);
+    if (serialized === prevIntegrationContextRef.current) return;
+    prevIntegrationContextRef.current = serialized;
 
     integrationCallback(
       field,
