@@ -28,12 +28,17 @@ export const Input: React.FC<FieldInputProps> = memo(({
   valid,
 }) => {
   const [value, setValue] = useState(propValue);
+  const isLocalEdit = useRef(false);
 
   useEffect(() => {
+    if (isLocalEdit.current) {
+      return;
+    }
+
     const modelExpression = field?.expressions?.model;
     if (modelExpression) {
       const processedExpression = modelExpression.replace(
-        /context\.\$(?!metadata|data)/g,
+        /context\.\.(?!metadata|data)/g,
         `context["${field.key}"]`
       );
 
@@ -52,25 +57,47 @@ export const Input: React.FC<FieldInputProps> = memo(({
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
+  const debouncedModelEval = useCallback(
+    debounce(
+      (
+        fieldRef: IField,
+        currentValue: any,
+        newContext: any,
+        generalRef: IFormContext,
+        validRef: any,
+        cb: (v: any) => void
+      ) => {
+        modelCallback(fieldRef, currentValue, newContext, generalRef, validRef, cb);
+      },
+      150
+    ),
+    []
+  );
+
   const debouncedOnChange = useCallback(
     debounce((value: any) => {
+      isLocalEdit.current = false;
       onChangeRef.current(value);
     }, 300),
     []
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { selectionStart, selectionEnd } = e.target;
     const newValue = e.target.value;
+    isLocalEdit.current = true;
 
     const modelExpression =
       field?.expressions?.model?.replace(
-        /context\.\$(?!metadata|data)/g,
+        /context\.\.(?!metadata|data)/g,
         `context["${field.key}"]`
       ) ?? "";
 
     if (modelExpression.includes(`context["${field.key}"]`)) {
-      modelCallback(
+      // Update local state immediately for responsive typing
+      setValue(newValue);
+
+      // Debounce the expensive model expression evaluation
+      debouncedModelEval(
         field,
         value,
         { ...context, [field.key]: newValue },
@@ -79,11 +106,6 @@ export const Input: React.FC<FieldInputProps> = memo(({
         (updatedValue) => {
           setValue(updatedValue);
           debouncedOnChange(updatedValue);
-
-          // Restore cursor position after the update
-          requestAnimationFrame(() => {
-            e.target.setSelectionRange?.(selectionStart, selectionEnd);
-          });
         }
       );
     } else {
@@ -95,8 +117,9 @@ export const Input: React.FC<FieldInputProps> = memo(({
   useEffect(() => {
     return () => {
       debouncedOnChange.cancel();
+      debouncedModelEval.cancel();
     };
-  }, [debouncedOnChange]);
+  }, [debouncedOnChange, debouncedModelEval]);
 
   const isReadonly =
     options.readOnly === true ||
