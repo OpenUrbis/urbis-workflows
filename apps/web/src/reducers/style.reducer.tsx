@@ -12,20 +12,27 @@ interface StyleContextProps {
   dispatch: React.Dispatch<any>;
 }
 
-const initialState: StyleState = {
-  fontSize: localStorage.getItem("fontSize")
-    ? Number(localStorage.getItem("fontSize"))
-    : 100,
-  buttonHoverColorWeight: localStorage.getItem("buttonHoverColorWeight")
-    ? (localStorage.getItem("buttonHoverColorWeight") as any)
-    : "800",
-  textColor: localStorage.getItem("textColor")
-    ? (localStorage.getItem("textColor") as any)
-    : "#ffffff",
-  backgroundColor: localStorage.getItem("backgroundColor")
-    ? (localStorage.getItem("backgroundColor") as any)
-    : "#000000",
-};
+function getInitialState(): StyleState {
+  const rootIsDark = document.documentElement.classList.contains("dark");
+  const storedWeight = localStorage.getItem("buttonHoverColorWeight");
+  const isDarkMode =
+    storedWeight === "800"
+      ? true
+      : storedWeight === "200"
+        ? false
+        : rootIsDark;
+
+  return {
+    fontSize: localStorage.getItem("fontSize")
+      ? Number(localStorage.getItem("fontSize"))
+      : 100,
+    buttonHoverColorWeight: isDarkMode ? "800" : "200",
+    textColor: isDarkMode ? "#ffffff" : "#000000",
+    backgroundColor: isDarkMode ? "#000000" : "#f5f5f5",
+  };
+}
+
+const initialState: StyleState = getInitialState();
 
 const StyleContext = createContext<StyleContextProps>({
   state: initialState,
@@ -49,51 +56,21 @@ const StyleProvider = ({ children }: any) => {
 
   useEffect(() => {
     const isDarkMode = state.buttonHoverColorWeight === "800";
-
-    document.documentElement.classList.toggle("dark", isDarkMode);
-    document.documentElement.style.colorScheme = isDarkMode ? "dark" : "light";
-  }, [state.buttonHoverColorWeight]);
-
-  useEffect(() => {
     const root = document.documentElement;
 
-    const syncStyleStateFromRootTheme = () => {
-      const isDarkMode = root.classList.contains("dark");
-      const targetStyle = isDarkMode
-        ? {
-            buttonHoverColorWeight: "800" as const,
-            textColor: "#ffffff" as const,
-            backgroundColor: "#000000" as const,
-          }
-        : {
-            buttonHoverColorWeight: "200" as const,
-            textColor: "#000000" as const,
-            backgroundColor: "#f5f5f5" as const,
-          };
+    root.classList.toggle("dark", isDarkMode);
+    root.style.colorScheme = isDarkMode ? "dark" : "light";
 
-      const isOutOfSync =
-        state.buttonHoverColorWeight !== targetStyle.buttonHoverColorWeight ||
-        state.textColor !== targetStyle.textColor ||
-        state.backgroundColor !== targetStyle.backgroundColor;
-
-      if (isOutOfSync) {
-        dispatch({ type: "SET_STYLE", payload: targetStyle });
-        localStorage.setItem(
-          "buttonHoverColorWeight",
-          targetStyle.buttonHoverColorWeight,
-        );
-        localStorage.setItem("textColor", targetStyle.textColor);
-        localStorage.setItem("backgroundColor", targetStyle.backgroundColor);
-      }
-    };
-
-    syncStyleStateFromRootTheme();
-
-    const observer = new MutationObserver(syncStyleStateFromRootTheme);
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
-
-    return () => observer.disconnect();
-  }, [state.buttonHoverColorWeight, state.textColor, state.backgroundColor]);
+    localStorage.setItem("buttonHoverColorWeight", state.buttonHoverColorWeight);
+    localStorage.setItem("textColor", state.textColor);
+    localStorage.setItem("backgroundColor", state.backgroundColor);
+    localStorage.setItem("fontSize", state.fontSize.toString());
+  }, [
+    state.backgroundColor,
+    state.buttonHoverColorWeight,
+    state.fontSize,
+    state.textColor,
+  ]);
 
   return (
     <StyleContext.Provider value={{ state, dispatch }}>

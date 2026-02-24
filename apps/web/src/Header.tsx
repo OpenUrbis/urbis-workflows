@@ -161,7 +161,6 @@ function Header(): JSX.Element {
       />
       <div onClickCapture={handleInternalNavCapture}>
         <UrbisHeader
-          key={`urbis-header-${isDarkMode ? "dark" : "light"}`}
           logoSrc={isDarkMode ? "/logo_escuro.svg" : "/logo.png"}
           logoAlt="Logotipo da Prefeitura de São Paulo"
           logoHref="https://viabiliza.urbis.prefeitura.sp.gov.br"
