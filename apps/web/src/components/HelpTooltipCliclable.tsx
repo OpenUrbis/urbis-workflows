@@ -27,14 +27,19 @@ export function HelpTooltipClickable({
             <Icon className="cursor-pointer" size={size} />
           </span>
         </DialogTrigger>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl bg-background text-foreground border border-border">
           <DialogHeader>
-            <DialogTitle>Ajuda</DialogTitle>
+            <DialogTitle className="text-foreground">Ajuda</DialogTitle>
           </DialogHeader>
           <div className="pt-1 pb-2" dangerouslySetInnerHTML={{ __html: tooltip }} />
           <div className="flex justify-end">
             <DialogClose asChild>
-              <Button type="button" variant="outline" size="sm">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="border-border text-foreground"
+              >
                 Fechar
               </Button>
             </DialogClose>

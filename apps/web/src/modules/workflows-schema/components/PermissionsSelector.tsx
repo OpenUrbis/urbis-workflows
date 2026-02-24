@@ -61,6 +61,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
   const [roles, setRoles] = useState<Role[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   // Generate a stable ID for this drawer based on parent + title
   const permissionsDrawerId = React.useMemo(
     () =>
@@ -71,6 +72,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
   // Use useCallback to memoize the fetchEntities function
   const fetchEntities = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
 
     try {
       const [usersResponse, rolesResponse, groupsResponse] = await Promise.all([
@@ -84,6 +86,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
       setGroups(groupsResponse.groups);
     } catch (error) {
       console.error("Failed to fetch entities:", error);
+      setLoadError("Não foi possível carregar usuários, papéis e grupos.");
     } finally {
       setLoading(false);
     }
@@ -119,6 +122,8 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     setIsOpen(true);
     setSearchTerm("");
     setTabIndex(0);
+    setLoadError(null);
+    setLoading(true);
   };
 
   const handleClose = () => {
@@ -237,7 +242,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     return (
       <div
         key={entity.id}
-        className="flex items-center justify-between cursor-pointer transition-colors duration-150 p-3 rounded-lg"
+        className="flex items-center justify-between cursor-pointer transition-colors duration-150 px-3 py-2 rounded-lg text-sm"
         style={{
           backgroundColor: access
             ? styleContext.state.buttonHoverColorWeight === "200"
@@ -262,7 +267,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
       >
         <span className="font-medium">{entity.name}</span>
         <div className="flex items-center gap-6">
-          <label className="inline-flex items-center gap-2 cursor-pointer">
+          <label className="inline-flex items-center gap-2 cursor-pointer text-xs">
             <input
               type="checkbox"
               checked={access === "read" || access === "write"}
@@ -277,7 +282,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
             />
             <span>Leitura</span>
           </label>
-          <label className="inline-flex items-center gap-2 cursor-pointer">
+          <label className="inline-flex items-center gap-2 cursor-pointer text-xs">
             <input
               type="checkbox"
               checked={access === "write"}
@@ -604,7 +609,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                 />
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-medium">
+                <span className="font-medium text-sm">
                   {totalPermissions > 0
                     ? `Gerenciar Permissões (${totalPermissions})`
                     : "Adicionar Permissões"}
@@ -641,7 +646,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                 placeholder="Buscar usuários, papéis ou grupos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 text-base transition-colors duration-200 border rounded-lg"
+                className="w-full pl-10 pr-4 py-2.5 text-sm transition-colors duration-200 border rounded-lg"
                 style={{
                   backgroundColor: styleContext.state.backgroundColor,
                   color: styleContext.state.textColor,
@@ -664,56 +669,72 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
             </p>
           </div>
 
-          {loading ? (
-            <div className="flex justify-center py-10">
-              <Spinner />
-            </div>
-          ) : (
-            <div>
-              <div
-                className="mx-4 mb-4 grid grid-cols-3 rounded-lg border p-1"
-                style={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#E5E7EB"
-                      : "#374151",
-                  backgroundColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#F9FAFB"
-                      : "#111827",
-                }}
-              >
-                {[
-                  { index: 0, label: "Grupos" },
-                  { index: 1, label: "Funções" },
-                  { index: 2, label: "Usuários" },
-                ].map((tab) => (
-                  <button
-                    key={tab.index}
-                    type="button"
-                    onClick={() => setTabIndex(tab.index)}
-                    className="rounded-md px-3 py-2 text-sm font-medium transition-colors"
-                    style={{
-                      color: styleContext.state.textColor,
-                      backgroundColor:
-                        tabIndex === tab.index
-                          ? styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#FFFFFF"
-                            : "#1F2937"
-                          : "transparent",
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+          <div className="min-h-[260px]">
+            {loading ? (
+              <div className="flex justify-center py-10" style={{ color: styleContext.state.textColor }}>
+                <Spinner size="xl" />
               </div>
+            ) : loadError ? (
+              <div className="px-4 pb-6">
+                <div
+                  className="p-4 text-center rounded-lg text-sm"
+                  style={{
+                    backgroundColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "rgba(243, 244, 246, 0.5)"
+                        : "rgba(31, 41, 55, 0.3)",
+                    color: styleContext.state.textColor,
+                  }}
+                >
+                  {loadError}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="mx-4 mb-4 grid grid-cols-3 rounded-lg border p-1"
+                  style={{
+                    borderColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "#E5E7EB"
+                        : "#374151",
+                    backgroundColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "#F9FAFB"
+                        : "#111827",
+                  }}
+                >
+                  {[
+                    { index: 0, label: "Grupos" },
+                    { index: 1, label: "Funções" },
+                    { index: 2, label: "Usuários" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.index}
+                      type="button"
+                      onClick={() => setTabIndex(tab.index)}
+                      className="rounded-md px-3 py-2 text-xs font-medium transition-colors"
+                      style={{
+                        color: styleContext.state.textColor,
+                        backgroundColor:
+                          tabIndex === tab.index
+                            ? styleContext.state.buttonHoverColorWeight === "200"
+                              ? "#FFFFFF"
+                              : "#1F2937"
+                            : "transparent",
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
 
-              <div className="px-4 pb-4">
+                <div className="px-4 pb-4">
                 {tabIndex === 0 && (
                   <div>
                     {filteredGroups.length === 0 ? (
                       <div
-                        className="p-4 text-center rounded-lg"
+                        className="p-4 text-center rounded-lg text-sm"
                         style={{
                           backgroundColor:
                             styleContext.state.buttonHoverColorWeight === "200"
@@ -740,7 +761,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   <div>
                     {filteredRoles.length === 0 ? (
                       <div
-                        className="p-4 text-center rounded-lg"
+                        className="p-4 text-center rounded-lg text-sm"
                         style={{
                           backgroundColor:
                             styleContext.state.buttonHoverColorWeight === "200"
@@ -767,7 +788,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   <div>
                     {filteredUsers.length === 0 ? (
                       <div
-                        className="p-4 text-center rounded-lg"
+                        className="p-4 text-center rounded-lg text-sm"
                         style={{
                           backgroundColor:
                             styleContext.state.buttonHoverColorWeight === "200"
@@ -790,8 +811,10 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   </div>
                 )}
               </div>
-            </div>
-          )}
+
+              </>
+            )}
+          </div>
         </SideDrawer>
       )}
     </>
