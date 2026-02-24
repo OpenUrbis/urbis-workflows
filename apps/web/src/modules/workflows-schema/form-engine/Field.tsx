@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useCallback, useEffect, useRef, useState, memo } from "react";
 import {
   ArrayOptions,
   BlockOptions,
@@ -206,7 +206,26 @@ export const useFieldDynamic = (
   );
   const [validState, setValidState] = useState<boolean | ValidState>(true);
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const onValidChangeRef = useRef(onValidChange);
+  onValidChangeRef.current = onValidChange;
+
+  const prevContextRef = useRef<string | null>(null);
+  const hasExpressions = !!(
+    field.expressions?.model ||
+    field.expressions?.options ||
+    field.expressions?.valid ||
+    field.expressions?.visible
+  );
+
   useEffect(() => {
+    if (hasExpressions) {
+      const serialized = JSON.stringify(context);
+      if (serialized === prevContextRef.current) return;
+      prevContextRef.current = serialized;
+    }
+
     optionCallback(field, context, general, validContext, setOptions);
     validCallback(
       field,
@@ -214,7 +233,7 @@ export const useFieldDynamic = (
       general,
       validContext,
       setValidState,
-      onValidChange
+      onValidChangeRef.current
     );
     visibleCallback(field, context, general, validContext, setVisible);
     if (
@@ -226,7 +245,7 @@ export const useFieldDynamic = (
       // inside the <Input> and <Textarea> components to update the value.
       // This is because the value of the input need to be controlled by the
       // component to be reactive to its own changes.
-      modelCallback(field, value, context, general, validContext, onChange);
+      modelCallback(field, value, context, general, validContext, onChangeRef.current);
     }
   }, [
     context,
@@ -236,7 +255,15 @@ export const useFieldDynamic = (
     field.expressions?.visible,
   ]);
 
+  const prevIntegrationContextRef = useRef<string | null>(null);
+
   useEffect(() => {
+    if (field.expressions?.integration) {
+      const serialized = JSON.stringify(context);
+      if (serialized === prevIntegrationContextRef.current) return;
+      prevIntegrationContextRef.current = serialized;
+    }
+
     integrationCallback(
       field,
       context,
@@ -244,7 +271,7 @@ export const useFieldDynamic = (
       validContext,
       value,
       setLoading,
-      onChange
+      onChangeRef.current
     );
   }, [context, general.$data, field.expressions?.integration]);
 
@@ -276,6 +303,36 @@ export const Field: React.FC<FieldProps> = memo(
 
     const [localValue, setLocalValue] = useState(value);
     const [localValid, setLocalValid] = useState(valid);
+
+    useEffect(() => {
+      setLocalValue(value);
+    }, [value]);
+
+    useEffect(() => {
+      setLocalValid(valid);
+    }, [valid]);
+
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+    const onValidChangeRef = useRef(onValidChange);
+    onValidChangeRef.current = onValidChange;
+
+    const handleBlockChange = useCallback((k: string, v: any) => {
+      setLocalValue((current: any) => {
+        const newLocalValue = { ...current, [k]: v };
+        onChangeRef.current(newLocalValue);
+        return newLocalValue;
+      });
+    }, []);
+
+    const handleBlockValidChange = useCallback((k: string, v: any) => {
+      setLocalValid((current: any) => {
+        const newLocalValid = { ...current, [k]: v };
+        onValidChangeRef.current(newLocalValid);
+        return newLocalValid;
+      });
+    }, []);
+
     const isOpen = (options as BlockOptions)?.open ?? true;
 
     const FieldComponent = FIELD_COMPONENT_MAP[field.type] || (() => <></>);
@@ -337,7 +394,7 @@ export const Field: React.FC<FieldProps> = memo(
             <div
               className={`${
                 (field.options as BlockOptions).card
-                  ? `w-full rounded ${
+                  ? `w-full rounded-md ${
                       (field.options as BlockOptions).hideCardBorder
                         ? "border-none px-6 pt-6"
                         : "border border-gray-200 p-6"
@@ -392,20 +449,8 @@ export const Field: React.FC<FieldProps> = memo(
                   layout={(field.options as BlockOptions).layout}
                   value={localValue}
                   valid={localValid}
-                  onChange={(k, v) => {
-                    setLocalValue((current: any) => {
-                      const newLocalValue = { ...current, [k]: v };
-                      onChange(newLocalValue);
-                      return newLocalValue;
-                    });
-                  }}
-                  onValidChange={(k, v) => {
-                    setLocalValid((current: any) => {
-                      const newLocalValid = { ...current, [k]: v };
-                      onValidChange(newLocalValid);
-                      return newLocalValid;
-                    });
-                  }}
+                  onChange={handleBlockChange}
+                  onValidChange={handleBlockValidChange}
                 />
               )}
             </div>
@@ -418,20 +463,8 @@ export const Field: React.FC<FieldProps> = memo(
               layout={(field.options as BlockOptions).layout}
               value={localValue}
               valid={localValid}
-              onChange={(k, v) => {
-                setLocalValue((current: any) => {
-                  const newLocalValue = { ...current, [k]: v };
-                  onChange(newLocalValue);
-                  return newLocalValue;
-                });
-              }}
-              onValidChange={(k, v) => {
-                setLocalValid((current: any) => {
-                  const newLocalValid = { ...current, [k]: v };
-                  onValidChange(newLocalValid);
-                  return newLocalValid;
-                });
-              }}
+              onChange={handleBlockChange}
+              onValidChange={handleBlockValidChange}
             />
           )}
           {parent && field.type === "array" && (

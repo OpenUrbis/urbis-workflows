@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { memo, useCallback, useContext, useRef, useState } from "react";
 import { BlockOptions, IField } from "@open-urbis/types";
 import { AddFieldMenu } from "../components/AddFieldMenu";
 import { FieldOptionEditor } from "../components/FieldOptionEditor";
@@ -8,6 +8,103 @@ import { FieldBlockEditableProps } from "./utils/types";
 import { Tooltip } from "@chakra-ui/react";
 import { StyleContext } from "../../../reducers/style.reducer";
 import { FaCube } from "react-icons/fa";
+
+const FieldEditableItem: React.FC<{
+  parent: any;
+  fieldDef: IField;
+  fieldKey: string;
+  index: number;
+  general: any;
+  value: any;
+  valid: any;
+  context: any;
+  validContext: any;
+  onChange: (key: string, value: any) => void;
+  onValidChange: (key: string, valid: any) => void;
+  onConfigChange: (index: number, config: IField) => void;
+  onRemove: (index: number) => void;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onDragOver: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
+}> = memo(({
+  parent,
+  fieldDef,
+  fieldKey,
+  index,
+  general,
+  value,
+  valid,
+  context,
+  validContext,
+  onChange,
+  onValidChange,
+  onConfigChange,
+  onRemove,
+  onDragStart,
+  onDragOver,
+  onDrop,
+}) => {
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const onValidChangeRef = useRef(onValidChange);
+  onValidChangeRef.current = onValidChange;
+  const onConfigChangeRef = useRef(onConfigChange);
+  onConfigChangeRef.current = onConfigChange;
+  const onRemoveRef = useRef(onRemove);
+  onRemoveRef.current = onRemove;
+  const fieldKeyRef = useRef(fieldKey);
+  fieldKeyRef.current = fieldKey;
+  const indexRef = useRef(index);
+  indexRef.current = index;
+
+  const handleChange = useCallback((v: any) => {
+    onChangeRef.current(fieldKeyRef.current, v);
+  }, []);
+
+  const handleValidChange = useCallback((v: any) => {
+    onValidChangeRef.current(fieldKeyRef.current, v);
+  }, []);
+
+  const handleConfigChange = useCallback((config: IField) => {
+    onConfigChangeRef.current(indexRef.current, config);
+  }, []);
+
+  const handleRemove = useCallback(() => {
+    onRemoveRef.current(indexRef.current);
+  }, []);
+
+  const handleDragStartLocal = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    onDragStart(e, index);
+  }, [onDragStart, index]);
+
+  const handleDragOverLocal = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    onDragOver(e, index);
+  }, [onDragOver, index]);
+
+  return (
+    <div
+      className="mb-4"
+      draggable
+      onDragStart={handleDragStartLocal}
+      onDragOver={handleDragOverLocal}
+      onDrop={onDrop}
+    >
+      <FieldEditable
+        parent={parent}
+        context={context}
+        validContext={validContext}
+        general={general}
+        field={fieldDef}
+        value={value}
+        valid={valid}
+        onChange={handleChange}
+        onValidChange={handleValidChange}
+        onConfigChange={handleConfigChange}
+        onRemove={handleRemove}
+      />
+    </div>
+  );
+});
 
 export const FieldBlockEditable: React.FC<FieldBlockEditableProps> = ({
   parent,
@@ -30,51 +127,68 @@ export const FieldBlockEditable: React.FC<FieldBlockEditableProps> = ({
     number | null
   >(null);
 
-  const handleDragStart = (
+  const fieldRef = useRef(field);
+  fieldRef.current = field;
+  const onConfigChangeRef = useRef(onConfigChange);
+  onConfigChangeRef.current = onConfigChange;
+
+  const handleFieldConfigChange = useCallback((index: number, config: IField) => {
+    const newFields = [...fieldRef.current];
+    newFields[index] = config;
+    onConfigChangeRef.current(newFields);
+  }, []);
+
+  const handleDragStart = useCallback((
     e: React.DragEvent<HTMLDivElement>,
     index: number
   ) => {
     setStartDraggingIndex(index);
     e.dataTransfer.effectAllowed = "move";
-  };
+  }, []);
 
-  const handleDragOver = (
+  const handleDragOver = useCallback((
     e: React.DragEvent<HTMLDivElement>,
     index: number
   ) => {
     e.preventDefault();
-    if (startDraggingIndex === null) return;
+    setStartDraggingIndex((startIdx) => {
+      if (startIdx === null) return startIdx;
 
-    let newIndex = startDraggingIndex < index ? index + 1 : index;
-    newIndex = newIndex > field.length ? field.length : newIndex;
+      let newIndex = startIdx < index ? index + 1 : index;
+      newIndex = newIndex > fieldRef.current.length ? fieldRef.current.length : newIndex;
 
-    if (startDraggingIndex !== newIndex) {
-      setCurrentDraggingIndex(newIndex);
-    }
-  };
+      if (startIdx !== newIndex) {
+        setCurrentDraggingIndex(newIndex);
+      }
+      return startIdx;
+    });
+  }, []);
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     
-    if (startDraggingIndex !== null && currentDraggingIndex !== null) {
-      const newFields = [...field];
-      const [movedItem] = newFields.splice(startDraggingIndex, 1);
-      
-      const targetIndex = startDraggingIndex < currentDraggingIndex
-        ? currentDraggingIndex - 1
-        : currentDraggingIndex;
-      
-      newFields.splice(targetIndex, 0, {
-        ...movedItem,
-        options: { ...movedItem.options }
+    setStartDraggingIndex((startIdx) => {
+      setCurrentDraggingIndex((currentIdx) => {
+        if (startIdx !== null && currentIdx !== null) {
+          const newFields = [...fieldRef.current];
+          const [movedItem] = newFields.splice(startIdx, 1);
+          
+          const targetIndex = startIdx < currentIdx
+            ? currentIdx - 1
+            : currentIdx;
+          
+          newFields.splice(targetIndex, 0, {
+            ...movedItem,
+            options: { ...movedItem.options }
+          });
+
+          onConfigChangeRef.current(newFields);
+        }
+        return null;
       });
-
-      onConfigChange(newFields);
-
-      setStartDraggingIndex(null);
-      setCurrentDraggingIndex(null);
-    }
-  };
+      return null;
+    });
+  }, []);
 
   return (
     <>
@@ -141,38 +255,30 @@ export const FieldBlockEditable: React.FC<FieldBlockEditableProps> = ({
                 </p>
               </div>
             ) : (
-              field.map((f, index) => (
-                <div
-                  key={`parent-${parent.key}-field-${f.key}-${index}-drag`}
-                  className="mb-4"
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={handleDrop}
-                >
-                  <FieldEditable
+              field.map((f, index) => {
+                const fKey = (f.options as any).key ?? f.key;
+                return (
+                  <FieldEditableItem
+                    key={`parent-${parent.key}-field-${f.key}-${index}-drag`}
                     parent={parent}
+                    fieldDef={f}
+                    fieldKey={fKey}
+                    index={index}
+                    general={general}
+                    value={value?.[fKey]}
+                    valid={valid?.[fKey]}
                     context={value}
                     validContext={valid}
-                    general={general}
-                    field={f}
-                    value={value?.[(f.options as any).key ?? f.key]}
-                    valid={valid?.[(f.options as any).key ?? f.key]}
-                    onChange={(v) => {
-                      onChange((f.options as any).key ?? f.key, v);
-                    }}
-                    onValidChange={(valid) => {
-                      onValidChange((f.options as any).key ?? f.key, valid);
-                    }}
-                    onConfigChange={(config: IField) => {
-                      const newFields = [...field];
-                      newFields[index] = config;
-                      onConfigChange(newFields);
-                    }}
-                    onRemove={() => onRemove(index)}
+                    onChange={onChange}
+                    onValidChange={onValidChange}
+                    onConfigChange={handleFieldConfigChange}
+                    onRemove={onRemove}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
                   />
-                </div>
-              ))
+                );
+              })
             )}
             <div className="flex justify-center mt-10">
               <AddFieldMenu
