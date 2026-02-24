@@ -1495,14 +1495,21 @@ export function WorkflowSchemaEditor(): JSX.Element {
                             value={String(selectedActivity.accessLevel)}
                             onValueChange={(value) => {
                               handleUpdateActivity(selectedActivityIndex, {
+                                ...selectedActivity,
                                 accessLevel: Number(value) as PrivacyLevelEnum,
                               });
                             }}
                           >
-                            <SelectTrigger className="h-11">
+                            <SelectTrigger
+                              className="h-11 bg-background text-foreground"
+                              style={{ color: styleContext.state.textColor }}
+                            >
                               <SelectValue placeholder="Selecione o nível de acesso" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent
+                              className="z-[1601] bg-background text-foreground"
+                              style={{ color: styleContext.state.textColor }}
+                            >
                               <SelectItem value={String(PrivacyLevelEnum.PUBLIC)}>
                                 Público
                               </SelectItem>
@@ -1933,10 +1940,16 @@ export function WorkflowSchemaEditor(): JSX.Element {
                   );
                 }}
               >
-                <SelectTrigger className="h-11">
+                <SelectTrigger
+                  className="h-11 bg-background text-foreground"
+                  style={{ color: styleContext.state.textColor }}
+                >
                   <SelectValue placeholder="Selecione o nível de acesso global" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  className="z-[1601] bg-background text-foreground"
+                  style={{ color: styleContext.state.textColor }}
+                >
                   <SelectItem value={String(PrivacyLevelEnum.PUBLIC)}>
                     Público
                   </SelectItem>

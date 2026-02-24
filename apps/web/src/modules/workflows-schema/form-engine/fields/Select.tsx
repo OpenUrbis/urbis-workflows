@@ -73,7 +73,7 @@ export const Select: React.FC<FieldSelectProps> = ({
       <SelectTrigger className={`w-full h-11 ${isReadonly ? "cursor-not-allowed" : ""}`}>
         <SelectValue placeholder={options?.placeholder ?? "Selecione"} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-[1601]">
         {options?.items?.map((item) => (
           <SelectItem key={fieldKey + "#" + item.label} value={item.value.toString()}>
             {item.label}
