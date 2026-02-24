@@ -4,6 +4,14 @@
 @import "tailwindcss/utilities";
 
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
   html,
   body,
   #root,
@@ -19,6 +27,18 @@
     @apply bg-background text-foreground;
     margin: 0;
     font-family: var(--font-family);
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    color-scheme: light;
+    background-color: hsl(var(--background));
+    accent-color: hsl(var(--primary));
+  }
+
+  .dark input[type="checkbox"],
+  .dark input[type="radio"] {
+    color-scheme: dark;
   }
 
   /* Override Chakra UI table inline border/bg to match DS tokens */
