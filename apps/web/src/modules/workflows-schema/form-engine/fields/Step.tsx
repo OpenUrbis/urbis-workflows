@@ -247,7 +247,7 @@ export const Step: React.FC<FieldStepProps> = ({
                     setActiveStep(index);
                     setTimeout(() => setRerender(true), 0);
                   }}
-                  className="flex flex-col items-start gap-2"
+                  className="flex items-center gap-2"
                 >
                   <div
                     className={`h-9 w-9 rounded-xl border-2 flex items-center justify-center transition-colors ${
@@ -262,7 +262,7 @@ export const Step: React.FC<FieldStepProps> = ({
                   >
                     {isStepComplete ? <FaCheck size={14} /> : <FaCircle size={8} />}
                   </div>
-                  <div className={`flex items-center space-x-2 ${window.innerWidth <= 500 ? "mt-2" : ""}`}>
+                  <div className="flex items-center space-x-2">
                     <span style={{ color: styleContext.state.textColor }}>
                       {(f.options as BlockOptions).label}
                     </span>

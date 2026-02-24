@@ -5,7 +5,7 @@ import {
   FormHelperText,
   Badge,
 } from "@chakra-ui/react";
-import { Button as DSButton, Input as DSInput } from "@open-urbis/map-ui";
+import { Input as DSInput } from "@open-urbis/map-ui";
 import { FaProjectDiagram, FaSearch, FaTimes } from "react-icons/fa";
 import { ActivityTemplate } from "../../../api/types/schema";
 import { SideDrawer } from "../../../components/SideDrawer";
@@ -123,7 +123,8 @@ export const ActivityDependenciesSelector: React.FC<
               ))
             )}
           </div>
-          <DSButton
+          <button
+            type="button"
             onClick={handleOpen}
             className={`flex items-center px-4 py-3 rounded-lg transition-colors duration-150 w-full ${
               isOpen
@@ -164,7 +165,7 @@ export const ActivityDependenciesSelector: React.FC<
                 </span>
               </div>
             </div>
-          </DSButton>
+          </button>
         </div>
         <FormHelperText style={{ color: styleContext.state.textColor }}>
           {helperText}
