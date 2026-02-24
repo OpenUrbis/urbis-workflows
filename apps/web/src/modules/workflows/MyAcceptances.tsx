@@ -113,7 +113,7 @@ export function MyAcceptances(): JSX.Element {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden border border-border">
           {data.length === 0 ? (
             <EmptyState />
           ) : (

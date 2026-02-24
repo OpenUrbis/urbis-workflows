@@ -165,7 +165,7 @@ export function MyProtocols(): JSX.Element {
             </div>
           </div>
 
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden border border-border">
             {data.length === 0 ? (
               <EmptyState />
             ) : (
