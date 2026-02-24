@@ -125,7 +125,7 @@ export function DocumentValidate(): JSX.Element {
 
   return (
     <div className="mx-auto mt-8 mb-24 w-full max-w-2xl px-4">
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold tracking-tight">
             Consultar <span className="text-red-500">Documento</span>
