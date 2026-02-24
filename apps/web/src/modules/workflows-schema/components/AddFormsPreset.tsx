@@ -218,7 +218,7 @@ export const AddFormsPreset: React.FC<AddFormPresetProps> = ({
         </div>
         <div className="fixed bottom-16 right-4 flex space-x-4">
           <button
-            className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80"
+            className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-80"
             disabled={
               loading ||
               !newPresetForm.label ||
@@ -228,7 +228,8 @@ export const AddFormsPreset: React.FC<AddFormPresetProps> = ({
             onClick={handleAddPreset}
           >
             <FaPlus size={14} />
-            <span>Adicionar</span> <SL bg="yellow.600">S</SL>
+            <span>Adicionar</span>{" "}
+            <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">S</SL>
           </button>
         </div>
       </div>

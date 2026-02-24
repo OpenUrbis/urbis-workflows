@@ -15,6 +15,30 @@ interface ShortcutLabelProps {
   className?: string;
 }
 
+const resolveBackground = (bg: string | undefined, fallback: string) => {
+  if (!bg) return fallback;
+
+  if (bg === "primary") return "hsl(var(--primary))";
+  if (bg === "primary-foreground") return "hsl(var(--primary-foreground))";
+
+  const tokenMap: Record<string, string> = {
+    "gray.100": "#f3f4f6",
+    "gray.200": "#e5e7eb",
+    "gray.600": "#4b5563",
+    "yellow.100": "#fef9c3",
+    "yellow.600": "#ca8a04",
+    "yellow.700": "#a16207",
+    "yellow.800": "#854d0e",
+    "yellow.900": "#713f12",
+    "green.600": "#16a34a",
+    "green.800": "#166534",
+    "blue.600": "#2563eb",
+    "blue.800": "#1e40af",
+  };
+
+  return tokenMap[bg] ?? bg;
+};
+
 export function SL({
   children,
   size,
@@ -73,9 +97,12 @@ export function SL({
                       ? "1.125rem"
                       : size,
               background:
-                bg ??
-                (state.buttonHoverColorWeight === "200" ? "#e5e7eb" : "#374151"),
-              color: state.buttonHoverColorWeight === "200" ? undefined : "#fff",
+                resolveBackground(
+                  bg,
+                  state.buttonHoverColorWeight === "200" ? "#e5e7eb" : "#374151"
+                ),
+              color:
+                bg ? undefined : state.buttonHoverColorWeight === "200" ? undefined : "#fff",
             }}
           >
             {children}

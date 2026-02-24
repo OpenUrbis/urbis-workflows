@@ -124,12 +124,13 @@ export function SignUpEditor(): JSX.Element {
         <Button
           type="button"
           size="sm"
-          className="h-10 px-5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80"
+          className="h-10 px-5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-80"
           disabled={loading}
           onClick={handleSave}
         >
           <FaSave size={14} />
-          <span>Salvar</span> <SL bg="yellow.600">S</SL>
+          <span>Salvar</span>{" "}
+          <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">S</SL>
         </Button>
       </div>
     </div>

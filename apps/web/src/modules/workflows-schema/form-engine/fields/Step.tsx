@@ -362,14 +362,14 @@ export const Step: React.FC<FieldStepProps> = ({
                     nextStepDisabled ? "opacity-50 cursor-not-allowed" : ""
                   } ${
                     styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-yellow-600 hover:bg-yellow-700"
-                      : "bg-yellow-800 hover:bg-yellow-900"
+                      ? "bg-primary hover:bg-primary/90"
+                      : "bg-primary hover:bg-primary/90"
                   }`}
                   onClick={() => setNextStep(activeStep)}
                   disabled={nextStepDisabled}
                 >
                   Próximo{" "}
-                  <SL className="ml-2" bg="yellow.500">
+                  <SL className="ml-2 text-[hsl(var(--primary-foreground))]" bg="primary">
                     →
                   </SL>
                 </Button>

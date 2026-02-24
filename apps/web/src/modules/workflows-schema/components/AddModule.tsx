@@ -52,7 +52,7 @@ export const AddModule: React.FC<AddModuleProps> = ({
 
   const addButton = (
     <button
-      className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80"
+      className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-80"
       disabled={
         !newFunctionForm.label ||
         !newFunctionForm.namespace ||
@@ -62,7 +62,8 @@ export const AddModule: React.FC<AddModuleProps> = ({
       onClick={() => onAddFunction(newFunctionForm)}
     >
       <FaPlus size={14} />
-      <span>Adicionar</span> <SL bg="yellow.600">{fixedButton ? "S" : "N"}</SL>
+      <span>Adicionar</span>{" "}
+      <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">{fixedButton ? "S" : "N"}</SL>
     </button>
   );
 

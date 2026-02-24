@@ -261,12 +261,12 @@ const DirectoryView = <T extends TreeItem>({
                   <span className="flex items-center">
                     {expandedItems.has(name) ? (
                       <FaFolderOpen
-                        className={`text-yellow-500 ${isCompact ? "mr-2" : "mr-3"}`}
+                        className={`text-primary ${isCompact ? "mr-2" : "mr-3"}`}
                         size={folderOpenSize}
                       />
                     ) : (
                       <FaFolder
-                        className={`text-yellow-500 ${isCompact ? "mr-2" : "mr-3"}`}
+                        className={`text-primary ${isCompact ? "mr-2" : "mr-3"}`}
                         size={folderSize}
                       />
                     )}
@@ -341,7 +341,7 @@ const DirectoryView = <T extends TreeItem>({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span
-                                className={`${isCompact ? "text-sm" : "text-base"} font-medium truncate text-foreground hover:text-yellow-600 transition-colors duration-200`}
+                                className={`${isCompact ? "text-sm" : "text-base"} font-medium truncate text-foreground hover:text-primary transition-colors duration-200`}
                               >
                                 {item.label}
                               </span>

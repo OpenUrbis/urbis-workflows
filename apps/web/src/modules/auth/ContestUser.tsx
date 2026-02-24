@@ -171,14 +171,14 @@ export function ContestUser(): JSX.Element {
           <button
             type="submit"
             onClick={handleSignUp}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white text-lg w-full py-3.5 rounded-xl disabled:opacity-80"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg w-full py-3.5 rounded-xl disabled:opacity-80"
             disabled={loading || !email || !document || !name}
           >
             {loading ? (
               <Spinner />
             ) : (
               <>
-                Contestar <SL bg="yellow.500">U</SL>
+                Contestar <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">U</SL>
               </>
             )}
           </button>
@@ -186,7 +186,7 @@ export function ContestUser(): JSX.Element {
         <div className="text-center pt-4">
           Não deseja contestar mais?{" "}
           <button
-            className="cursor-pointer hover:text-yellow-600 text-yellow-500 font-bold"
+            className="cursor-pointer hover:text-primary/90 text-primary font-bold"
             onClick={() => signIn()}
           >
             Entrar <SL>E</SL>

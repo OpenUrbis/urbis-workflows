@@ -130,9 +130,7 @@ export const IncomingActivity: React.FC<{
                 type="submit"
                 disabled={!workflowId}
                 className={`px-4 py-2 rounded-md text-white font-medium transition-colors ${
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-yellow-500 hover:bg-yellow-600"
-                    : "bg-yellow-600 hover:bg-yellow-700"
+                  "bg-primary hover:bg-primary/90 text-primary-foreground"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 Buscar

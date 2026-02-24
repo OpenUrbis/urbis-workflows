@@ -268,9 +268,9 @@ const PromptModal: FC<PromptProps> = ({
               className={`w-32 px-4 py-3 text-2xl font-bold text-center rounded-lg border ${
                 hasError
                   ? "border-red-400 focus:border-red-500"
-                  : "border-gray-200 focus:border-yellow-400"
+                  : "border-gray-200 focus:border-primary"
               } focus:outline-none focus:ring-2 ${
-                hasError ? "focus:ring-red-200" : "focus:ring-yellow-100"
+                hasError ? "focus:ring-red-200" : "focus:ring-primary/20"
               }`}
               placeholder="0"
               style={{
@@ -287,8 +287,8 @@ const PromptModal: FC<PromptProps> = ({
               <SL
                 bg={
                   styleContext.state.buttonHoverColorWeight === "200"
-                    ? "yellow.100"
-                    : "yellow.800"
+                    ? "primary"
+                    : "primary"
                 }
                 className="ml-1"
                 alwaysShow
@@ -401,31 +401,19 @@ const PromptModal: FC<PromptProps> = ({
               ${
                 hasError
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-yellow-600 hover:bg-yellow-700 text-white"
+                  : "bg-primary hover:bg-primary/90 text-primary-foreground"
               }`}
             disabled={hasError}
             onClick={handleConfirm}
-            style={
-              hasError
-                ? undefined
-                : {
-                    backgroundColor:
-                      styleContext.state.backgroundColor === "#000000"
-                        ? "#d97706"
-                        : undefined,
-                    color: "#ffffff",
-                  }
-            }
           >
             <span>{isIndexSelector ? "Selecionar" : "Confirmar"}</span>
             <SL
               bg={
                 hasError
                   ? "gray.200"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "yellow.600"
-                    : "yellow.900"
+                  : "primary"
               }
+              className={hasError ? undefined : "text-[hsl(var(--primary-foreground))]"}
             >
               Enter
             </SL>

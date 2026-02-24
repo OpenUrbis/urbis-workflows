@@ -65,7 +65,7 @@ export const Radio: React.FC<FieldRadioProps> = ({
             <input
               type="radio"
               name={fieldKey}
-              className="h-4 w-4 border-gray-300 text-yellow-600 focus:ring-yellow-500"
+              className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
               value={item.value.toString()}
               checked={currentValue === item.value.toString()}
               disabled={isReadonly}

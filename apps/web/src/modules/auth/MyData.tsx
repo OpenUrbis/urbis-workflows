@@ -218,8 +218,8 @@ export function MyData(): JSX.Element {
                     size="lg"
                     color={
                       styleContext.state.buttonHoverColorWeight === "200"
-                        ? "yellow.500"
-                        : "yellow.300"
+                        ? "primary"
+                        : "primary"
                     }
                   />
                 </div>
@@ -250,11 +250,12 @@ export function MyData(): JSX.Element {
           <div className="fixed bottom-16 right-4 flex space-x-4">
             <button
               onClick={handleSave}
-              className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80"
+              className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-80"
               disabled={isLoading}
             >
               <FaSave size={14} />
-              <span>Salvar</span> <SL bg="yellow.600">S</SL>
+              <span>Salvar</span>{" "}
+              <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">S</SL>
             </button>
           </div>
         </>

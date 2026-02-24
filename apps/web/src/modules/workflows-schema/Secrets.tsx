@@ -349,18 +349,19 @@ export const Secrets: React.FC = () => {
         <Button
           type="button"
           size="sm"
-          className={`mt-4 h-9 rounded-full px-4 gap-2 ${
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "bg-yellow-600 hover:bg-yellow-700"
-              : "bg-yellow-800 hover:bg-yellow-900"
-          }`}
+          className="mt-4 h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={handleAddSecretForm}
           disabled={loading}
         >
           <FaPlus size={16} />
           <span>Segredo</span>
           <span className="text-sm opacity-75 ml-2">
-            <SL bg="yellow.600">N</SL>
+            <SL
+              bg="hsl(var(--primary))"
+              className="text-[hsl(var(--primary-foreground))]"
+            >
+              N
+            </SL>
           </span>
         </Button>
       </div>
@@ -400,17 +401,18 @@ export const Secrets: React.FC = () => {
               <Button
                 type="button"
                 size="sm"
-                className={`h-9 rounded-full px-4 gap-2 ${
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-yellow-600 hover:bg-yellow-700"
-                    : "bg-yellow-800 hover:bg-yellow-900"
-                }`}
+                className="h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleAddSecretForm}
               >
                 <FaPlus size={16} />
                 <span>Segredo</span>
                 <span className="text-sm opacity-75 ml-2">
-                  <SL bg="yellow.600">N</SL>
+                  <SL
+                    bg="hsl(var(--primary))"
+                    className="text-[hsl(var(--primary-foreground))]"
+                  >
+                    N
+                  </SL>
                 </span>
               </Button>
             </div>
@@ -560,17 +562,18 @@ export const Secrets: React.FC = () => {
                       <Button
                         type="button"
                         size="sm"
-                        className={`h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 text-white ${
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "bg-yellow-600 hover:bg-yellow-700"
-                            : "bg-yellow-800 hover:bg-yellow-900"
-                        }`}
+                        className="h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground"
                         onClick={handleSaveSecret}
                         disabled={loading}
                       >
                         <FaSave size={14} />
                         <span>Salvar</span>
-                        <SL bg="yellow.600">S</SL>
+                        <SL
+                          bg="hsl(var(--primary))"
+                          className="text-[hsl(var(--primary-foreground))]"
+                        >
+                          S
+                        </SL>
                       </Button>
                     </div>
                   </div>

@@ -218,14 +218,14 @@ export const Datasets: React.FC = () => {
           Base de dados
         </h1>
         <button
-          className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 font-medium"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors duration-200 font-medium"
           onClick={handleAddDatasetForm}
           disabled={loading}
         >
           <FaPlus size={16} />
           <span>Base de dados</span>
           <span className="text-sm opacity-75 ml-2">
-            <SL bg="yellow.600">N</SL>
+            <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
           </span>
         </button>
       </div>
@@ -262,13 +262,13 @@ export const Datasets: React.FC = () => {
                 Selecione uma base de dados da lista ao lado ou crie uma nova
               </p>
               <button
-                className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 font-medium"
+                className="flex items-center space-x-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors duration-200 font-medium"
                 onClick={handleAddDatasetForm}
               >
                 <FaPlus size={16} />
                 <span>Base de dados</span>
                 <span className="text-sm opacity-75 ml-2">
-                  <SL bg="yellow.600">N</SL>
+                  <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
                 </span>
               </button>
             </div>
@@ -383,19 +383,13 @@ export const Datasets: React.FC = () => {
 
               <div className="fixed bottom-16 right-4 flex space-x-4">
                 <button
-                  className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200"
+                  className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground"
                   onClick={handleSaveDataset}
                   disabled={loading}
-                  style={{
-                    backgroundColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#ca8a04"
-                        : "#854d0e",
-                    color: "#ffffff",
-                  }}
                 >
                   <FaSave size={14} />
-                  <span>Salvar</span> <SL bg="yellow.600">S</SL>
+                  <span>Salvar</span>{" "}
+                  <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">S</SL>
                 </button>
               </div>
             </>

@@ -163,7 +163,7 @@ export const ArrayField: React.FC<FieldArrayProps> = ({
               <Button
                 type="button"
                 size="sm"
-                className="h-9 px-4 gap-2 text-white bg-yellow-600 hover:bg-yellow-700"
+                className="h-9 px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleAdd}
               >
                 <FaPlus />
@@ -230,7 +230,7 @@ export const ArrayField: React.FC<FieldArrayProps> = ({
             <Button
               type="button"
               size="sm"
-              className="h-9 px-4 gap-2 text-white bg-yellow-600 hover:bg-yellow-700"
+              className="h-9 px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={handleAdd}
             >
               <FaPlus />
@@ -246,7 +246,7 @@ export const ArrayField: React.FC<FieldArrayProps> = ({
         <Button
           type="button"
           size="sm"
-          className="h-9 px-4 gap-2 text-white bg-yellow-600 hover:bg-yellow-700"
+          className="h-9 px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={handleAdd}
         >
           <FaPlus />

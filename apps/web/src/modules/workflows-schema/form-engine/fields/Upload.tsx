@@ -322,7 +322,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
                         className={`mt-1 w-full h-1.5 ${isLightMode ? "bg-gray-200" : "bg-gray-700"} rounded-full overflow-hidden`}
                       >
                         <div
-                          className={`h-full ${isLightMode ? "bg-yellow-500" : "bg-yellow-500"} rounded-full transition-all duration-200`}
+                          className="h-full bg-primary rounded-full transition-all duration-200"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
@@ -335,8 +335,8 @@ export const Upload: React.FC<FieldUploadProps> = ({
                           onClick={() => downloadFile(options.dir, filename)}
                           className={`p-1.5 rounded-full transition-colors ${
                             isLightMode
-                              ? "text-gray-500 hover:text-yellow-600 hover:bg-yellow-50"
-                              : "text-gray-300 hover:text-yellow-400 hover:bg-yellow-900/20"
+                              ? "text-gray-500 hover:text-primary hover:bg-primary/10"
+                              : "text-gray-300 hover:text-primary hover:bg-primary/10"
                           }`}
                           title="Baixar arquivo"
                         >
@@ -346,8 +346,8 @@ export const Upload: React.FC<FieldUploadProps> = ({
                           onClick={() => removeUploadedFile(filename)}
                           className={`p-1.5 rounded-full transition-colors ${
                             isLightMode
-                              ? "text-gray-500 hover:text-yellow-600 hover:bg-yellow-50"
-                              : "text-gray-300 hover:text-yellow-400 hover:bg-yellow-900/20"
+                              ? "text-gray-500 hover:text-primary hover:bg-primary/10"
+                              : "text-gray-300 hover:text-primary hover:bg-primary/10"
                           }`}
                           title="Remover arquivo"
                           disabled={isReadonly}
@@ -376,15 +376,15 @@ export const Upload: React.FC<FieldUploadProps> = ({
         className={`relative border-2 border-dashed rounded-xl p-6 transition-all duration-200 ${
           isDragging
             ? isLightMode
-              ? "border-yellow-400 bg-yellow-50"
-              : "border-yellow-600 bg-yellow-900/10"
+              ? "border-primary bg-primary/5"
+              : "border-primary bg-primary/10"
             : isReadonly
               ? isLightMode
                 ? "border-gray-300 bg-gray-100 opacity-70"
                 : "border-gray-600 bg-gray-800/20 opacity-70"
               : isLightMode
-                ? "border-gray-300 hover:border-yellow-400 bg-gray-50"
-                : "border-gray-600 hover:border-yellow-500 bg-gray-800/10"
+                ? "border-gray-300 hover:border-primary bg-gray-50"
+                : "border-gray-600 hover:border-primary bg-gray-800/10"
         }`}
         onDragEnter={handleDrag}
         onDragOver={handleDrag}
@@ -396,8 +396,8 @@ export const Upload: React.FC<FieldUploadProps> = ({
             className={`p-3 rounded-full ${
               isDragging
                 ? isLightMode
-                  ? "bg-yellow-100 text-yellow-600"
-                  : "bg-yellow-900/20 text-yellow-400"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-primary/10 text-primary"
                 : isLightMode
                   ? "bg-gray-100 text-gray-500"
                   : "bg-gray-800 text-gray-300"
@@ -434,7 +434,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
 
           <label
             htmlFor={inputKey.toString()}
-            className={`bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-150 ${
+            className={`bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-150 ${
               isReadonly ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
             }`}
           >

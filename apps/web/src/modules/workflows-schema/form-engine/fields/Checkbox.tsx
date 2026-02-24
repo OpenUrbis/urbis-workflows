@@ -59,7 +59,7 @@ export const Checkbox: React.FC<FieldCheckboxProps> = ({
           >
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               checked={value[item.value] === true}
               disabled={isReadonly}
             onChange={(e) => {

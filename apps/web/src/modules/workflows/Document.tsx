@@ -276,7 +276,7 @@ export function Document(): JSX.Element {
               <>
                 <div className="text-end x">
                   <button
-                    className={`bg-yellow-600 hover:bg-yellow-700 text-white text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                    className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
                     onClick={handleExtraApostille}
                   >
                     Ex Officio
@@ -284,7 +284,7 @@ export function Document(): JSX.Element {
                 </div>
                 <div className="text-end">
                   <button
-                    className={`bg-yellow-600 hover:bg-yellow-700 text-white text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                    className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
                     onClick={handleApostille}
                   >
                     Apostilar
@@ -421,7 +421,7 @@ export function Document(): JSX.Element {
               ></Field>
               <div className="text-center">
                 <button
-                  className={`bg-yellow-600 hover:bg-yellow-700 text-white text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                  className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
                   onClick={handleAccept}
                 >
                   Aceitar
@@ -561,7 +561,7 @@ export function Document(): JSX.Element {
                 protocolo por "Pedidos".
               </p>
               <div
-                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xl py-4 px-6 rounded-xl disabled:opacity-80 cursor-pointer"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80 cursor-pointer"
                 onClick={mockCallPayment}
               >
                 <RiBarcodeFill className="inline" size={42} /> Baixar boleto
@@ -583,7 +583,7 @@ export function Document(): JSX.Element {
             <div className="flex flex-col space-y-4 justify-center text-center pt-6 cursor-pointer">
               <div
                 onClick={() => downloadDocument()}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xl py-4 px-6 rounded-xl disabled:opacity-80"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80"
               >
                 <img
                   className="inline mr-2"
@@ -599,7 +599,7 @@ export function Document(): JSX.Element {
             <div className="flex flex-col space-y-4 justify-center text-center cursor-pointer">
               <div
                 onClick={() => downloadPlate()}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xl py-4 px-6 rounded-xl disabled:opacity-80"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80"
               >
                 <img
                   className="inline mr-2"

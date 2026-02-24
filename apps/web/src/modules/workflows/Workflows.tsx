@@ -642,7 +642,7 @@ export function Workflows(): JSX.Element {
                 <DSButton
                   className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 ${
                     canSubmit && !isSubmitting
-                      ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+                      ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                       : "bg-gray-400 cursor-not-allowed text-white"
                   }`}
                   onClick={handleFormSubmit}
@@ -1044,11 +1044,11 @@ export function Workflows(): JSX.Element {
               <DSButton
                 className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 ${
                   canSubmit
-                    ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                     : "bg-gray-400 cursor-not-allowed text-white"
                 }`}
                 onClick={handleProtocol}
-                disabled={loading || !canSubmit}
+                disabled={loading}
                 title={
                   !canSubmit ? "Complete todos os campos obrigatórios" : ""
                 }

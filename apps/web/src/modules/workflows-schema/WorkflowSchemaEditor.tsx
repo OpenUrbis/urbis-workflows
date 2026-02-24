@@ -1714,33 +1714,20 @@ export function WorkflowSchemaEditor(): JSX.Element {
                     </button>
                     <div className="flex">
                       <button
-                        className="bg-yellow-600 hover:bg-yellow-700 text-white pl-6 pr-2 py-2.5 rounded-l-lg shadow-lg flex items-center space-x-2"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground pl-6 pr-2 py-2.5 rounded-l-lg shadow-lg flex items-center space-x-2"
                         onClick={() => handleSave()}
                         disabled={loading}
-                        style={{
-                          backgroundColor:
-                            styleContext.state.backgroundColor === "#000000"
-                              ? "#d97706"
-                              : undefined,
-                          color: "#ffffff",
-                        }}
                       >
                         <FaSave size={14} />
                         <span>
                           {isLocalDraft ? "Salvar Rascunho" : "Salvar"}
                         </span>{" "}
-                        <SL bg="yellow.600">M</SL>
+                        <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">M</SL>
                       </button>
                       <Menu>
                         <MenuButton
                           as="button"
-                          className="px-4 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-r-lg flex items-center justify-center space-x-2"
-                          style={{
-                            backgroundColor:
-                              styleContext.state.backgroundColor === "#000000"
-                                ? "#d97706"
-                                : undefined,
-                          }}
+                          className="px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-r-lg flex items-center justify-center space-x-2"
                         >
                           <div className="flex items-center space-x-2">
                             <FaChevronDown size={12} />
@@ -1815,19 +1802,13 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 )}
                 {id === "new" && (
                   <button
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2"
                     onClick={() => handleSave()}
                     disabled={loading}
-                    style={{
-                      backgroundColor:
-                        styleContext.state.backgroundColor === "#000000"
-                          ? "#d97706"
-                          : undefined,
-                      color: "#ffffff",
-                    }}
                   >
                     <FaSave size={14} />
-                    <span>Criar Assunto</span> <SL bg="yellow.600">M</SL>
+                    <span>Criar Assunto</span>{" "}
+                    <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">M</SL>
                   </button>
                 )}
               </div>

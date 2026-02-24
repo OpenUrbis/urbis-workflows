@@ -15,17 +15,12 @@ import {
 } from "react-icons/fa";
 import { Loader2, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import * as RadixDialog from "@radix-ui/react-dialog";
 import {
   Button,
   Card,
   CardContent,
   CardFooter,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   Input,
 } from "@open-urbis/map-ui";
 import { ApiClient } from "../../api";
@@ -188,11 +183,7 @@ export const WorkflowsSchema: React.FC = () => {
                     placeholder="Buscar assunto..."
                     value={search}
                     onChange={(e: any) => setSearch(e.target.value)}
-                    className={`w-full h-10 pl-10 text-sm transition-all duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "focus:ring-2 focus:ring-yellow-200 border-gray-200"
-                        : "focus:ring-2 focus:ring-yellow-600 border-gray-700"
-                    }`}
+                    className="w-full h-10 pl-10 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -219,54 +210,58 @@ export const WorkflowsSchema: React.FC = () => {
           />
         </>
       )}
-      <Dialog
+      <RadixDialog.Root
         open={!!selectedDescription}
         onOpenChange={(open) => !open && setSelectedDescription(null)}
       >
-        <DialogContent className="max-w-[640px] rounded-2xl border-muted/80 p-0 overflow-hidden">
-          <DialogHeader className="px-6 pt-6 pb-3">
-            <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
-              {selectedDescription?.label}
-            </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Descrição completa do assunto selecionado.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-[55vh] overflow-y-auto px-6 pb-2">
-            <div
-              className="max-w-none text-sm leading-6 text-foreground"
-              dangerouslySetInnerHTML={{
-                __html: selectedDescription?.text || "",
-              }}
-            />
-          </div>
-          <DialogFooter className="px-6 py-4 border-t bg-muted/20 gap-2 sm:gap-3">
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => {
-                setSelectedDescription(null);
-                if (selectedDescription) {
-                  handleRequest(selectedDescription.id);
-                }
-              }}
-              className="h-9 px-4 gap-2"
-            >
-              <span>Solicitar</span>
-              <SL bg="yellow.700">Enter</SL>
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="h-9 px-4 border-border bg-background hover:bg-muted text-foreground"
-              onClick={() => setSelectedDescription(null)}
-            >
-              Fechar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <RadixDialog.Portal>
+          <RadixDialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+          <RadixDialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-[640px] translate-x-[-50%] translate-y-[-50%] rounded-2xl border border-muted/80 bg-background p-0 shadow-lg outline-none overflow-hidden">
+            <div className="px-6 pt-6 pb-3">
+              <RadixDialog.Title className="text-xl font-semibold tracking-tight text-foreground">
+                {selectedDescription?.label}
+              </RadixDialog.Title>
+              <RadixDialog.Description className="text-sm text-muted-foreground">
+                Descrição completa do assunto selecionado.
+              </RadixDialog.Description>
+            </div>
+            <div className="max-h-[55vh] overflow-y-auto px-6 pb-2">
+              <div
+                className="max-w-none text-sm leading-6 text-foreground"
+                dangerouslySetInnerHTML={{
+                  __html: selectedDescription?.text || "",
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-end px-6 py-4 border-t bg-muted/20 gap-2 sm:gap-3">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setSelectedDescription(null);
+                  if (selectedDescription) {
+                    handleRequest(selectedDescription.id);
+                  }
+                }}
+                className="h-9 px-4 gap-2"
+              >
+                <span>Solicitar</span>
+                <SL bg="hsl(var(--primary))" className="text-[hsl(var(--primary-foreground))]">Enter</SL>
+              </Button>
+              <RadixDialog.Close asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-4 border-border bg-background hover:bg-muted text-foreground"
+                >
+                  Fechar
+                </Button>
+              </RadixDialog.Close>
+            </div>
+          </RadixDialog.Content>
+        </RadixDialog.Portal>
+      </RadixDialog.Root>
     </div>
   );
 };
@@ -332,7 +327,6 @@ const StageSelectorButton = ({
   stage: string;
   setStage: (stage: string) => void;
 }) => {
-  const styleContext = useContext(StyleContext);
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
@@ -388,22 +382,12 @@ const StageSelectorButton = ({
         <Button
           onClick={() => navigate("/workflows-schema/new")}
           size="sm"
-          className={`h-9 rounded-full px-4 gap-2 ${
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-              : "bg-yellow-600 hover:bg-yellow-700 text-white"
-          }`}
+          className="h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <FaPlus size={16} />
           <span>Assunto</span>
           <span className="text-sm opacity-75 ml-2">
-            <SL
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "yellow.600"
-                  : "yellow.700"
-              }
-            >
+            <SL bg="hsl(var(--primary))" className="text-[hsl(var(--primary-foreground))]">
               N
             </SL>
           </span>
@@ -473,7 +457,7 @@ const WorkflowsList = ({
           key={workflow.id}
           className={`group rounded-2xl border transition-all duration-200 ${
             isGridView ? "hover:shadow-sm" : "hover:bg-opacity-50"
-          } border-border bg-card text-card-foreground hover:border-yellow-500/70 hover:bg-muted/30`}
+          } border-border bg-card text-card-foreground hover:border-primary/60 hover:bg-muted/30`}
         >
           <CardContent className="p-5">
           <div
@@ -527,22 +511,12 @@ const WorkflowsList = ({
                 <Button
                   onClick={() => handleRequest(workflow.id)}
                   size="sm"
-                  className={`h-9 rounded-full px-5 gap-2 min-w-[150px] ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                      : "bg-yellow-600 hover:bg-yellow-700 text-white"
-                  }`}
+                  className="h-9 rounded-full px-5 gap-2 min-w-[150px] bg-primary hover:bg-primary/90 text-primary-foreground"
                   title={isAuthenticated ? "Solicitar" : "Entrar para solicitar"}
                 >
                   <FaPlus size={18} />
                   <span>Solicitar</span>
-                  <SL
-                    bg={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "yellow.600"
-                        : "yellow.700"
-                    }
-                  >
+                  <SL bg="hsl(var(--primary))" className="text-[hsl(var(--primary-foreground))]">
                     {`S+${index + 1}`}
                   </SL>
                 </Button>
@@ -634,7 +608,7 @@ const ViewButton = ({
         onClick={onClick}
         className={`h-8 w-8 transition-all duration-200 ${
           active
-            ? "bg-card text-yellow-500 border border-border shadow-sm"
+            ? "bg-card text-primary border border-border shadow-sm"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
         }`}
       >
