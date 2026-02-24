@@ -297,16 +297,9 @@ export const Modules: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden">
+      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden border-border bg-card text-card-foreground">
         <div
-          className="w-3/12 border-r"
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-            backgroundColor: styleContext.state.backgroundColor,
-          }}
+          className="w-3/12 border-r border-border bg-card"
         >
           <TreeList
             items={functions}

@@ -54,16 +54,9 @@ export function Profile(): JSX.Element {
         Representações
       </h1>
 
-      <div className="flex flex-grow border rounded-lg overflow-hidden">
+      <div className="flex flex-grow border rounded-lg overflow-hidden border-border bg-card text-card-foreground">
         <div
-          className="flex flex-col py-4 w-3/12 border-r"
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-            backgroundColor: styleContext.state.backgroundColor,
-          }}
+          className="flex flex-col py-4 w-3/12 border-r border-border bg-card"
         >
           {menus.map((menu) => (
             <div
@@ -80,8 +73,7 @@ export function Profile(): JSX.Element {
             >
               <button
                 onClick={() => setSubpage(menu.link)}
-                className="flex justify-between w-full items-center"
-                style={{ color: styleContext.state.textColor }}
+                className="flex justify-between w-full items-center text-card-foreground"
               >
                 <div className="flex items-center space-x-3">
                   {menu.icon}
