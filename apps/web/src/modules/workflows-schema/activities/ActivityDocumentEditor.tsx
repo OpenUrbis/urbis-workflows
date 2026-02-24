@@ -217,7 +217,7 @@ export const ActivityDocumentEditor = ({
               .map((doc) => (
                 <div
                   key={doc.id}
-                  className={`p-3 border rounded cursor-pointer flex justify-between items-center group transition-colors duration-150`}
+                  className={`p-3 border rounded-xl cursor-pointer flex justify-between items-center group transition-colors duration-150`}
                   onClick={() => setSelectedDocumentId(doc.id)}
                   style={{
                     backgroundColor:
@@ -315,16 +315,16 @@ export const ActivityDocumentEditor = ({
 
         <div className="w-3/4 pl-4">
           {!selectedDocumentId && (
-            <div className="flex flex-col mt-6 items-center justify-center h-full text-gray-500">
-              <FaFileAlt size={48} className="mb-4 opacity-50" />
+            <div className="flex flex-col mt-4 items-center justify-center min-h-[220px] text-gray-500">
+              <FaFileAlt size={36} className="mb-3 opacity-50" />
               <p
-                className="text-xl font-medium mb-2"
+                className="text-lg font-medium mb-1"
                 style={{ color: styleContext.state.textColor }}
               >
                 Nenhum documento selecionado
               </p>
               <p
-                className="text-sm mb-6"
+                className="text-sm mb-4"
                 style={{ color: styleContext.state.textColor }}
               >
                 Selecione um documento da lista ao lado ou crie um novo

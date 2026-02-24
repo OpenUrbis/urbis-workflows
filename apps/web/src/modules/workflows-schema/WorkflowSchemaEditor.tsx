@@ -27,6 +27,12 @@ import {
   SelectValue,
 } from "@open-urbis/map-ui";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@open-urbis/map-ui/ui/dropdown-menu";
+import {
   Button,
   FormControl,
   FormHelperText,
@@ -211,40 +217,23 @@ const tabConfig = [
 const ActivityMenuButton: React.FC<{
   onAddActivity: (type: ActivityTypeEnum) => void;
   buttonClassName?: string;
-  styleContext: any;
-}> = ({ onAddActivity, buttonClassName, styleContext }) => {
+}> = ({ onAddActivity, buttonClassName }) => {
   return (
-    <Menu>
-      <MenuButton
-        as="button"
-        className={`px-6 py-2.5 rounded-lg flex items-center justify-center ${
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "bg-blue-500 hover:bg-blue-600 text-white"
-            : "bg-blue-800 hover:bg-blue-700 text-blue-100"
-        } ${buttonClassName || ""}`}
-      >
-        <div className="flex items-center">
-          <FaPlus size={14} className="mr-2" />
-          <span>Atividade</span>
-        </div>
-      </MenuButton>
-      <MenuList
-        zIndex={"overlay"}
-        bg={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "white"
-            : "gray.800"
-        }
-        maxHeight="300px"
-        overflowY="auto"
-        boxShadow="lg"
-        border="1px solid"
-        borderColor={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.200"
-            : "gray.600"
-        }
-        py={2}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={`px-6 py-2.5 rounded-lg flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white transition-colors ${buttonClassName || ""}`}
+        >
+          <div className="flex items-center">
+            <FaPlus size={14} className="mr-2" />
+            <span>Atividade</span>
+          </div>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="max-h-[300px] overflow-y-auto min-w-[200px]"
+        align="start"
       >
         {[
           {
@@ -268,32 +257,17 @@ const ActivityMenuButton: React.FC<{
             icon: <FaFileAlt className="text-purple-500" />,
           },
         ].map((item) => (
-          <MenuItem
+          <DropdownMenuItem
             key={item.type}
-            onClick={() => onAddActivity(item.type)}
+            onSelect={() => onAddActivity(item.type)}
             className="flex items-center space-x-2"
-            bg={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "white"
-                : "gray.800"
-            }
-            _hover={{
-              bg:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "gray.100"
-                  : "gray.700",
-            }}
-            px={4}
-            py={2}
           >
             {item.icon}
-            <span style={{ color: styleContext.state.textColor }}>
-              {item.label}
-            </span>
-          </MenuItem>
+            <span>{item.label}</span>
+          </DropdownMenuItem>
         ))}
-      </MenuList>
-    </Menu>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
@@ -1450,7 +1424,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         <ActivityMenuButton
                           onAddActivity={handleAddActivity}
                           buttonClassName="w-full"
-                          styleContext={styleContext}
                         />
                       </div>
                     </>

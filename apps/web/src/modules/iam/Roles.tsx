@@ -294,77 +294,33 @@ export function Roles(): JSX.Element {
           />
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden border"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
-        >
+        <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
           <Table variant="simple" size="sm" className="text-sm">
             <Thead className="text-xs">
               <Tr>
                 <Th
                   width="40px"
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } px-3 py-3 text-xs font-semibold tracking-wide`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 px-3 py-3 text-xs font-semibold tracking-wide text-foreground"
                 ></Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } px-4 py-3 text-xs font-semibold tracking-wide`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 px-4 py-3 text-xs font-semibold tracking-wide text-foreground"
                 >
                   Nome
                 </Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } px-4 py-3 text-xs font-semibold tracking-wide`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 px-4 py-3 text-xs font-semibold tracking-wide text-foreground"
                 >
                   Descrição
                 </Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } px-4 py-3 text-xs font-semibold tracking-wide`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 px-4 py-3 text-xs font-semibold tracking-wide text-foreground"
                 >
                   Permissões
                 </Th>
                 <Th
                   width="100px"
                   textAlign="right"
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } px-4 py-3 text-xs font-semibold tracking-wide`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 px-4 py-3 text-xs font-semibold tracking-wide text-foreground"
                 >
                   Ações
                 </Th>
@@ -374,20 +330,11 @@ export function Roles(): JSX.Element {
               {roles.map((role) => (
                 <React.Fragment key={role.id}>
                   <Tr
-                    className="transition-colors duration-200"
-                    _hover={{
-                      bg:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.50"
-                          : "gray.700",
-                    }}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                    }}
+                    className="transition-colors duration-200 hover:bg-muted/50"
                   >
                     <Td
                       onClick={() => toggleRoleExpand(role.id)}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-foreground"
                     >
                       {expandedRoles[role.id] ? (
                         <FaChevronDown />
@@ -397,16 +344,12 @@ export function Roles(): JSX.Element {
                     </Td>
                     <Td
                       fontWeight="medium"
-                      style={{ color: styleContext.state.textColor }}
+                      className="text-foreground"
                     >
                       {role.name}
                     </Td>
                     <Td
-                      className="max-w-xs truncate"
-                      style={{
-                        color: styleContext.state.textColor,
-                        opacity: 0.9,
-                      }}
+                      className="max-w-xs truncate text-muted-foreground"
                     >
                       {role.description}
                     </Td>

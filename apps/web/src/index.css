@@ -20,4 +20,18 @@
     margin: 0;
     font-family: var(--font-family);
   }
+
+  /* Override Chakra UI table inline border/bg to match DS tokens */
+  .ds-table td,
+  .ds-table th {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .ds-table td {
+    background: transparent !important;
+  }
+
+  .ds-table th {
+    background: hsl(var(--muted) / 0.4) !important;
+  }
 }

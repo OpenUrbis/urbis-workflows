@@ -153,7 +153,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
               .map((tax) => (
                 <div
                   key={tax.id}
-                  className={`p-3 border rounded cursor-pointer flex justify-between items-center group transition-colors duration-150`}
+                  className={`p-3 border rounded-xl cursor-pointer flex justify-between items-center group transition-colors duration-150`}
                   onClick={() => setSelectedTaxId(tax.id)}
                   style={{
                     backgroundColor:
@@ -310,16 +310,16 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
             </div>
           )}
           {!selectedTaxId && (
-            <div className="flex flex-col mt-6 items-center justify-center h-full text-gray-500">
-              <FaFileInvoiceDollar size={48} className="mb-4 opacity-50" />
+            <div className="flex flex-col mt-4 items-center justify-center min-h-[220px] text-gray-500">
+              <FaFileInvoiceDollar size={36} className="mb-3 opacity-50" />
               <p
-                className="text-xl font-medium mb-2"
+                className="text-lg font-medium mb-1"
                 style={{ color: styleContext.state.textColor }}
               >
                 Nenhuma taxa selecionada
               </p>
               <p
-                className="text-sm mb-6"
+                className="text-sm mb-4"
                 style={{ color: styleContext.state.textColor }}
               >
                 Selecione uma taxa da lista ao lado ou crie uma nova

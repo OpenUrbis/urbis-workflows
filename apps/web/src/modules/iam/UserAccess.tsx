@@ -315,77 +315,33 @@ export function UserAccess(): JSX.Element {
           />
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden border"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
-        >
+        <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
           <Table variant="simple" size="sm" className="text-sm">
             <Thead className="text-xs">
               <Tr>
                 <Th
                   width="40px"
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  color={styleContext.state.textColor}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 ></Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  color={styleContext.state.textColor}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 >
                   Nome
                 </Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  color={styleContext.state.textColor}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 >
                   Email
                 </Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  color={styleContext.state.textColor}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 >
                   Permissões Ativas
                 </Th>
                 <Th
                   width="100px"
                   textAlign="right"
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  color={styleContext.state.textColor}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 >
                   Ações
                 </Th>
@@ -395,20 +351,11 @@ export function UserAccess(): JSX.Element {
               {filteredUsers.map((user) => (
                 <React.Fragment key={user.id}>
                   <Tr
-                    className="transition-colors duration-200"
-                    _hover={{
-                      bg:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.50"
-                          : "gray.700",
-                    }}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                    }}
+                    className="transition-colors duration-200 hover:bg-muted/50"
                   >
                     <Td
                       onClick={() => toggleUserExpand(user.id)}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-foreground"
                     >
                       {expandedUsers[user.id] ? (
                         <FaChevronDown />
@@ -418,11 +365,11 @@ export function UserAccess(): JSX.Element {
                     </Td>
                     <Td
                       fontWeight="medium"
-                      color={styleContext.state.textColor}
+                      className="text-foreground"
                     >
                       {user.name}
                     </Td>
-                    <Td color={styleContext.state.textColor} opacity={0.9}>
+                    <Td className="text-muted-foreground">
                       {user.email}
                     </Td>
                     <Td>

@@ -295,77 +295,33 @@ export function Groups(): JSX.Element {
           />
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden border"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
-        >
+        <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
           <Table variant="simple" size="sm" className="text-sm">
             <Thead className="text-xs">
               <Tr>
                 <Th
                   width="40px"
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 ></Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 >
                   Nome
                 </Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 >
                   Descrição
                 </Th>
                 <Th
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 >
                   Funções
                 </Th>
                 <Th
                   width="100px"
                   textAlign="right"
-                  className={
-                    `${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    } text-xs font-semibold`
-                  }
-                  style={{ color: styleContext.state.textColor }}
+                  className="bg-muted/40 text-xs font-semibold text-foreground"
                 >
                   Ações
                 </Th>
@@ -375,20 +331,11 @@ export function Groups(): JSX.Element {
               {groups.map((group) => (
                 <React.Fragment key={group.id}>
                   <Tr
-                    className="transition-colors duration-200"
-                    _hover={{
-                      bg:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.50"
-                          : "gray.700",
-                    }}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                    }}
+                    className="transition-colors duration-200 hover:bg-muted/50"
                   >
                     <Td
                       onClick={() => toggleGroupExpand(group.id)}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-foreground"
                     >
                       {expandedGroups[group.id] ? (
                         <FaChevronDown />
@@ -398,16 +345,12 @@ export function Groups(): JSX.Element {
                     </Td>
                     <Td
                       fontWeight="medium"
-                      style={{ color: styleContext.state.textColor }}
+                      className="text-foreground"
                     >
                       {group.name}
                     </Td>
                     <Td
-                      className="max-w-xs truncate"
-                      style={{
-                        color: styleContext.state.textColor,
-                        opacity: 0.9,
-                      }}
+                      className="max-w-xs truncate text-muted-foreground"
                     >
                       {group.description}
                     </Td>

@@ -223,16 +223,7 @@ export function Permissions(): JSX.Element {
           />
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden border"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
-        >
+        <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
           <div className="overflow-x-auto w-full">
             <Table
               variant="simple"
@@ -243,62 +234,26 @@ export function Permissions(): JSX.Element {
               <Thead className="text-xs">
                 <Tr>
                   <Th
-                    className={
-                      `${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-gray-100"
-                          : "bg-gray-800"
-                      } text-xs font-semibold`
-                    }
-                    style={{
-                      color: styleContext.state.textColor,
-                      width: "20%",
-                      minWidth: "150px",
-                    }}
+                    className="bg-muted/40 text-xs font-semibold text-foreground"
+                    style={{ width: "20%", minWidth: "150px" }}
                   >
                     Nome
                   </Th>
                   <Th
-                    className={
-                      `${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-gray-100"
-                          : "bg-gray-800"
-                      } text-xs font-semibold`
-                    }
-                    style={{
-                      color: styleContext.state.textColor,
-                      width: "25%",
-                      minWidth: "180px",
-                    }}
+                    className="bg-muted/40 text-xs font-semibold text-foreground"
+                    style={{ width: "25%", minWidth: "180px" }}
                   >
                     Código
                   </Th>
                   <Th
-                    className={
-                      `${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-gray-100"
-                          : "bg-gray-800"
-                      } text-xs font-semibold`
-                    }
-                    style={{
-                      color: styleContext.state.textColor,
-                      width: "45%",
-                    }}
+                    className="bg-muted/40 text-xs font-semibold text-foreground"
+                    style={{ width: "45%" }}
                   >
                     Descrição
                   </Th>
                   <Th
-                    className={
-                      `${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-gray-100"
-                          : "bg-gray-800"
-                      } text-xs font-semibold`
-                    }
+                    className="bg-muted/40 text-xs font-semibold text-foreground"
                     style={{
-                      color: styleContext.state.textColor,
                       width: "10%",
                       minWidth: "100px",
                       textAlign: "right",
@@ -313,21 +268,12 @@ export function Permissions(): JSX.Element {
                 {permissions.map((permission) => (
                   <Tr
                     key={permission.id}
-                    className="transition-colors duration-200"
-                    _hover={{
-                      bg:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.50"
-                          : "gray.700",
-                    }}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                    }}
+                    className="transition-colors duration-200 hover:bg-muted/50"
                   >
                     <Td
                       fontWeight="medium"
+                      className="text-foreground"
                       style={{
-                        color: styleContext.state.textColor,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -396,9 +342,8 @@ export function Permissions(): JSX.Element {
                       </Tooltip>
                     </Td>
                     <Td
+                      className="text-muted-foreground"
                       style={{
-                        color: styleContext.state.textColor,
-                        opacity: 0.9,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
