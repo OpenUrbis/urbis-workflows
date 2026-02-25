@@ -14,7 +14,6 @@ import {
 } from "@open-urbis/map-ui";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { IFormContext } from "@open-urbis/types";
-import { Loader2 } from "lucide-react";
 import { Field } from "../workflows-schema/form-engine/Field";
 import { ApiClient } from "../../api";
 import {
@@ -58,6 +57,7 @@ import {
   DocumentActivity,
   TaxActivity,
 } from "./activities";
+import { Spinner } from "../../components";
 import { formatDate, formatId } from "./activities/common";
 import { v4 as uuidv4 } from "uuid";
 import { usePermissions } from "../../reducers/permission.context";
@@ -431,7 +431,7 @@ export function Workflows(): JSX.Element {
     if (permissionsLoading) {
       return (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Spinner size="xl" />
         </div>
       );
     }
@@ -652,7 +652,7 @@ export function Workflows(): JSX.Element {
                   }
                 >
                   {isSubmitting ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span className="mr-2"><Spinner /></span>
                   ) : null}
                   <span>Enviar</span>
                 </DSButton>
@@ -762,7 +762,9 @@ export function Workflows(): JSX.Element {
     <div className="flex flex-col space-y-6 sm:px-0 md:px-6 mt-6 mb-24">
       {loading ? (
         <div className="pt-10 text-center">
-          <Loader2 className="mx-auto h-10 w-10 animate-spin" />
+          <div className="mx-auto h-10 w-10 text-muted-foreground">
+            <Spinner size="xl" />
+          </div>
         </div>
       ) : workflow ? (
         <>
@@ -1016,7 +1018,7 @@ export function Workflows(): JSX.Element {
             <div className="w-3/4 pl-6">
               {loading ? (
                 <div className="flex items-center justify-center h-64">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <Spinner size="xl" />
                 </div>
               ) : (
                 workflow.schema?.activities?.[activeStep] && (
@@ -1054,7 +1056,7 @@ export function Workflows(): JSX.Element {
                 }
               >
                 {loading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span className="mr-2"><Spinner /></span>
                 ) : null}
                 <span>Solicitar</span>{" "}
               </DSButton>

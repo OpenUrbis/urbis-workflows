@@ -19,8 +19,8 @@ import {
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { SL } from "../../components";
-import { Loader2 } from "lucide-react";
 import { FaInbox, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { Spinner } from "../../components";
 
 function EmptyState() {
   return (
@@ -110,7 +110,7 @@ export function MyAcceptances(): JSX.Element {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Spinner size="xl" />
         </div>
       ) : (
         <Card className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">

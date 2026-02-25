@@ -12,7 +12,6 @@ import {
 import { BsThreeDots } from "react-icons/bs";
 import { SL } from "../../components";
 import { Button, Input, Label } from "@open-urbis/map-ui";
-import { Loader2 } from "lucide-react";
 import EditableHeader from "../../components/EditableHeader";
 import { FormEditor } from "./components/FormEditor";
 import { TreeList } from "./components/TreeList";
@@ -23,6 +22,7 @@ import { FormsApiClient } from "../../api/clients/forms.client";
 import { StepEditable } from "./form-engine/fields/StepEditable";
 import { IField } from "@open-urbis/types";
 import { StyleContext } from "../../reducers/style.reducer";
+import { Spinner } from "../../components";
 import {
   CreateFormDto,
   FormData,
@@ -402,7 +402,7 @@ export const FormsPreset: React.FC = () => {
         <div className="flex flex-col p-6 w-9/12">
           {loading && (
             <div className="flex-grow flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Spinner size="xl" />
             </div>
           )}
           {!loading && selectedPreset === null && addingPreset && (

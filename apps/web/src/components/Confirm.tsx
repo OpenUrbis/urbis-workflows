@@ -1,13 +1,11 @@
 import React, { FC, useContext, useEffect, useState } from "react";
 import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react";
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@open-urbis/map-ui";
 import { StyleContext } from "../reducers";
 import SL from "./ShortcutLabel";
 import {
@@ -31,7 +29,7 @@ interface ConfirmProps {
 }
 
 const ConfirmModal: FC = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState<string>("");
   const [modalMessage, setModalMessage] = useState<string>("");
   const [modalType, setModalType] = useState<
@@ -51,12 +49,12 @@ const ConfirmModal: FC = () => {
     setConfirmText(confirmParams?.confirmText || "Confirmar");
     setCancelText(confirmParams?.cancelText || "Cancelar");
     if (resolveConfirm) {
-      onOpen();
+      setIsOpen(true);
     }
-  }, [confirmParams, onOpen]);
+  }, [confirmParams]);
 
   const handleClose = () => {
-    onClose();
+    setIsOpen(false);
   };
 
   const handleConfirm = () => {
@@ -133,49 +131,56 @@ const ConfirmModal: FC = () => {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleCancel}
-      motionPreset="slideInBottom"
-      isCentered
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleCancel();
+      }}
     >
-      <ModalOverlay backdropFilter="blur(4px)" />
-      <ModalContent
+      <DialogContent
         className="shadow-xl"
         style={{
           width: "400px",
           backgroundColor: styleContext.state.backgroundColor,
         }}
       >
-        <ModalHeader className="px-6 pt-4 pb-4 border-b">
+        <DialogHeader className="px-6 pt-4 pb-4 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {getIcon()}
-              <span
-                className="text-xl font-bold"
-                style={{ color: styleContext.state.textColor }}
-              >
-                {modalTitle}
-              </span>
+              <DialogTitle asChild>
+                <span
+                  className="text-xl font-bold"
+                  style={{ color: styleContext.state.textColor }}
+                >
+                  {modalTitle}
+                </span>
+              </DialogTitle>
             </div>
             <button
               onClick={handleCancel}
               className="hover:bg-opacity-10 rounded p-1.5 transition-colors duration-150"
               style={{
-                color: styleContext.state.buttonHoverColorWeight === "200" ? "#6B7280" : "#9CA3AF",
-                backgroundColor: styleContext.state.buttonHoverColorWeight === "200" 
-                  ? "rgba(107, 114, 128, 0.1)" 
-                  : "rgba(156, 163, 175, 0.1)",
+                color:
+                  styleContext.state.buttonHoverColorWeight === "200"
+                    ? "#6B7280"
+                    : "#9CA3AF",
+                backgroundColor:
+                  styleContext.state.buttonHoverColorWeight === "200"
+                    ? "rgba(107, 114, 128, 0.1)"
+                    : "rgba(156, 163, 175, 0.1)",
               }}
             >
               <FaTimes size={12} />
             </button>
           </div>
-        </ModalHeader>
-        <ModalBody className="px-6 py-6">
+        </DialogHeader>
+
+        <div className="px-6 py-6">
           <p style={{ color: styleContext.state.textColor }}>{modalMessage}</p>
-        </ModalBody>
-        <ModalFooter className="px-6 pt-4 pb-4 border-t space-x-3">
+        </div>
+
+        <DialogFooter className="px-6 pt-4 pb-4 border-t space-x-3">
           <button
             className={`px-6 py-2.5 rounded-lg font-medium text-white transition-colors flex items-center space-x-2 ${getConfirmButtonStyle()}`}
             onClick={handleConfirm}
@@ -243,9 +248,9 @@ const ConfirmModal: FC = () => {
               esc
             </SL>
           </button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

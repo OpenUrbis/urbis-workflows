@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@open-urbis/map-ui";
 import { StyleContext } from "../../../reducers";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "../../../components";
 
 interface VersionsMenuProps {
   versions: {
@@ -64,7 +64,7 @@ export const VersionsMenu: React.FC<VersionsMenuProps> = ({
   return (
     <div>
       {loading ? (
-        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        <Spinner />
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

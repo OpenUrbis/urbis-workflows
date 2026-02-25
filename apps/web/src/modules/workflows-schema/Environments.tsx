@@ -32,7 +32,7 @@ import {
   ConstantTypeEnum,
 } from "../../api/types/constant-variables.dto";
 import { useSnackbar } from "../../hooks/snackbar";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "../../components";
 
 type VersionInfo = {
   id: string;
@@ -383,7 +383,7 @@ export const Environments: React.FC = () => {
         <div className="flex flex-col p-6 w-9/12">
           {loading && (
             <div className="flex-grow flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Spinner size="xl" />
             </div>
           )}
           {!loading && selectedEnvironment === null && addingEnvironment && (

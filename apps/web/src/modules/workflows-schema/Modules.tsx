@@ -15,7 +15,7 @@ import {
 import { VersionsMenu } from "./components/VersionsMenu";
 import { TreeList } from "./components/TreeList";
 import { StyleContext } from "../../reducers/style.reducer";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "../../components";
 
 const codeModulesClient = new CodeModulesApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -315,7 +315,7 @@ export const Modules: React.FC = () => {
         <div className="flex flex-col p-6 w-9/12">
           {loading && (
             <div className="flex-grow flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Spinner size="xl" />
             </div>
           )}
           {!loading && selectedFunction === null && addingFunction && (

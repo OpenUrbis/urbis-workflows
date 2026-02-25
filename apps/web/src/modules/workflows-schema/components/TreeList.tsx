@@ -4,8 +4,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@open-urbis/map-ui";
-import { FaFolder, FaFolderOpen } from "react-icons/fa";
-import { Search } from "lucide-react";
+import { FaFolder, FaFolderOpen, FaSearch } from "react-icons/fa";
 import { IconType } from "react-icons";
 import { useState, useEffect } from "react";
 import { Input } from "@open-urbis/map-ui";
@@ -127,7 +126,7 @@ export const TreeList = <T extends TreeItem>({
         <div className="p-4 border-b border-border bg-card">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-              <Search className="text-muted-foreground" size={16} />
+              <FaSearch className="text-muted-foreground" size={16} />
             </div>
             <Input
               placeholder="Buscar..."
@@ -213,7 +212,7 @@ const DirectoryView = <T extends TreeItem>({
     if (search.trim() !== "") {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-          <Search size={32} className="mb-4 opacity-50" />
+          <FaSearch size={32} className="mb-4 opacity-50" />
           <p className="text-lg font-medium mb-1">
             Nenhuma entidade encontrada
           </p>

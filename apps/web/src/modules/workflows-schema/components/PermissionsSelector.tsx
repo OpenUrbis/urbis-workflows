@@ -1,11 +1,5 @@
 import { getAccessToken } from "../../../auth/token";
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Badge,
-} from "@chakra-ui/react";
 import { Input as DSInput } from "@open-urbis/map-ui";
 import { FaLock, FaSearch, FaTimes } from "react-icons/fa";
 import { User, Role, Group } from "../../../api/types/iam.dto";
@@ -13,6 +7,7 @@ import { IamApiClient } from "../../../api/clients/iam.client";
 import InfoTooltip from "../../../components/InfoTooltip";
 import { SideDrawer } from "../../../components/SideDrawer";
 import { Spinner } from "../../../components";
+import { FormControl, FormHelperText, FormLabel } from "../../../components";
 
 const iamClient = new IamApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -333,12 +328,19 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
             ) : (
               <>
                 {permissions?.users?.slice(0, 3).map((user) => (
-                  <Badge
+                  <span
                     key={user.id}
-                    colorScheme={"teal"}
-                    variant="solid"
                     className="flex items-center gap-1 py-1"
-                    borderRadius="md"
+                    style={{
+                      borderRadius: 6,
+                      backgroundColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#0d9488"
+                          : "#0f766e",
+                      color: "#ffffff",
+                      paddingLeft: 8,
+                      paddingRight: 8,
+                    }}
                   >
                     <span className="ml-1 flex-1">
                       {user.name} ({user.access === "write" ? "E" : "L"})
@@ -370,7 +372,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                     >
                       <FaTimes size={10} />
                     </button>
-                  </Badge>
+                  </span>
                 ))}
                 {(permissions?.users?.length || 0) > 3 && (
                   <div className="relative group">
@@ -391,35 +393,43 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                       }
                       showIcon={false}
                     >
-                      <Badge
-                        colorScheme="gray"
-                        py="1"
-                        px="2"
+                      <span
                         className="hover:opacity-80 transition-opacity cursor-pointer"
-                        borderRadius="md"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.600"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
+                        style={{
+                          borderRadius: 6,
+                          paddingTop: 4,
+                          paddingBottom: 4,
+                          paddingLeft: 8,
+                          paddingRight: 8,
+                          backgroundColor:
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "#e5e7eb"
+                              : "#4b5563",
+                          color:
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "#374151"
+                              : "#e5e7eb",
+                        }}
                       >
                         +{(permissions?.users?.length || 0) - 3}
-                      </Badge>
+                      </span>
                     </InfoTooltip>
                   </div>
                 )}
                 {permissions?.roles?.slice(0, 3).map((role) => (
-                  <Badge
+                  <span
                     key={role.id}
-                    colorScheme={"teal"}
-                    variant="solid"
                     className="flex items-center gap-1 py-1"
-                    borderRadius="md"
+                    style={{
+                      borderRadius: 6,
+                      backgroundColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#0d9488"
+                          : "#0f766e",
+                      color: "#ffffff",
+                      paddingLeft: 8,
+                      paddingRight: 8,
+                    }}
                   >
                     <span className="ml-1 flex-1">
                       {role.name} ({role.access === "write" ? "E" : "L"})
@@ -451,7 +461,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                     >
                       <FaTimes size={10} />
                     </button>
-                  </Badge>
+                  </span>
                 ))}
                 {(permissions?.roles?.length || 0) > 3 && (
                   <div className="relative group">
@@ -472,35 +482,43 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                       }
                       showIcon={false}
                     >
-                      <Badge
-                        colorScheme="gray"
-                        py="1"
-                        px="2"
+                      <span
                         className="hover:opacity-80 transition-opacity cursor-pointer"
-                        borderRadius="md"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.600"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
+                        style={{
+                          borderRadius: 6,
+                          paddingTop: 4,
+                          paddingBottom: 4,
+                          paddingLeft: 8,
+                          paddingRight: 8,
+                          backgroundColor:
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "#e5e7eb"
+                              : "#4b5563",
+                          color:
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "#374151"
+                              : "#e5e7eb",
+                        }}
                       >
                         +{(permissions?.roles?.length || 0) - 3}
-                      </Badge>
+                      </span>
                     </InfoTooltip>
                   </div>
                 )}
                 {permissions?.groups?.slice(0, 3).map((group) => (
-                  <Badge
+                  <span
                     key={group.id}
-                    colorScheme={"teal"}
-                    variant="solid"
                     className="flex items-center gap-1 py-1"
-                    borderRadius="md"
+                    style={{
+                      borderRadius: 6,
+                      backgroundColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#0d9488"
+                          : "#0f766e",
+                      color: "#ffffff",
+                      paddingLeft: 8,
+                      paddingRight: 8,
+                    }}
                   >
                     <span className="ml-1 flex-1">
                       {group.name} ({group.access === "write" ? "E" : "L"})
@@ -532,7 +550,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                     >
                       <FaTimes size={10} />
                     </button>
-                  </Badge>
+                  </span>
                 ))}
                 {(permissions?.groups?.length || 0) > 3 && (
                   <div className="relative group">
@@ -553,25 +571,26 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                       }
                       showIcon={false}
                     >
-                      <Badge
-                        colorScheme="gray"
-                        py="1"
-                        px="2"
+                      <span
                         className="hover:opacity-80 transition-opacity cursor-pointer"
-                        borderRadius="md"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.600"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
+                        style={{
+                          borderRadius: 6,
+                          paddingTop: 4,
+                          paddingBottom: 4,
+                          paddingLeft: 8,
+                          paddingRight: 8,
+                          backgroundColor:
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "#e5e7eb"
+                              : "#4b5563",
+                          color:
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "#374151"
+                              : "#e5e7eb",
+                        }}
                       >
                         +{(permissions?.groups?.length || 0) - 3}
-                      </Badge>
+                      </span>
                     </InfoTooltip>
                   </div>
                 )}

@@ -1,4 +1,4 @@
-import { IconButton, Spinner, Tooltip } from "@chakra-ui/react";
+import { IconButton, Spinner, Tooltip } from "../../../components";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaTrash,
@@ -168,21 +168,16 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
         aria-label="Remove field"
         icon={<FaTrash />}
         onClick={onRemove}
-        bg={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.100"
-            : "gray.800"
-        }
-        color={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.600"
-            : "gray.200"
-        }
-        _hover={{
-          bg:
+        className="transition-colors"
+        style={{
+          backgroundColor:
             styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.200"
-              : "gray.700",
+              ? "#f3f4f6"
+              : "#1f2937",
+          color:
+            styleContext.state.buttonHoverColorWeight === "200"
+              ? "#4b5563"
+              : "#e5e7eb",
         }}
       />
     );

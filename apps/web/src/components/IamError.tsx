@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../reducers/auth.reducer";
 import { Button, Card, CardContent } from "@open-urbis/map-ui";
-import { AlertTriangle, RefreshCcw } from "lucide-react";
+import { FaExclamationTriangle, FaRedo } from "react-icons/fa";
 
 interface IamErrorProps {
   error?: Error | null;
@@ -147,7 +147,7 @@ export const IamError: React.FC<IamErrorProps> = ({
               IAM
             </p>
             <div className="absolute inset-0 flex items-center justify-center">
-              <AlertTriangle className="h-12 w-12 text-muted-foreground" />
+              <FaExclamationTriangle className="h-12 w-12 text-muted-foreground" />
             </div>
           </div>
 
@@ -178,7 +178,7 @@ export const IamError: React.FC<IamErrorProps> = ({
               className="h-10 px-5 rounded-lg"
               onClick={handleRetry}
             >
-              <RefreshCcw className="h-4 w-4 mr-2" />
+              <FaRedo className="h-4 w-4 mr-2" />
               Tentar novamente
             </Button>
           </div>

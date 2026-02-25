@@ -1,17 +1,18 @@
 import { useContext, useState } from "react";
 import { IFormContext } from "@open-urbis/types";
 import {
-  IconButton,
   FormControl,
-  FormLabel,
   FormHelperText,
+  FormLabel,
+  IconButton,
   Tooltip,
+} from "../../../components";
+import {
   Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-} from "@chakra-ui/react";
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@open-urbis/map-ui";
 import { FaPlus, FaTrash, FaFileInvoiceDollar } from "react-icons/fa";
 import {
   ActivityTypeEnum,
@@ -41,7 +42,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
   onChange,
 }) => {
   const [selectedTaxId, setSelectedTaxId] = useState<string>("");
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState("calculation");
   const styleContext = useContext(StyleContext);
 
   if (activity.type !== ActivityTypeEnum.TAX) {
@@ -360,62 +361,61 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
           style={{ backgroundColor: styleContext.state.backgroundColor }}
           className="rounded-lg"
         >
-          <Tabs
-            index={selectedTab}
-            onChange={setSelectedTab}
-            variant="enclosed"
-            colorScheme={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "yellow"
-                : "gray"
-            }
-          >
-            <TabList
+          <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+            <TabsList
               className="border-b px-4"
               style={{
                 borderColor:
                   styleContext.state.buttonHoverColorWeight === "200"
                     ? "#E5E7EB"
                     : "#374151",
+                backgroundColor: "transparent",
               }}
             >
-              <Tab style={{ color: styleContext.state.textColor }}>
+              <TabsTrigger
+                value="calculation"
+                style={{ color: styleContext.state.textColor }}
+              >
                 Cálculo da Taxa
-              </Tab>
-              <Tab style={{ color: styleContext.state.textColor }}>
+              </TabsTrigger>
+              <TabsTrigger
+                value="document-editor"
+                style={{ color: styleContext.state.textColor }}
+              >
                 Editor do Documento
-              </Tab>
-              <Tab style={{ color: styleContext.state.textColor }}>
+              </TabsTrigger>
+              <TabsTrigger
+                value="document-preview"
+                style={{ color: styleContext.state.textColor }}
+              >
                 Prévia do Documento
-              </Tab>
-            </TabList>
+              </TabsTrigger>
+            </TabsList>
 
-            <TabPanels>
-              <TabPanel>
-                <TaxCalculationEditor
-                  tax={selectedTax}
-                  context={context}
-                  general={general}
-                  styleContext={styleContext}
-                  onChangeTaxCalculation={handleChangeTaxCalculation}
-                />
-              </TabPanel>
-              <TabPanel>
-                <BillingDocumentEditor
-                  tax={selectedTax}
-                  styleContext={styleContext}
-                  onChangeBillingTemplate={handleChangeBillingTemplate}
-                />
-              </TabPanel>
-              <TabPanel>
-                <BillingDocumentPreview
-                  tax={selectedTax}
-                  styleContext={styleContext}
-                  context={context}
-                  general={general}
-                />
-              </TabPanel>
-            </TabPanels>
+            <TabsContent value="calculation">
+              <TaxCalculationEditor
+                tax={selectedTax}
+                context={context}
+                general={general}
+                styleContext={styleContext}
+                onChangeTaxCalculation={handleChangeTaxCalculation}
+              />
+            </TabsContent>
+            <TabsContent value="document-editor">
+              <BillingDocumentEditor
+                tax={selectedTax}
+                styleContext={styleContext}
+                onChangeBillingTemplate={handleChangeBillingTemplate}
+              />
+            </TabsContent>
+            <TabsContent value="document-preview">
+              <BillingDocumentPreview
+                tax={selectedTax}
+                styleContext={styleContext}
+                context={context}
+                general={general}
+              />
+            </TabsContent>
           </Tabs>
         </div>
       )}

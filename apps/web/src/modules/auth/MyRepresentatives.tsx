@@ -2,11 +2,11 @@ import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { Badge, Button, Card, CardContent } from "@open-urbis/map-ui";
-import { Loader2 } from "lucide-react";
 import { FaTrash, FaUserFriends } from "react-icons/fa";
 import { LABEL_MAPPER, STATUS_BADGE_VARIANT_MAPPER } from "./MyRepresentation";
 import { ApiClient } from "../../api";
 import { RepresentativeLink } from "../../api/types/users.dto";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -69,26 +69,26 @@ export function MyRepresentatives(): JSX.Element {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-semibold tracking-tight mb-3 text-foreground">
+    <div className="flex flex-col space-y-8 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
         Meus Representantes
       </h1>
 
       {loading && (
-        <div className="pt-10 text-center flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex items-center justify-center py-16">
+          <Spinner size="xl" />
         </div>
       )}
 
       {!loading && representatives.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12">
+        <div className="flex flex-col justify-center h-[calc(100vh-300px)] text-left">
           <div className="w-14 h-14 rounded-full mb-3 flex items-center justify-center bg-muted">
             <FaUserFriends size={26} className="text-muted-foreground" />
           </div>
-          <p className="text-base font-medium mb-1.5 text-foreground">
+          <p className="text-lg font-medium mb-1.5 text-foreground">
             Nenhum representante cadastrado
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Você não possui representantes ativos no momento
           </p>
         </div>
@@ -99,7 +99,7 @@ export function MyRepresentatives(): JSX.Element {
           {representatives.map((representative) => (
             <Card
               key={representative.id}
-              className="transition-all duration-200"
+              className="rounded-2xl border border-border bg-card text-card-foreground transition-all duration-200"
             >
               <CardContent className="flex flex-col md:flex-row md:items-center md:space-x-6 space-y-4 md:space-y-0 p-6">
                 <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -108,7 +108,7 @@ export function MyRepresentatives(): JSX.Element {
                       <span className="text-sm font-medium text-muted-foreground">
                         Documento
                       </span>
-                      <div className="mt-1 text-base font-semibold text-foreground">
+                      <div className="mt-1 text-sm font-semibold text-foreground">
                         {representative.representative}
                       </div>
                     </div>
@@ -116,7 +116,7 @@ export function MyRepresentatives(): JSX.Element {
                       <span className="text-sm font-medium text-muted-foreground">
                         Vínculo
                       </span>
-                      <div className="mt-1 text-base font-medium text-foreground">
+                      <div className="mt-1 text-sm font-medium text-foreground">
                         {representative.link}
                       </div>
                     </div>

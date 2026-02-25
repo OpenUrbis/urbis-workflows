@@ -1,15 +1,9 @@
 import React, { useState } from "react";
-import {
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Badge,
-} from "@chakra-ui/react";
 import { Input as DSInput } from "@open-urbis/map-ui";
 import { FaProjectDiagram, FaSearch, FaTimes } from "react-icons/fa";
 import { ActivityTemplate } from "../../../api/types/schema";
 import { SideDrawer } from "../../../components/SideDrawer";
-import { Tooltip } from "../../../components";
+import { FormControl, FormHelperText, FormLabel, Tooltip } from "../../../components";
 
 export interface ActivityDependenciesSelectorProps {
   activities: ActivityTemplate[];
@@ -91,12 +85,19 @@ export const ActivityDependenciesSelector: React.FC<
               </div>
             ) : (
               selectedDependencies.map((depId) => (
-                <Badge
+                <span
                   key={depId}
-                  colorScheme="purple"
-                  variant="solid"
                   className="flex items-center py-1"
-                  borderRadius="md"
+                  style={{
+                    borderRadius: 6,
+                    backgroundColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "#a855f7"
+                        : "#7e22ce",
+                    color: "#ffffff",
+                    paddingLeft: 8,
+                    paddingRight: 8,
+                  }}
                 >
                   <span className="mx-1">{getActivityLabel(depId)}</span>
                   <button
@@ -119,7 +120,7 @@ export const ActivityDependenciesSelector: React.FC<
                   >
                     <FaTimes size={10} />
                   </button>
-                </Badge>
+                </span>
               ))
             )}
           </div>

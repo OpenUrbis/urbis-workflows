@@ -1,18 +1,14 @@
 import React, { useState } from "react";
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Collapse,
-  IconButton,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-} from "@chakra-ui/react";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { CodeEditor } from "../../components/CodeEditor";
 import { TaxConfig } from "../../../../api/types/schema";
 import { IFormContext } from "@open-urbis/types";
+import {
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  IconButton,
+} from "../../../../components";
 
 interface TaxCalculationEditorProps {
   tax: TaxConfig;
@@ -59,6 +55,20 @@ export const TaxCalculationEditor: React.FC<TaxCalculationEditorProps> = ({
 
   const errors = validationErrors.filter((error) => error.severity === 8);
   const warnings = validationErrors.filter((error) => error.severity !== 8);
+
+  const alertRowStyle = (variant: "error" | "warning") => {
+    const isLight = styleContext.state.buttonHoverColorWeight === "200";
+    if (variant === "error") {
+      return {
+        backgroundColor: isLight ? "#fee2e2" : "#7f1d1d",
+        color: isLight ? "#991b1b" : "#fecaca",
+      };
+    }
+    return {
+      backgroundColor: isLight ? "#fef3c7" : "#78350f",
+      color: isLight ? "#92400e" : "#fef3c7",
+    };
+  };
 
   const handleValidate = (errors: any[]) => {
     setValidationErrors(errors);
@@ -130,46 +140,26 @@ export const TaxCalculationEditor: React.FC<TaxCalculationEditorProps> = ({
         onValidate={handleValidate}
       />
       {validationErrors.length > 0 && (
-        <Box mt={2} className="space-y-2">
+        <div className="mt-2 space-y-2">
           {errors.map((error, index) => (
-            <Alert
-              status="error"
-              mb={2}
+            <div
               key={`error-${index}`}
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#fee2e2"
-                    : "#7f1d1d",
-                color:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#991b1b"
-                    : "#fecaca",
-              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-md"
+              style={alertRowStyle("error")}
             >
-              <AlertIcon />
+              <div className="h-2 w-2 rounded-full bg-current opacity-60" />
               Erro na linha {error.startLineNumber}: {error.message}
-            </Alert>
+            </div>
           ))}
 
           {warnings.length > 0 && (
             <div>
-              <Alert
-                status="warning"
-                className="cursor-pointer"
+              <div
+                className="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md"
                 onClick={() => setShowWarnings(!showWarnings)}
-                style={{
-                  backgroundColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#fef3c7"
-                      : "#78350f",
-                  color:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#92400e"
-                      : "#fef3c7",
-                }}
+                style={alertRowStyle("warning")}
               >
-                <AlertIcon />
+                <div className="h-2.5 w-2.5 rounded-full bg-current opacity-60" />
                 <div className="flex-grow">
                   {warnings.length} {warnings.length === 1 ? "aviso" : "avisos"}{" "}
                   encontrado{warnings.length === 1 ? "" : "s"}
@@ -177,38 +167,26 @@ export const TaxCalculationEditor: React.FC<TaxCalculationEditorProps> = ({
                 <IconButton
                   aria-label="Toggle warnings"
                   icon={showWarnings ? <FaChevronUp /> : <FaChevronDown />}
-                  size="sm"
-                  variant="ghost"
                   style={{ color: styleContext.state.textColor }}
                 />
-              </Alert>
-              <Collapse in={showWarnings}>
-                <Box pl={4} mt={2} className="space-y-2">
+              </div>
+              {showWarnings && (
+                <div className="pl-4 mt-2 space-y-2">
                   {warnings.map((warning, index) => (
-                    <Alert
-                      status="warning"
-                      variant="left-accent"
+                    <div
                       key={`warning-${index}`}
-                      style={{
-                        backgroundColor:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#fef3c7"
-                            : "#78350f",
-                        color:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#92400e"
-                            : "#fef3c7",
-                      }}
+                      className="flex items-center gap-2 px-3 py-2 rounded-md"
+                      style={alertRowStyle("warning")}
                     >
-                      <AlertIcon />
+                      <div className="h-2 w-2 rounded-full bg-current opacity-60" />
                       Linha {warning.startLineNumber}: {warning.message}
-                    </Alert>
+                    </div>
                   ))}
-                </Box>
-              </Collapse>
+                </div>
+              )}
             </div>
           )}
-        </Box>
+        </div>
       )}
 
       <div className="flex flex-col space-y-4 mt-6">

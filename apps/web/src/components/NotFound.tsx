@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, CardContent } from "@open-urbis/map-ui";
-import { AlertTriangle, Home } from "lucide-react";
+import { FaExclamationTriangle, FaHome } from "react-icons/fa";
 
 export const NotFound: React.FC = () => {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export const NotFound: React.FC = () => {
               404
             </p>
             <div className="absolute inset-0 flex items-center justify-center">
-              <AlertTriangle className="h-12 w-12 text-muted-foreground" />
+              <FaExclamationTriangle className="h-12 w-12 text-muted-foreground" />
             </div>
           </div>
 
@@ -35,7 +35,7 @@ export const NotFound: React.FC = () => {
               className="h-10 px-5 rounded-lg"
               onClick={() => navigate("/")}
             >
-              <Home className="h-4 w-4 mr-2" />
+              <FaHome className="h-4 w-4 mr-2" />
               Voltar para a página inicial
             </Button>
           </div>

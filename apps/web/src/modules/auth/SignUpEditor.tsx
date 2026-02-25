@@ -8,7 +8,7 @@ import { FieldTypeEnum, IField } from "@open-urbis/types";
 import { FieldEditable } from "../workflows-schema/form-engine/FieldEditable";
 import { FaSave } from "react-icons/fa";
 import { Button } from "@open-urbis/map-ui";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -92,7 +92,7 @@ export function SignUpEditor(): JSX.Element {
     <div className="pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {loading && (
         <div className="pt-10 text-center flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Spinner size="xl" />
         </div>
       )}
 

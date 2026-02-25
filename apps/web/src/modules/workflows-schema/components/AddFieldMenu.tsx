@@ -1,20 +1,4 @@
 import { getAccessToken } from "../../../auth/token";
-import {
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  useDisclosure,
-  MenuGroup,
-  Portal,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-} from "@chakra-ui/react";
 import React, { useContext, useEffect, useState } from "react";
 import {
   FaMinus,
@@ -44,6 +28,19 @@ import {
   withNumberInput,
 } from "../../../reducers/hotkeys.reducer";
 import { SL } from "../../../components";
+import {
+  Button,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+} from "../../../components";
 
 const formsClient = new FormsApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -152,8 +149,8 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
 }) => {
   const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
-  const submenuController = useDisclosure();
-  const presetModalController = useDisclosure();
+  const [submenuOpen, setSubmenuOpen] = useState(false);
+  const [presetModalOpen, setPresetModalOpen] = useState(false);
   const [presets, setPresets] = useState<FormMetadata[]>([]);
   const [presetsSearch, setPresetsSearch] = useState("");
 
@@ -347,7 +344,7 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
         }),
         V: withNoModifiers((event) => {
           event?.preventDefault();
-          presetModalController.onOpen();
+          setPresetModalOpen(true);
         }),
       },
     });
@@ -359,23 +356,23 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
       });
     };
     
-  }, [hotkeyContext, presetModalController, addFieldCallback]);
+  }, [hotkeyContext, addFieldCallback]);
 
   const handleCloseModal = () => {
     setPresetsSearch("");
-    presetModalController.onClose();
+    setPresetModalOpen(false);
   };
 
   return (
     <div className="text-left flex space-x-2">
       <Menu
-        isOpen={submenuController.isOpen}
-        onClose={submenuController.onClose}
+        open={submenuOpen}
+        onOpenChange={setSubmenuOpen}
       >
         <MenuButton
           as="button"
           className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-150 ${
-            submenuController.isOpen
+            submenuOpen
               ? styleContext.state.buttonHoverColorWeight === "200"
                 ? "bg-gray-200 border-gray-300"
                 : "bg-gray-700 border-gray-600"
@@ -383,7 +380,7 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
                 ? "bg-gray-100 hover:bg-gray-200 border-gray-200"
                 : "bg-gray-800 hover:bg-gray-700 border-gray-700"
           } border`}
-          onClick={submenuController.onOpen}
+          onClick={() => setSubmenuOpen(true)}
           style={{ color: styleContext.state.textColor }}
         >
           <div className="flex items-center space-x-2">
@@ -414,20 +411,21 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
             </div>
           </div>
         </MenuButton>
-        <Portal>
-          <MenuList
-            zIndex={"overlay"}
-            bg={styleContext.state.backgroundColor}
-            maxHeight="300px"
-            overflowY="auto"
-            boxShadow="lg"
-            border="1px solid"
-            borderColor={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "gray.200"
-                : "gray.600"
-            }
-            py={2}
+        <MenuList
+          className="p-2"
+        >
+          <div
+            className="max-h-[300px] overflow-y-auto"
+            style={{
+              backgroundColor: styleContext.state.backgroundColor,
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor:
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#e5e7eb"
+                  : "#4b5563",
+              borderRadius: 8,
+            }}
           >
             {fieldTypeGroups.map((group, groupIndex) => (
               <React.Fragment key={group.label}>
@@ -442,18 +440,12 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
                     }}
                   />
                 )}
-                <MenuGroup
-                  title={group.label}
-                  color={styleContext.state.textColor}
-                  ml={4}
-                  mt={groupIndex === 0 ? 0 : 2}
-                  mb={1}
-                  fontWeight="medium"
-                  fontSize="sm"
-                  textTransform="uppercase"
-                  letterSpacing="wider"
-                  opacity={0.7}
-                />
+                <div
+                  className={`px-4 ${groupIndex === 0 ? "mt-0" : "mt-2"} mb-1 text-xs font-medium tracking-wider uppercase`}
+                  style={{ color: styleContext.state.textColor, opacity: 0.7 }}
+                >
+                  {group.label}
+                </div>
                 {group.types.map(([type, label, Icon], typeIndex) => {
                   // Calculate the overall index for this field across all groups
                   const globalIndex =
@@ -468,19 +460,17 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
                       key={type}
                       onClick={() => {
                         addFieldCallback(template(type));
-                        submenuController.onClose();
-                      }}
-                      bg={styleContext.state.backgroundColor}
-                      _hover={{
-                        bg:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.100"
-                            : "gray.700",
+                        setSubmenuOpen(false);
                       }}
                       className="transition-colors duration-150"
-                      style={{ color: styleContext.state.textColor }}
-                      px={4}
-                      py={2}
+                      style={{
+                        color: styleContext.state.textColor,
+                        backgroundColor: styleContext.state.backgroundColor,
+                        paddingLeft: 16,
+                        paddingRight: 16,
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                      }}
                     >
                       <div className="flex items-center justify-between w-full">
                         <div className="flex items-center space-x-2">
@@ -494,15 +484,15 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
                 })}
               </React.Fragment>
             ))}
-          </MenuList>
-        </Portal>
+          </div>
+        </MenuList>
       </Menu>
 
       {showPresetsBlocks && (
         <button
-          onClick={presetModalController.onOpen}
+          onClick={() => setPresetModalOpen(true)}
           className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-150 ${
-            presetModalController.isOpen
+            presetModalOpen
               ? styleContext.state.buttonHoverColorWeight === "200"
                 ? "bg-gray-200 border-gray-300"
                 : "bg-gray-700 border-gray-600"
@@ -543,23 +533,29 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
       )}
 
       <Modal
-        isOpen={presetModalController.isOpen}
+        isOpen={presetModalOpen}
         onClose={handleCloseModal}
-        size="xl"
       >
         <ModalOverlay />
-        <ModalContent
-          bg={styleContext.state.backgroundColor}
-          borderColor={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.200"
-              : "gray.600"
-          }
-        >
-          <ModalHeader style={{ color: styleContext.state.textColor }}>
-            Selecionar Pré-Definido
-          </ModalHeader>
-          <ModalBody>
+        <ModalContent>
+          <div
+            style={{
+              backgroundColor: styleContext.state.backgroundColor,
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor:
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#e5e7eb"
+                  : "#4b5563",
+              borderRadius: 12,
+            }}
+          >
+            <ModalHeader>
+              <div style={{ color: styleContext.state.textColor }}>
+                Selecionar Pré-Definido
+              </div>
+            </ModalHeader>
+            <ModalBody>
             <TreeList
               items={mapPresetsToTreeItems(presets)}
               search={presetsSearch}
@@ -569,8 +565,8 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
               icon={FaMinus}
               iconColor="blue"
             />
-          </ModalBody>
-          <ModalFooter>
+            </ModalBody>
+            <ModalFooter>
             <Button
               onClick={handleCloseModal}
               style={{
@@ -580,16 +576,11 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
                     : "#374151",
                 color: styleContext.state.textColor,
               }}
-              _hover={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#D1D5DB"
-                    : "#4B5563",
-              }}
             >
               Cancelar
             </Button>
-          </ModalFooter>
+            </ModalFooter>
+          </div>
         </ModalContent>
       </Modal>
     </div>

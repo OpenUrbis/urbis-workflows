@@ -1,4 +1,3 @@
-import { FormControl, FormLabel } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { Input, SL, Select, Textarea } from "../../../components";
 import { HotkeyContext } from "../../../reducers";
@@ -9,6 +8,7 @@ import {
 import { CodeEditor } from "./CodeEditor";
 import DynamicTable from "./DynamicTable";
 import { FaPlus } from "react-icons/fa";
+import { FormControl, FormLabel } from "../../../components";
 
 export type AddEnvironmentProps = {
   onAddEnvironment: (environment: CreateConstantVariableHttpDto) => void;

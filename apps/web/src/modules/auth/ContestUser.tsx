@@ -1,21 +1,15 @@
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { BlockOptions, FieldTypeEnum, IField } from "@open-urbis/types";
 import { Input, MaskedInput, SL } from "../../components";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { AuthContext } from "../../reducers/auth.reducer";
 import { Field } from "../workflows-schema";
+import { Spinner } from "../../components";
 
 const FormControl = ({ children, ...props }: any) => <div {...props}>{children}</div>;
 const FormLabel = ({ children, ...props }: any) => <label {...props}>{children}</label>;
-const Spinner = ({ size = "md" }: any) => (
-  <Loader2
-    className={`mx-auto animate-spin ${size === "xl" ? "h-10 w-10" : size === "lg" ? "h-8 w-8" : "h-5 w-5"}`}
-    aria-hidden="true"
-  />
-);
 
 export function ContestUser(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);

@@ -13,16 +13,11 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import {
   Modal,
-  ModalOverlay,
+  ModalBody,
   ModalContent,
   ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  Box,
-  Text,
-  Badge,
-  Flex,
-} from "@chakra-ui/react";
+  ModalOverlay,
+} from "../../../components";
 import {
   ActivityTemplate,
   Incoming,
@@ -33,73 +28,58 @@ import {
 const ActivityNode = ({ data }: { data: any }) => {
   const isDarkMode = data.styleContext?.state?.buttonHoverColorWeight !== "200";
 
+  const getBorderColor = () => {
+    if (data.type === "activity") return isDarkMode ? "#c084fc" : "#a855f7";
+    if (data.type === "incoming") return isDarkMode ? "#60a5fa" : "#3b82f6";
+    return isDarkMode ? "#4ade80" : "#22c55e";
+  };
+
+  const getBgColor = () => {
+    if (isDarkMode) return data.isSelected ? "#581c87" : "#1f2937";
+    return data.isSelected ? "#f3e8ff" : "#ffffff";
+  };
+
+  const getBadgeClass = () => {
+    if (data.type === "activity") return "bg-purple-100 text-purple-800";
+    if (data.type === "incoming") return "bg-blue-100 text-blue-800";
+    return "bg-green-100 text-green-800";
+  };
+
   return (
-    <Box
-      p={3}
-      borderRadius="md"
-      bg={
-        isDarkMode
-          ? data.isSelected
-            ? "purple.900"
-            : "gray.800"
-          : data.isSelected
-            ? "purple.100"
-            : "white"
-      }
-      borderWidth={2}
-      borderColor={
-        data.type === "activity"
-          ? isDarkMode
-            ? "purple.400"
-            : "purple.500"
-          : data.type === "incoming"
-            ? isDarkMode
-              ? "blue.400"
-              : "blue.500"
-            : isDarkMode
-              ? "green.400"
-              : "green.500"
-      }
-      boxShadow="md"
-      width="200px"
+    <div
+      className="p-3 rounded-md shadow-md"
+      style={{
+        width: 200,
+        backgroundColor: getBgColor(),
+        borderWidth: 2,
+        borderStyle: "solid",
+        borderColor: getBorderColor(),
+      }}
     >
-      <Text
-        fontWeight="bold"
-        fontSize="sm"
-        noOfLines={1}
+      <div
+        className="font-bold text-sm truncate"
         title={data.label}
-        color={isDarkMode ? "white" : "gray.800"}
+        style={{ color: isDarkMode ? "#ffffff" : "#1f2937" }}
       >
         {data.label}
-      </Text>
-      <Text
-        fontSize="xs"
-        color={isDarkMode ? "gray.400" : "gray.500"}
-        noOfLines={1}
+      </div>
+      <div
+        className="text-xs truncate"
         title={data.namespace}
+        style={{ color: isDarkMode ? "#9ca3af" : "#6b7280" }}
       >
         {data.namespace}
-      </Text>
+      </div>
       {data.type && (
-        <Badge
-          mt={1}
-          colorScheme={
-            data.type === "activity"
-              ? "purple"
-              : data.type === "incoming"
-                ? "blue"
-                : "green"
-          }
-          fontSize="xs"
-        >
+        <span className={`inline-flex mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${getBadgeClass()}`}>
           {data.type === "activity"
             ? "Atividade"
             : data.type === "incoming"
               ? "Entrada"
               : "Saída"}
-        </Badge>
+        </span>
       )}
-    </Box>
+    </div>
   );
 };
 
@@ -419,16 +399,17 @@ export const DependencyGraphVisualization: React.FC<
   }, [initialized, nodes, edges, setNodes, setEdges]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
-      <ModalOverlay backdropFilter="blur(4px)" />
-      <ModalContent
-        maxW="90vw"
-        maxH="90vh"
-        h="80vh"
-        style={{
-          backgroundColor: styleContext.state.backgroundColor,
-        }}
-      >
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <div
+          style={{
+            maxWidth: "90vw",
+            maxHeight: "90vh",
+            height: "80vh",
+            backgroundColor: styleContext.state.backgroundColor,
+          }}
+        >
         <style>
           {`
             .reactflow-wrapper {
@@ -448,25 +429,33 @@ export const DependencyGraphVisualization: React.FC<
             }
           `}
         </style>
-        <ModalHeader style={{ color: styleContext.state.textColor }}>
-          <Flex justify="space-between" align="center" pr={8}>
-            <Text>Visualização do Fluxo</Text>
-            <Flex gap={2} flexWrap="wrap" justifyContent="flex-end">
-              <Badge colorScheme="purple" px={2} py={1}>
+        <ModalHeader>
+          <div className="flex items-center justify-between pr-8" style={{ color: styleContext.state.textColor }}>
+            <div>Visualização do Fluxo</div>
+            <div className="flex gap-2 flex-wrap justify-end">
+              <span className="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
                 Atividades
-              </Badge>
-              <Badge colorScheme="blue" px={2} py={1}>
+              </span>
+              <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
                 Entradas
-              </Badge>
-              <Badge colorScheme="green" px={2} py={1}>
+              </span>
+              <span className="px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
                 Saídas
-              </Badge>
-            </Flex>
-          </Flex>
+              </span>
+            </div>
+          </div>
         </ModalHeader>
-        <ModalCloseButton style={{ color: styleContext.state.textColor }} />
-        <ModalBody p={0} position="relative">
-          <Box width="100%" height="100%" className="reactflow-wrapper">
+        <ModalBody className="p-0" style={{ position: "relative" }}>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="absolute right-4 top-4 h-8 w-8 rounded-md inline-flex items-center justify-center"
+            style={{ color: styleContext.state.textColor }}
+          >
+            ×
+          </button>
+          <div style={{ width: "100%", height: "100%" }} className="reactflow-wrapper">
             {initialized && nodes.length > 0 ? (
               <div
                 style={{ width: "100%", height: "100%", minHeight: "500px" }}
@@ -516,15 +505,10 @@ export const DependencyGraphVisualization: React.FC<
                   />
 
                   {/* Legend */}
-                  <Box
-                    position="absolute"
-                    bottom={4}
-                    right={4}
-                    p={3}
-                    borderRadius="md"
-                    boxShadow="md"
-                    zIndex={10}
+                  <div
+                    className="absolute bottom-4 right-4 p-3 rounded-md shadow-md"
                     style={{
+                      zIndex: 10,
                       backgroundColor:
                         styleContext.state.buttonHoverColorWeight === "200"
                           ? "rgba(255, 255, 255, 0.9)"
@@ -533,123 +517,74 @@ export const DependencyGraphVisualization: React.FC<
                         styleContext.state.buttonHoverColorWeight === "200"
                           ? "#e5e7eb"
                           : "#374151",
-                      borderWidth: "1px",
+                      borderWidth: 1,
+                      borderStyle: "solid",
                       color: styleContext.state.textColor,
                     }}
                   >
-                    <Text fontWeight="bold" mb={2} fontSize="sm">
-                      Legenda
-                    </Text>
+                    <div className="font-bold text-sm mb-2">Legenda</div>
 
-                    <Flex direction="column" gap={2}>
-                      {/* Node types */}
-                      <Flex align="center" gap={2}>
-                        <Box
-                          w="16px"
-                          h="16px"
-                          borderRadius="md"
-                          borderWidth={2}
-                          borderColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "purple.500"
-                              : "purple.400"
-                          }
+                    <div className="flex flex-col gap-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="rounded-md"
+                          style={{ width: 16, height: 16, borderWidth: 2, borderStyle: "solid", borderColor: styleContext.state.buttonHoverColorWeight === "200" ? "#a855f7" : "#c084fc" }}
                         />
-                        <Text fontSize="xs">Atividades</Text>
-                      </Flex>
+                        <div>Atividades</div>
+                      </div>
 
-                      <Flex align="center" gap={2}>
-                        <Box
-                          w="16px"
-                          h="16px"
-                          borderRadius="md"
-                          borderWidth={2}
-                          borderColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "blue.500"
-                              : "blue.400"
-                          }
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="rounded-md"
+                          style={{ width: 16, height: 16, borderWidth: 2, borderStyle: "solid", borderColor: styleContext.state.buttonHoverColorWeight === "200" ? "#3b82f6" : "#60a5fa" }}
                         />
-                        <Text fontSize="xs">Entradas</Text>
-                      </Flex>
+                        <div>Entradas</div>
+                      </div>
 
-                      <Flex align="center" gap={2}>
-                        <Box
-                          w="16px"
-                          h="16px"
-                          borderRadius="md"
-                          borderWidth={2}
-                          borderColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "green.500"
-                              : "green.400"
-                          }
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="rounded-md"
+                          style={{ width: 16, height: 16, borderWidth: 2, borderStyle: "solid", borderColor: styleContext.state.buttonHoverColorWeight === "200" ? "#22c55e" : "#4ade80" }}
                         />
-                        <Text fontSize="xs">Saídas</Text>
-                      </Flex>
+                        <div>Saídas</div>
+                      </div>
 
-                      <Box
-                        h="1px"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.600"
-                        }
-                        my={1}
+                      <div
+                        style={{ height: 1, backgroundColor: styleContext.state.buttonHoverColorWeight === "200" ? "#e5e7eb" : "#4b5563" }}
                       />
 
-                      {/* Edge types */}
-                      <Flex align="center" gap={2}>
-                        <Box
-                          w="16px"
-                          h="2px"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "#9333ea"
-                              : "#a855f7"
-                          }
+                      <div className="flex items-center gap-2">
+                        <div
+                          style={{ width: 16, height: 2, backgroundColor: styleContext.state.buttonHoverColorWeight === "200" ? "#9333ea" : "#a855f7" }}
                         />
-                        <Text fontSize="xs">Dependências entre atividades</Text>
-                      </Flex>
+                        <div>Dependências entre atividades</div>
+                      </div>
 
-                      <Flex align="center" gap={2}>
-                        <Box
-                          w="16px"
-                          h="2px"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "#3182ce"
-                              : "#60a5fa"
-                          }
+                      <div className="flex items-center gap-2">
+                        <div
+                          style={{ width: 16, height: 2, backgroundColor: styleContext.state.buttonHoverColorWeight === "200" ? "#3182ce" : "#60a5fa" }}
                         />
-                        <Text fontSize="xs">Dependências de entrada</Text>
-                      </Flex>
+                        <div>Dependências de entrada</div>
+                      </div>
 
-                      <Flex align="center" gap={2}>
-                        <Box
-                          w="16px"
-                          h="2px"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "#38a169"
-                              : "#4ade80"
-                          }
+                      <div className="flex items-center gap-2">
+                        <div
+                          style={{ width: 16, height: 2, backgroundColor: styleContext.state.buttonHoverColorWeight === "200" ? "#38a169" : "#4ade80" }}
                         />
-                        <Text fontSize="xs">Dependências de saída</Text>
-                      </Flex>
-                    </Flex>
-                  </Box>
+                        <div>Dependências de saída</div>
+                      </div>
+                    </div>
+                  </div>
                 </ReactFlow>
               </div>
             ) : (
-              <Flex justify="center" align="center" height="100%" width="100%">
-                <Text color={styleContext.state.textColor}>
-                  Carregando visualização...
-                </Text>
-              </Flex>
+              <div className="flex items-center justify-center h-full w-full" style={{ color: styleContext.state.textColor }}>
+                Carregando visualização...
+              </div>
             )}
-          </Box>
+          </div>
         </ModalBody>
+        </div>
       </ModalContent>
     </Modal>
   );

@@ -1,12 +1,6 @@
 import { getAccessToken } from "../../auth/token";
 import {
   IconButton,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Spinner,
   Step,
   StepIcon,
@@ -17,12 +11,12 @@ import {
   StepStatus,
   StepTitle,
   Tag,
-  useDisclosure,
   useSteps,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { FaDownload, FaExpand } from "react-icons/fa";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@open-urbis/map-ui";
+import { FaDownload, FaExpand, FaTimes } from "react-icons/fa";
 import { RiBarcodeFill } from "react-icons/ri";
 import { useNavigate, useParams } from "react-router-dom";
 import { IField } from "@open-urbis/types";
@@ -57,7 +51,7 @@ export function Document(): JSX.Element {
     index: 1,
     count: 4,
   });
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
 
   const fetchProtocol = async () => {
     const response = await axios.get(
@@ -492,7 +486,7 @@ export function Document(): JSX.Element {
                       {acceptance.status === "ACCEPTED" && (
                         <div
                           onClick={() => {
-                            onOpen();
+                            setIsOpen(true);
                             setOpenedAcceptance(acceptance);
                           }}
                           className="flex items-center space-x-2 cursor-pointer"
@@ -512,16 +506,45 @@ export function Document(): JSX.Element {
             })}
 
           {protocol && (
-            <Modal isOpen={isOpen} onClose={onClose}>
-              <ModalOverlay />
-              <ModalContent
+            <Dialog
+              open={isOpen}
+              onOpenChange={(open) => {
+                if (!open) setIsOpen(false);
+              }}
+            >
+              <DialogContent
                 className="px-4 py-6"
-                style={{ minWidth: 685, maxHeight: "80vh" }}
-                bg={styleContext.state.backgroundColor}
+                style={{ minWidth: 685, maxHeight: "80vh", backgroundColor: styleContext.state.backgroundColor }}
               >
-                <ModalHeader>Dados da assinatura</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody overflowY="auto" wordBreak="break-word">
+                <DialogHeader>
+                  <div className="flex items-center justify-between gap-4">
+                    <DialogTitle asChild>
+                      <span style={{ color: styleContext.state.textColor }}>
+                        Dados da assinatura
+                      </span>
+                    </DialogTitle>
+                    <button
+                      type="button"
+                      aria-label="Close"
+                      onClick={() => setIsOpen(false)}
+                      className="rounded p-1.5 transition-colors duration-150"
+                      style={{
+                        color:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#6B7280"
+                            : "#9CA3AF",
+                        backgroundColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "rgba(107, 114, 128, 0.1)"
+                            : "rgba(156, 163, 175, 0.1)",
+                      }}
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
+                </DialogHeader>
+
+                <div className="overflow-y-auto break-words">
                   <FieldView
                     context={openedAcceptance.value}
                     field={protocol.acceptance[openedAcceptance.type]}
@@ -530,13 +553,14 @@ export function Document(): JSX.Element {
                       $variables: protocol.environment,
                       $data: openedAcceptance.value,
                       $modules: parseFunctions(protocol?.function ?? {}),
+                      $history: protocol.diff,
                       $state: "view",
                     }}
                     value={openedAcceptance.value}
                   ></FieldView>
-                </ModalBody>
-              </ModalContent>
-            </Modal>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
 
           {/* Tax */}

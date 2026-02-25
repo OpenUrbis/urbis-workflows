@@ -40,7 +40,7 @@ import {
   visibleCallback,
 } from "./utils/expressions";
 import { ArrayField } from "./fields/Array";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner } from "../../../components";
 import { FieldProps } from "./utils/types";
 import { RenderValidState } from "./components/RenderValidState";
 import { RenderLabelTooltip } from "./components/RenderLabelTooltip";

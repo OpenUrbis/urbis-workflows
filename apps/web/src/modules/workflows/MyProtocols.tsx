@@ -21,7 +21,6 @@ import { SL } from "../../components";
 import { ApiClient } from "../../api";
 import { WorkflowMetadata } from "../../api/types/workflows.dto";
 import { useSnackbar } from "../../hooks/snackbar";
-import { Loader2 } from "lucide-react";
 import {
   FaInbox,
   FaChevronLeft,
@@ -31,6 +30,7 @@ import {
   FaRocket,
   FaLink,
 } from "react-icons/fa";
+import { Spinner } from "../../components";
 import { formatId } from "./activities/common";
 import { usePermissions } from "../../reducers/permission.context";
 
@@ -125,7 +125,7 @@ export function MyProtocols(): JSX.Element {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Spinner size="xl" />
         </div>
       ) : (
         <>

@@ -13,7 +13,6 @@ import EditableHeader from "../../components/EditableHeader";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { StyleContext } from "../../reducers/style.reducer";
 import { Button, Input, Label } from "@open-urbis/map-ui";
-import { Loader2 } from "lucide-react";
 import { AddSecret } from "./components/AddSecret";
 import { ApiClient } from "../../api";
 import {
@@ -25,6 +24,7 @@ import {
 import { TreeList } from "./components/TreeList";
 import { VersionsMenu } from "./components/VersionsMenu";
 import { usePermissions } from "../../reducers/permission.context";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "http://localhost:4000",
@@ -383,7 +383,7 @@ export const Secrets: React.FC = () => {
         <div className="flex flex-col p-6 w-9/12">
           {loading && !selectedSecret && (
             <div className="flex-grow flex items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Spinner size="xl" />
             </div>
           )}
           {!loading && selectedSecret === null && addingSecret && (
@@ -421,7 +421,7 @@ export const Secrets: React.FC = () => {
             <>
               {loading ? (
                 <div className="flex-grow flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <Spinner size="xl" />
                 </div>
               ) : (
                 <>
@@ -506,7 +506,7 @@ export const Secrets: React.FC = () => {
                               disabled={loadingDecrypted}
                             >
                               {loadingDecrypted ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <Spinner />
                               ) : showDecrypted ? (
                                 <FaEyeSlash size={16} />
                               ) : (

@@ -1,10 +1,10 @@
-import { FormControl, FormLabel } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { Input, SL, Textarea } from "../../../components";
 import { HotkeyContext } from "../../../reducers";
 import { Upload } from "../form-engine/fields";
 import { CreateDatasetHttpDto } from "../../../api/types/datasets.dto";
 import { FaPlus } from "react-icons/fa";
+import { FormControl, FormLabel } from "../../../components";
 
 export type AddDatasetProps = {
   onAddDataset: (dataset: CreateDatasetHttpDto) => void;

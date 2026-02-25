@@ -5,7 +5,7 @@ import { FieldOptionEditor } from "../components/FieldOptionEditor";
 import { FieldEditable } from "./FieldEditable";
 import { StepEditable } from "./fields";
 import { FieldBlockEditableProps } from "./utils/types";
-import { Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components";
 import { StyleContext } from "../../../reducers/style.reducer";
 import { FaCube } from "react-icons/fa";
 

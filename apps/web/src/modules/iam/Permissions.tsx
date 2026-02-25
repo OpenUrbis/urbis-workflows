@@ -18,13 +18,13 @@ import {
   Label,
 } from "@open-urbis/map-ui";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
-import { Loader2 } from "lucide-react";
 import { StyleContext } from "../../reducers";
 import { ApiClient } from "../../api";
 import { Permission } from "../../api/types/iam.dto";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { useSnackbar } from "../../hooks/snackbar";
 import { SideDrawer } from "../../components/SideDrawer";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -207,7 +207,7 @@ export function Permissions(): JSX.Element {
 
       {isLoading && permissions.length === 0 ? (
         <div className="flex justify-center my-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Spinner size="xl" />
         </div>
       ) : (
         <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">

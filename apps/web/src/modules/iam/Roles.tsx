@@ -32,7 +32,6 @@ import {
   FaChevronDown,
   FaChevronRight,
 } from "react-icons/fa";
-import { Loader2 } from "lucide-react";
 import { StyleContext } from "../../reducers";
 import { ApiClient } from "../../api";
 import { Permission, Role } from "../../api/types/iam.dto";
@@ -40,6 +39,7 @@ import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { useSnackbar } from "../../hooks/snackbar";
 import InfoTooltip from "../../components/InfoTooltip";
 import { SideDrawer } from "../../components/SideDrawer";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -276,7 +276,7 @@ export function Roles(): JSX.Element {
 
       {isLoading && roles.length === 0 ? (
         <div className="flex justify-center my-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Spinner size="xl" />
         </div>
       ) : (
         <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">

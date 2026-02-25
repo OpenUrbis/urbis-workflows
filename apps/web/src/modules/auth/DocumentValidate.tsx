@@ -25,7 +25,8 @@ import {
 import { SL } from "../../components";
 import { HotkeyContext } from "../../reducers";
 import { AuthContext } from "../../reducers/auth.reducer";
-import { CircleCheckBig, CircleX, Loader2 } from "lucide-react";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { Spinner } from "../../components";
 
 export function DocumentValidate(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);
@@ -190,7 +191,7 @@ export function DocumentValidate(): JSX.Element {
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Spinner />
                 Verificando...
               </>
             ) : (
@@ -219,9 +220,9 @@ export function DocumentValidate(): JSX.Element {
           <DialogHeader>
             <div className="flex justify-center mb-2">
               {valid ? (
-                <CircleCheckBig className="h-16 w-16 text-green-600" />
+                <FaCheckCircle className="h-16 w-16 text-green-600" />
               ) : (
-                <CircleX className="h-16 w-16 text-red-600" />
+                <FaTimesCircle className="h-16 w-16 text-red-600" />
               )}
             </div>
             <DialogTitle className="text-center">

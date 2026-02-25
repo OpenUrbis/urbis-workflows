@@ -1,4 +1,3 @@
-import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { Input, Select, SL, Textarea } from "../../../components";
 import { HotkeyContext } from "../../../reducers";
@@ -7,6 +6,7 @@ import { FieldTypeEnum, IField } from "@open-urbis/types";
 import { FormEditor } from "./FormEditor";
 import { StepEditable } from "../form-engine/fields/StepEditable";
 import { FaPlus } from "react-icons/fa";
+import { FormControl, FormLabel, Spinner } from "../../../components";
 
 export type AddFormPresetProps = {
   onAddPreset: (preset: Omit<CreateFormDto, "commit">) => void;

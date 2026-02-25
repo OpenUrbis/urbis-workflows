@@ -1,10 +1,10 @@
-import { FormControl, FormLabel } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { Input, SL, Textarea } from "../../../components";
 import { HotkeyContext } from "../../../reducers";
 import { CreateCodeModuleHttpDto } from "../../../api/types/code-modules.dto";
 import { CodeEditor } from "./CodeEditor";
 import { FaPlus } from "react-icons/fa";
+import { FormControl, FormLabel } from "../../../components";
 
 export type AddModuleProps = {
   onAddFunction: (fun: CreateCodeModuleHttpDto) => void;

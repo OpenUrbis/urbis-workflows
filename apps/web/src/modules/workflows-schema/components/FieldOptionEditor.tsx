@@ -1,4 +1,3 @@
-import { IconButton } from "@chakra-ui/react";
 import { useContext, useState, useEffect } from "react";
 import { IField, IFormContext, MapOptions } from "@open-urbis/types";
 import { FaEllipsisV, FaChevronUp, FaChevronDown } from "react-icons/fa";
@@ -9,6 +8,7 @@ import { createFieldConfig } from "./fieldConfigs";
 import React from "react";
 import { SideDrawer } from "../../../components/SideDrawer";
 import { PermissionsSelector } from "./PermissionsSelector";
+import { IconButton } from "../../../components";
 
 // Add utility functions for items conversion
 const convertItemsToString = (

@@ -2,17 +2,6 @@ import { getAccessToken } from "../../auth/token";
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { FaPlus, FaRetweet, FaTrash, FaSave, FaDatabase } from "react-icons/fa";
 import { SL } from "../../components";
-import {
-  Spinner,
-  Table,
-  TableContainer,
-  Tag,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
 import EditableHeader from "../../components/EditableHeader";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { AddDataset } from "./components/AddDataset";
@@ -25,6 +14,7 @@ import {
   DatasetsEntity,
   CreateDatasetHttpDto,
 } from "../../api/types/datasets.dto";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -296,30 +286,66 @@ export const Datasets: React.FC = () => {
 
               <div className="w-4/5 mx-auto">
                 <div className="flex flex-col space-y-4">
-                  <Tag size={"lg"} className="w-fit">
-                    Inserido {selectedDataset.inserted} de{" "}
-                    {selectedDataset.total}
-                  </Tag>
-                  <TableContainer className="border dark:border-gray-700 rounded-lg">
-                    <Table>
-                      <Thead>
-                        <Tr>
+                  <div
+                    className="w-fit px-3 py-1.5 rounded-full text-sm border"
+                    style={{
+                      borderColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#e5e7eb"
+                          : "#374151",
+                      color: styleContext.state.textColor,
+                      backgroundColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#f8fafc"
+                          : "#111827",
+                    }}
+                  >
+                    Inserido {selectedDataset.inserted} de {selectedDataset.total}
+                  </div>
+                  <div className="border dark:border-gray-700 rounded-lg overflow-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr>
                           {headers.map((header) => (
-                            <Th key={header}>{header}</Th>
+                            <th
+                              key={header}
+                              className="text-left font-semibold px-3 py-2 border-b"
+                              style={{
+                                borderColor:
+                                  styleContext.state.buttonHoverColorWeight ===
+                                  "200"
+                                    ? "#e5e7eb"
+                                    : "#374151",
+                              }}
+                            >
+                              {header}
+                            </th>
                           ))}
-                        </Tr>
-                      </Thead>
-                      <Tbody>
+                        </tr>
+                      </thead>
+                      <tbody>
                         {selectedDataset?.sample?.map((item, index) => (
-                          <Tr key={index}>
+                          <tr key={index}>
                             {headers.map((header) => (
-                              <Td key={header}>{item[header]}</Td>
+                              <td
+                                key={header}
+                                className="px-3 py-2 border-b"
+                                style={{
+                                  borderColor:
+                                    styleContext.state.buttonHoverColorWeight ===
+                                    "200"
+                                      ? "#e5e7eb"
+                                      : "#374151",
+                                }}
+                              >
+                                {item[header]}
+                              </td>
                             ))}
-                          </Tr>
+                          </tr>
                         ))}
-                      </Tbody>
-                    </Table>
-                  </TableContainer>
+                      </tbody>
+                    </table>
+                  </div>
 
                   <Upload
                     fieldKey="dataset-uploader"

@@ -1,21 +1,17 @@
 import React, { useContext, useState, useEffect } from "react";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  ModalFooter,
-  Box,
-  Alert,
-  AlertIcon,
-  IconButton,
-  Collapse,
-} from "@chakra-ui/react";
 import { CodeEditor } from "./CodeEditor";
 import { FaTimes, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { StyleContext } from "../../../reducers";
 import { SL } from "../../../components";
+import {
+  IconButton,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+} from "../../../components";
 
 interface CodeViewerModalProps {
   title: string;
@@ -127,16 +123,33 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
   const errors = validationErrors.filter((error) => error.severity === 8);
   const warnings = validationErrors.filter((error) => error.severity !== 8);
 
+  const alertRowStyle = (variant: "error" | "warning") => {
+    const isLight = styleContext.state.buttonHoverColorWeight === "200";
+    if (variant === "error") {
+      return {
+        backgroundColor: isLight ? "#fee2e2" : "#7f1d1d",
+        color: isLight ? "#991b1b" : "#fecaca",
+      };
+    }
+    return {
+      backgroundColor: isLight ? "#fef3c7" : "#78350f",
+      color: isLight ? "#92400e" : "#fef3c7",
+    };
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="4xl">
-      <ModalOverlay backdropFilter="blur(4px)" />
-      <ModalContent
-        maxHeight="80vh"
-        maxWidth="56rem"
-        bg={styleContext.state.backgroundColor}
-        display="flex"
-        flexDirection="column"
-      >
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <div
+          style={{
+            maxHeight: "80vh",
+            maxWidth: "56rem",
+            backgroundColor: styleContext.state.backgroundColor,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
         <ModalHeader
           className="flex items-center justify-between border-b pb-4"
           style={{ color: styleContext.state.textColor }}
@@ -187,22 +200,12 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
             <div className="w-full px-4 py-3 max-h-[150px] overflow-y-auto">
               {errors.length > 0 && (
                 <div>
-                  <Alert
-                    status="error"
-                    className="cursor-pointer"
+                  <div
+                    className="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md"
                     onClick={() => setShowErrors(!showErrors)}
-                    style={{
-                      backgroundColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#fee2e2"
-                          : "#7f1d1d",
-                      color:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#991b1b"
-                          : "#fecaca",
-                    }}
+                    style={alertRowStyle("error")}
                   >
-                    <AlertIcon />
+                    <div className="h-2.5 w-2.5 rounded-full bg-current opacity-60" />
                     <div className="flex-grow">
                       {errors.length} {errors.length === 1 ? "erro" : "erros"}{" "}
                       encontrado
@@ -211,58 +214,34 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
                     <IconButton
                       aria-label="Toggle errors"
                       icon={showErrors ? <FaChevronUp /> : <FaChevronDown />}
-                      size="sm"
-                      variant="ghost"
                       style={{ color: styleContext.state.textColor }}
                     />
-                  </Alert>
-                  <Collapse in={showErrors}>
-                    <Box pl={4} mt={2} className="space-y-2">
+                  </div>
+                  {showErrors && (
+                    <div className="pl-4 mt-2 space-y-2">
                       {errors.map((error, index) => (
-                        <Alert
-                          status="error"
-                          variant="left-accent"
+                        <div
                           key={`error-${index}`}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#fee2e2"
-                                : "#7f1d1d",
-                            color:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#991b1b"
-                                : "#fecaca",
-                          }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-md"
+                          style={alertRowStyle("error")}
                         >
-                          <AlertIcon />
+                          <div className="h-2 w-2 rounded-full bg-current opacity-60" />
                           Linha {error.startLineNumber}: {error.message}
-                        </Alert>
+                        </div>
                       ))}
-                    </Box>
-                  </Collapse>
+                    </div>
+                  )}
                 </div>
               )}
 
               {warnings.length > 0 && (
                 <div className="mt-2">
-                  <Alert
-                    status="warning"
-                    className="cursor-pointer"
+                  <div
+                    className="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-md"
                     onClick={() => setShowWarnings(!showWarnings)}
-                    style={{
-                      backgroundColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#fef3c7"
-                          : "#78350f",
-                      color:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#92400e"
-                          : "#fef3c7",
-                    }}
+                    style={alertRowStyle("warning")}
                   >
-                    <AlertIcon />
+                    <div className="h-2.5 w-2.5 rounded-full bg-current opacity-60" />
                     <div className="flex-grow">
                       {warnings.length}{" "}
                       {warnings.length === 1 ? "aviso" : "avisos"} encontrado
@@ -271,37 +250,23 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
                     <IconButton
                       aria-label="Toggle warnings"
                       icon={showWarnings ? <FaChevronUp /> : <FaChevronDown />}
-                      size="sm"
-                      variant="ghost"
                       style={{ color: styleContext.state.textColor }}
                     />
-                  </Alert>
-                  <Collapse in={showWarnings}>
-                    <Box pl={4} mt={2} className="space-y-2">
+                  </div>
+                  {showWarnings && (
+                    <div className="pl-4 mt-2 space-y-2">
                       {warnings.map((warning, index) => (
-                        <Alert
-                          status="warning"
-                          variant="left-accent"
+                        <div
                           key={`warning-${index}`}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#fef3c7"
-                                : "#78350f",
-                            color:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#92400e"
-                                : "#fef3c7",
-                          }}
+                          className="flex items-center gap-2 px-3 py-2 rounded-md"
+                          style={alertRowStyle("warning")}
                         >
-                          <AlertIcon />
+                          <div className="h-2 w-2 rounded-full bg-current opacity-60" />
                           Linha {warning.startLineNumber}: {warning.message}
-                        </Alert>
+                        </div>
                       ))}
-                    </Box>
-                  </Collapse>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -359,6 +324,7 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
             </div>
           </div>
         </ModalFooter>
+        </div>
       </ModalContent>
     </Modal>
   );

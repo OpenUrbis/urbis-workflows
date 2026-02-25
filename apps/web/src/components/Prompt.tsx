@@ -1,13 +1,11 @@
 import React, { FC, useContext, useEffect, useState } from "react";
 import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react";
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@open-urbis/map-ui";
 import { IField, FieldTypeEnum, TextAreaOptions } from "@open-urbis/types";
 import { Field } from "../modules/workflows-schema/form-engine/Field";
 import { StyleContext } from "../reducers";
@@ -46,7 +44,7 @@ const PromptModal: FC<PromptProps> = ({
   fields,
   options,
 }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState<string>(defaultValue);
   const [modalTitle, setModalTitle] = useState<string>(title);
   const [formFields, setFields] = useState<any[]>(fields || []);
@@ -69,7 +67,7 @@ const PromptModal: FC<PromptProps> = ({
     setForm(promptParams?.defaultValue || {});
     setModalOptions(promptParams?.options || {});
     if (resolvePrompt) {
-      onOpen();
+      setIsOpen(true);
     }
     
   }, [resolvePrompt, promptParams]);
@@ -92,7 +90,7 @@ const PromptModal: FC<PromptProps> = ({
     if (closeButton) {
       closeButton.focus();
     }
-    onClose();
+    setIsOpen(false);
   };
 
   const handleConfirm = () => {
@@ -336,16 +334,13 @@ const PromptModal: FC<PromptProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleCancel}
-      motionPreset="slideInBottom"
-      isCentered
-      onEsc={handleCancel}
-      closeOnEsc={false}
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleCancel();
+      }}
     >
-      <ModalOverlay backdropFilter="blur(4px)" />
-      <ModalContent
+      <DialogContent
         className="px-6 py-"
         style={{
           minWidth: isIndexSelector ? "400px" : "400px",
@@ -353,12 +348,14 @@ const PromptModal: FC<PromptProps> = ({
           backgroundColor: styleContext.state.backgroundColor,
         }}
       >
-        <ModalHeader className="p-4 border-b">
+        <DialogHeader className="p-4 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 text-xl mt-4">
-              <span style={{ color: styleContext.state.textColor }}>
-                {modalTitle}
-              </span>
+              <DialogTitle asChild>
+                <span style={{ color: styleContext.state.textColor }}>
+                  {modalTitle}
+                </span>
+              </DialogTitle>
               {modalOptions?.tooltip && (
                 <div className="text-sm">
                   <HelpTooltipClickable
@@ -387,15 +384,17 @@ const PromptModal: FC<PromptProps> = ({
               <FaTimes size={12} />
             </button>
           </div>
-        </ModalHeader>
-        <ModalBody
+        </DialogHeader>
+
+        <div
           className={`my-4 ${isIndexSelector ? "text-center" : ""}`}
           style={{ color: styleContext.state.textColor }}
         >
           {renderInputArea()}
           {renderError()}
-        </ModalBody>
-        <ModalFooter className="pt-4 border-t space-x-3">
+        </div>
+
+        <DialogFooter className="pt-4 border-t space-x-3">
           <button
             className={`px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2
               ${
@@ -408,12 +407,10 @@ const PromptModal: FC<PromptProps> = ({
           >
             <span>{isIndexSelector ? "Selecionar" : "Confirmar"}</span>
             <SL
-              bg={
-                hasError
-                  ? "gray.200"
-                  : "primary"
+              bg={hasError ? "gray.200" : "primary"}
+              className={
+                hasError ? undefined : "text-[hsl(var(--primary-foreground))]"
               }
-              className={hasError ? undefined : "text-[hsl(var(--primary-foreground))]"}
             >
               Enter
             </SL>
@@ -440,9 +437,9 @@ const PromptModal: FC<PromptProps> = ({
               esc
             </SL>
           </button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

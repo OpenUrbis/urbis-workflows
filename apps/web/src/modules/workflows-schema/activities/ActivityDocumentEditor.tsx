@@ -1,16 +1,17 @@
 import React, { useState, useContext } from "react";
 import {
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   FormControl,
-  FormLabel,
   FormHelperText,
-  Tooltip,
+  FormLabel,
   IconButton,
-} from "@chakra-ui/react";
+  Tooltip,
+} from "../../../components";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@open-urbis/map-ui";
 import { IFormContext } from "@open-urbis/types";
 import { DocumentEditor } from "./documents/DocumentEditor";
 import { DocumentPlateEditor } from "./documents/DocumentPlateEditor";
@@ -38,8 +39,8 @@ export const ActivityDocumentEditor = ({
 }: ActivityDocumentEditorProps): JSX.Element => {
   const { id } = useParams<{ id: string }>();
   const [selectedDocumentId, setSelectedDocumentId] = useState<string>("");
-  const [tabIndex, setTabIndex] = useState(0);
-  const isPreview = tabIndex === 1;
+  const [selectedTab, setSelectedTab] = useState("editor");
+  const isPreview = selectedTab === "preview";
   const styleContext = useContext(StyleContext);
 
   // Generate QR code URL based on the current workflow
@@ -462,45 +463,41 @@ export const ActivityDocumentEditor = ({
             style={{ backgroundColor: styleContext.state.backgroundColor }}
             className="rounded-lg"
           >
-            <Tabs
-              index={tabIndex}
-              onChange={setTabIndex}
-              variant="enclosed"
-              colorScheme={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "yellow"
-                  : "gray"
-              }
-            >
-              <TabList
+            <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+              <TabsList
                 className="border-b px-4"
                 style={{
                   borderColor:
                     styleContext.state.buttonHoverColorWeight === "200"
                       ? "#E5E7EB"
                       : "#374151",
+                  backgroundColor: "transparent",
                 }}
               >
-                <Tab style={{ color: styleContext.state.textColor }}>
+                <TabsTrigger
+                  value="editor"
+                  style={{ color: styleContext.state.textColor }}
+                >
                   Editor
-                </Tab>
-                <Tab style={{ color: styleContext.state.textColor }}>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="preview"
+                  style={{ color: styleContext.state.textColor }}
+                >
                   Prévia
-                </Tab>
-              </TabList>
+                </TabsTrigger>
+              </TabsList>
 
-              <TabPanels>
-                <TabPanel>
-                  {renderTemplateEditor(
-                    documents.find((doc) => doc.id === selectedDocumentId)!
-                  )}
-                </TabPanel>
-                <TabPanel>
-                  {renderTemplateEditor(
-                    documents.find((doc) => doc.id === selectedDocumentId)!
-                  )}
-                </TabPanel>
-              </TabPanels>
+              <TabsContent value="editor">
+                {renderTemplateEditor(
+                  documents.find((doc) => doc.id === selectedDocumentId)!
+                )}
+              </TabsContent>
+              <TabsContent value="preview">
+                {renderTemplateEditor(
+                  documents.find((doc) => doc.id === selectedDocumentId)!
+                )}
+              </TabsContent>
             </Tabs>
           </div>
         )}

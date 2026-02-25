@@ -12,8 +12,8 @@ import {
   FaRocket,
   FaFlask,
   FaClone,
+  FaSearch,
 } from "react-icons/fa";
-import { Loader2, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import * as RadixDialog from "@radix-ui/react-dialog";
 import {
@@ -28,6 +28,7 @@ import { WorkflowSchema } from "../../api/types/workflows-schema.dto";
 import { PermissionGate } from "../../components/PermissionGate";
 import { usePermissions } from "../../reducers/permission.context";
 import { AuthContext } from "../../reducers/auth.reducer";
+import { Spinner } from "../../components";
 
 // Create API client factory that uses current token
 const createApiClient = () => {
@@ -173,10 +174,7 @@ export const WorkflowsSchema: React.FC = () => {
               <div className="flex-grow relative">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                    <Search
-                      className="text-muted-foreground"
-                      size={16}
-                    />
+                    <FaSearch className="text-muted-foreground" size={16} />
                   </div>
                   <Input
                     type="text"
@@ -269,7 +267,7 @@ export const WorkflowsSchema: React.FC = () => {
 const LoadingSpinner = () => {
   return (
     <div className="flex flex-col items-center justify-center pt-10 space-y-4">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <Spinner size="xl" />
       <span className="text-sm text-muted-foreground">Carregando assuntos...</span>
     </div>
   );
@@ -570,12 +568,12 @@ const WorkflowsList = ({
       ))}
       {filteredWorkflows.length === 0 && (
         <div className="flex flex-col items-center justify-center text-center">
-          <Search size={48} className="mb-4 text-muted-foreground/60" />
+          <FaSearch size={48} className="mb-4 text-muted-foreground/60" />
           <p className="text-xl font-medium mb-2 text-foreground">
             Nenhum assunto encontrado
           </p>
           <p className="text-sm text-muted-foreground">
-            Tente ajustar sua busca ou criar um novo assunto
+            Tente ajustar sua pesquisa ou criar um novo assunto
           </p>
         </div>
       )}

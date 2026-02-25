@@ -2,16 +2,16 @@ import { useContext, useState } from "react";
 import { FieldTypeEnum, IField, IFormContext } from "@open-urbis/types";
 import { FieldEditable } from "../form-engine/FieldEditable";
 import { FaPlus, FaTrash, FaSignature } from "react-icons/fa";
-import {
-  IconButton,
-  FormControl,
-  FormLabel,
-  Tooltip,
-  FormHelperText,
-} from "@chakra-ui/react";
 import { SignatureConfig } from "../../../api/types/schema";
 import { StyleContext } from "../../../reducers";
 import { Input, Textarea } from "../../../components";
+import {
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  IconButton,
+  Tooltip,
+} from "../../../components";
 
 export type SignatureEditorProps = {
   signatures: SignatureConfig[];

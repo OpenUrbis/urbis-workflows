@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from "react";
 import { Button, Input, Label, Textarea } from "@open-urbis/map-ui";
-import { Loader2 } from "lucide-react";
 import { SL } from "../../../components";
 import { HotkeyContext } from "../../../reducers";
 import { CreateSecretHttpDto } from "../../../api/types/integrations.dto";
 import { FaPlus } from "react-icons/fa";
+import { Spinner } from "../../../components";
 
 export type AddSecretProps = {
   onAddSecret: (secret: Partial<CreateSecretHttpDto>) => void;
@@ -58,7 +58,7 @@ export const AddSecret: React.FC<AddSecretProps> = ({
   if (loading) {
     return (
       <div className="flex-grow flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Spinner size="xl" />
       </div>
     );
   }
