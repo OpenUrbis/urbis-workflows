@@ -32,11 +32,11 @@ const InfoTooltip = ({
           {showIcon && <Icon className="ml-1" size={size} color="#9CA3AF" />}
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg bg-background text-foreground border-border">
         <DialogHeader>
-          <DialogTitle>Informações</DialogTitle>
+          <DialogTitle className="text-foreground">Informações</DialogTitle>
         </DialogHeader>
-        <div className="max-h-[300px] overflow-y-auto">{content}</div>
+        <div className="max-h-[400px] overflow-y-auto pr-2 text-foreground">{content}</div>
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="outline" size="sm">

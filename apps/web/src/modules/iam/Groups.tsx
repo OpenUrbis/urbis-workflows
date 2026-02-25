@@ -320,11 +320,11 @@ export function Groups(): JSX.Element {
                             <InfoTooltip
                               key={role.id}
                               content={
-                                <div className="space-y-2">
-                                  <p className="font-bold">Permissões:</p>
+                                <div className="space-y-2 text-foreground">
+                                  <p className="font-bold text-foreground">Permissões:</p>
                                   {role.permissions.map((perm) => (
-                                    <p key={perm.id} className="text-sm">
-                                      • <code>{perm.code}</code>
+                                    <p key={perm.id} className="text-sm text-foreground">
+                                      • <code className="bg-muted px-1 rounded text-foreground">{perm.code}</code>
                                       {perm.description && ` - ${perm.description}`}
                                     </p>
                                   ))}
@@ -346,10 +346,10 @@ export function Groups(): JSX.Element {
                         {group.roles.length > 3 && (
                           <InfoTooltip
                             content={
-                              <div className="space-y-2">
-                                <p className="font-bold">Funções adicionais:</p>
+                              <div className="space-y-2 text-foreground">
+                                <p className="font-bold text-foreground">Funções adicionais:</p>
                                 {group.roles.slice(3).map((role) => (
-                                  <p key={role.id} className="text-sm">
+                                  <p key={role.id} className="text-sm text-foreground">
                                     • {role.name}
                                     {role.description && ` - ${role.description}`}
                                   </p>
@@ -399,8 +399,8 @@ export function Groups(): JSX.Element {
                             <p className="font-bold text-foreground">Detalhes do Grupo</p>
                             <InfoTooltip
                               content={
-                                <div className="space-y-2">
-                                  <p className="font-bold">Permissões efetivas:</p>
+                                <div className="space-y-2 text-foreground">
+                                  <p className="font-bold text-foreground">Permissões efetivas:</p>
                                   <p className="text-xs mb-2 text-muted-foreground">
                                     (Combinação de todas as permissões das funções deste grupo)
                                   </p>
@@ -411,8 +411,8 @@ export function Groups(): JSX.Element {
                                       )
                                     )
                                   ).map((perm, idx) => (
-                                    <p key={idx} className="text-sm">
-                                      • <code>{perm.code}</code>
+                                    <p key={idx} className="text-sm text-foreground">
+                                      • <code className="bg-muted px-1 rounded text-foreground">{perm.code}</code>
                                       {perm.description && ` - ${perm.description}`}
                                     </p>
                                   ))}
@@ -459,11 +459,11 @@ export function Groups(): JSX.Element {
                                     </p>
                                     <InfoTooltip
                                       content={
-                                        <div className="space-y-2">
-                                          <p className="font-bold">Permissões:</p>
+                                        <div className="space-y-2 text-foreground">
+                                          <p className="font-bold text-foreground">Permissões:</p>
                                           {role.permissions.map((perm) => (
-                                            <p key={perm.id} className="text-sm">
-                                              • <code>{perm.code}</code>
+                                            <p key={perm.id} className="text-sm text-foreground">
+                                              • <code className="bg-muted px-1 rounded text-foreground">{perm.code}</code>
                                               {perm.description && ` - ${perm.description}`}
                                             </p>
                                           ))}

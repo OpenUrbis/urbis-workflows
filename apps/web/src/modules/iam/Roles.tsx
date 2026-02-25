@@ -326,10 +326,25 @@ export function Roles(): JSX.Element {
                               key={permission.id}
                               content={
                                 <div className="space-y-2 text-foreground">
-                                  <p className="font-bold">Detalhes da Permissão:</p>
-                                  <p className="text-sm"><span className="font-medium">Nome:</span> {permission.name}</p>
-                                  <p className="text-sm"><span className="font-medium">Código:</span> {permission.code}</p>
-                                  <p className="text-sm"><span className="font-medium">Descrição:</span> {permission.description}</p>
+                                  <p className="font-bold text-foreground">
+                                    Detalhes da Permissão:
+                                  </p>
+                                  <p className="text-sm text-foreground">
+                                    <span className="font-medium">Nome:</span>{" "}
+                                    {permission.name}
+                                  </p>
+                                  <p className="text-sm text-foreground">
+                                    <span className="font-medium">Código:</span>{" "}
+                                    <code className="bg-muted px-1 rounded text-foreground">
+                                      {permission.code}
+                                    </code>
+                                  </p>
+                                  <p className="text-sm text-foreground">
+                                    <span className="font-medium">
+                                      Descrição:
+                                    </span>{" "}
+                                    {permission.description}
+                                  </p>
                                 </div>
                               }
                               showIcon={false}
@@ -343,7 +358,9 @@ export function Roles(): JSX.Element {
                             </InfoTooltip>
                           ))
                         ) : (
-                          <span className="text-xs text-muted-foreground">Sem permissões</span>
+                          <span className="text-xs text-muted-foreground">
+                            Sem permissões
+                          </span>
                         )}
                         {role.permissions.length > 2 && (
                           <InfoTooltip
@@ -400,7 +417,7 @@ export function Roles(): JSX.Element {
                             <p className="font-bold text-foreground">Detalhes da Função</p>
                             <InfoTooltip
                               content={
-                                <div className="space-y-2">
+                                <div className="space-y-2 text-foreground">
                                   <p className="font-bold text-foreground">Permissões efetivas:</p>
                                   <p className="text-xs mb-2 text-muted-foreground">
                                     (Todas as permissões atribuídas a esta função)
@@ -456,7 +473,7 @@ export function Roles(): JSX.Element {
                                         <div className="space-y-2 text-foreground">
                                           <p className="font-bold text-foreground">Detalhes da Permissão:</p>
                                           <p className="text-sm text-foreground"><span className="font-medium">Nome:</span> {permission.name}</p>
-                                          <p className="text-sm text-foreground"><span className="font-medium">Código:</span> {permission.code}</p>
+                                          <p className="text-sm text-foreground"><span className="font-medium">Código:</span> <code className="bg-muted px-1 rounded text-foreground">{permission.code}</code></p>
                                           <p className="text-sm text-foreground"><span className="font-medium">Descrição:</span> {permission.description}</p>
                                         </div>
                                       }

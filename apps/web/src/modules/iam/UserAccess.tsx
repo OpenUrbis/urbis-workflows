@@ -318,13 +318,21 @@ export function UserAccess(): JSX.Element {
                       <InfoTooltip
                         content={
                           <div className="space-y-2 p-1 text-foreground">
-                            <p className="font-bold">Permissões Efetivas:</p>
+                            <p className="font-bold text-foreground">
+                              Permissões Efetivas:
+                            </p>
                             {getEffectivePermissions(user).length > 0 ? (
-                              <div className="max-h-[300px] overflow-y-auto space-y-1">
+                              <div className="max-h-[300px] overflow-y-auto space-y-1 pr-2">
                                 {getEffectivePermissions(user).map(
                                   (permission) => (
-                                    <p key={permission.id} className="text-sm">
-                                      • <code>{permission.code}</code>{" "}
+                                    <p
+                                      key={permission.id}
+                                      className="text-sm text-foreground"
+                                    >
+                                      •{" "}
+                                      <code className="bg-muted px-1 rounded text-foreground">
+                                        {permission.code}
+                                      </code>{" "}
                                       {permission.description}
                                     </p>
                                   ),
