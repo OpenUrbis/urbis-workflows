@@ -257,18 +257,17 @@ export function Roles(): JSX.Element {
 
   return (
     <div className="flex flex-col space-y-6 mb-20">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center h-10">
         <h2
-          className="text-xl font-bold"
+          className="text-lg font-bold text-foreground m-0 leading-none"
           style={{ color: styleContext.state.textColor }}
         >
           Funções
         </h2>
         <DSButton
           type="button"
-          size="sm"
           onClick={resetFormAndOpen}
-          className="h-9 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="h-8 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <FaPlus size={14} />
           Nova Função
@@ -622,12 +621,13 @@ export function Roles(): JSX.Element {
                                 id={permission.id}
                                 checked={formData.permissionIds.includes(permission.id)}
                                 onCheckedChange={() => handlePermissionChange(permission.id)}
+                                className="!rounded-none shrink-0"
                               />
                               <Label
                                 htmlFor={permission.id}
                                 className="flex-1 cursor-pointer"
                               >
-                                <div className="text-sm font-medium text-foreground">{permission.name}</div>
+                                <div className="text-sm font-medium text-foreground leading-tight">{permission.name}</div>
                                 <div className="text-xs text-muted-foreground">{permission.code}</div>
                               </Label>
                             </div>
@@ -645,15 +645,14 @@ export function Roles(): JSX.Element {
           </div>
 
           <div
-            className="absolute bottom-0 left-0 right-0 py-4 px-6 border-t border-border flex justify-end space-x-3 z-10"
+            className="absolute bottom-0 left-0 right-0 h-16 px-6 border-t border-border flex items-center justify-end space-x-3 z-10"
             style={{ backgroundColor: styleContext.state.backgroundColor }}
           >
             <DSButton
               type="button"
-              size="sm"
               onClick={handleSave}
               disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isEdit ? "Atualizar" : "Criar"} Função
             </DSButton>

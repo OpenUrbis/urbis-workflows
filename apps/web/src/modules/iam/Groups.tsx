@@ -19,10 +19,6 @@ import {
   SelectValue,
   Textarea as DSTextarea,
   Label,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
 } from "@open-urbis/map-ui";
 import {
   FaEdit,
@@ -256,18 +252,17 @@ export function Groups(): JSX.Element {
 
   return (
     <div className="flex flex-col space-y-6 mb-20">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center h-10">
         <h2
-          className="text-xl font-bold"
+          className="text-lg font-bold text-foreground m-0 leading-none"
           style={{ color: styleContext.state.textColor }}
         >
           Grupos
         </h2>
         <DSButton
           type="button"
-          size="sm"
           onClick={resetFormAndOpen}
-          className="h-9 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="h-8 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <FaPlus size={14} />
           Novo Grupo
@@ -531,7 +526,7 @@ export function Groups(): JSX.Element {
           }}
         >
           <div className="overflow-y-auto h-full pb-24">
-            <div className="p-4 border-b border-border">
+            <div className="p-4 pb-24 border-b border-border">
               <div className="mb-4">
                 <Label className="mb-2 block text-sm font-medium text-foreground">
                   Nome do Grupo
@@ -629,15 +624,16 @@ export function Groups(): JSX.Element {
                         id={role.id}
                         checked={formData.roleIds.includes(role.id)}
                         onCheckedChange={() => handleRoleChange(role.id)}
+                        className="!rounded-none shrink-0"
                       />
                       <Label
                         htmlFor={role.id}
                         className="flex-1 cursor-pointer"
                       >
-                        <div className="text-sm font-medium text-foreground">{role.name}</div>
+                        <div className="text-sm font-medium text-foreground leading-tight">{role.name}</div>
                         <div className="text-xs text-muted-foreground">{role.description}</div>
                         <div className="flex mt-1 gap-1">
-                          <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/5 text-primary border-primary/10">
+                          <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border-primary/20">
                             {role.permissions.length} permissões
                           </Badge>
                         </div>
@@ -653,15 +649,14 @@ export function Groups(): JSX.Element {
           </div>
 
           <div
-            className="absolute bottom-0 left-0 right-0 py-4 px-6 border-t border-border flex justify-end space-x-3 z-10"
+            className="absolute bottom-0 left-0 right-0 h-16 px-6 border-t border-border flex items-center justify-end space-x-3 z-10"
             style={{ backgroundColor: styleContext.state.backgroundColor }}
           >
             <DSButton
               type="button"
-              size="sm"
               onClick={handleSave}
               disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isEdit ? "Atualizar" : "Criar"} Grupo
             </DSButton>

@@ -444,13 +444,9 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
                 </div>
                 {badge && (
                   <div
-                    className={`px-2 py-0.5 rounded-full ${
-                      badge.color
-                        ? `${badge.color.bg} ${badge.color.text}`
-                        : `bg-${badge.colorScheme}-100 text-${badge.colorScheme}-800`
-                    }`}
+                    className={`px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary`}
                   >
-                    <span className="text-[10px] font-medium">{badge.text}</span>
+                    <span className="text-[10px] font-medium leading-none">{badge.text}</span>
                   </div>
                 )}
               </div>

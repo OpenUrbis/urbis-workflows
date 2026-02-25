@@ -56,7 +56,7 @@ export function Permissions(): JSX.Element {
       const response = await api.iam.getPermissions();
       // Sort permissions by code
       const sortedPermissions = [...response.permissions].sort((a, b) =>
-        a.code.localeCompare(b.code)
+        a.code.localeCompare(b.code),
       );
       setPermissions(sortedPermissions);
     } catch (error) {
@@ -85,7 +85,6 @@ export function Permissions(): JSX.Element {
         delete: ["N"],
       });
     };
-    
   }, []);
 
   const resetFormAndOpen = () => {
@@ -99,7 +98,7 @@ export function Permissions(): JSX.Element {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -135,7 +134,7 @@ export function Permissions(): JSX.Element {
         type: "warning",
         confirmText: "Excluir",
         cancelText: "Cancelar",
-      }
+      },
     );
 
     if (confirmed) {
@@ -165,10 +164,12 @@ export function Permissions(): JSX.Element {
       if (isEdit && selectedPermission) {
         const updated = await api.iam.updatePermission(
           selectedPermission.id,
-          formData
+          formData,
         );
         setPermissions(
-          permissions.map((p) => (p.id === selectedPermission.id ? updated : p))
+          permissions.map((p) =>
+            p.id === selectedPermission.id ? updated : p,
+          ),
         );
         snackbar.success("A permissão foi atualizada com sucesso.");
       } else {
@@ -187,18 +188,17 @@ export function Permissions(): JSX.Element {
 
   return (
     <div className="flex flex-col space-y-6 mb-20">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center h-10">
         <h2
-          className="text-xl font-bold"
+          className="text-lg font-bold text-foreground m-0 leading-none"
           style={{ color: styleContext.state.textColor }}
         >
           Permissões
         </h2>
         <DSButton
           type="button"
-          size="sm"
           onClick={resetFormAndOpen}
-          className="h-9 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+          className="h-8 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <FaPlus size={14} />
           Nova Permissão
@@ -261,7 +261,9 @@ export function Permissions(): JSX.Element {
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="truncate cursor-default">{permission.name}</div>
+                            <div className="truncate cursor-default">
+                              {permission.name}
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent side="top">
                             {permission.name}
@@ -375,9 +377,7 @@ export function Permissions(): JSX.Element {
           <div className="overflow-y-auto h-full pb-20">
             <div className="p-4 border-b border-border">
               <div className="mb-4">
-                <Label
-                  className="mb-2 block text-sm font-medium text-foreground"
-                >
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Nome da Permissão
                 </Label>
                 <DSInput
@@ -391,9 +391,7 @@ export function Permissions(): JSX.Element {
               </div>
 
               <div className="mb-4">
-                <Label
-                  className="mb-2 block text-sm font-medium text-foreground"
-                >
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Código
                 </Label>
                 <DSInput
@@ -410,9 +408,7 @@ export function Permissions(): JSX.Element {
               </div>
 
               <div className="mb-4">
-                <Label
-                  className="mb-2 block text-sm font-medium text-foreground"
-                >
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Descrição
                 </Label>
                 <DSTextarea
@@ -427,15 +423,14 @@ export function Permissions(): JSX.Element {
           </div>
 
           <div
-            className="absolute bottom-0 left-0 right-0 py-4 px-6 border-t border-border flex justify-end space-x-3 z-10"
+            className="absolute bottom-0 left-0 right-0 h-16 px-6 border-t border-border flex items-center justify-end space-x-3 z-10"
             style={{ backgroundColor: styleContext.state.backgroundColor }}
           >
             <DSButton
               type="button"
-              size="sm"
               onClick={handleSave}
               disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isEdit ? "Atualizar" : "Criar"} Permissão
             </DSButton>
