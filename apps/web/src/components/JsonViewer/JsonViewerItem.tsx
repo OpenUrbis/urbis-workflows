@@ -1,4 +1,4 @@
-import { IconButton } from "@chakra-ui/react";
+import { IconButton } from "../LegacyUi";
 import React, { useEffect, useState } from "react";
 import { FaCopy, FaEdit } from "react-icons/fa";
 import { isValidJsonAny } from "../../modules/workflows-schema/form-engine/utils/is-valid-json-str";
@@ -83,18 +83,18 @@ export const JsonViewerItem = (props: IJsonViewerProps): React.JSX.Element => {
     return (
       <div className="action-icons">
         <IconButton
-          size={"xs"}
           aria-label="Edit item"
           onClick={() => editValue()}
+          className="h-6 w-6"
+          icon={<FaEdit />}
         >
-          <FaEdit />
         </IconButton>
         <IconButton
-          size={"xs"}
           aria-label="Copy item"
           onClick={() => copyToClipboard()}
+          className="h-6 w-6"
+          icon={<FaCopy />}
         >
-          <FaCopy />
         </IconButton>
         {type === "object" && !Array.isArray(props.data) && (
           <JsonViewerNewKey newKey={(key: string) => editValue(key)} />

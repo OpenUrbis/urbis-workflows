@@ -15,7 +15,11 @@ import {
   TooltipTrigger,
 } from "@open-urbis/map-ui";
 
-export const Spinner = ({ size = "md" }: { size?: "md" | "xl" }) => (
+export const Spinner = ({
+  size = "md",
+}: {
+  size?: "sm" | "md" | "lg" | "xl";
+}) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
@@ -24,7 +28,15 @@ export const Spinner = ({ size = "md" }: { size?: "md" | "xl" }) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={`animate-spin ${size === "xl" ? "h-10 w-10" : "h-5 w-5"}`}
+    className={`animate-spin ${
+      size === "xl"
+        ? "h-10 w-10"
+        : size === "lg"
+          ? "h-7 w-7"
+          : size === "sm"
+            ? "h-4 w-4"
+            : "h-5 w-5"
+    }`}
     aria-hidden="true"
   >
     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
@@ -84,6 +96,8 @@ export const IconButton = ({
   className = "",
   style,
   "aria-label": ariaLabel,
+  children,
+  ...props
 }: any) => (
   <button
     type="button"
@@ -91,8 +105,9 @@ export const IconButton = ({
     className={`inline-flex h-8 w-8 items-center justify-center rounded-md ${className}`}
     onClick={onClick}
     style={style}
+    {...props}
   >
-    {icon}
+    {icon ?? children}
   </button>
 );
 

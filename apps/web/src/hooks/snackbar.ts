@@ -1,21 +1,40 @@
-import { useToast, UseToastOptions } from "@chakra-ui/react";
+import { dispatchSnackbarEvent } from "../components/SnackbarHost";
 
-export const DEFAULT_SNACKBAR_PARAMS: UseToastOptions = {
-  duration: 3000,
-  position: "bottom",
+type SnackbarStatus = "success" | "error" | "info" | "warning";
+
+export type SnackbarConfigs = {
+  duration?: number;
 };
 
-export const useSnackbar = (
-  configs: UseToastOptions = DEFAULT_SNACKBAR_PARAMS
-) => {
-  const toast = useToast();
+export const DEFAULT_SNACKBAR_PARAMS: SnackbarConfigs = {
+  duration: 3000,
+};
 
-  const onlyToast = (params: UseToastOptions) =>
-    toast({ ...configs, ...params });
+type OnlyToastParams = {
+  status?: SnackbarStatus;
+  title?: string;
+  description?: string;
+  duration?: number;
+};
+
+export const useSnackbar = (configs: SnackbarConfigs = DEFAULT_SNACKBAR_PARAMS) => {
+  const onlyToast = (params: OnlyToastParams) => {
+    const status = params.status ?? "info";
+    dispatchSnackbarEvent({
+      status,
+      title: params.title,
+      description: params.description,
+      duration: params.duration ?? configs.duration,
+    });
+  };
 
   return {
     success: (description: string) =>
-      toast({ ...configs, title: "Sucesso!", description, status: "success" }),
+      onlyToast({
+        status: "success",
+        title: "Sucesso!",
+        description,
+      }),
     error: (description: string) =>
       onlyToast({
         status: "error",

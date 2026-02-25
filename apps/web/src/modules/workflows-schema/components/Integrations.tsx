@@ -1,5 +1,5 @@
 import { getAccessToken } from "../../../auth/token";
-import { FormControl, FormLabel, Select, Spinner } from "@chakra-ui/react";
+import { FormControl, FormLabel, Spinner } from "../../../components/LegacyUi";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSnackbar } from "../../../hooks/snackbar";
@@ -135,10 +135,8 @@ export const Integrations: React.FC<IntegrationsProps> = ({
       </label>
       <FormControl id="IdUnidade">
         <FormLabel>Unidade</FormLabel>
-        <Select
-          placeholder="Selecione a unidade do SEI"
-          size="lg"
-          className="flex-grow"
+        <select
+          className="flex-grow h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           value={integrations?.IdUnidade}
           onChange={(e) =>
             setIntegrations({
@@ -152,7 +150,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               {unit.description}
             </option>
           ))}
-        </Select>
+        </select>
       </FormControl>
       {loading === LoadingTypes.SEI_UNITS && (
         <div className=" text-center">
@@ -161,10 +159,8 @@ export const Integrations: React.FC<IntegrationsProps> = ({
       )}
       <FormControl id="IdTipoProcedimento">
         <FormLabel>Tipo do procedimento</FormLabel>
-        <Select
-          placeholder="Selecione o tipo do procedimento SEI"
-          size="lg"
-          className="flex-grow"
+        <select
+          className="flex-grow h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           value={integrations?.IdTipoProcedimento}
           onChange={(e) =>
             setIntegrations({
@@ -178,7 +174,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               {type.description}
             </option>
           ))}
-        </Select>
+        </select>
       </FormControl>
       {loading === LoadingTypes.SEI_PROCESSES_TYPES && (
         <div className=" text-center">
@@ -187,9 +183,8 @@ export const Integrations: React.FC<IntegrationsProps> = ({
       )}
       <FormControl id="NivelAcesso">
         <FormLabel>Nivel de acesso</FormLabel>
-        <Select
-          size="lg"
-          className="flex-grow"
+        <select
+          className="flex-grow h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           value={integrations?.NivelAcesso}
           onChange={(e) =>
             setIntegrations({
@@ -204,13 +199,12 @@ export const Integrations: React.FC<IntegrationsProps> = ({
           <option key="nivel-acesso-1" value={1}>
             Privado
           </option>
-        </Select>
+        </select>
       </FormControl>
       <FormControl id="CoverLetterIdSerie">
         <FormLabel>Tipo do documento da folha de rosto</FormLabel>
-        <Select
-          size="lg"
-          className="flex-grow"
+        <select
+          className="flex-grow h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           value={integrations?.CoverLetterIdSerie}
           onChange={(e) =>
             setIntegrations({
@@ -224,7 +218,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               {type.description}
             </option>
           ))}
-        </Select>
+        </select>
       </FormControl>
       {loading === LoadingTypes.SEI_DOCUMENTS_TYPES && (
         <div className=" text-center">
@@ -247,9 +241,8 @@ export const Integrations: React.FC<IntegrationsProps> = ({
       </FormControl>
       <FormControl id="DocumentIdSerie">
         <FormLabel>Tipo do documento</FormLabel>
-        <Select
-          size="lg"
-          className="flex-grow"
+        <select
+          className="flex-grow h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           value={integrations?.DocumentIdSerie}
           onChange={(e) =>
             setIntegrations({
@@ -263,7 +256,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               {type.description}
             </option>
           ))}
-        </Select>
+        </select>
       </FormControl>
       {loading === LoadingTypes.SEI_DOCUMENTS_TYPES && (
         <div className=" text-center">
@@ -272,9 +265,8 @@ export const Integrations: React.FC<IntegrationsProps> = ({
       )}
       <FormControl id="PlateIdSerie">
         <FormLabel>Tipo do documento da placa</FormLabel>
-        <Select
-          size="lg"
-          className="flex-grow"
+        <select
+          className="flex-grow h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           value={integrations?.PlateIdSerie}
           onChange={(e) =>
             setIntegrations({
@@ -288,7 +280,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               {type.description}
             </option>
           ))}
-        </Select>
+        </select>
       </FormControl>
       {loading === LoadingTypes.SEI_DOCUMENTS_TYPES && (
         <div className=" text-center">
@@ -297,9 +289,8 @@ export const Integrations: React.FC<IntegrationsProps> = ({
       )}
       <FormControl id="TaxDocumentIdSerie">
         <FormLabel>Tipo do documento do boleto</FormLabel>
-        <Select
-          size="lg"
-          className="flex-grow"
+        <select
+          className="flex-grow h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           value={integrations?.TaxDocumentIdSerie}
           onChange={(e) =>
             setIntegrations({
@@ -313,7 +304,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               {type.description}
             </option>
           ))}
-        </Select>
+        </select>
       </FormControl>
       {loading === LoadingTypes.SEI_DOCUMENTS_TYPES && (
         <div className=" text-center">

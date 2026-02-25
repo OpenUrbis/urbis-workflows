@@ -197,7 +197,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
                     icon={<FaTrash />}
                     size="sm"
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       handleRemoveTax(tax.id);
                     }}

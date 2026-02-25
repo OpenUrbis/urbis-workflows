@@ -1,18 +1,4 @@
 import { getAccessToken } from "../../auth/token";
-import {
-  IconButton,
-  Spinner,
-  Step,
-  StepIcon,
-  StepIndicator,
-  StepNumber,
-  Stepper,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Tag,
-  useSteps,
-} from "@chakra-ui/react";
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@open-urbis/map-ui";
@@ -23,6 +9,7 @@ import { IField } from "@open-urbis/types";
 import logoCityHallImg from "../../assets/logo_white.png";
 import { useSnackbar } from "../../hooks/snackbar";
 import { StyleContext } from "../../reducers";
+import { IconButton, Spinner } from "../../components/LegacyUi";
 import { Field } from "../workflows-schema";
 import { VersionsMenu } from "../workflows-schema/components/VersionsMenu";
 import { FieldView } from "../workflows-schema/form-engine/FieldView";
@@ -47,10 +34,7 @@ export function Document(): JSX.Element {
     field?: IField;
     protocol?: any;
   }>();
-  const { activeStep, setActiveStep } = useSteps({
-    index: 1,
-    count: 4,
-  });
+  const [activeStep, setActiveStep] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
 
   const fetchProtocol = async () => {
@@ -67,6 +51,7 @@ export function Document(): JSX.Element {
 
     if (response.data.status === "WAITING_ACCEPTANCE") {
       setMaxStepEnable(1);
+      setActiveStep(1);
     } else if (response.data.status === "WAITING_TAX_PAYMENT") {
       setActiveStep(2);
       setMaxStepEnable(2);
@@ -245,6 +230,13 @@ export function Document(): JSX.Element {
     REJECTED: "Rejeitado",
   };
 
+  const steps = [
+    { index: 0, title: "Pedido" },
+    { index: 1, title: "Assinaturas" },
+    { index: 2, title: "Taxa" },
+    { index: 3, title: "Documento" },
+  ];
+
   const formVersions = protocol
     ? protocol.versions.filter(
         (version) => version.type === "apostille" || version.type === "create"
@@ -288,69 +280,46 @@ export function Document(): JSX.Element {
             )}
           </div>
 
-          <Stepper
-            size="lg"
-            colorScheme="red"
-            orientation={window.innerWidth <= 500 ? "vertical" : "horizontal"}
-            index={activeStep}
-          >
-            <Step>
-              <StepIndicator
-                className="cursor-pointer"
-                onClick={() => setActiveStep(0)}
-              >
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-              <StepTitle>Pedido</StepTitle>
-              <StepSeparator></StepSeparator>
-            </Step>
-            <Step>
-              <StepIndicator
-                className="cursor-pointer"
-                onClick={() => setActiveStep(1)}
-              >
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-              <StepTitle>Assinaturas</StepTitle>
-              <StepSeparator></StepSeparator>
-            </Step>
-            <Step>
-              <StepIndicator
-                className="cursor-pointer"
-                onClick={() => setActiveStep(2)}
-              >
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-              <StepTitle>Taxa</StepTitle>
-              <StepSeparator></StepSeparator>
-            </Step>
-            <Step>
-              <StepIndicator
-                className="cursor-pointer"
-                onClick={() => setActiveStep(3)}
-              >
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-              <StepTitle>Documento</StepTitle>
-              <StepSeparator></StepSeparator>
-            </Step>
-          </Stepper>
+          <div className="flex flex-wrap items-center gap-3 pb-2">
+            {steps.map((s, idx) => {
+              const isActive = activeStep === s.index;
+              const isComplete = activeStep > s.index;
+              return (
+                <div key={s.index} className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveStep(s.index)}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <span
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 text-sm font-semibold"
+                      style={{
+                        backgroundColor: isActive || isComplete ? "#ef4444" : "transparent",
+                        borderColor: isActive || isComplete ? "#ef4444" : (styleContext.state.buttonHoverColorWeight === "200" ? "#E5E7EB" : "#374151"),
+                        color: isActive || isComplete ? "white" : styleContext.state.textColor,
+                      }}
+                    >
+                      {idx + 1}
+                    </span>
+                    <span style={{ color: styleContext.state.textColor }}>
+                      {s.title}
+                    </span>
+                  </button>
+                  {idx < steps.length - 1 && (
+                    <span
+                      className="h-px w-10"
+                      style={{
+                        backgroundColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
           {/* Protocol */}
           {activeStep === 0 && protocol && (
@@ -476,12 +445,20 @@ export function Document(): JSX.Element {
                     <div className="flex-grow"></div>
                     <div className="flex flex-col space-y-6">
                       <div className="flex justify-end">
-                        <Tag
-                          size={"lg"}
-                          color={COLOR_MAPPER[acceptance.status as any]}
+                        <span
+                          className="inline-flex rounded-full px-3 py-1 text-sm font-semibold"
+                          style={{
+                            backgroundColor:
+                              acceptance.status === "ACCEPTED"
+                                ? "rgba(34, 197, 94, 0.15)"
+                                : acceptance.status === "REJECTED"
+                                  ? "rgba(239, 68, 68, 0.15)"
+                                  : "rgba(107, 114, 128, 0.15)",
+                            color: styleContext.state.textColor,
+                          }}
                         >
                           {LABEL_MAPPER[acceptance.status as any]}
-                        </Tag>
+                        </span>
                       </div>
                       {acceptance.status === "ACCEPTED" && (
                         <div
@@ -666,7 +643,6 @@ export function Document(): JSX.Element {
                         {version.type}
                         {version.type === "document" && (
                           <IconButton
-                            size={"sm"}
                             aria-label="Retry Preset"
                             icon={<FaDownload />}
                             onClick={() => downloadDocument(version.version)}
@@ -676,7 +652,6 @@ export function Document(): JSX.Element {
                         )}
                         {version.type === "plate" && (
                           <IconButton
-                            size={"sm"}
                             aria-label="Retry Preset"
                             icon={<FaDownload />}
                             onClick={() => downloadPlate(version.version)}

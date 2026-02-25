@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { usePermissions } from "../reducers/permission.context";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner } from "./LegacyUi";
 import { StyleContext } from "../reducers";
 import { AuthContext } from "../reducers/auth.reducer";
 
@@ -47,15 +47,16 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center pt-40 space-y-4">
-        <Spinner
-          size="xl"
-          color={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "yellow.500"
-              : "yellow.300"
-          }
-          thickness="3px"
-        />
+        <div
+          style={{
+            color:
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "#eab308"
+                : "#fde047",
+          }}
+        >
+          <Spinner size="xl" />
+        </div>
       </div>
     );
   }

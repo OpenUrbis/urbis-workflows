@@ -1,6 +1,6 @@
 import { getAccessToken } from "../../../auth/token";
 import React, { useContext, useState, useEffect } from "react";
-import { Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components/LegacyUi";
 import {
   FaFileAlt,
   FaHistory,

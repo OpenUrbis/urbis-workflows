@@ -1,4 +1,5 @@
-import { Button, Tooltip } from "@chakra-ui/react";
+import { Button } from "@open-urbis/map-ui";
+import { Tooltip } from "../LegacyUi";
 import React, { useEffect, useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { IJsonViewerProps } from "./index.dto";
@@ -54,12 +55,12 @@ export const JsonViewer = (props: IJsonViewerProps): React.JSX.Element => {
   return (
     <div className="json-view-container">
       <div className="actions">
-        <Tooltip content="Expandir todos os atributos">
+        <Tooltip label="Expandir todos os atributos">
           <Button variant="outline" onClick={() => expandAll()}>
             <FaPlus />
           </Button>
         </Tooltip>
-        <Tooltip content="Retrair todos os atributos">
+        <Tooltip label="Retrair todos os atributos">
           <Button variant="outline" onClick={() => collapseAll()}>
             <FaMinus />
           </Button>

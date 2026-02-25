@@ -1,4 +1,4 @@
-import { Center, Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components/LegacyUi";
 import {
   FaList,
   FaCheck,
@@ -414,16 +414,18 @@ export const ActivitiesList: React.FC<{
                     : "bg-gray-900 hover:bg-gray-800"
               } ${isBlocked ? "opacity-70 cursor-not-allowed" : "opacity-100 cursor-pointer"}`}
             >
-              <Center
-                w="36px"
-                h="36px"
-                bg={statusColors.bg}
-                color={statusColors.color}
-                borderRadius="12px"
-                mr={4}
+              <div
+                className="flex items-center justify-center mr-4"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 12,
+                  backgroundColor: statusColors.bg,
+                  color: statusColors.color,
+                }}
               >
                 {getStatusIcon(status, isActive)}
-              </Center>
+              </div>
               <div className="flex-1 relative">
                 <div className="font-medium">{activity.label}</div>
                 <div className="text-sm opacity-75 flex items-center">

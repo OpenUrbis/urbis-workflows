@@ -3,8 +3,7 @@ import { HotkeyContext, withNoModifiers } from "./reducers/hotkeys.reducer";
 import { GlobalHotKeys } from "react-hotkeys";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./reducers/auth.reducer";
-import { UrbisHeader } from "@open-urbis/map-ui";
-import { Button } from "@open-urbis/map-ui/ui/button";
+import { UrbisHeader, Button } from "@open-urbis/map-ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@open-urbis/map-ui/ui/dropdown-menu";
+} from "@open-urbis/map-ui";
 import { usePermissions } from "./reducers/permission.context";
 
 function Header(): JSX.Element {

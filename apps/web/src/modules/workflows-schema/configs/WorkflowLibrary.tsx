@@ -23,7 +23,7 @@ import {
   MenuItem,
   MenuList,
   Spinner,
-} from "../../../components/ChakraCompat";
+} from "../../../components/LegacyUi";
 import {
   HotkeyContext,
   withNoModifiers,

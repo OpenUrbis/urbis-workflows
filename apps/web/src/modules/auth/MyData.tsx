@@ -130,15 +130,16 @@ export function MyData(): JSX.Element {
     <div className="relative min-h-[80vh]">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center pt-10 space-y-4">
-          <Spinner
-            size="xl"
-            color={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "yellow.500"
-                : "yellow.300"
-            }
-            thickness="3px"
-          />
+          <div
+            style={{
+              color:
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#eab308"
+                  : "#fde047",
+            }}
+          >
+            <Spinner size="xl" />
+          </div>
           <span style={{ color: styleContext.state.textColor }}>
             Salvando dados...
           </span>
@@ -208,14 +209,7 @@ export function MyData(): JSX.Element {
 
               {isLoadingConfig && (
                 <div className="flex justify-center items-center">
-                  <Spinner
-                    size="lg"
-                    color={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "primary"
-                        : "primary"
-                    }
-                  />
+                  <Spinner size="lg" />
                 </div>
               )}
               {config && (

@@ -1,5 +1,5 @@
 export * from "./Confirm";
-export * from "./ChakraCompat";
+export * from "./LegacyUi";
 export * from "./EditableHeader";
 export * from "./HelpTooltipCliclable";
 export * from "./IamError";
@@ -10,6 +10,7 @@ export * from "./NotFound";
 export * from "./PermissionGate";
 export * from "./Prompt";
 export * from "./ProtectedRoute";
+export * from "./SnackbarHost";
 export * from "./Select";
 export * from "./ShortcutLabel";
 export * from "./SideDrawer";

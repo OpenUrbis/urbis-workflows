@@ -297,7 +297,7 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
   const handlePresetSelect = async (preset: FormMetadata) => {
     const presetConfig = await presetTemplate(preset);
     addFieldCallback(presetConfig);
-    presetModalController.onClose();
+    setPresetModalOpen(false);
   };
 
   const fetchPresets = async () => {

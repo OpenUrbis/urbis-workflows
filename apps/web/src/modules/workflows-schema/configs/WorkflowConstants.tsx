@@ -6,8 +6,7 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  useDisclosure,
-} from "@chakra-ui/react";
+} from "../../../components/LegacyUi";
 import { FaPlus, FaGlobe, FaCode } from "react-icons/fa";
 import {
   Button as DSButton,
@@ -56,7 +55,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
     useState<ConstantVariable | null>(null);
   const [constantsSearch, setConstantsSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [isAddingLocal, setIsAddingLocal] = useState(false);
 
   const api = new ApiClient({
@@ -150,7 +149,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
 
     const updatedConstants = [...constants, newConstant];
     onConstantsChange(updatedConstants);
-    onClose();
+    setIsOpen(false);
   };
 
   const handleAddLocalConstant = (localConstant: any) => {
@@ -209,7 +208,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
 
   const handleCloseModal = () => {
     setGlobalSearch("");
-    onClose();
+    setIsOpen(false);
   };
 
   return (
@@ -263,19 +262,13 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
         <div className="mt-4">
           <Menu>
             <MenuButton
-              as={DSButton}
               className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#ca8a04"
-                  : "#854d0e"
-              }
-              color="#ffffff"
-              _hover={{
-                bg:
+              style={{
+                backgroundColor:
                   styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12",
+                    ? "#ca8a04"
+                    : "#854d0e",
+                color: "#ffffff",
               }}
             >
               <div className="flex items-center justify-center space-x-2">
@@ -284,55 +277,26 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
                 <SL bg="primary">N</SL>
               </div>
             </MenuButton>
-            <MenuList
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "white"
-                  : "gray.800"
-              }
-              borderColor={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "gray.200"
-                  : "gray.600"
-              }
-            >
+            <MenuList>
               <MenuItem
-                icon={<FaGlobe />}
-                onClick={onOpen}
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.100"
-                      : "gray.700",
-                }}
+                onClick={() => setIsOpen(true)}
               >
-                <span style={{ color: styleContext.state.textColor }}>
-                  Importar Global
-                </span>
+                <div className="flex items-center gap-2">
+                  <FaGlobe />
+                  <span style={{ color: styleContext.state.textColor }}>
+                    Importar Global
+                  </span>
+                </div>
               </MenuItem>
               <MenuItem
-                icon={<FaCode />}
                 onClick={() => setIsAddingLocal(true)}
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.100"
-                      : "gray.700",
-                }}
               >
-                <span style={{ color: styleContext.state.textColor }}>
-                  Criar Local
-                </span>
+                <div className="flex items-center gap-2">
+                  <FaCode />
+                  <span style={{ color: styleContext.state.textColor }}>
+                    Criar Local
+                  </span>
+                </div>
               </MenuItem>
             </MenuList>
           </Menu>
@@ -373,19 +337,13 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
             </p>
             <Menu>
               <MenuButton
-                as={DSButton}
                 className="h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e"
-                }
-                color="#ffffff"
-                _hover={{
-                  bg:
+                style={{
+                  backgroundColor:
                     styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#a16207"
-                      : "#713f12",
+                      ? "#ca8a04"
+                      : "#854d0e",
+                  color: "#ffffff",
                 }}
               >
                 <div className="flex items-center justify-center space-x-2">
@@ -394,55 +352,26 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
                   <SL bg="primary">N</SL>
                 </div>
               </MenuButton>
-              <MenuList
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                borderColor={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.200"
-                    : "gray.600"
-                }
-              >
+              <MenuList>
                 <MenuItem
-                  icon={<FaGlobe />}
-                  onClick={onOpen}
-                  bg={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "white"
-                      : "gray.800"
-                  }
-                  _hover={{
-                    bg:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.100"
-                        : "gray.700",
-                  }}
+                  onClick={() => setIsOpen(true)}
                 >
-                  <span style={{ color: styleContext.state.textColor }}>
-                    Importar Global
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <FaGlobe />
+                    <span style={{ color: styleContext.state.textColor }}>
+                      Importar Global
+                    </span>
+                  </div>
                 </MenuItem>
                 <MenuItem
-                  icon={<FaCode />}
                   onClick={() => setIsAddingLocal(true)}
-                  bg={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "white"
-                      : "gray.800"
-                  }
-                  _hover={{
-                    bg:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.100"
-                        : "gray.700",
-                  }}
                 >
-                  <span style={{ color: styleContext.state.textColor }}>
-                    Criar Local
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <FaCode />
+                    <span style={{ color: styleContext.state.textColor }}>
+                      Criar Local
+                    </span>
+                  </div>
                 </MenuItem>
               </MenuList>
             </Menu>

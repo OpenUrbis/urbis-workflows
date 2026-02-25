@@ -1,6 +1,6 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useEffect, useState } from "react";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner } from "../../components/LegacyUi";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Field } from "../workflows-schema/form-engine/Field";

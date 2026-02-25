@@ -41,7 +41,6 @@
     color-scheme: dark;
   }
 
-  /* Override Chakra UI table inline border/bg to match DS tokens */
   .ds-table td,
   .ds-table th {
     border-color: hsl(var(--border)) !important;

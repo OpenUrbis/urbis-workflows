@@ -1,4 +1,4 @@
-import { Spinner, Badge, Tooltip } from "@chakra-ui/react";
+import { Spinner, Tooltip } from "../../../components/LegacyUi";
 import { IFormContext } from "@open-urbis/types";
 import { useState, useEffect } from "react";
 import { FaLink, FaExternalLinkAlt, FaUnlink, FaPlus } from "react-icons/fa";
@@ -187,9 +187,18 @@ export const IncomingActivity: React.FC<{
                   />
                 </div>
                 <div className="space-y-1">
-                  <Badge colorScheme="blue" fontSize="sm">
+                  <span
+                    className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                    style={{
+                      backgroundColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "rgba(59, 130, 246, 0.12)"
+                          : "rgba(59, 130, 246, 0.25)",
+                      color: styleContext.state.textColor,
+                    }}
+                  >
                     {value.$metadata?.workflowId}
-                  </Badge>
+                  </span>
                   <h3
                     className="font-medium mt-2"
                     style={{ color: styleContext.state.textColor }}

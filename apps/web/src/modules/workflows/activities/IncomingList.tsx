@@ -1,4 +1,4 @@
-import { Center, Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components/LegacyUi";
 import {
   FaProjectDiagram,
   FaChevronUp,
@@ -97,28 +97,28 @@ export const IncomingList: React.FC<{
                       : ""
                   }`}
                 >
-                  <Center
-                    w="36px"
-                    h="36px"
-                    bg={
-                      isCompleted
+                  <div
+                    className="flex items-center justify-center mr-4"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 12,
+                      color: "white",
+                      backgroundColor: isCompleted
                         ? styleContext.state.buttonHoverColorWeight === "200"
-                          ? "green.400"
-                          : "green.900"
+                          ? "#4ade80"
+                          : "#14532d"
                         : styleContext.state.buttonHoverColorWeight === "200"
-                          ? "yellow.400"
-                          : "yellow.900"
-                    }
-                    color="white"
-                    borderRadius="12px"
-                    mr={4}
+                          ? "#facc15"
+                          : "#713f12",
+                    }}
                   >
                     {isCompleted ? (
                       <FaCheckCircle size={14} />
                     ) : (
                       <FaArrowRight size={14} />
                     )}
-                  </Center>
+                  </div>
                   <div className="flex-1">
                     <div className="font-medium">{workflow.label}</div>
                     <Tooltip

@@ -6,6 +6,7 @@ import Header from "./Header";
 import RouteDefinitions from "./RouteDefinitions";
 import PromptModal from "./components/Prompt";
 import ConfirmModal from "./components/Confirm";
+import { SnackbarHost } from "./components/SnackbarHost";
 import { AuthProvider } from "./reducers/auth.reducer";
 import { HotkeyProvider } from "./reducers/hotkeys.reducer";
 import { StyleProvider } from "./reducers/style.reducer";
@@ -25,6 +26,7 @@ export default function App() {
             <UserIamSyncProvider />
             <PromptModal />
             <ConfirmModal />
+            <SnackbarHost />
             <HotkeyProvider>
               <Layout shouldDisplayHeaderFooter={shouldDisplayHeaderFooter}>
                 <RouteDefinitions />

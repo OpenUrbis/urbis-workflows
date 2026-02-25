@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner } from "../../../components/LegacyUi";
 import {
   FaSignature,
   FaHistory,

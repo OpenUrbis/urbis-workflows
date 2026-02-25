@@ -269,7 +269,7 @@ export const ActivityDocumentEditor = ({
                     icon={<FaTrash />}
                     size="sm"
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       handleRemoveDocument(doc.id);
                     }}

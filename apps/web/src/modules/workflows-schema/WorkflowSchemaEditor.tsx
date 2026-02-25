@@ -31,7 +31,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@open-urbis/map-ui/ui/dropdown-menu";
+} from "@open-urbis/map-ui";
 import {
   Button,
   FormControl,
@@ -1400,7 +1400,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                                     icon={<FaTrash />}
                                     size="sm"
                                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={(e) => {
+                                    onClick={(e: React.MouseEvent) => {
                                       e.stopPropagation();
                                       handleRemoveActivity(index);
                                     }}
@@ -1687,7 +1687,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         </p>
                         <ActivityMenuButton
                           onAddActivity={handleAddActivity}
-                          styleContext={styleContext}
                         />
                       </div>
                     </div>

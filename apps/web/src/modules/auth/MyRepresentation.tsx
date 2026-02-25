@@ -22,7 +22,6 @@ export const STATUS_BADGE_VARIANT_MAPPER = {
   CANCELLED: "destructive",
 };
 
-// Backward-compatible export used by legacy screens still relying on Chakra Tag colorScheme
 export const COLOR_MAPPER = {
   PENDING: "gray",
   ACCEPTED: "green",

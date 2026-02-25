@@ -1,4 +1,4 @@
-import { IconButton, Tooltip } from "@chakra-ui/react";
+import { IconButton, Tooltip } from "../../../components/LegacyUi";
 import { useContext, useState } from "react";
 import { FaTrash, FaList, FaCube } from "react-icons/fa";
 import { IField, IFormContext, PresetOptions } from "@open-urbis/types";
@@ -179,21 +179,16 @@ export const FormEditor: React.FC<FormEditorProps> = ({
                           onClick={() => {
                             handleRemoveField(index);
                           }}
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.100"
-                              : "gray.800"
-                          }
-                          color={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.600"
-                              : "gray.200"
-                          }
-                          _hover={{
-                            bg:
+                          className="transition-colors"
+                          style={{
+                            backgroundColor:
                               styleContext.state.buttonHoverColorWeight === "200"
-                                ? "gray.200"
-                                : "gray.700",
+                                ? "#F3F4F6"
+                                : "#1F2937",
+                            color:
+                              styleContext.state.buttonHoverColorWeight === "200"
+                                ? "#4B5563"
+                                : "#E5E7EB",
                           }}
                         />
                       </div>

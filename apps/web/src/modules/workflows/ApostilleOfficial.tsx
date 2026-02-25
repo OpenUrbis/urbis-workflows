@@ -1,7 +1,7 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner } from "../../components/LegacyUi";
 import { SL } from "../../components";
 import axios from "axios";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
