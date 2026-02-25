@@ -266,7 +266,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
               <div className="flex items-center justify-center space-x-2">
                 <FaPlus size={14} />
                 <span>Módulo</span>
-                <SL bg="yellow.600">N</SL>
+                <SL bg="primary">N</SL>
               </div>
             </MenuButton>
             <MenuList
@@ -373,7 +373,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
                 <div className="flex items-center justify-center space-x-2">
                   <FaPlus size={14} />
                   <span>Módulo</span>
-                  <SL bg="yellow.600">N</SL>
+                  <SL bg="primary">N</SL>
                 </div>
               </MenuButton>
               <MenuList

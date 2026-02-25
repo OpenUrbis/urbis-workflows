@@ -137,7 +137,11 @@ export function MyProtocols(): JSX.Element {
                     variant={stage === "development" ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setStage("development")}
-                    className="h-9 rounded-full px-4 gap-2"
+                    className={`h-9 rounded-full px-4 gap-2 ${
+                      stage === "development"
+                        ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                    }`}
                   >
                     <FaCode size={16} />
                     <span>Desenvolvimento</span>
@@ -146,7 +150,11 @@ export function MyProtocols(): JSX.Element {
                     variant={stage === "staging" ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setStage("staging")}
-                    className="h-9 rounded-full px-4 gap-2"
+                    className={`h-9 rounded-full px-4 gap-2 ${
+                      stage === "staging"
+                        ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                    }`}
                   >
                     <FaFlask size={16} />
                     <span>Homologação</span>
@@ -155,7 +163,11 @@ export function MyProtocols(): JSX.Element {
                     variant={stage === "production" ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setStage("production")}
-                    className="h-9 rounded-full px-4 gap-2"
+                    className={`h-9 rounded-full px-4 gap-2 ${
+                      stage === "production"
+                        ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                    }`}
                   >
                     <FaRocket size={16} />
                     <span>Produção</span>
@@ -165,7 +177,7 @@ export function MyProtocols(): JSX.Element {
             </div>
           </div>
 
-          <Card className="overflow-hidden border border-border">
+          <Card className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">
             {data.length === 0 ? (
               <EmptyState />
             ) : (
@@ -186,7 +198,7 @@ export function MyProtocols(): JSX.Element {
                         <TableRow
                           key={item.id}
                           onClick={() => navigate(`/workflows/${item.id}`)}
-                          className="cursor-pointer"
+                          className="cursor-pointer transition-colors hover:bg-muted/40"
                         >
                           <TableCell>
                             <div className="flex items-center space-x-1">
@@ -240,7 +252,7 @@ export function MyProtocols(): JSX.Element {
                   </TooltipProvider>
                 </div>
 
-                <div className="px-4 py-3 flex items-center justify-between border-t">
+                <div className="px-4 py-3 flex items-center justify-between border-t border-border bg-muted/10">
                   <div className="flex-1 flex justify-between sm:hidden">
                     <Button
                       type="button"
@@ -281,7 +293,7 @@ export function MyProtocols(): JSX.Element {
                       >
                         <FaChevronLeft />
                         Anterior
-                        <SL bg="yellow.700">
+                        <SL bg="primary">
                           ←
                         </SL>
                       </Button>
@@ -294,7 +306,7 @@ export function MyProtocols(): JSX.Element {
                       >
                         Próximo
                         <FaChevronRight />
-                        <SL bg="yellow.700">
+                        <SL bg="primary">
                           →
                         </SL>
                       </Button>

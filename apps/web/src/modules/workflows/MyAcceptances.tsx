@@ -113,7 +113,7 @@ export function MyAcceptances(): JSX.Element {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
-        <Card className="overflow-hidden border border-border">
+        <Card className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground">
           {data.length === 0 ? (
             <EmptyState />
           ) : (
@@ -141,7 +141,7 @@ export function MyAcceptances(): JSX.Element {
                           onClick={() =>
                             navigate(`/protocol/${item.protocol}/document`)
                           }
-                          className="cursor-pointer"
+                          className="cursor-pointer transition-colors hover:bg-muted/40"
                         >
                           <TableCell>
                             <Badge variant="secondary" className="font-medium">
@@ -151,7 +151,9 @@ export function MyAcceptances(): JSX.Element {
                           <TableCell>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="line-clamp-1">{item.type}</span>
+                                <span className="line-clamp-1 text-foreground">
+                                  {item.type}
+                                </span>
                               </TooltipTrigger>
                               <TooltipContent>{item.type}</TooltipContent>
                             </Tooltip>
@@ -166,7 +168,7 @@ export function MyAcceptances(): JSX.Element {
                 </TooltipProvider>
               </div>
 
-              <div className="px-4 py-3 flex items-center justify-between border-t">
+              <div className="px-4 py-3 flex items-center justify-between border-t border-border bg-muted/10">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <Button
                     type="button"
@@ -209,7 +211,7 @@ export function MyAcceptances(): JSX.Element {
                     >
                       <FaChevronLeft />
                       Anterior
-                      <SL bg="yellow.700">
+                      <SL bg="primary">
                         ←
                       </SL>
                     </Button>
@@ -222,7 +224,7 @@ export function MyAcceptances(): JSX.Element {
                     >
                       Próximo
                       <FaChevronRight />
-                      <SL bg="yellow.700">
+                      <SL bg="primary">
                         →
                       </SL>
                     </Button>

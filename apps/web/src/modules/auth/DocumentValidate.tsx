@@ -195,7 +195,7 @@ export function DocumentValidate(): JSX.Element {
               </>
             ) : (
               <>
-                Verificar <SL bg="yellow.500">V</SL>
+                Verificar <SL bg="primary">V</SL>
               </>
             )}
           </Button>

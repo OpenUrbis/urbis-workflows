@@ -258,7 +258,7 @@ export const WorkflowOutgoingDependencies = ({
           >
             <FaPlus size={14} />
             <span>Dependência</span>
-            <SL bg="yellow.600">N</SL>
+            <SL bg="primary">N</SL>
           </button>
         </div>
       </div>
@@ -461,7 +461,7 @@ export const WorkflowOutgoingDependencies = ({
               <div className="flex items-center justify-center space-x-2">
                 <FaPlus size={14} />
                 <span>Dependência</span>
-                <SL bg="yellow.600">N</SL>
+                <SL bg="primary">N</SL>
               </div>
             </button>
           </div>

@@ -281,7 +281,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
               <div className="flex items-center justify-center space-x-2">
                 <FaPlus size={14} />
                 <span>Variável</span>
-                <SL bg="yellow.600">N</SL>
+                <SL bg="primary">N</SL>
               </div>
             </MenuButton>
             <MenuList
@@ -391,7 +391,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
                 <div className="flex items-center justify-center space-x-2">
                   <FaPlus size={14} />
                   <span>Variável</span>
-                  <SL bg="yellow.600">N</SL>
+                  <SL bg="primary">N</SL>
                 </div>
               </MenuButton>
               <MenuList
