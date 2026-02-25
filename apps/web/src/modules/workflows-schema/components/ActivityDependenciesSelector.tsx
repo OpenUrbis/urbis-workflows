@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input as DSInput } from "@open-urbis/map-ui";
+import { Badge, Checkbox, Input as DSInput } from "@open-urbis/map-ui";
 import { FaProjectDiagram, FaSearch, FaTimes } from "react-icons/fa";
 import { ActivityTemplate } from "../../../api/types/schema";
 import { SideDrawer } from "../../../components/SideDrawer";
@@ -85,42 +85,26 @@ export const ActivityDependenciesSelector: React.FC<
               </div>
             ) : (
               selectedDependencies.map((depId) => (
-                <span
+                <Badge
                   key={depId}
-                  className="flex items-center py-1"
-                  style={{
-                    borderRadius: 6,
-                    backgroundColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#a855f7"
-                        : "#7e22ce",
-                    color: "#ffffff",
-                    paddingLeft: 8,
-                    paddingRight: 8,
-                  }}
+                  variant="outline"
+                  className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center bg-primary/10 text-primary border-primary/20"
                 >
-                  <span className="mx-1">{getActivityLabel(depId)}</span>
+                  <span className="mr-1 truncate max-w-[200px]">
+                    {getActivityLabel(depId)}
+                  </span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleDependency(depId);
                     }}
-                    className="mr-1 hover:bg-opacity-10 rounded p-1 transition-colors duration-150"
-                    style={{
-                      color: "white",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        "rgba(255, 255, 255, 0.1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
+                    className="ml-0.5 rounded p-0.5 hover:bg-muted/60 transition-colors"
                     aria-label="Remove"
+                    type="button"
                   >
                     <FaTimes size={10} />
                   </button>
-                </span>
+                </Badge>
               ))
             )}
           </div>
@@ -262,16 +246,18 @@ export const ActivityDependenciesSelector: React.FC<
                       }}
                     >
                       <div className="flex items-center w-full">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            handleToggleDependency(activity.id);
-                          }}
-                          className="mr-3 h-5 w-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                        <div
+                          className="mr-3"
                           onClick={(e) => e.stopPropagation()}
-                        />
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() =>
+                              handleToggleDependency(activity.id)
+                            }
+                            className="!rounded-none"
+                          />
+                        </div>
                         <div className="flex-1">
                           {activity.documentation &&
                           activity.documentation.length > 60 ? (
