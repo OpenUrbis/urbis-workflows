@@ -215,26 +215,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
           <div className="mt-4">
             <button
               onClick={handleAddTax}
-              className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e",
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e";
-              }}
+              className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <FaPlus size={14} />
               <span>Taxa</span>
@@ -327,26 +308,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
               </p>
               <button
                 onClick={handleAddTax}
-                className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
-                style={{
-                  backgroundColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#ca8a04"
-                      : "#854d0e",
-                  color: "#ffffff",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#a16207"
-                      : "#713f12";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#ca8a04"
-                      : "#854d0e";
-                }}
+                className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <FaPlus size={14} />
                 <span>Taxa</span>

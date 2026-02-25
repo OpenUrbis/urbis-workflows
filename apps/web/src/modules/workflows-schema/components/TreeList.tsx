@@ -123,7 +123,7 @@ export const TreeList = <T extends TreeItem>({
   return (
     <TooltipProvider>
       <div className="flex flex-col">
-        <div className="p-4 border-b border-border bg-card">
+        <div className="p-4 border-b border-border bg-transparent">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
               <FaSearch className="text-muted-foreground" size={16} />
@@ -136,7 +136,7 @@ export const TreeList = <T extends TreeItem>({
             />
           </div>
         </div>
-        <div className="flex-grow overflow-y-auto p-2 bg-card">
+        <div className="flex-grow overflow-y-auto p-2 bg-transparent">
           <DirectoryView
             node={tree}
             search={search}

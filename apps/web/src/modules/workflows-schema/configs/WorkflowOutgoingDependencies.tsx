@@ -162,7 +162,7 @@ export const WorkflowOutgoingDependencies = ({
               .map((outgoing) => (
                 <div
                   key={outgoing.id}
-                  className={`p-3 border rounded cursor-pointer flex justify-between items-center group transition-colors duration-150`}
+                  className={`p-3 border rounded-2xl cursor-pointer flex justify-between items-center group transition-colors duration-150`}
                   onClick={() => {
                     setSelectedOutgoingId(outgoing.id);
                     fetchAvailableWorkflows();
@@ -235,26 +235,7 @@ export const WorkflowOutgoingDependencies = ({
         <div className="mt-4">
           <button
             onClick={handleAddOutgoing}
-            className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
-            style={{
-              backgroundColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#ca8a04"
-                  : "#854d0e",
-              color: "#ffffff",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#a16207"
-                  : "#713f12";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#ca8a04"
-                  : "#854d0e";
-            }}
+            className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <FaPlus size={14} />
             <span>Dependência</span>
@@ -437,26 +418,7 @@ export const WorkflowOutgoingDependencies = ({
             </p>
             <button
               onClick={handleAddOutgoing}
-              className="h-11 rounded-xl px-4 shadow-sm inline-flex items-center justify-center gap-2 transition-colors duration-150 font-semibold"
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e",
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e";
-              }}
+              className="h-11 rounded-xl px-4 shadow-sm inline-flex items-center justify-center gap-2 transition-colors duration-150 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <div className="flex items-center justify-center space-x-2">
                 <FaPlus size={14} />

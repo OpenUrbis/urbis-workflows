@@ -248,11 +248,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
         <div className="mt-4">
           <Menu>
             <MenuButton
-              className={`h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 text-white ${
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "bg-yellow-600 hover:bg-yellow-700"
-                  : "bg-yellow-800 hover:bg-yellow-900"
-              }`}
+              className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <div className="flex items-center justify-center space-x-2">
                 <FaPlus size={14} />
@@ -333,11 +329,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
             </p>
             <Menu>
               <MenuButton
-                className={`h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 text-white ${
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-yellow-600 hover:bg-yellow-700"
-                    : "bg-yellow-800 hover:bg-yellow-900"
-                }`}
+                className="h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <div className="flex items-center justify-center space-x-2">
                   <FaPlus size={14} />
