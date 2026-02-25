@@ -69,19 +69,19 @@ export function DocumentValidate(): JSX.Element {
         {
           documentType,
           checksum: hash,
-        }
+        },
       );
 
       if (response.status === 201 && response.data.same) {
         setValid(true);
       } else {
         setError(
-          "O documento inserido não é o atual ou não foi gerado pela plataforma, ou as informações inseridas estão incorretas."
+          "O documento inserido não é o atual ou não foi gerado pela plataforma, ou as informações inseridas estão incorretas.",
         );
       }
     } catch (error: any) {
       setError(
-        "Algum erro ocorreu ao tentar consultar o documento, tente novamente."
+        "Algum erro ocorreu ao tentar consultar o documento, tente novamente.",
       );
     } finally {
       setLoading(false);
@@ -91,7 +91,7 @@ export function DocumentValidate(): JSX.Element {
   };
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event?.target?.files?.[0];
     if (!file) {
@@ -115,7 +115,7 @@ export function DocumentValidate(): JSX.Element {
   const bufferToHex = (buffer: ArrayBuffer) => {
     const byteArray = new Uint8Array(buffer);
     return Array.from(byteArray, (byte) =>
-      byte.toString(16).padStart(2, "0")
+      byte.toString(16).padStart(2, "0"),
     ).join("");
   };
 
@@ -128,7 +128,7 @@ export function DocumentValidate(): JSX.Element {
       <Card className="border-border shadow-none">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold tracking-tight">
-            Consultar <span className="text-red-500">Documento</span>
+            Consultar Documento
           </CardTitle>
           <CardDescription>
             Verifique a autenticidade informando protocolo, tipo e arquivo.

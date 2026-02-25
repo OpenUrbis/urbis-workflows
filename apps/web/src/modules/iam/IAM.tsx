@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { SL } from "../../components/ShortcutLabel";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { Button, Card } from "@open-urbis/map-ui";
-import { FaKey, FaUserTag, FaUsers, FaUserShield } from "react-icons/fa";
+import { FaKey, FaUserTag, FaUsers, FaUserShield, FaChevronRight } from "react-icons/fa";
 import { Permissions, Roles, Groups, UserAccess } from ".";
 
 export function IAM(): JSX.Element {
@@ -83,17 +83,22 @@ export function IAM(): JSX.Element {
                 type="button"
                 variant="ghost"
                 onClick={() => setSubpage(menu.link)}
-                className={`flex justify-between w-full items-center h-auto px-4 py-2.5 font-normal text-foreground rounded-full transition-colors duration-150 ${
+                className={`flex justify-between w-full items-center h-auto px-4 py-2.5 font-normal rounded-lg transition-colors duration-150 ${
                   subpage === menu.link
-                    ? "bg-emerald-300/60 dark:bg-emerald-500/30"
-                    : "hover:bg-emerald-300/45 dark:hover:bg-emerald-500/25"
+                    ? "bg-primary/10 text-primary hover:bg-primary/20"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                <div className="flex items-center space-x-3">
-                  {menu.icon}
-                  <span className="text-sm font-medium">{menu.name}</span>
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <span className={subpage === menu.link ? "text-primary" : "text-muted-foreground"}>
+                    {menu.icon}
+                  </span>
+                  <span className="text-sm font-medium truncate">{menu.name}</span>
                 </div>
-                <SL>{menu.key}</SL>
+                <div className="flex items-center gap-2">
+                  <SL>{menu.key}</SL>
+                  {subpage === menu.link && <FaChevronRight size={10} className="text-primary" />}
+                </div>
               </Button>
             </div>
           ))}

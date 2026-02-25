@@ -1,25 +1,24 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  FormControl,
-  FormLabel,
-  Spinner,
   Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  IconButton,
-  Tooltip,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Badge,
-} from "@chakra-ui/react";
-import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
   Button as DSButton,
   Input as DSInput,
   Textarea as DSTextarea,
+  Label,
 } from "@open-urbis/map-ui";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import { StyleContext } from "../../reducers";
 import { ApiClient } from "../../api";
 import { Permission } from "../../api/types/iam.dto";
@@ -188,7 +187,7 @@ export function Permissions(): JSX.Element {
 
   return (
     <div className="flex flex-col space-y-6 mb-20">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center">
         <h2
           className="text-xl font-bold"
           style={{ color: styleContext.state.textColor }}
@@ -199,11 +198,7 @@ export function Permissions(): JSX.Element {
           type="button"
           size="sm"
           onClick={resetFormAndOpen}
-          className={`h-9 rounded-lg px-4 gap-2 text-white ${
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "bg-orange-500 hover:bg-orange-600"
-              : "bg-orange-600 hover:bg-orange-700"
-          }`}
+          className="h-9 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <FaPlus size={14} />
           Nova Permissão
@@ -212,211 +207,148 @@ export function Permissions(): JSX.Element {
 
       {isLoading && permissions.length === 0 ? (
         <div className="flex justify-center my-8">
-          <Spinner
-            size="lg"
-            color={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "orange.500"
-                : "orange.400"
-            }
-            thickness="3px"
-          />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
         <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
           <div className="overflow-x-auto w-full">
-            <Table
-              variant="simple"
-              size="sm"
-              className="text-sm"
-              style={{ tableLayout: "fixed", width: "100%" }}
-            >
-              <Thead className="text-xs">
-                <Tr>
-                  <Th
-                    className="bg-muted/40 text-xs font-semibold text-foreground"
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead
+                    className="bg-muted/40 text-xs font-semibold text-foreground h-10"
                     style={{ width: "20%", minWidth: "150px" }}
                   >
                     Nome
-                  </Th>
-                  <Th
-                    className="bg-muted/40 text-xs font-semibold text-foreground"
+                  </TableHead>
+                  <TableHead
+                    className="bg-muted/40 text-xs font-semibold text-foreground h-10"
                     style={{ width: "25%", minWidth: "180px" }}
                   >
                     Código
-                  </Th>
-                  <Th
-                    className="bg-muted/40 text-xs font-semibold text-foreground"
+                  </TableHead>
+                  <TableHead
+                    className="bg-muted/40 text-xs font-semibold text-foreground h-10"
                     style={{ width: "45%" }}
                   >
                     Descrição
-                  </Th>
-                  <Th
-                    className="bg-muted/40 text-xs font-semibold text-foreground"
+                  </TableHead>
+                  <TableHead
+                    className="bg-muted/40 text-xs font-semibold text-foreground h-10 text-right"
                     style={{
                       width: "10%",
                       minWidth: "100px",
-                      textAlign: "right",
-                      whiteSpace: "nowrap",
                     }}
                   >
                     Ações
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {permissions.map((permission) => (
-                  <Tr
+                  <TableRow
                     key={permission.id}
-                    className="transition-colors duration-200 hover:bg-muted/50"
+                    className="transition-colors duration-200"
                   >
-                    <Td
-                      fontWeight="medium"
-                      className="text-foreground"
+                    <TableCell
+                      className="font-medium text-foreground py-2"
                       style={{
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      <Tooltip
-                        label={permission.name}
-                        placement="top"
-                        hasArrow
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "white"
-                            : "gray.800"
-                        }
-                      >
-                        <div className="truncate">{permission.name}</div>
-                      </Tooltip>
-                    </Td>
-                    <Td
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate cursor-default">{permission.name}</div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {permission.name}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell
+                      className="py-2"
                       style={{
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      <Tooltip
-                        label={permission.code}
-                        placement="top"
-                        hasArrow
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "white"
-                            : "gray.800"
-                        }
-                      >
-                        <Badge
-                          colorScheme="orange"
-                          variant="solid"
-                          py="1"
-                          px="2"
-                          className="hover:opacity-80 transition-opacity truncate max-w-full inline-block"
-                          borderRadius="md"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "orange.100"
-                              : "orange.800"
-                          }
-                          color={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "orange.800"
-                              : "orange.200"
-                          }
-                        >
-                          {permission.code}
-                        </Badge>
-                      </Tooltip>
-                    </Td>
-                    <Td
-                      className="text-muted-foreground"
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-medium px-2 py-0.5 rounded-full truncate max-w-full inline-flex items-center bg-primary/10 text-primary border-primary/20"
+                            >
+                              {permission.code}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {permission.code}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell
+                      className="text-muted-foreground py-2"
                       style={{
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      <Tooltip
-                        label={permission.description || "Sem descrição"}
-                        placement="top"
-                        hasArrow
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "white"
-                            : "gray.800"
-                        }
-                      >
-                        <div className="cursor-help truncate">
-                          {permission.description || "Sem descrição"}
-                        </div>
-                      </Tooltip>
-                    </Td>
-                    <Td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help truncate">
+                              {permission.description || "Sem descrição"}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {permission.description || "Sem descrição"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell className="text-right py-2">
                       <div className="flex justify-end space-x-2 group">
-                        <IconButton
-                          aria-label="Edit"
-                          icon={<FaEdit />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
+                        <DSButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
                           onClick={() => handleEditClick(permission)}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F3F4F6"
-                                : "#4B5563",
-                            color: styleContext.state.textColor,
-                          }}
-                        />
-                        <IconButton
-                          aria-label="Delete"
-                          icon={<FaTrash />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
+                          title="Editar"
+                        >
+                          <FaEdit size={14} />
+                        </DSButton>
+                        <DSButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           onClick={() => handleDeleteClick(permission.id)}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F3F4F6"
-                                : "#4B5563",
-                            color: styleContext.state.textColor,
-                          }}
-                        />
+                          title="Excluir"
+                        >
+                          <FaTrash size={14} />
+                        </DSButton>
                       </div>
-                    </Td>
-                  </Tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
                 {permissions.length === 0 && (
-                  <Tr>
-                    <Td
+                  <TableRow>
+                    <TableCell
                       colSpan={4}
-                      className="text-center py-4"
-                      style={{ color: "var(--muted-foreground)" }}
+                      className="text-center py-8 text-muted-foreground"
                     >
                       Nenhuma permissão encontrada
-                    </Td>
-                  </Tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </Tbody>
+              </TableBody>
             </Table>
           </div>
         </div>
@@ -435,63 +367,54 @@ export function Permissions(): JSX.Element {
             isEdit
               ? {
                   text: selectedPermission?.code || "",
-                  colorScheme: "orange",
+                  colorScheme: "blue",
                 }
               : undefined
           }
         >
-          <div className="overflow-y-auto">
+          <div className="overflow-y-auto h-full pb-20">
             <div className="p-4 border-b border-border">
-              <FormControl id="name" mb={4} isRequired>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
+              <div className="mb-4">
+                <Label
+                  className="mb-2 block text-sm font-medium text-foreground"
                 >
                   Nome da Permissão
-                </FormLabel>
+                </Label>
                 <DSInput
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Ex: Visualizar Fluxos de Trabalho"
-                  className="h-11 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+                  className="h-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-              </FormControl>
+              </div>
 
-              <FormControl id="code" mb={4} isRequired>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
+              <div className="mb-4">
+                <Label
+                  className="mb-2 block text-sm font-medium text-foreground"
                 >
                   Código
-                </FormLabel>
+                </Label>
                 <DSInput
                   type="text"
                   name="code"
                   value={formData.code}
                   onChange={handleInputChange}
                   placeholder="Ex: workflow:read:*"
-                  className="h-11 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+                  className="h-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-                <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <div className="mt-1 text-xs text-muted-foreground">
                   Formato: dominio:tipo_operacao:acao (use * para curingas)
                 </div>
-              </FormControl>
+              </div>
 
-              <FormControl id="description" mb={4}>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
+              <div className="mb-4">
+                <Label
+                  className="mb-2 block text-sm font-medium text-foreground"
                 >
                   Descrição
-                </FormLabel>
+                </Label>
                 <DSTextarea
                   name="description"
                   value={formData.description}
@@ -499,16 +422,20 @@ export function Permissions(): JSX.Element {
                   placeholder="Descrição detalhada da permissão..."
                   className="min-h-[112px] bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-              </FormControl>
+              </div>
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background flex justify-end space-x-3 z-10">
+          <div
+            className="absolute bottom-0 left-0 right-0 py-4 px-6 border-t border-border flex justify-end space-x-3 z-10"
+            style={{ backgroundColor: styleContext.state.backgroundColor }}
+          >
             <DSButton
               type="button"
+              size="sm"
               onClick={handleSave}
               disabled={isLoading}
-              className="bg-orange-600 hover:bg-orange-700 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isEdit ? "Atualizar" : "Criar"} Permissão
             </DSButton>

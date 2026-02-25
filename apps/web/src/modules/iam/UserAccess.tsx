@@ -1,32 +1,18 @@
 import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Spinner,
   Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useDisclosure,
-  IconButton,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Badge,
-  Box,
-  Text,
-  Flex,
-  Collapse,
   Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Stack,
-  Divider,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-} from "@chakra-ui/react";
-import {
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Separator,
   Button as DSButton,
   Input as DSInput,
   Select as DSSelect,
@@ -34,6 +20,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Label,
+  Checkbox,
 } from "@open-urbis/map-ui";
 import {
   FaEdit,
@@ -41,6 +29,7 @@ import {
   FaChevronDown,
   FaChevronRight,
 } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import { StyleContext } from "../../reducers";
 import { ApiClient } from "../../api";
 import { Permission, Role, Group, User } from "../../api/types/iam.dto";
@@ -60,7 +49,10 @@ const ClickableBadge: React.FC<React.ComponentProps<typeof Badge>> = ({
   children,
   ...props
 }) => (
-  <Badge {...props} className={`${props.className || ""} cursor-pointer`}>
+  <Badge
+    {...props}
+    className={`text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center cursor-pointer ${props.className || ""}`}
+  >
     {children}
   </Badge>
 );
@@ -78,7 +70,9 @@ export function UserAccess(): JSX.Element {
   const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>(
     {}
   );
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
   const [formData, setFormData] = useState({
     userId: "",
     groupIds: [] as string[],
@@ -86,7 +80,7 @@ export function UserAccess(): JSX.Element {
     permissionIds: [] as string[],
     accessLevel: 1, // Default to REGISTERED (1)
   });
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState("groups");
   const [searchText, setSearchText] = useState({
     groups: "",
     roles: "",
@@ -123,11 +117,6 @@ export function UserAccess(): JSX.Element {
 
   useEffect(() => {
     fetchData();
-
-    return () => {
-      // Cleanup
-    };
-    
   }, []);
 
   const filteredUsers = users.filter(
@@ -158,16 +147,10 @@ export function UserAccess(): JSX.Element {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const updatedUser = await api.iam.assignUserAccess(formData);
-
-      // Update the users list with the updated user
-      setUsers(users.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
-
-      snackbar.success(
-        "As permissões do usuário foram atualizadas com sucesso."
-      );
-
-      handleClose();
+      await api.iam.assignUserAccess(formData);
+      snackbar.success("As permissões do usuário foram atualizadas com sucesso.");
+      fetchData(); // Refresh the list
+      onClose();
     } catch (error) {
       console.error("Error saving user access:", error);
       snackbar.error("Não foi possível atualizar as permissões do usuário.");
@@ -187,9 +170,9 @@ export function UserAccess(): JSX.Element {
           : type === "role"
             ? "roleIds"
             : "permissionIds";
-      const currentIds = prev[field];
+      const currentIds = (prev as any)[field];
       const newIds = currentIds.includes(id)
-        ? currentIds.filter((currentId) => currentId !== id)
+        ? currentIds.filter((currentId: string) => currentId !== id)
         : [...currentIds, id];
 
       return {
@@ -199,50 +182,9 @@ export function UserAccess(): JSX.Element {
     });
   };
 
-  // Filter items based on search
-  const filteredGroups = groups.filter(
-    (group) =>
-      group.name.toLowerCase().includes(searchText.groups.toLowerCase()) ||
-      group.description.toLowerCase().includes(searchText.groups.toLowerCase())
-  );
-
-  const filteredRoles = roles.filter(
-    (role) =>
-      role.name.toLowerCase().includes(searchText.roles.toLowerCase()) ||
-      role.description.toLowerCase().includes(searchText.roles.toLowerCase())
-  );
-
-  const filteredPermissions = permissions.filter(
-    (permission) =>
-      permission.name
-        .toLowerCase()
-        .includes(searchText.permissions.toLowerCase()) ||
-      permission.code
-        .toLowerCase()
-        .includes(searchText.permissions.toLowerCase()) ||
-      permission.description
-        .toLowerCase()
-        .includes(searchText.permissions.toLowerCase())
-  );
-
-  // Group permissions by domain for better organization
-  const groupedPermissions = filteredPermissions.reduce(
-    (acc, permission) => {
-      const domain = permission.code.split(":")[0];
-      if (!acc[domain]) {
-        acc[domain] = [];
-      }
-      acc[domain].push(permission);
-      return acc;
-    },
-    {} as Record<string, Permission[]>
-  );
-
-  // Calculate effective permissions for a user (from groups + direct roles + direct permissions)
   const getEffectivePermissions = (user: User): Permission[] => {
     const uniquePermissions = new Map<string, Permission>();
 
-    // Add permissions from groups
     user.groups.forEach((group) => {
       group.roles.forEach((role) => {
         role.permissions.forEach((permission) => {
@@ -251,14 +193,12 @@ export function UserAccess(): JSX.Element {
       });
     });
 
-    // Add permissions from direct roles
     user.directRoles.forEach((role) => {
       role.permissions.forEach((permission) => {
         uniquePermissions.set(permission.id, permission);
       });
     });
 
-    // Add direct permissions
     user.directPermissions.forEach((permission) => {
       uniquePermissions.set(permission.id, permission);
     });
@@ -266,16 +206,13 @@ export function UserAccess(): JSX.Element {
     return Array.from(uniquePermissions.values());
   };
 
-  // Count total permissions for each group
   const getTotalPermissions = (group: Group): number => {
     const permissionSet = new Set<string>();
-
     group.roles.forEach((role) => {
       role.permissions.forEach((permission) => {
         permissionSet.add(permission.id);
       });
     });
-
     return permissionSet.size;
   };
 
@@ -283,349 +220,163 @@ export function UserAccess(): JSX.Element {
     onClose();
   };
 
+  const groupedPermissions = permissions
+    .filter(
+      (p) =>
+        p.name.toLowerCase().includes(searchText.permissions.toLowerCase()) ||
+        p.code.toLowerCase().includes(searchText.permissions.toLowerCase())
+    )
+    .reduce((acc, permission) => {
+      const domain = permission.code.split(":")[0];
+      if (!acc[domain]) acc[domain] = [];
+      acc[domain].push(permission);
+      return acc;
+    }, {} as Record<string, Permission[]>);
+
+  const filteredGroupsList = groups.filter(
+    (group) =>
+      group.name.toLowerCase().includes(searchText.groups.toLowerCase()) ||
+      group.description.toLowerCase().includes(searchText.groups.toLowerCase())
+  );
+
+  const filteredRolesList = roles.filter(
+    (role) =>
+      role.name.toLowerCase().includes(searchText.roles.toLowerCase()) ||
+      role.description.toLowerCase().includes(searchText.roles.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col space-y-6 mb-20">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold" color={styleContext.state.textColor}>
-          Acesso de Usuários
-        </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold text-foreground">Acesso de Usuários</h2>
         <div className="relative w-[300px]">
-          <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
           <DSInput
             placeholder="Buscar usuários..."
             value={userFilter}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setUserFilter(e.target.value)
-            }
-            className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+            onChange={(e) => setUserFilter(e.target.value)}
+            className="h-9 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
           />
         </div>
       </div>
 
       {isLoading && users.length === 0 ? (
         <div className="flex justify-center my-8">
-          <Spinner
-            size="lg"
-            color={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "purple.500"
-                : "purple.400"
-            }
-            thickness="3px"
-          />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
         <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
-          <Table variant="simple" size="sm" className="text-sm">
-            <Thead className="text-xs">
-              <Tr>
-                <Th
-                  width="40px"
-                  className="bg-muted/40 text-xs font-semibold text-foreground"
-                ></Th>
-                <Th
-                  className="bg-muted/40 text-xs font-semibold text-foreground"
-                >
-                  Nome
-                </Th>
-                <Th
-                  className="bg-muted/40 text-xs font-semibold text-foreground"
-                >
-                  Email
-                </Th>
-                <Th
-                  className="bg-muted/40 text-xs font-semibold text-foreground"
-                >
-                  Permissões Ativas
-                </Th>
-                <Th
-                  width="100px"
-                  textAlign="right"
-                  className="bg-muted/40 text-xs font-semibold text-foreground"
-                >
-                  Ações
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10 bg-muted/40 h-10 px-3"></TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold text-foreground">Nome</TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold text-foreground">Email</TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold text-foreground whitespace-nowrap">Permissões Ativas</TableHead>
+                <TableHead className="w-[100px] text-right bg-muted/40 h-10 px-4 text-xs font-semibold text-foreground">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredUsers.map((user) => (
                 <React.Fragment key={user.id}>
-                  <Tr
-                    className="transition-colors duration-200 hover:bg-muted/50"
-                  >
-                    <Td
-                      onClick={() => toggleUserExpand(user.id)}
-                      className="cursor-pointer text-foreground"
-                    >
-                      {expandedUsers[user.id] ? (
-                        <FaChevronDown />
-                      ) : (
-                        <FaChevronRight />
-                      )}
-                    </Td>
-                    <Td
-                      fontWeight="medium"
-                      className="text-foreground"
-                    >
-                      {user.name}
-                    </Td>
-                    <Td className="text-muted-foreground">
-                      {user.email}
-                    </Td>
-                    <Td>
+                  <TableRow className="transition-colors duration-200">
+                    <TableCell onClick={() => toggleUserExpand(user.id)} className="cursor-pointer text-foreground py-2">
+                      {expandedUsers[user.id] ? <FaChevronDown /> : <FaChevronRight />}
+                    </TableCell>
+                    <TableCell className="font-medium text-foreground py-2">{user.name}</TableCell>
+                    <TableCell className="text-muted-foreground py-2">{user.email}</TableCell>
+                    <TableCell className="py-2 whitespace-nowrap">
                       <InfoTooltip
                         content={
-                          <Box>
-                            <Text fontWeight="bold" mb={2}>
-                              Permissões Efetivas:
-                            </Text>
+                          <div className="space-y-2 p-1 text-foreground">
+                            <p className="font-bold">Permissões Efetivas:</p>
                             {getEffectivePermissions(user).length > 0 ? (
-                              getEffectivePermissions(user).map(
-                                (permission) => (
-                                  <Text
-                                    key={permission.id}
-                                    mb={1}
-                                    fontSize="sm"
-                                  >
-                                    • <code>{permission.code}</code>
-                                    {permission.description &&
-                                      ` - ${permission.description}`}
-                                  </Text>
-                                )
-                              )
+                              <div className="max-h-[300px] overflow-y-auto space-y-1">
+                                {getEffectivePermissions(user).map((permission) => (
+                                  <p key={permission.id} className="text-sm">
+                                    • <code>{permission.code}</code> {permission.description}
+                                  </p>
+                                ))}
+                              </div>
                             ) : (
-                              <Text fontSize="sm" color="gray.500">
-                                Sem permissões
-                              </Text>
+                              <p className="text-sm text-muted-foreground">Sem permissões</p>
                             )}
-                          </Box>
+                          </div>
                         }
-                        placement="top"
                         showIcon={false}
                       >
-                        <ClickableBadge
-                          colorScheme="orange"
-                          variant="solid"
-                          className="flex items-center py-1 hover:opacity-80 transition-opacity"
-                          borderRadius="md"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "orange.100"
-                              : "orange.800"
-                          }
-                          color={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "orange.800"
-                              : "orange.200"
-                          }
-                          px={2}
-                          py={1}
-                        >
+                        <Badge variant="outline" className="text-[10px] font-medium inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary border-primary/20 cursor-pointer">
                           {getEffectivePermissions(user).length} permissões
-                        </ClickableBadge>
+                        </Badge>
                       </InfoTooltip>
-                    </Td>
-                    <Td textAlign="right">
-                      <div className="flex justify-end space-x-2 group">
-                        <IconButton
-                          aria-label="Edit"
-                          icon={<FaEdit />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleEditClick(user)}
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "#F3F4F6"
-                              : "#4B5563"
-                          }
-                          color={styleContext.state.textColor}
-                          _hover={{
-                            bg:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#E5E7EB"
-                                : "#6B7280",
-                          }}
-                        />
-                      </div>
-                    </Td>
-                  </Tr>
-                  <Tr>
-                    <Td colSpan={6} p={0}>
-                      <Collapse in={expandedUsers[user.id] || false}>
-                        <Box
-                          p={4}
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.50"
-                              : "gray.800"
-                          }
-                          borderBottomWidth="1px"
-                          borderColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.200"
-                              : "gray.700"
-                          }
-                        >
-                          <Flex justifyContent="space-between" mb={2}>
-                            <Text
-                              fontWeight="bold"
-                              color={styleContext.state.textColor}
-                            >
-                              Detalhes de Acesso
-                            </Text>
-                          </Flex>
-                          <Divider mb={3} />
-
-                          <Text
-                            fontSize="sm"
-                            mb={2}
-                            style={{ color: styleContext.state.textColor }}
-                          >
+                    </TableCell>
+                    <TableCell className="text-right py-2">
+                      <DSButton variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditClick(user)}>
+                        <FaEdit size={14} />
+                      </DSButton>
+                    </TableCell>
+                  </TableRow>
+                  {expandedUsers[user.id] && (
+                    <TableRow className="bg-muted/30">
+                      <TableCell colSpan={5} className="p-0">
+                        <div className="p-4 border-b border-border">
+                          <p className="font-bold text-foreground mb-2">Detalhes de Acesso</p>
+                          <Separator className="my-3" />
+                          <p className="text-sm text-foreground mb-2">
                             <strong>Nível de Acesso:</strong>{" "}
-                            {user.accessLevel === 0
-                              ? "Público"
-                              : user.accessLevel === 1
-                                ? "Registrado"
-                                : user.accessLevel === 2
-                                  ? "Restrito"
-                                  : user.accessLevel === 3
-                                    ? "Confidencial"
-                                    : "Anônimo"}
-                          </Text>
-
-                          <Text
-                            fontSize="sm"
-                            fontWeight="medium"
-                            mb={2}
-                            style={{ color: styleContext.state.textColor }}
-                          >
-                            Grupos:
-                          </Text>
-                          {user.groups.length > 0 ? (
-                            <Flex gap={2} flexWrap="wrap">
-                              {user.groups.map((group) => (
-                                <ClickableBadge
-                                  key={group.id}
-                                  colorScheme="teal"
-                                  variant="solid"
-                                  className="flex items-center py-1 hover:opacity-80 transition-opacity"
-                                  borderRadius="md"
-                                  bg={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "teal.100"
-                                      : "teal.800"
-                                  }
-                                  color={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "teal.800"
-                                      : "teal.200"
-                                  }
-                                  px={2}
-                                  py={1}
-                                >
-                                  {group.name}
-                                </ClickableBadge>
-                              ))}
-                            </Flex>
-                          ) : (
-                            <Text
-                              fontSize="sm"
-                              color={
-                                styleContext.state.buttonHoverColorWeight ===
-                                "200"
-                                  ? "gray.500"
-                                  : "gray.400"
-                              }
-                            >
-                              Este usuário não pertence a nenhum grupo.
-                            </Text>
-                          )}
-                        </Box>
-                      </Collapse>
-                    </Td>
-                  </Tr>
+                            {user.accessLevel === 0 ? "Público" : user.accessLevel === 1 ? "Registrado" : user.accessLevel === 2 ? "Restrito" : user.accessLevel === 3 ? "Confidencial" : "Anônimo"}
+                          </p>
+                          <p className="text-sm font-medium text-foreground mb-2">Grupos:</p>
+                          <div className="flex gap-2 flex-wrap">
+                            {user.groups.length > 0 ? user.groups.map((group) => (
+                              <Badge key={group.id} variant="outline" className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border-primary/20">
+                                {group.name}
+                              </Badge>
+                            )) : <p className="text-sm text-muted-foreground italic">Nenhum grupo atribuído</p>}
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </React.Fragment>
               ))}
               {filteredUsers.length === 0 && (
-                <Tr>
-                  <Td
-                    colSpan={6}
-                    className="text-center py-8"
-                    color="var(--foreground)"
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-8 text-muted-foreground"
                   >
-                    <Text fontSize="md" color="var(--muted-foreground)">
-                      Nenhum usuário encontrado
-                    </Text>
-                  </Td>
-                </Tr>
+                    Nenhum usuário encontrado
+                  </TableCell>
+                </TableRow>
               )}
-            </Tbody>
+            </TableBody>
           </Table>
         </div>
       )}
 
-      {/* Replace custom drawer implementation with SideDrawer component */}
       {isOpen && (
         <SideDrawer
           isOpen={isOpen}
           onClose={handleClose}
-          styleContext={styleContext}
-          title={
-            selectedUser ? "Editar Acesso de Usuário" : "Novo Acesso de Usuário"
-          }
+          title={selectedUser ? "Editar Acesso de Usuário" : "Novo Acesso de Usuário"}
           width="520px"
           storageKey="iam"
-          badge={{
-            text: `${selectedUser ? getEffectivePermissions(selectedUser).length : 0} permissões`,
-            colorScheme: "blue",
-          }}
+          badge={{ text: `${selectedUser ? getEffectivePermissions(selectedUser).length : 0} permissões`, colorScheme: "blue" }}
+          styleContext={styleContext}
         >
-          <div className="overflow-y-auto">
+          <div className="overflow-y-auto h-full pb-24">
             {selectedUser && (
-              <div className="pt-4 px-4 border-b border-border">
-                <Text
-                  fontSize="md"
-                  fontWeight="medium"
-                  color={styleContext.state.textColor}
-                >
-                  {selectedUser.name}
-                </Text>
-                <Text
-                  fontSize="sm"
-                  color={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.600"
-                      : "gray.400"
-                  }
-                >
-                  {selectedUser.email}
-                </Text>
+              <div className="py-4 px-4 border-b border-border">
+                <p className="text-base font-medium text-foreground">{selectedUser.name}</p>
+                <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
               </div>
             )}
-
-            <div className="p-4">
-              <FormControl id="accessLevel" mb={4}>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
-                  Nível de Acesso
-                </FormLabel>
-                <DSSelect
-                  value={String(formData.accessLevel)}
-                  onValueChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      accessLevel: parseInt(value, 10),
-                    })
-                  }
-                >
-                  <SelectTrigger className="h-11 w-full bg-background text-foreground border-border">
+            <div className="p-4 pb-24">
+              <div className="mb-6">
+                <Label className="mb-2 block text-sm font-medium text-foreground">Nível de Acesso</Label>
+                <DSSelect value={String(formData.accessLevel)} onValueChange={(v) => setFormData({ ...formData, accessLevel: parseInt(v) })}>
+                  <SelectTrigger className="h-9 w-full bg-background border-border text-foreground">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent className="z-[2000]">
@@ -636,444 +387,86 @@ export function UserAccess(): JSX.Element {
                     <SelectItem value="4">Anônimo</SelectItem>
                   </SelectContent>
                 </DSSelect>
-                <FormHelperText
-                  style={{
-                    color:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.600"
-                        : "gray.400",
-                  }}
-                >
-                  Define o nível de acesso deste usuário
-                </FormHelperText>
-              </FormControl>
+              </div>
 
-              <Tabs
-                isFitted
-                variant="enclosed"
-                index={activeTab}
-                onChange={setActiveTab}
-                colorScheme="blue"
-                mb={4}
-              >
-                <TabList
-                  className="border-b"
-                  style={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                >
-                  <Tab style={{ color: styleContext.state.textColor }}>
-                    Grupos
-                  </Tab>
-                  <Tab style={{ color: styleContext.state.textColor }}>
-                    Funções
-                  </Tab>
-                  <Tab style={{ color: styleContext.state.textColor }}>
-                    Permissões
-                  </Tab>
-                </TabList>
+              <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0 gap-6">
+                  <TabsTrigger value="groups" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-2">Grupos</TabsTrigger>
+                  <TabsTrigger value="roles" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-2">Funções</TabsTrigger>
+                  <TabsTrigger value="permissions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-2">Permissões</TabsTrigger>
+                </TabsList>
 
-                <TabPanels className="-mx-4 mt-2">
-                  <TabPanel>
-                    <div className="mb-4">
-                      <div className="relative">
-                        <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                        <DSInput
-                          placeholder="Buscar grupos..."
-                          value={searchText.groups}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setSearchText({
-                              ...searchText,
-                              groups: e.target.value,
-                            })
-                          }
-                          className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
-                        />
-                      </div>
+                <div className="mt-4">
+                  <TabsContent value="groups">
+                    <div className="relative mb-4">
+                      <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                      <DSInput placeholder="Buscar grupos..." value={searchText.groups} onChange={(e) => setSearchText({ ...searchText, groups: e.target.value })} className="pl-9 h-9 bg-background border-border text-foreground" />
                     </div>
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                      {filteredGroupsList.map((g) => (
+                        <div key={g.id} className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${formData.groupIds.includes(g.id) ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/50 border border-transparent"}`} onClick={() => handleCheckboxChange("group", g.id)}>
+                          <Checkbox id={`g-${g.id}`} checked={formData.groupIds.includes(g.id)} onCheckedChange={() => handleCheckboxChange("group", g.id)} />
+                          <Label htmlFor={`g-${g.id}`} className="flex-1 cursor-pointer">
+                            <div className="text-sm font-medium text-foreground">{g.name}</div>
+                            <div className="text-xs text-muted-foreground line-clamp-1">{g.description}</div>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
 
-                    {filteredGroups.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                        <FaSearch size={32} className="mb-4 opacity-60" />
-                        <p className="text-lg font-medium mb-1 text-foreground">
-                          Nenhum grupo encontrado
-                        </p>
-                        <p className="text-sm">
-                          Tente buscar com outros termos
-                        </p>
-                      </div>
-                    ) : (
-                      <Stack spacing={2} maxH="500px" overflowY="auto">
-                        {filteredGroups.map((group) => (
-                          <Box
-                            key={group.id}
-                            p={3}
-                            borderRadius="lg"
-                            transition="all 0.2s"
-                            cursor="pointer"
-                            onClick={() =>
-                              handleCheckboxChange("group", group.id)
-                            }
-                            style={{
-                              backgroundColor: formData.groupIds.includes(
-                                group.id
-                              )
-                                ? styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                  ? "rgba(20, 184, 166, 0.1)"
-                                  : "rgba(13, 148, 136, 0.2)"
-                                : "transparent",
-                            }}
-                            _hover={{
-                              bg: !formData.groupIds.includes(group.id)
-                                ? styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                  ? "rgba(243, 244, 246, 0.8)"
-                                  : "rgba(31, 41, 55, 0.5)"
-                                : undefined,
-                            }}
-                          >
-                            <div className="flex items-center w-full">
-                              <input
-                                type="checkbox"
-                                checked={formData.groupIds.includes(group.id)}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  handleCheckboxChange("group", group.id);
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                                className="mr-3 h-4 w-4 rounded border-border bg-background text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                              />
-                              <div className="flex-1">
-                                <Text
-                                  fontWeight="medium"
-                                  color={styleContext.state.textColor}
-                                >
-                                  {group.name}
-                                </Text>
-                                <Text
-                                  fontSize="xs"
-                                  color={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "gray.600"
-                                      : "gray.400"
-                                  }
-                                >
-                                  {group.description}
-                                </Text>
-                                <Flex mt={1} flexWrap="wrap" gap={1}>
-                                  <Badge colorScheme="teal" fontSize="xs">
-                                    {group.roles.length} funções
-                                  </Badge>
-                                  <Badge
-                                    colorScheme="orange"
-                                    fontSize="xs"
-                                    bg={
-                                      styleContext.state
-                                        .buttonHoverColorWeight === "200"
-                                        ? "orange.100"
-                                        : "orange.800"
-                                    }
-                                    color={
-                                      styleContext.state
-                                        .buttonHoverColorWeight === "200"
-                                        ? "orange.800"
-                                        : "orange.200"
-                                    }
-                                  >
-                                    {getTotalPermissions(group)} permissões
-                                  </Badge>
-                                </Flex>
-                              </div>
+                  <TabsContent value="roles">
+                    <div className="relative mb-4">
+                      <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                      <DSInput placeholder="Buscar funções..." value={searchText.roles} onChange={(e) => setSearchText({ ...searchText, roles: e.target.value })} className="pl-9 h-9 bg-background border-border text-foreground" />
+                    </div>
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                      {filteredRolesList.map((r) => (
+                        <div key={r.id} className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${formData.roleIds.includes(r.id) ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/50 border border-transparent"}`} onClick={() => handleCheckboxChange("role", r.id)}>
+                          <Checkbox id={`r-${r.id}`} checked={formData.roleIds.includes(r.id)} onCheckedChange={() => handleCheckboxChange("role", r.id)} />
+                          <Label htmlFor={`r-${r.id}`} className="flex-1 cursor-pointer">
+                            <div className="text-sm font-medium text-foreground">{r.name}</div>
+                            <div className="text-xs text-muted-foreground line-clamp-1">{r.description}</div>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="permissions">
+                    <div className="relative mb-4">
+                      <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                      <DSInput placeholder="Buscar permissões..." value={searchText.permissions} onChange={(e) => setSearchText({ ...searchText, permissions: e.target.value })} className="pl-9 h-9 bg-background border-border text-foreground" />
+                    </div>
+                    <div className="space-y-6 max-h-[400px] overflow-y-auto">
+                      {Object.entries(groupedPermissions).map(([cat, perms]) => (
+                        <div key={cat} className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{cat}</span>
+                            <Separator className="flex-1" />
+                          </div>
+                          {perms.map((p) => (
+                            <div key={p.id} className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-all ${formData.permissionIds.includes(p.id) ? "bg-primary/10" : "hover:bg-muted/50"}`} onClick={() => handleCheckboxChange("permission", p.id)}>
+                              <Checkbox id={`p-${p.id}`} checked={formData.permissionIds.includes(p.id)} onCheckedChange={() => handleCheckboxChange("permission", p.id)} />
+                              <Label htmlFor={`p-${p.id}`} className="flex-1 cursor-pointer">
+                                <div className="text-sm font-medium text-foreground">{p.name}</div>
+                                <div className="text-xs text-muted-foreground"><code>{p.code}</code></div>
+                              </Label>
                             </div>
-                          </Box>
-                        ))}
-                      </Stack>
-                    )}
-                    <Text fontSize="sm" color="gray.500" mt={2}>
-                      Selecionados: {formData.groupIds.length} grupos
-                    </Text>
-                  </TabPanel>
-
-                  <TabPanel>
-                    <div className="mb-4">
-                      <div className="relative">
-                        <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                        <DSInput
-                          placeholder="Buscar funções..."
-                          value={searchText.roles}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setSearchText({
-                              ...searchText,
-                              roles: e.target.value,
-                            })
-                          }
-                          className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
-                        />
-                      </div>
+                          ))}
+                        </div>
+                      ))}
                     </div>
-
-                    {filteredRoles.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                        <FaSearch size={32} className="mb-4 opacity-60" />
-                        <p className="text-lg font-medium mb-1 text-foreground">
-                          Nenhuma função encontrada
-                        </p>
-                        <p className="text-sm">
-                          Tente buscar com outros termos
-                        </p>
-                      </div>
-                    ) : (
-                      <Stack spacing={2} maxH="400px" overflowY="auto">
-                        {filteredRoles.map((role) => (
-                          <Box
-                            key={role.id}
-                            p={3}
-                            borderRadius="lg"
-                            transition="all 0.2s"
-                            cursor="pointer"
-                            onClick={() =>
-                              handleCheckboxChange("role", role.id)
-                            }
-                            style={{
-                              backgroundColor: formData.roleIds.includes(
-                                role.id
-                              )
-                                ? styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                  ? "rgba(147, 51, 234, 0.1)"
-                                  : "rgba(126, 34, 206, 0.2)"
-                                : "transparent",
-                            }}
-                            _hover={{
-                              bg: !formData.roleIds.includes(role.id)
-                                ? styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                  ? "rgba(243, 244, 246, 0.8)"
-                                  : "rgba(31, 41, 55, 0.5)"
-                                : undefined,
-                            }}
-                          >
-                            <div className="flex items-center w-full">
-                              <input
-                                type="checkbox"
-                                checked={formData.roleIds.includes(role.id)}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  handleCheckboxChange("role", role.id);
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                                className="mr-3 h-4 w-4 rounded border-border bg-background text-violet-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                              />
-                              <div className="flex-1">
-                                <Text
-                                  fontWeight="medium"
-                                  color={styleContext.state.textColor}
-                                >
-                                  {role.name}
-                                </Text>
-                                <Text
-                                  fontSize="xs"
-                                  color={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "gray.600"
-                                      : "gray.400"
-                                  }
-                                >
-                                  {role.description}
-                                </Text>
-                                <Flex mt={1} flexWrap="wrap" gap={1}>
-                                  <Badge
-                                    colorScheme="orange"
-                                    fontSize="xs"
-                                    bg={
-                                      styleContext.state
-                                        .buttonHoverColorWeight === "200"
-                                        ? "orange.100"
-                                        : "orange.800"
-                                    }
-                                    color={
-                                      styleContext.state
-                                        .buttonHoverColorWeight === "200"
-                                        ? "orange.800"
-                                        : "orange.200"
-                                    }
-                                  >
-                                    {role.permissions.length} permissões
-                                  </Badge>
-                                </Flex>
-                              </div>
-                            </div>
-                          </Box>
-                        ))}
-                      </Stack>
-                    )}
-                    <Text
-                      fontSize="sm"
-                      color={
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.600"
-                          : "gray.400"
-                      }
-                      mt={2}
-                    >
-                      Selecionadas: {formData.roleIds.length} funções diretas
-                    </Text>
-                  </TabPanel>
-
-                  <TabPanel>
-                    <div className="mb-4">
-                      <div className="relative">
-                        <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                        <DSInput
-                          placeholder="Buscar permissões..."
-                          value={searchText.permissions}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            setSearchText({
-                              ...searchText,
-                              permissions: e.target.value,
-                            })
-                          }
-                          className="h-11 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
-                        />
-                      </div>
-                    </div>
-
-                    {Object.keys(groupedPermissions).length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                        <FaSearch size={32} className="mb-4 opacity-60" />
-                        <p className="text-lg font-medium mb-1 text-foreground">
-                          Nenhuma permissão encontrada
-                        </p>
-                        <p className="text-sm">
-                          Tente buscar com outros termos
-                        </p>
-                      </div>
-                    ) : (
-                      <Box maxH="400px" overflowY="auto">
-                        {Object.entries(groupedPermissions).map(
-                          ([category, permissions]) => (
-                            <Box key={category} mb={4}>
-                              <Text
-                                fontWeight="bold"
-                                mb={2}
-                                color={styleContext.state.textColor}
-                              >
-                                {category}
-                              </Text>
-                              <Stack spacing={2}>
-                                {permissions.map((permission) => (
-                                  <Box
-                                    key={permission.id}
-                                    p={3}
-                                    borderRadius="lg"
-                                    transition="all 0.2s"
-                                    cursor="pointer"
-                                    onClick={() =>
-                                      handleCheckboxChange(
-                                        "permission",
-                                        permission.id
-                                      )
-                                    }
-                                    style={{
-                                      backgroundColor:
-                                        formData.permissionIds.includes(
-                                          permission.id
-                                        )
-                                          ? styleContext.state
-                                              .buttonHoverColorWeight === "200"
-                                            ? "rgba(249, 115, 22, 0.1)"
-                                            : "rgba(234, 88, 12, 0.2)"
-                                          : "transparent",
-                                    }}
-                                    _hover={{
-                                      bg: !formData.permissionIds.includes(
-                                        permission.id
-                                      )
-                                        ? styleContext.state
-                                            .buttonHoverColorWeight === "200"
-                                          ? "rgba(243, 244, 246, 0.8)"
-                                          : "rgba(31, 41, 55, 0.5)"
-                                        : undefined,
-                                    }}
-                                  >
-                                    <div className="flex items-center w-full">
-                                      <input
-                                        type="checkbox"
-                                        checked={formData.permissionIds.includes(
-                                          permission.id
-                                        )}
-                                        onChange={(e) => {
-                                          e.stopPropagation();
-                                          handleCheckboxChange(
-                                            "permission",
-                                            permission.id
-                                          );
-                                        }}
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="mr-3 h-4 w-4 rounded border-border bg-background text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                                      />
-                                      <div className="flex-1">
-                                        <Text
-                                          fontWeight="medium"
-                                          color={styleContext.state.textColor}
-                                        >
-                                          {permission.name}
-                                        </Text>
-                                        <Text
-                                          fontSize="xs"
-                                          color={
-                                            styleContext.state
-                                              .buttonHoverColorWeight === "200"
-                                              ? "gray.600"
-                                              : "gray.400"
-                                          }
-                                        >
-                                          <code>{permission.code}</code>
-                                          {permission.description &&
-                                            ` - ${permission.description}`}
-                                        </Text>
-                                      </div>
-                                    </div>
-                                  </Box>
-                                ))}
-                              </Stack>
-                              <Divider my={2} />
-                            </Box>
-                          )
-                        )}
-                      </Box>
-                    )}
-                    <Text
-                      fontSize="sm"
-                      color={
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.600"
-                          : "gray.400"
-                      }
-                      mt={2}
-                    >
-                      Selecionadas: {formData.permissionIds.length} permissões
-                      diretas
-                    </Text>
-                  </TabPanel>
-                </TabPanels>
+                  </TabsContent>
+                </div>
               </Tabs>
             </div>
-
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background flex justify-end space-x-3 z-10">
-              <DSButton
-                type="button"
-                onClick={handleSave}
-                disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {selectedUser ? "Atualizar" : "Criar"} Acesso
+            <div
+              className="absolute bottom-0 left-0 right-0 py-4 px-6 border-t border-border flex justify-end space-x-3 z-10"
+              style={{ backgroundColor: styleContext.state.backgroundColor }}
+            >
+              <DSButton type="button" size="sm" onClick={handleSave} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                Atualizar Permissões
               </DSButton>
             </div>
           </div>
@@ -1082,3 +475,5 @@ export function UserAccess(): JSX.Element {
     </div>
   );
 }
+
+export default UserAccess;
