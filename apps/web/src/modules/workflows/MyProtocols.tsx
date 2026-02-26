@@ -3,9 +3,13 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Badge,
   Button,
+  Calendar,
   Card,
   CardContent,
   Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Table,
   TableBody,
   TableCell,
@@ -18,6 +22,8 @@ import {
   TooltipTrigger,
 } from "@open-urbis/map-ui";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { SL } from "../../components";
 import { ApiClient } from "../../api";
 import {
@@ -39,6 +45,7 @@ import {
   FaSort,
   FaTimes,
   FaFilter,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import { Spinner } from "../../components";
 import { formatId } from "./activities/common";
@@ -115,8 +122,8 @@ export function MyProtocols(): JSX.Element {
   const [filterLabel, setFilterLabel] = useState("");
   const [filterCreatedByName, setFilterCreatedByName] = useState("");
   const [filterWorkflowId, setFilterWorkflowId] = useState("");
-  const [filterDateFrom, setFilterDateFrom] = useState("");
-  const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
+  const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
 
   // Sort state
   const [sortBy, setSortBy] = useState<SortField>("timestamp");
@@ -133,8 +140,8 @@ export function MyProtocols(): JSX.Element {
     filterLabel ||
     filterCreatedByName ||
     filterWorkflowId ||
-    filterDateFrom ||
-    filterDateTo;
+    filterDateFrom !== undefined ||
+    filterDateTo !== undefined;
 
   const nextPage = () => {
     if (!isLastPage) {
@@ -164,7 +171,7 @@ export function MyProtocols(): JSX.Element {
         if (filterLabel) params.label = filterLabel;
         if (filterCreatedByName) params.createdByName = filterCreatedByName;
         if (filterWorkflowId) params.workflowId = filterWorkflowId;
-        if (filterDateFrom) params.dateFrom = new Date(filterDateFrom).toISOString();
+        if (filterDateFrom) params.dateFrom = filterDateFrom.toISOString();
         if (filterDateTo) {
           const endDate = new Date(filterDateTo);
           endDate.setHours(23, 59, 59, 999);
@@ -225,8 +232,8 @@ export function MyProtocols(): JSX.Element {
     setFilterLabel("");
     setFilterCreatedByName("");
     setFilterWorkflowId("");
-    setFilterDateFrom("");
-    setFilterDateTo("");
+    setFilterDateFrom(undefined);
+    setFilterDateTo(undefined);
   };
 
   const handleSort = (field: SortField) => {
@@ -261,7 +268,7 @@ export function MyProtocols(): JSX.Element {
         </div>
       ) : (
         <>
-          <div className="flex flex-col space-y-3">
+          <div className="flex flex-col space-y-5">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 {canEditWorkflowSchema ? (
@@ -407,23 +414,57 @@ export function MyProtocols(): JSX.Element {
                     Período
                   </label>
                   <div className="flex items-center space-x-2">
-                    <Input
-                      type="date"
-                      value={filterDateFrom}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setFilterDateFrom(e.target.value)
-                      }
-                      className="h-9 text-sm flex-1"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={`h-9 text-sm flex-1 justify-start font-normal ${
+                            !filterDateFrom ? "text-muted-foreground" : ""
+                          }`}
+                        >
+                          <FaCalendarAlt size={12} className="mr-2" />
+                          {filterDateFrom
+                            ? format(filterDateFrom, "dd/MM/yyyy", { locale: ptBR })
+                            : "De"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filterDateFrom}
+                          onSelect={setFilterDateFrom}
+                          locale={ptBR}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <span className="text-xs text-muted-foreground">até</span>
-                    <Input
-                      type="date"
-                      value={filterDateTo}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setFilterDateTo(e.target.value)
-                      }
-                      className="h-9 text-sm flex-1"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={`h-9 text-sm flex-1 justify-start font-normal ${
+                            !filterDateTo ? "text-muted-foreground" : ""
+                          }`}
+                        >
+                          <FaCalendarAlt size={12} className="mr-2" />
+                          {filterDateTo
+                            ? format(filterDateTo, "dd/MM/yyyy", { locale: ptBR })
+                            : "Até"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filterDateTo}
+                          onSelect={setFilterDateTo}
+                          locale={ptBR}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
               </div>
@@ -460,6 +501,12 @@ export function MyProtocols(): JSX.Element {
                                 currentOrder={sortOrder}
                               />
                             </div>
+                          </TableHead>
+                          <TableHead className="bg-muted/40">
+                            Descrição
+                          </TableHead>
+                          <TableHead className="bg-muted/40">
+                            Criado por
                           </TableHead>
                           <TableHead
                             className="bg-muted/40 cursor-pointer select-none"
@@ -534,6 +581,19 @@ export function MyProtocols(): JSX.Element {
                               </TooltipTrigger>
                               <TooltipContent>{item.label}</TooltipContent>
                             </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="line-clamp-1 text-muted-foreground">
+                                  {item.description || "—"}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>{item.description}</TooltipContent>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {item.createdBy?.name || "—"}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {formatDate(String(item.createdAt))}
