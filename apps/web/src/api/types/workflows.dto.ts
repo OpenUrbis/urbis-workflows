@@ -176,6 +176,22 @@ export interface FormWorkflowHttpDto {
   form: any;
 }
 
+// Search / Filter params for findAll
+export interface FindAllWorkflowsParams {
+  stage?: string;
+  page?: number;
+  pageSize?: number;
+  query?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  label?: string;
+  description?: string;
+  createdByName?: string;
+  workflowId?: string;
+  sortBy?: string;
+  sortOrder?: "ASC" | "DESC";
+}
+
 // Response DTOs
 export interface CreateWorkflowResponse {
   id: string;
