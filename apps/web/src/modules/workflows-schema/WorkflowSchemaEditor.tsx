@@ -1131,7 +1131,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                       >
                         <FaExclamationTriangle className="mr-2" size={14} />
                         <Tooltip label="Este rascunho está salvo apenas neste dispositivo e navegador. As alterações serão perdidas se você limpar os dados do navegador ou acessar de outro dispositivo. Use o botão Salvar para enviar as alterações ao servidor ou Descartar para remover as alterações locais.">
-                          <span>Rascunho salvo apenas neste dispositivo</span>
+                          <span className="text-xs">Rascunho salvo apenas neste dispositivo</span>
                         </Tooltip>
                       </div>
                       <button
@@ -1143,7 +1143,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         }`}
                       >
                         <FaTrash size={14} />
-                        <span>Descartar Rascunho</span>
+                        <span className="text-xs">Descartar Rascunho</span>
                       </button>
                     </div>
                   )}
@@ -1153,7 +1153,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                       onTextChange={(text) => {
                         updateSubject({ ...workflowSchema, label: text });
                       }}
-                      className="text-lg md:text-2xl font-semibold text-center max-h-48 overflow-y-auto"
+                      className="text-lg md:text-xl font-semibold text-center max-h-48 overflow-y-auto"
                       style={{ color: styleContext.state.textColor }}
                     />
                   </div>
@@ -1173,10 +1173,10 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 </div>
               </div>
               <div className="flex">
-                <div className="w-1/4 border-r pr-4">
+                <div className="w-1/4 border-r pr-4 text-sm">
                   <div className="mb-6">
                     <h2
-                      className="text-xl font-bold mb-4"
+                      className="text-base font-semibold mb-3"
                       style={{ color: styleContext.state.textColor }}
                     >
                       Configuração
@@ -1290,7 +1290,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                     <>
                       <div className="flex justify-between items-center mb-4">
                         <h2
-                          className="text-xl font-bold"
+                          className="text-base font-semibold"
                           style={{ color: styleContext.state.textColor }}
                         >
                           Atividades

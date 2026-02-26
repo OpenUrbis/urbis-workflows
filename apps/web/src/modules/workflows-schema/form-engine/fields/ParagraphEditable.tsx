@@ -16,7 +16,7 @@ export const ParagraphEditable: React.FC<FieldParagraphEditableProps> = ({
     <EditableHeader
       key={key}
       html={props.options.html}
-      className="font-normal"
+      className="text-sm font-normal"
       onTextChange={(value) => {
         onChange({ key, options: { html: value } });
       }}

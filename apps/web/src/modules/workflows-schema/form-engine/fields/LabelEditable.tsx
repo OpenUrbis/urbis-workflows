@@ -13,7 +13,7 @@ export const LabelEditable: React.FC<FieldLabelEditableProps> = ({
   props,
 }) => {
   return (
-    <div className="flex space-x-2">
+    <div className="flex space-x-2 text-sm">
       <EditableHeader
         key={fieldKey}
         value={props.options.label}

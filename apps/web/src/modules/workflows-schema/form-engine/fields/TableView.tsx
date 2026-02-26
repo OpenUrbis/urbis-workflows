@@ -43,19 +43,20 @@ export const TableView: React.FC<FieldTableViewProps> = ({
 
   return (
     <div className="flex flex-col" style={{ width: options.width }}>
-      {parsedTable.map((row, rowIndex) => {
-        return (
-          <div className="flex">
-            {row.map((field) => {
+      <div className="rounded-md border overflow-hidden">
+        {parsedTable.map((row, rowIndex) => {
+          return (
+            <div className="flex" key={`row-${rowIndex}`}>
+              {row.map((field, colIndex) => {
               if (field.type === "integration" || field.type === "link") {
                 return <></>;
               }
 
               return (field.type as any) !== "none" ? (
                 <div
-                  className={`border-x px-4 pt-3 border-t ${
-                    rowIndex + 1 === parsedTable.length ? "border-b" : ""
-                  }`}
+                  className={`border-l px-4 pt-3 border-t ${
+                    colIndex + 1 === row.length ? "border-r" : ""
+                  } ${rowIndex + 1 === parsedTable.length ? "border-b" : ""}`}
                   style={{
                     width: `${
                       (((field.options as TableOptions).columns ?? row.length) /
@@ -74,7 +75,7 @@ export const TableView: React.FC<FieldTableViewProps> = ({
                 </div>
               ) : (
                 <div
-                  className="border-x"
+                  className={`border-l ${colIndex + 1 === row.length ? "border-r" : ""}`}
                   style={{
                     width: `${
                       (((field.options as TableOptions).columns ?? row.length) /
@@ -84,10 +85,11 @@ export const TableView: React.FC<FieldTableViewProps> = ({
                   }}
                 ></div>
               );
-            })}
-          </div>
-        );
-      })}
+              })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
