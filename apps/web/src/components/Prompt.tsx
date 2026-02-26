@@ -1,5 +1,6 @@
 import React, { FC, useContext, useEffect, useState } from "react";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -344,7 +345,7 @@ const PromptModal: FC<PromptProps> = ({
           maxHeight: "85vh",
         }}
       >
-        <DialogHeader className="p-4 pt-0 border-b">
+        <DialogHeader className="pb-4 pt-0 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 text-xl">
               <DialogTitle asChild>
@@ -383,25 +384,21 @@ const PromptModal: FC<PromptProps> = ({
         </DialogHeader>
 
         <div
-          className={`my-4 ${isIndexSelector ? "text-center" : ""}`}
+          className={`${isIndexSelector ? "text-center" : ""}`}
           style={{ color: styleContext.state.textColor }}
         >
           {renderInputArea()}
           {renderError()}
         </div>
 
-        <DialogFooter className="pt-4 border-t space-x-3">
-          <button
-            className={`px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2
-              ${
-                hasError
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-primary hover:bg-primary/90 text-primary-foreground"
-              }`}
+        <DialogFooter className="border-t space-x-3">
+          <Button
+            type="button"
             disabled={hasError}
             onClick={handleConfirm}
+            className="gap-2"
           >
-            <span>{isIndexSelector ? "Selecionar" : "Confirmar"}</span>
+            {isIndexSelector ? "Selecionar" : "Confirmar"}
             <SL
               bg={hasError ? "gray.200" : "primary"}
               className={
@@ -410,19 +407,14 @@ const PromptModal: FC<PromptProps> = ({
             >
               Enter
             </SL>
-          </button>
-          <button
-            className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2"
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
             onClick={handleCancel}
-            style={{
-              backgroundColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#f3f4f6"
-                  : "#1f2937",
-              color: styleContext.state.textColor,
-            }}
+            className="gap-2"
           >
-            <span>Cancelar</span>
+            Cancelar
             <SL
               bg={
                 styleContext.state.buttonHoverColorWeight === "200"
@@ -432,7 +424,7 @@ const PromptModal: FC<PromptProps> = ({
             >
               esc
             </SL>
-          </button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

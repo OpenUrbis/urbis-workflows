@@ -3,6 +3,7 @@ import { CodeEditor } from "./CodeEditor";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { StyleContext } from "../../../reducers";
 import { SL } from "../../../components";
+import { Button as DSButton } from "@open-urbis/map-ui";
 import {
   IconButton,
   Modal,
@@ -148,7 +149,7 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
           className="flex items-center justify-between border-b pb-4"
           style={{ color: styleContext.state.textColor }}
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center pb-6 space-x-3">
             <span>{title}</span>
           </div>
         </ModalHeader>
@@ -251,20 +252,13 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
           <div className="border-t w-full">
             <div className="px-4 py-3 flex justify-end space-x-3">
               {!readOnly && onSave && (
-                <button
+                <DSButton
+                  type="button"
                   onClick={handleSave}
                   disabled={isSaveDisabled}
-                  className="px-6 py-2.5 rounded-lg font-medium text-white transition-colors flex items-center space-x-2"
-                  style={{
-                    backgroundColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#eab308"
-                        : "#854d0e",
-                    opacity: isSaveDisabled ? "0.5" : "1",
-                    cursor: isSaveDisabled ? "not-allowed" : "pointer",
-                  }}
+                  className="gap-2"
                 >
-                  <span>Salvar Alterações</span>
+                  Salvar Alterações
                   <SL
                     bg={
                       styleContext.state.buttonHoverColorWeight === "200"
@@ -274,20 +268,15 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
                   >
                     Enter
                   </SL>
-                </button>
+                </DSButton>
               )}
-              <button
+              <DSButton
+                type="button"
+                variant="outline"
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2"
-                style={{
-                  backgroundColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#f3f4f6"
-                      : "#1f2937",
-                  color: styleContext.state.textColor,
-                }}
+                className="gap-2"
               >
-                <span>{!readOnly && onSave ? "Cancelar" : "Fechar"}</span>
+                {!readOnly && onSave ? "Cancelar" : "Fechar"}
                 <SL
                   bg={
                     styleContext.state.buttonHoverColorWeight === "200"
@@ -297,7 +286,7 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
                 >
                   esc
                 </SL>
-              </button>
+              </DSButton>
             </div>
           </div>
         </ModalFooter>

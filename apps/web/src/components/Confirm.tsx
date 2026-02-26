@@ -1,5 +1,6 @@
 import React, { FC, useContext, useEffect, useState } from "react";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -119,17 +120,6 @@ const ConfirmModal: FC = () => {
     }
   };
 
-  const getConfirmButtonStyle = () => {
-    switch (modalType) {
-      case "warning":
-        return "bg-yellow-500 hover:bg-yellow-600";
-      case "success":
-        return "bg-green-500 hover:bg-green-600";
-      default:
-        return "bg-blue-500 hover:bg-blue-600";
-    }
-  };
-
   return (
     <Dialog
       open={isOpen}
@@ -180,33 +170,8 @@ const ConfirmModal: FC = () => {
         </div>
 
         <DialogFooter className="px-6 pt-4 border-t space-x-3">
-          <button
-            className={`px-6 py-2.5 rounded-lg font-medium text-white transition-colors flex items-center space-x-2 ${getConfirmButtonStyle()}`}
-            onClick={handleConfirm}
-            style={
-              modalType === "warning"
-                ? {
-                    backgroundColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#eab308"
-                        : "#854d0e",
-                  }
-                : modalType === "success"
-                  ? {
-                      backgroundColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#22c55e"
-                          : "#166534",
-                    }
-                  : {
-                      backgroundColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#3b82f6"
-                          : "#1e40af",
-                    }
-            }
-          >
-            <span>{confirmText}</span>
+          <Button type="button" onClick={handleConfirm} className="gap-2">
+            {confirmText}
             <SL
               bg={
                 modalType === "warning"
@@ -224,19 +189,14 @@ const ConfirmModal: FC = () => {
             >
               Enter
             </SL>
-          </button>
-          <button
-            className="px-6 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
             onClick={handleCancel}
-            style={{
-              backgroundColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#f3f4f6"
-                  : "#1f2937",
-              color: styleContext.state.textColor,
-            }}
+            className="gap-2"
           >
-            <span>{cancelText}</span>
+            {cancelText}
             <SL
               bg={
                 styleContext.state.buttonHoverColorWeight === "200"
@@ -246,7 +206,7 @@ const ConfirmModal: FC = () => {
             >
               esc
             </SL>
-          </button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
