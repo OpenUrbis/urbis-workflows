@@ -74,11 +74,20 @@ export const Select: React.FC<FieldSelectProps> = ({
         <SelectValue placeholder={options?.placeholder ?? "Selecione"} />
       </SelectTrigger>
       <SelectContent className="z-[1601]">
-        {options?.items?.map((item) => (
-          <SelectItem key={fieldKey + "#" + item.label} value={item.value.toString()}>
-            {item.label}
-          </SelectItem>
-        ))}
+        {options?.items?.map((item) => {
+          const itemAny = item as any;
+          const label =
+            itemAny?.label ?? itemAny?.key ?? (itemAny?.value !== undefined ? String(itemAny.value) : "");
+
+          return (
+            <SelectItem
+              key={fieldKey + "#" + (itemAny?.value !== undefined ? String(itemAny.value) : label)}
+              value={item.value.toString()}
+            >
+              {label}
+            </SelectItem>
+          );
+        })}
       </SelectContent>
     </DSSelect>
   );
