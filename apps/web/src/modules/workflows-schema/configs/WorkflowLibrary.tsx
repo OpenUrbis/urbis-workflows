@@ -210,7 +210,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
       >
         <div className="flex justify-between items-center mb-4">
           <h2
-            className="text-xl font-bold"
+            className="text-base font-semibold"
             style={{ color: styleContext.state.textColor }}
           >
             Módulos
@@ -221,13 +221,13 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
           <div className="flex flex-col items-center justify-center py-8 text-gray-500">
             <FaCode size={32} className="mb-4 opacity-50" />
             <p
-              className="text-sm text-center mb-2"
+              className="text-xs text-center mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhum módulo cadastrado
             </p>
             <p
-              className="text-xs text-center"
+              className="text-xs text-center opacity-80"
               style={{ color: styleContext.state.textColor }}
             >
               Adicione um módulo usando o botão abaixo
@@ -248,7 +248,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
         <div className="mt-4">
           <Menu>
             <MenuButton
-              className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="h-10 w-full rounded-xl px-4 text-sm font-medium shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <div className="flex items-center justify-center space-x-2">
                 <FaPlus size={14} />
@@ -316,20 +316,20 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <FaCode size={48} className="mb-4 opacity-50" />
             <p
-              className="text-xl font-medium mb-2"
+              className="text-base font-semibold mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhum módulo selecionado
             </p>
             <p
-              className="text-sm mb-6"
+              className="text-xs mb-4 opacity-80"
               style={{ color: styleContext.state.textColor }}
             >
               Selecione um módulo da lista ao lado ou crie um novo
             </p>
             <Menu>
               <MenuButton
-                className="h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="h-10 rounded-xl px-4 text-sm font-medium shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <div className="flex items-center justify-center space-x-2">
                   <FaPlus size={14} />

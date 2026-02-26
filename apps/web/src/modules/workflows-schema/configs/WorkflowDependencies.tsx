@@ -149,7 +149,7 @@ export const WorkflowDependencies = ({
     <div className="flex w-full">
       <div className="w-1/4 border-r pr-4">
         <h2
-          className="text-xl font-bold mb-4"
+          className="text-base font-semibold mb-3"
           style={{ color: styleContext.state.textColor }}
         >
           Pré-requisitos
@@ -163,13 +163,13 @@ export const WorkflowDependencies = ({
                 style={{ transform: "scaleX(-1)" }}
               />
               <p
-                className="text-sm text-center mb-2"
+                className="text-xs text-center mb-1"
                 style={{ color: styleContext.state.textColor }}
               >
                 Nenhuma dependência cadastrada
               </p>
               <p
-                className="text-xs text-center"
+                className="text-xs text-center opacity-80"
                 style={{ color: styleContext.state.textColor }}
               >
                 Adicione uma dependência usando o botão abaixo
@@ -254,7 +254,7 @@ export const WorkflowDependencies = ({
         <div className="mt-4">
           <button
             onClick={handleAddIncoming}
-            className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="h-10 w-full rounded-xl px-4 text-sm font-medium shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <FaPlus size={14} />
             <span>Dependência</span>

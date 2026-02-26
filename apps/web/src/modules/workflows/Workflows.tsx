@@ -86,14 +86,17 @@ export function Workflows(): JSX.Element {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const styleContext = useContext(StyleContext);
-  const { userIam, hasActivityAccess, loading: permissionsLoading } =
-    usePermissions();
+  const {
+    userIam,
+    hasActivityAccess,
+    loading: permissionsLoading,
+  } = usePermissions();
   const isCreating = location.pathname.endsWith("/create");
   const [showQRModal, setShowQRModal] = useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   const [workflow, setWorkflow] = useState<WorkflowSchema | undefined>(
-    undefined
+    undefined,
   );
   const [context, setContext] = useState<any>({});
   const [valid, setValid] = useState<any>({});
@@ -128,7 +131,7 @@ export function Workflows(): JSX.Element {
         // Fetch workflow schema for creation
         response = await apiClient.workflowsSchema.findOne(
           id as string,
-          params.get("stage") as WorkflowStageEnum
+          params.get("stage") as WorkflowStageEnum,
         );
         setWorkflow(response);
 
@@ -159,14 +162,14 @@ export function Workflows(): JSX.Element {
       const user = await apiClient.users.getProfile();
       const variables = await loadConstantVariables(
         workflow.schema?.constants ?? [],
-        apiClient
+        apiClient,
       );
       const modules = await loadCodeModules(
         workflow.schema?.code ?? [],
-        apiClient
+        apiClient,
       );
       const signatureMetadata = loadSignatureMetadata(
-        workflow.schema?.activities ?? []
+        workflow.schema?.activities ?? [],
       );
 
       setGeneral({
@@ -187,7 +190,7 @@ export function Workflows(): JSX.Element {
   const updateCreatingContext = (
     namespace: string,
     value: any,
-    activityType: ActivityTypeEnum
+    activityType: ActivityTypeEnum,
   ) => {
     // Only allow context updates when creating a new workflow
     if (!isCreating) return;
@@ -271,7 +274,7 @@ export function Workflows(): JSX.Element {
     if (!id || !isCreating) return;
 
     const confirmed = await confirmation(
-      "Tem certeza que deseja descartar todas as alterações locais não salvas?"
+      "Tem certeza que deseja descartar todas as alterações locais não salvas?",
     );
 
     if (!confirmed) {
@@ -313,7 +316,7 @@ export function Workflows(): JSX.Element {
           acc[incoming.namespace] = context[incoming.namespace];
           return acc;
         },
-        {}
+        {},
       );
 
       const response = await apiClient.workflows.create({
@@ -349,7 +352,7 @@ export function Workflows(): JSX.Element {
     // If it's an object, recursively check all its values
     if (typeof validObj === "object") {
       return Object.values(validObj).some((value) =>
-        checkValidCompletion(value)
+        checkValidCompletion(value),
       );
     }
 
@@ -419,7 +422,7 @@ export function Workflows(): JSX.Element {
             updateCreatingContext(
               selectedIncoming?.namespace as string,
               value,
-              ActivityTypeEnum.INCOMING
+              ActivityTypeEnum.INCOMING,
             );
           }}
           apiClient={apiClient}
@@ -608,7 +611,7 @@ export function Workflows(): JSX.Element {
                     updateCreatingContext(
                       activity.namespace,
                       value,
-                      ActivityTypeEnum.FORM
+                      ActivityTypeEnum.FORM,
                     );
                   } else {
                     setContext((prev: any) => ({
@@ -652,7 +655,9 @@ export function Workflows(): JSX.Element {
                   }
                 >
                   {isSubmitting ? (
-                    <span className="mr-2"><Spinner /></span>
+                    <span className="mr-2">
+                      <Spinner />
+                    </span>
                   ) : null}
                   <span>Enviar</span>
                 </DSButton>
@@ -739,7 +744,7 @@ export function Workflows(): JSX.Element {
       const currentActivity = workflow.schema.activities[activeStep];
       if (currentActivity.type === ActivityTypeEnum.FORM) {
         const isComplete = checkValidCompletion(
-          valid[currentActivity.namespace]
+          valid[currentActivity.namespace],
         );
         setCanSubmit(isComplete);
       }
@@ -786,15 +791,19 @@ export function Workflows(): JSX.Element {
                           }`}
                         >
                           <FaExclamationTriangle className="mr-2" size={14} />
-                          <span>Rascunho salvo apenas neste dispositivo</span>
+                          <span className="text-xs">
+                            Rascunho salvo apenas neste dispositivo
+                          </span>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-sm">
-                        As alterações feitas neste formulário são salvas automaticamente apenas neste dispositivo. Para salvar permanentemente, clique em "Solicitar".
+                        As alterações feitas neste formulário são salvas
+                        automaticamente apenas neste dispositivo. Para salvar
+                        permanentemente, clique em "Solicitar".
                       </TooltipContent>
                     </DSTooltip>
                   </TooltipProvider>
-                  <DSButton
+                  <button
                     onClick={handleDiscardDraft}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
                       styleContext.state.buttonHoverColorWeight === "200"
@@ -803,8 +812,8 @@ export function Workflows(): JSX.Element {
                     }`}
                   >
                     <FaTrash size={14} />
-                    <span>Descartar Rascunho</span>
-                  </DSButton>
+                    <span className="text-xs">Descartar Rascunho</span>
+                  </button>
                 </div>
               )}
 
@@ -831,7 +840,7 @@ export function Workflows(): JSX.Element {
                             <DSButton
                               onClick={() => {
                                 navigator.clipboard.writeText(
-                                  isCreating ? workflow.id : (id as string)
+                                  isCreating ? workflow.id : (id as string),
                                 );
                                 setIsTooltipOpen(true);
                                 setTimeout(() => setIsTooltipOpen(false), 1500);
@@ -865,16 +874,14 @@ export function Workflows(): JSX.Element {
                             setSelectedDescription({
                               text: workflow.description,
                               label: workflow.label,
-                            })
+                            });
                           }}
                           variant="ghost"
-                          className={
-                            `h-auto p-0 ${
-                              styleContext.state.buttonHoverColorWeight === "200"
-                                ? "text-blue-600 hover:text-blue-700"
-                                : "text-blue-400 hover:text-blue-300"
-                            }`
-                          }
+                          className={`h-auto p-0 ${
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "text-blue-600 hover:text-blue-700"
+                              : "text-blue-400 hover:text-blue-300"
+                          }`}
                         >
                           Ver mais
                         </DSButton>
@@ -894,9 +901,9 @@ export function Workflows(): JSX.Element {
                               {formatDate(
                                 Number(
                                   localStorage.getItem(
-                                    getLastUpdateKey(id as string)
-                                  )
-                                ) || new Date()
+                                    getLastUpdateKey(id as string),
+                                  ),
+                                ) || new Date(),
                               )}
                             </>
                           ) : (
@@ -952,7 +959,8 @@ export function Workflows(): JSX.Element {
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="left">
-                        Escaneie para acessar {isCreating ? "o modelo" : "o protocolo"}
+                        Escaneie para acessar{" "}
+                        {isCreating ? "o modelo" : "o protocolo"}
                       </TooltipContent>
                     </DSTooltip>
                   </TooltipProvider>
@@ -1056,7 +1064,9 @@ export function Workflows(): JSX.Element {
                 }
               >
                 {loading ? (
-                  <span className="mr-2"><Spinner /></span>
+                  <span className="mr-2">
+                    <Spinner />
+                  </span>
                 ) : null}
                 <span>Solicitar</span>{" "}
               </DSButton>

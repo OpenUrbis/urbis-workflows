@@ -470,7 +470,7 @@ const WorkflowsList = ({
             >
               <div className="flex-grow">
                 <div className="flex items-center space-x-2 mb-3">
-                  <h3 className="text-md leading-tight text-foreground">
+                  <h3 className="text-md font-semibold leading-tight text-foreground">
                     {workflow.label}
                   </h3>
                 </div>

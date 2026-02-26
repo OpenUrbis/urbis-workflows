@@ -1,15 +1,13 @@
 import { getAccessToken } from "../../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
-import {
-  Spinner,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-} from "../../../components/LegacyUi";
+import { Spinner } from "../../../components/LegacyUi";
 import { FaPlus, FaGlobe, FaCode } from "react-icons/fa";
 import {
   Button as DSButton,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -224,7 +222,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
       >
         <div className="flex justify-between items-center mb-4">
           <h2
-            className="text-xl font-bold"
+            className="text-base font-semibold"
             style={{ color: styleContext.state.textColor }}
           >
             Variáveis
@@ -235,13 +233,13 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
           <div className="flex flex-col items-center justify-center py-8 text-gray-500">
             <FaCode size={32} className="mb-4 opacity-50" />
             <p
-              className="text-sm text-center mb-2"
+              className="text-xs text-center mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhuma variável cadastrada
             </p>
             <p
-              className="text-xs text-center"
+              className="text-xs text-center opacity-80"
               style={{ color: styleContext.state.textColor }}
             >
               Adicione uma variável usando o botão abaixo
@@ -260,46 +258,37 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
           />
         )}
         <div className="mt-4">
-          <Menu>
-            <MenuButton
-              className="h-11 w-full rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e",
-                color: "#ffffff",
-              }}
-            >
-              <div className="flex items-center justify-center space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <DSButton
+                type="button"
+                size="sm"
+                className="w-full rounded-xl px-4 font-medium shadow-sm gap-2"
+              >
                 <FaPlus size={14} />
                 <span>Variável</span>
-                <SL bg="primary">N</SL>
-              </div>
-            </MenuButton>
-            <MenuList>
-              <MenuItem
-                onClick={() => setIsOpen(true)}
-              >
+                <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
+              </DSButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="max-h-[300px] overflow-y-auto min-w-[200px]" align="start">
+              <DropdownMenuItem onSelect={() => setIsOpen(true)}>
                 <div className="flex items-center gap-2">
                   <FaGlobe />
                   <span style={{ color: styleContext.state.textColor }}>
                     Importar Global
                   </span>
                 </div>
-              </MenuItem>
-              <MenuItem
-                onClick={() => setIsAddingLocal(true)}
-              >
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setIsAddingLocal(true)}>
                 <div className="flex items-center gap-2">
                   <FaCode />
                   <span style={{ color: styleContext.state.textColor }}>
                     Criar Local
                   </span>
                 </div>
-              </MenuItem>
-            </MenuList>
-          </Menu>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -324,57 +313,48 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <FaCode size={48} className="mb-4 opacity-50" />
             <p
-              className="text-xl font-medium mb-2"
+              className="text-base font-semibold mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhuma variável selecionada
             </p>
             <p
-              className="text-sm mb-6"
+              className="text-xs mb-4 opacity-80"
               style={{ color: styleContext.state.textColor }}
             >
               Selecione uma variável da lista ao lado ou crie uma nova
             </p>
-            <Menu>
-              <MenuButton
-                className="h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2"
-                style={{
-                  backgroundColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#ca8a04"
-                      : "#854d0e",
-                  color: "#ffffff",
-                }}
-              >
-                <div className="flex items-center justify-center space-x-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <DSButton
+                  type="button"
+                  size="sm"
+                  className="rounded-xl px-4 font-medium shadow-sm gap-2"
+                >
                   <FaPlus size={14} />
                   <span>Variável</span>
-                  <SL bg="primary">N</SL>
-                </div>
-              </MenuButton>
-              <MenuList>
-                <MenuItem
-                  onClick={() => setIsOpen(true)}
-                >
+                  <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
+                </DSButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="max-h-[300px] overflow-y-auto min-w-[200px]" align="start">
+                <DropdownMenuItem onSelect={() => setIsOpen(true)}>
                   <div className="flex items-center gap-2">
                     <FaGlobe />
                     <span style={{ color: styleContext.state.textColor }}>
                       Importar Global
                     </span>
                   </div>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => setIsAddingLocal(true)}
-                >
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setIsAddingLocal(true)}>
                   <div className="flex items-center gap-2">
                     <FaCode />
                     <span style={{ color: styleContext.state.textColor }}>
                       Criar Local
                     </span>
                   </div>
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
