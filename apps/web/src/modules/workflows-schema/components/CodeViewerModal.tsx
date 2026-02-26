@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { CodeEditor } from "./CodeEditor";
-import { FaTimes, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { StyleContext } from "../../../reducers";
 import { SL } from "../../../components";
 import {
@@ -142,13 +142,7 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
       <ModalOverlay />
       <ModalContent>
         <div
-          style={{
-            maxHeight: "80vh",
-            maxWidth: "56rem",
-            backgroundColor: styleContext.state.backgroundColor,
-            display: "flex",
-            flexDirection: "column",
-          }}
+          className="flex flex-col max-h-[80vh] max-w-[56rem]"
         >
         <ModalHeader
           className="flex items-center justify-between border-b pb-4"
@@ -157,23 +151,6 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
           <div className="flex items-center space-x-3">
             <span>{title}</span>
           </div>
-          <button
-            onClick={onClose}
-            className="hover:bg-opacity-10 rounded p-1.5 transition-colors duration-150"
-            style={{
-              color:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#6B7280"
-                  : "#9CA3AF",
-              backgroundColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "rgba(107, 114, 128, 0.1)"
-                  : "rgba(156, 163, 175, 0.1)",
-            }}
-            aria-label="Close"
-          >
-            <FaTimes size={12} />
-          </button>
         </ModalHeader>
         <ModalBody className="mt-4 p-0 overflow-auto">
           <div style={{ height: "400px" }}>

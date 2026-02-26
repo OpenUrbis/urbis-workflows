@@ -27,7 +27,7 @@ export function HelpTooltipClickable({
             <Icon className="cursor-pointer" size={size} />
           </span>
         </DialogTrigger>
-        <DialogContent className="max-w-3xl bg-background text-foreground border border-border">
+        <DialogContent className="max-w-3xl bg-background text-foreground border border-border [&>button.absolute.right-4.top-4]:hidden">
           <DialogHeader>
             <DialogTitle className="text-foreground">Ajuda</DialogTitle>
           </DialogHeader>

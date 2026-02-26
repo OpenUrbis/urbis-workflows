@@ -32,7 +32,7 @@ const InfoTooltip = ({
           {showIcon && <Icon className="ml-1" size={size} color="#9CA3AF" />}
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-lg bg-background text-foreground border-border">
+      <DialogContent className="max-w-lg bg-background text-foreground border-border [&>button.absolute.right-4.top-4]:hidden">
         <DialogHeader>
           <DialogTitle className="text-foreground">Informações</DialogTitle>
         </DialogHeader>

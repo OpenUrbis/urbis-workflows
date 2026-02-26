@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Input as DSInput } from "@open-urbis/map-ui";
 import { StyleContext } from "../reducers/style.reducer";
 
-interface InputProps extends React.ComponentProps<typeof DSInput> {
+interface InputProps extends Omit<React.ComponentProps<typeof DSInput>, "size"> {
   readOnly?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;

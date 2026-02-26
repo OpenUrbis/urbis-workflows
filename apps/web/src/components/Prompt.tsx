@@ -49,7 +49,7 @@ const PromptModal: FC<PromptProps> = ({
   const [modalTitle, setModalTitle] = useState<string>(title);
   const [formFields, setFields] = useState<any[]>(fields || []);
   const [modalOptions, setModalOptions] = useState<IPromptPropsOptions>(
-    options || {}
+    options || {},
   );
   const [promptParams, setPromptParamsState] = useState<PromptProps>({});
   const [form, setForm] = useState<any>(input || {});
@@ -69,7 +69,6 @@ const PromptModal: FC<PromptProps> = ({
     if (resolvePrompt) {
       setIsOpen(true);
     }
-    
   }, [resolvePrompt, promptParams]);
 
   useEffect(() => {
@@ -78,14 +77,12 @@ const PromptModal: FC<PromptProps> = ({
     if (validator) resultValidate = !validator(input);
 
     if (hasError !== resultValidate) setHasError(resultValidate);
-
-    
   }, [input]);
 
   const handleClose = () => {
     // Focus on the close button before closing the modal
     const closeButton = document.querySelector(
-      '[aria-label="Close"]'
+      '[aria-label="Close"]',
     ) as HTMLButtonElement;
     if (closeButton) {
       closeButton.focus();
@@ -118,7 +115,7 @@ const PromptModal: FC<PromptProps> = ({
     title: string,
     defaultValue?: string,
     fields?: any[],
-    options?: any
+    options?: any,
   ) => {
     return new Promise<string | null>((resolve) => {
       if (setPromptParams) {
@@ -341,16 +338,15 @@ const PromptModal: FC<PromptProps> = ({
       }}
     >
       <DialogContent
-        className="px-6 py-"
+        className="shadow-xl bg-background text-foreground [&>button.absolute.right-4.top-4]:hidden"
         style={{
-          minWidth: isIndexSelector ? "400px" : "400px",
-          maxWidth: "600px",
-          backgroundColor: styleContext.state.backgroundColor,
+          width: "900px",
+          maxHeight: "85vh",
         }}
       >
-        <DialogHeader className="p-4 border-b">
+        <DialogHeader className="p-4 pt-0 border-b">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 text-xl mt-4">
+            <div className="flex items-center space-x-3 text-xl">
               <DialogTitle asChild>
                 <span style={{ color: styleContext.state.textColor }}>
                   {modalTitle}

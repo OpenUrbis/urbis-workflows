@@ -74,14 +74,14 @@ export const Button = ({
     variant === "ghost"
       ? "bg-transparent hover:bg-muted text-foreground"
       : colorScheme === "blue"
-        ? "bg-blue-600 hover:bg-blue-700 text-white"
+        ? "bg-primary text-primary-foreground hover:bg-primary/90"
         : "bg-primary text-primary-foreground hover:bg-primary/90";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${variantClass} ${className}`}
+      className={`inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium ${variantClass} ${className}`}
       style={{ marginRight: mr ? `${mr * 0.25}rem` : undefined }}
       {...props}
     >
@@ -151,7 +151,9 @@ export const Modal = ({ isOpen, onClose, children }: any) => (
 export const ModalOverlay = () => null;
 
 export const ModalContent = ({ children }: any) => (
-  <DialogContent>{children}</DialogContent>
+  <DialogContent className="bg-background text-foreground [&>button.absolute.right-4.top-4]:hidden">
+    {children}
+  </DialogContent>
 );
 
 export const ModalHeader = ({ children }: any) => (
