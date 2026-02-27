@@ -55,6 +55,8 @@ export interface WorkflowMetadata {
   createdAt: Date;
   updatedBy: UserData;
   updatedAt: Date;
+  status?: string;
+  currentStep?: string;
 }
 
 export interface SignatureValue {
@@ -188,6 +190,7 @@ export interface FindAllWorkflowsParams {
   description?: string;
   createdByName?: string;
   workflowId?: string;
+  status?: string;
   sortBy?: string;
   sortOrder?: "ASC" | "DESC";
 }

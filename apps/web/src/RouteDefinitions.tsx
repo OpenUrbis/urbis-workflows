@@ -9,6 +9,7 @@ import {
   FormsPreset,
   IAM,
   MyProtocols,
+  AllWorkflows,
   Profile,
   Workflows,
   Secrets,
@@ -197,14 +198,25 @@ const RouteDefinitions = () => (
     </Route>
 
     {/* Workflow routes */}
-    <Route
-      element={<ProtectedRoute requiredPermission="workflow:read:findAll" />}
-    >
+    <Route element={<ProtectedRoute />}>
       <Route
         path="/workflows"
         element={
           <PrivateWrapper>
             <MyProtocols />
+          </PrivateWrapper>
+        }
+      />
+    </Route>
+
+    <Route
+      element={<ProtectedRoute requiredPermission="workflow:read:findAll" />}
+    >
+      <Route
+        path="/workflows/all"
+        element={
+          <PrivateWrapper>
+            <AllWorkflows />
           </PrivateWrapper>
         }
       />

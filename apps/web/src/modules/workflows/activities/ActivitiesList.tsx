@@ -407,7 +407,7 @@ export const ActivitiesList: React.FC<{
               key={activity.id}
               onClick={() => (isBlocked ? null : setActiveStep(activityIndex))}
               className={`flex items-center p-4 rounded-lg transition-colors ${
-                isCompleted
+                isActive && isCompleted
                   ? styleContext.state.buttonHoverColorWeight === "200"
                     ? "bg-green-50 hover:bg-green-100"
                     : "bg-green-950/40 hover:bg-green-950/60"

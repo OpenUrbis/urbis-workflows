@@ -103,7 +103,11 @@ function SortIcon({
   );
 }
 
-export function MyProtocols(): JSX.Element {
+export function AllWorkflows(): JSX.Element {
+  return <MyProtocols mode="admin" />;
+}
+
+export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX.Element {
   const [data, setData] = useState<WorkflowMetadata[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -138,11 +142,14 @@ export function MyProtocols(): JSX.Element {
   const isFirstPage = currentPage === 1;
   const isLastPage = currentPage === totalPages;
 
+  const [filterStatus, setFilterStatus] = useState("");
+
   const hasActiveFilters =
     searchQuery ||
     filterLabel ||
     filterCreatedByName ||
     filterWorkflowId ||
+    filterStatus ||
     filterDateFrom !== undefined ||
     filterDateTo !== undefined;
 
@@ -174,6 +181,7 @@ export function MyProtocols(): JSX.Element {
         if (filterLabel) params.label = filterLabel;
         if (filterCreatedByName) params.createdByName = filterCreatedByName;
         if (filterWorkflowId) params.workflowId = filterWorkflowId;
+        if (filterStatus) params.status = filterStatus;
         if (filterDateFrom) params.dateFrom = filterDateFrom.toISOString();
         if (filterDateTo) {
           const endDate = new Date(filterDateTo);
@@ -181,7 +189,9 @@ export function MyProtocols(): JSX.Element {
           params.dateTo = endDate.toISOString();
         }
 
-        const response = await api.workflows.findAll(params);
+        const response = mode === "admin"
+          ? await api.workflows.findAllAdmin(params)
+          : await api.workflows.findAll(params);
         setData(response.workflows);
         setTotalPages(Math.ceil(response.pagination.total / pageSize));
       } catch (error) {
@@ -199,8 +209,10 @@ export function MyProtocols(): JSX.Element {
       filterLabel,
       filterCreatedByName,
       filterWorkflowId,
+      filterStatus,
       filterDateFrom,
       filterDateTo,
+      mode,
     ]
   );
 
@@ -217,6 +229,7 @@ export function MyProtocols(): JSX.Element {
     filterLabel,
     filterCreatedByName,
     filterWorkflowId,
+    filterStatus,
     filterDateFrom,
     filterDateTo,
     sortBy,
@@ -235,6 +248,7 @@ export function MyProtocols(): JSX.Element {
     setFilterLabel("");
     setFilterCreatedByName("");
     setFilterWorkflowId("");
+    setFilterStatus("");
     setFilterDateFrom(undefined);
     setFilterDateTo(undefined);
   };
@@ -262,7 +276,7 @@ export function MyProtocols(): JSX.Element {
   return (
     <div className="flex flex-col space-y-8 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
-        Meus Pedidos
+        {mode === "admin" ? "Todos os Pedidos" : "Meus Pedidos"}
       </h1>
 
       {loading && !data.length ? (
@@ -369,7 +383,7 @@ export function MyProtocols(): JSX.Element {
 
             {/* Expandable column filters */}
             {showFilters && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 rounded-xl border border-border bg-muted/20">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 p-4 rounded-xl border border-border bg-muted/20">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">
                     Protocolo (ID)
@@ -411,6 +425,20 @@ export function MyProtocols(): JSX.Element {
                     }
                     className="h-9 text-sm"
                   />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Status
+                  </label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <option value="">Todos</option>
+                    <option value="Em andamento">Em andamento</option>
+                    <option value="Completo">Completo</option>
+                  </select>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">
@@ -511,6 +539,9 @@ export function MyProtocols(): JSX.Element {
                           <TableHead className="bg-muted/40">
                             Criado por
                           </TableHead>
+                          <TableHead className="bg-muted/40">
+                            Status
+                          </TableHead>
                           <TableHead
                             className="bg-muted/40 cursor-pointer select-none"
                             onClick={() => handleSort("timestamp")}
@@ -602,6 +633,24 @@ export function MyProtocols(): JSX.Element {
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {item.createdBy?.name || "—"}
+                          </TableCell>
+                          <TableCell>
+                            {item.status === "Completo" ? (
+                              <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 hover:bg-green-100">
+                                Completo
+                              </Badge>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant="secondary" className="cursor-default">
+                                    {item.status || "Em andamento"}
+                                  </Badge>
+                                </TooltipTrigger>
+                                {item.currentStep && (
+                                  <TooltipContent>Etapa atual: {item.currentStep}</TooltipContent>
+                                )}
+                              </Tooltip>
+                            )}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {formatDate(String(item.createdAt))}

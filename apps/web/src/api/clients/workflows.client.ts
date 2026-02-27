@@ -98,6 +98,27 @@ export class WorkflowsApiClient extends BaseApiClient {
   }
 
   /**
+   * Find all workflows across all users (admin endpoint)
+   * Requires workflow:admin:findAll permission.
+   */
+  async findAllAdmin(
+    params: FindAllWorkflowsParams = {},
+  ): Promise<FindAllWorkflowsResponse> {
+    try {
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== "")
+      );
+
+      const response = await this.client.get<FindAllWorkflowsResponse>("/admin", {
+        params: cleanParams,
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * Find a workflow by ID
    * @param id Workflow ID
    * @returns Workflow details

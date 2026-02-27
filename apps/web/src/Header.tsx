@@ -34,7 +34,6 @@ function Header(): JSX.Element {
       path: "/workflows",
       label: "Pedidos",
       shortcut: "2",
-      permission: "workflow:read:findAll",
     },
     {
       path: "/acceptances",
@@ -85,6 +84,8 @@ function Header(): JSX.Element {
       permission: "iam:permissions:read:findAll",
     },
   ];
+
+  const canViewAllWorkflows = hasPermission("workflow:read:findAll");
 
   // Filter navItems based on permissions
   const filteredNavItems = navItems.filter(
@@ -168,10 +169,13 @@ function Header(): JSX.Element {
             isAuthenticated
               ? filteredNavItems
                   .filter((item) => !item.mobile)
+                  // When user can view all workflows, remove Pedidos from nav (handled by dropdown)
+                  .filter((item) => !(canViewAllWorkflows && item.path === "/workflows"))
                   .map((item) => ({
                     label: item.label,
                     href: item.path,
-                    active: window.location.pathname === item.path,
+                    active: window.location.pathname === item.path
+                      || (item.path === "/workflows" && window.location.pathname === "/workflows/all"),
                   }))
               : []
           }
@@ -189,6 +193,44 @@ function Header(): JSX.Element {
               >
                 Consultar documento
               </Button>
+
+              {isAuthenticated && canViewAllWorkflows ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`cursor-pointer h-9 rounded-full px-4 ${
+                        window.location.pathname === "/workflows" || window.location.pathname === "/workflows/all"
+                          ? "bg-accent text-accent-foreground"
+                          : ""
+                      }`}
+                    >
+                      Pedidos
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 bg-popover">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        navigate("/workflows");
+                      }}
+                    >
+                      Meus
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        navigate("/workflows/all");
+                      }}
+                    >
+                      Todos
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
 
               {isAuthenticated && administrativeItems.length > 0 ? (
                 <DropdownMenu>
