@@ -92,6 +92,7 @@ export function Workflows(): JSX.Element {
     loading: permissionsLoading,
   } = usePermissions();
   const isCreating = location.pathname.endsWith("/create");
+  const highlightQuery = params.get("highlight") || undefined;
   const [showQRModal, setShowQRModal] = useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
@@ -636,6 +637,7 @@ export function Workflows(): JSX.Element {
                 context={formValue?.form ?? {}}
                 value={formValue.form}
                 general={general}
+                highlightQuery={highlightQuery}
               />
             )}
 

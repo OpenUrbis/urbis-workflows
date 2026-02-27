@@ -46,10 +46,12 @@ import {
   FaTimes,
   FaFilter,
   FaCalendarAlt,
+  FaEye,
 } from "react-icons/fa";
 import { Spinner } from "../../components";
 import { formatId } from "./activities/common";
 import { usePermissions } from "../../reducers/permission.context";
+import { SearchPreviewDialog } from "./components/SearchPreviewDialog";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -112,6 +114,7 @@ export function MyProtocols(): JSX.Element {
     canEditWorkflowSchema ? "development" : "production"
   );
   const [tooltipItem, setTooltipItem] = useState<string | null>(null);
+  const [previewWorkflowId, setPreviewWorkflowId] = useState<string | null>(null);
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const pageSize = 10;
@@ -534,13 +537,18 @@ export function MyProtocols(): JSX.Element {
                               />
                             </div>
                           </TableHead>
+                          {searchQuery && (
+                            <TableHead className="bg-muted/40 w-10">
+                              <span className="sr-only">Prévia</span>
+                            </TableHead>
+                          )}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                       {data.map((item) => (
                         <TableRow
                           key={item.id}
-                          onClick={() => navigate(`/workflows/${item.id}`)}
+                          onClick={() => navigate(`/workflows/${item.id}${searchQuery ? `?highlight=${encodeURIComponent(searchQuery)}` : ""}`)}
                           className="cursor-pointer transition-colors hover:bg-muted/40"
                         >
                           <TableCell>
@@ -601,6 +609,27 @@ export function MyProtocols(): JSX.Element {
                           <TableCell className="text-muted-foreground">
                             {formatDate(String(item.updatedAt))}
                           </TableCell>
+                          {searchQuery && (
+                            <TableCell>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPreviewWorkflowId(item.id);
+                                    }}
+                                    className="h-7 w-7 text-muted-foreground hover:text-primary"
+                                  >
+                                    <FaEye size={13} />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Pré-visualizar correspondências</TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                          )}
                         </TableRow>
                       ))}
                       </TableBody>
@@ -674,6 +703,12 @@ export function MyProtocols(): JSX.Element {
           </Card>
         </>
       )}
+
+      <SearchPreviewDialog
+        workflowId={previewWorkflowId}
+        query={searchQuery}
+        onClose={() => setPreviewWorkflowId(null)}
+      />
     </div>
   );
 }

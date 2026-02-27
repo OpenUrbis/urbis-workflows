@@ -64,6 +64,7 @@ export type FieldBlockViewProps = {
   field: IField[];
   general: IFormContext;
   value: any;
+  highlightQuery?: string;
 };
 
 export type FieldEditableProps = {
