@@ -81,7 +81,7 @@ function EmptyState({ hasFilters }: { hasFilters?: boolean }) {
   );
 }
 
-type SortField = "timestamp" | "updatedAt" | "label" | "relevance";
+type SortField = "timestamp" | "updatedAt" | "label" | "relevance" | "createdByName" | "workflowId";
 type SortOrder = "ASC" | "DESC";
 
 function SortIcon({
@@ -258,7 +258,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
       setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
     } else {
       setSortBy(field);
-      setSortOrder(field === "label" ? "ASC" : "DESC");
+      setSortOrder(field === "label" || field === "createdByName" || field === "workflowId" ? "ASC" : "DESC");
     }
   };
 
@@ -430,15 +430,15 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                   <label className="text-xs font-medium text-muted-foreground">
                     Status
                   </label>
-                  <select
+                  <Input
+                    type="text"
+                    placeholder="Filtrar por status"
                     value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <option value="">Todos</option>
-                    <option value="Em andamento">Em andamento</option>
-                    <option value="Completo">Completo</option>
-                  </select>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFilterStatus(e.target.value)
+                    }
+                    className="h-9 text-sm"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">
@@ -517,8 +517,18 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="bg-muted/40">
-                            Protocolo
+                          <TableHead
+                            className="bg-muted/40 cursor-pointer select-none"
+                            onClick={() => handleSort("workflowId")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Protocolo
+                              <SortIcon
+                                field="workflowId"
+                                currentSort={sortBy}
+                                currentOrder={sortOrder}
+                              />
+                            </div>
                           </TableHead>
                           <TableHead
                             className="bg-muted/40 cursor-pointer select-none"
@@ -533,11 +543,18 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                               />
                             </div>
                           </TableHead>
-                          <TableHead className="bg-muted/40">
-                            Descrição
-                          </TableHead>
-                          <TableHead className="bg-muted/40">
-                            Criado por
+                          <TableHead
+                            className="bg-muted/40 cursor-pointer select-none"
+                            onClick={() => handleSort("createdByName")}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              Criado por
+                              <SortIcon
+                                field="createdByName"
+                                currentSort={sortBy}
+                                currentOrder={sortOrder}
+                              />
+                            </div>
                           </TableHead>
                           <TableHead className="bg-muted/40">
                             Status
@@ -621,16 +638,6 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                               <TooltipContent>{item.label}</TooltipContent>
                             </Tooltip>
                           </TableCell>
-                          <TableCell>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="line-clamp-1 text-muted-foreground">
-                                  {item.description || "—"}
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>{item.description}</TooltipContent>
-                            </Tooltip>
-                          </TableCell>
                           <TableCell className="text-muted-foreground">
                             {item.createdBy?.name || "—"}
                           </TableCell>
@@ -640,16 +647,9 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                                 Completo
                               </Badge>
                             ) : (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Badge variant="secondary" className="cursor-default">
-                                    {item.status || "Em andamento"}
-                                  </Badge>
-                                </TooltipTrigger>
-                                {item.currentStep && (
-                                  <TooltipContent>Etapa atual: {item.currentStep}</TooltipContent>
-                                )}
-                              </Tooltip>
+                              <Badge variant="secondary" className="cursor-default">
+                                {item.status || "Em andamento"}
+                              </Badge>
                             )}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
