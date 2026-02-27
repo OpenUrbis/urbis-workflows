@@ -252,39 +252,39 @@ export const ActivitiesList: React.FC<{
     if (isActive) {
       if (status === ActivityStatus.COMPLETED) {
         return {
-          bg: isDarkMode ? "green.900" : "green.400",
-          color: "white",
-        };
-      } else {
-        return {
-          bg: isDarkMode ? "gray.700" : "gray.300",
-          color: isDarkMode ? "white" : "gray.600",
+          bg: isDarkMode ? "#14532d" : "#4ade80",
+          color: "#ffffff",
         };
       }
+
+      return {
+        bg: isDarkMode ? "#374151" : "#d1d5db",
+        color: isDarkMode ? "#ffffff" : "#4b5563",
+      };
     }
 
     // Regular status colors
     switch (status) {
       case ActivityStatus.COMPLETED:
         return {
-          bg: isDarkMode ? "green.900" : "green.400",
-          color: "white",
+          bg: isDarkMode ? "#14532d" : "#4ade80",
+          color: "#ffffff",
         };
       case ActivityStatus.ACTIVE:
         return {
-          bg: isDarkMode ? "blue.900" : "blue.400",
-          color: "white",
+          bg: isDarkMode ? "#1e3a8a" : "#60a5fa",
+          color: "#ffffff",
         };
       case ActivityStatus.BLOCKED:
         return {
-          bg: isDarkMode ? "gray.700" : "gray.300",
-          color: isDarkMode ? "gray.400" : "gray.600",
+          bg: isDarkMode ? "#374151" : "#d1d5db",
+          color: isDarkMode ? "#9ca3af" : "#4b5563",
         };
       case ActivityStatus.PENDING:
       default:
         return {
-          bg: isDarkMode ? "gray.700" : "gray.300",
-          color: isDarkMode ? "gray.400" : "gray.600",
+          bg: isDarkMode ? "#374151" : "#d1d5db",
+          color: isDarkMode ? "#9ca3af" : "#4b5563",
         };
     }
   };
@@ -400,18 +400,24 @@ export const ActivitiesList: React.FC<{
           const dependencies = getDependencyInfo(activity);
           const statusLabel = getStatusLabel(status, isBlocked);
 
+          const isCompleted = status === ActivityStatus.COMPLETED;
+
           return (
             <div
               key={activity.id}
               onClick={() => (isBlocked ? null : setActiveStep(activityIndex))}
               className={`flex items-center p-4 rounded-lg transition-colors ${
-                isActive
+                isCompleted
                   ? styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-200"
-                    : "bg-gray-700"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-50 hover:bg-gray-100"
-                    : "bg-gray-900 hover:bg-gray-800"
+                    ? "bg-green-50 hover:bg-green-100"
+                    : "bg-green-950/40 hover:bg-green-950/60"
+                  : isActive
+                    ? styleContext.state.buttonHoverColorWeight === "200"
+                      ? "bg-gray-200"
+                      : "bg-gray-700"
+                    : styleContext.state.buttonHoverColorWeight === "200"
+                      ? "bg-gray-50 hover:bg-gray-100"
+                      : "bg-gray-900 hover:bg-gray-800"
               } ${isBlocked ? "opacity-70 cursor-not-allowed" : "opacity-100 cursor-pointer"}`}
             >
               <div
