@@ -647,7 +647,10 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                                 Completo
                               </Badge>
                             ) : (
-                              <Badge variant="secondary" className="cursor-default">
+                              <Badge
+                                variant="secondary"
+                                className="cursor-default bg-muted text-foreground hover:bg-muted dark:bg-muted/40"
+                              >
                                 {item.status || "Em andamento"}
                               </Badge>
                             )}
