@@ -1,7 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import "./App.css";
-import Footer from "./Footer";
 import Header from "./Header";
 import RouteDefinitions from "./RouteDefinitions";
 import PromptModal from "./components/Prompt";
@@ -50,7 +49,6 @@ function Layout({
     <div id="application" className="min-h-screen bg-background text-foreground">
       {shouldDisplayHeaderFooter && <Header />}
       {children}
-      {shouldDisplayHeaderFooter && <Footer />}
     </div>
   );
 }

@@ -14,6 +14,20 @@ import {
 } from "@open-urbis/map-ui";
 import { usePermissions } from "./reducers/permission.context";
 
+const APP_MENU_ITEMS: { label: string; href: string; active?: boolean }[] = [
+  { label: "Mosaico", href: "https://urbis.prefeitura.sp.gov.br" },
+  { label: "Mapa", href: "https://mapa.urbis.prefeitura.sp.gov.br" },
+  {
+    label: "Dados Abertos",
+    href: "https://dadosabertos.urbis.prefeitura.sp.gov.br",
+  },
+  { label: "Doc. técnica", href: "https://docs.urbis.prefeitura.sp.gov.br/" },
+  {
+    label: "Legis",
+    href: "https://docs.urbis.prefeitura.sp.gov.br/docs/legis",
+  },
+];
+
 function Header(): JSX.Element {
   const { isAuthenticated, user, signIn, signOut } = useContext(AuthContext);
   const hotkeyContext = useContext(HotkeyContext);
@@ -22,6 +36,15 @@ function Header(): JSX.Element {
   const [isDarkMode, setIsDarkMode] = useState(() =>
     document.documentElement.classList.contains("dark"),
   );
+
+  const displayName = user?.socialName || user?.name || user?.email || "Usuário";
+  const initials =
+    (user?.socialName || user?.name || user?.email || "")
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join("") || "U";
 
   const navItems = [
     {
@@ -98,6 +121,9 @@ function Header(): JSX.Element {
       .map((item) => ({ path: item.path, label: item.label })),
   ];
 
+  const canViewWorkflows = hasPermission("workflow:read:findAll");
+  const canViewWorkflowSchemas = hasPermission("workflow-schema:read:findAll");
+
   function handleRedirect(path: string) {
     navigate(path);
   }
@@ -165,51 +191,45 @@ function Header(): JSX.Element {
           logoAlt="Logotipo da Prefeitura de São Paulo"
           logoHref="https://viabiliza.urbis.prefeitura.sp.gov.br"
           badgeText="Viabiliza"
-          menuItems={
-            isAuthenticated
-              ? filteredNavItems
-                  .filter((item) => !item.mobile)
-                  // When user can view all workflows, remove Pedidos from nav (handled by dropdown)
-                  .filter((item) => !(canViewAllWorkflows && item.path === "/workflows"))
-                  .map((item) => ({
-                    label: item.label,
-                    href: item.path,
-                    active: window.location.pathname === item.path
-                      || (item.path === "/workflows" && window.location.pathname === "/workflows/all"),
-                  }))
-              : []
-          }
-          isAuthenticated={isAuthenticated}
-          user={user ?? undefined}
+          menuItems={APP_MENU_ITEMS.map((item) => ({
+            label: item.label,
+            href: item.href,
+            active: !!item.active,
+          }))}
+          isAuthenticated={false}
+          user={undefined}
           onLogin={signIn}
-          onLogout={handleLogout}
+          onLogout={undefined}
+          showLogin={!isAuthenticated}
           rightSlot={
             <div className="hidden md:flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="cursor-pointer h-9 rounded-full px-4"
-                onClick={() => navigate("/document-validate")}
-              >
-                Consultar documento
-              </Button>
-
-              {isAuthenticated && canViewAllWorkflows ? (
+              {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`cursor-pointer h-9 rounded-full px-4 ${
-                        window.location.pathname === "/workflows" || window.location.pathname === "/workflows/all"
-                          ? "bg-accent text-accent-foreground"
-                          : ""
-                      }`}
+                      className="cursor-pointer h-9 rounded-full px-4"
                     >
-                      Pedidos
+                      Menu
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 bg-popover">
+                  <DropdownMenuContent align="end" className="w-64 bg-popover">
+                    <DropdownMenuLabel>Navegação</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+
+                    {canViewWorkflowSchemas ? (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          navigate("/workflows-schema");
+                        }}
+                      >
+                        Assuntos
+                      </DropdownMenuItem>
+                    ) : null}
+
                     <DropdownMenuItem
                       className="cursor-pointer"
                       onSelect={(event) => {
@@ -217,16 +237,43 @@ function Header(): JSX.Element {
                         navigate("/workflows");
                       }}
                     >
-                      Meus
+                      Pedidos — Meus
                     </DropdownMenuItem>
+
+                    {canViewAllWorkflows ? (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          navigate("/workflows/all");
+                        }}
+                      >
+                        Pedidos — Todos
+                      </DropdownMenuItem>
+                    ) : null}
+
+                    {canViewWorkflows ? (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          navigate("/acceptances");
+                        }}
+                      >
+                        Assinaturas
+                      </DropdownMenuItem>
+                    ) : null}
+
+                    <DropdownMenuSeparator />
+
                     <DropdownMenuItem
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
-                        navigate("/workflows/all");
+                        navigate("/document-validate");
                       }}
                     >
-                      Todos
+                      Consultar documento
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -258,6 +305,61 @@ function Header(): JSX.Element {
                         {item.label}
                       </DropdownMenuItem>
                     ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 rounded-full h-9 px-3 shrink-0"
+                      aria-haspopup="menu"
+                      aria-label="Abrir menu do usuário"
+                    >
+                      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-600 text-white text-[10px] font-bold">
+                        {initials}
+                      </span>
+                      <span className="hidden md:inline text-sm font-medium max-w-[140px] truncate">
+                        {displayName}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-72 bg-popover">
+                    <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
+                    {user?.email ? (
+                      <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                        {user.email}
+                      </DropdownMenuLabel>
+                    ) : null}
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        window.location.href = "https://conta.urbis.prefeitura.sp.gov.br";
+                      }}
+                    >
+                      Minha conta
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        signOut();
+                      }}
+                    >
+                      Sair
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+                    <div className="px-2 py-1.5 text-[11px] text-muted-foreground select-none">
+                      Versão: {`${import.meta.env.VITE_VERSION}`}
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : null}
