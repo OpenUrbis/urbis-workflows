@@ -10,7 +10,7 @@
     "@emotion/styled": "^11.11.0",
     "@monaco-editor/react": "^4.6.0",
     "@open-urbis/types": "*",
-    "@open-urbis/map-ui": "git+https://github.com/OpenUrbis/urbis-map.git#main",
+    "@open-urbis/map-ui": "file:/Users/renantashiro/Projects/urbis/urbis-map/packages/ui",
     "@react-input/mask": "^2.0.4",
     "@types/node": "^20.1.4",
     "@types/qrcode.react": "^3.0.0",
@@ -41,6 +41,7 @@
     "react-router-dom": "^6.14.0",
     "react-simple-code-editor": "^0.13.1",
     "reactflow": "^11.11.4",
+    "recharts": "^2.15.4",
     "tailwindcss": "^3.3.2",
     "uuid": "^11.1.0",
     "web-vitals": "^2.1.4"

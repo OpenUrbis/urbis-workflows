@@ -1,0 +1,69 @@
+import React, { useEffect, useState } from "react";
+import { getAccessToken } from "../../../auth/token";
+import { ApiClient } from "../../../api";
+import { GetTaxDocumentsResponse, DashboardTaxStateCount } from "../../../api/types/dashboard.dto";
+import { StatCard } from "../components/StatCard";
+import { BarChart } from "../components/BarChart";
+import { Card } from "@open-urbis/map-ui";
+import { Spinner } from "../../../components";
+import {
+  FaReceipt,
+  FaFileAlt,
+  FaExclamationTriangle,
+} from "react-icons/fa";
+
+export function TaxDocumentsPanel() {
+  const [data, setData] = useState<GetTaxDocumentsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const client = new ApiClient({
+      baseURL: import.meta.env.VITE_BACK_END_API,
+      headers: { Authorization: `Bearer ${getAccessToken()}` },
+    });
+    client.dashboard
+      .getTaxDocuments()
+      .then(setData)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Spinner size="xl" />
+      </div>
+    );
+  }
+  if (error) return <div className="text-destructive text-sm py-4">Erro: {error}</div>;
+  if (!data) return null;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard label="Total de Taxas" value={data.totalTaxes} icon={FaReceipt} />
+        <StatCard label="Taxas com Falha" value={data.failedTaxes} icon={FaExclamationTriangle} color="destructive" />
+        <StatCard label="Total de Documentos" value={data.totalDocuments} icon={FaFileAlt} color="muted" />
+      </div>
+
+      {data.taxByState.length > 0 && (
+        <Card className="p-4 border border-border bg-card">
+          <BarChart
+            title="Taxas por Estado"
+            items={data.taxByState.map((r: DashboardTaxStateCount) => ({
+              label: r.state || "—",
+              value: r.count,
+              color:
+                r.state.includes("Completo")
+                  ? "bg-emerald-500"
+                  : r.state.includes("Falhou")
+                    ? "bg-red-500"
+                    : "bg-amber-500",
+            }))}
+          />
+        </Card>
+      )}
+    </div>
+  );
+}

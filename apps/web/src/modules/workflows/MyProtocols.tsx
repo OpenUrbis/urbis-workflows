@@ -21,7 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@open-urbis/map-ui";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { SL } from "../../components";
@@ -108,6 +108,7 @@ export function AllWorkflows(): JSX.Element {
 }
 
 export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX.Element {
+  const [searchParams] = useSearchParams();
   const [data, setData] = useState<WorkflowMetadata[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -115,7 +116,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
   const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
   const [stage, setStage] = useState(
-    canEditWorkflowSchema ? "development" : "production"
+    searchParams.get("stage") || (canEditWorkflowSchema ? "development" : "production")
   );
   const [tooltipItem, setTooltipItem] = useState<string | null>(null);
   const [previewWorkflowId, setPreviewWorkflowId] = useState<string | null>(null);
@@ -125,7 +126,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
 
   // Search & filter state
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(!!searchParams.get("status"));
   const [filterLabel, setFilterLabel] = useState("");
   const [filterCreatedByName, setFilterCreatedByName] = useState("");
   const [filterWorkflowId, setFilterWorkflowId] = useState("");
@@ -142,7 +143,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
   const isFirstPage = currentPage === 1;
   const isLastPage = currentPage === totalPages;
 
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState(searchParams.get("status") || "");
 
   const hasActiveFilters =
     searchQuery ||
@@ -276,7 +277,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
   return (
     <div className="flex flex-col space-y-8 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
-        {mode === "admin" ? "Todos os Pedidos" : "Meus Pedidos"}
+        {mode === "admin" ? "Relatório" : "Meus Pedidos"}
       </h1>
 
       {loading && !data.length ? (

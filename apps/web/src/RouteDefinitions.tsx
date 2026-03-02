@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import MapCallback from "./MapCallback";
 import {
   ContestUser,
+  Dashboard,
   Datasets,
   DocumentValidate,
   Environments,
@@ -167,6 +168,22 @@ const RouteDefinitions = () => (
         element={
           <PrivateWrapper>
             <IAM />
+          </PrivateWrapper>
+        }
+      />
+    </Route>
+
+    {/* Dashboard route */}
+    <Route
+      element={
+        <ProtectedRoute requiredPermission="dashboard:read:workflowOverview" />
+      }
+    >
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateWrapper>
+            <Dashboard />
           </PrivateWrapper>
         }
       />

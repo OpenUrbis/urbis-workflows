@@ -106,6 +106,12 @@ function Header(): JSX.Element {
       mobile: true,
       permission: "iam:permissions:read:findAll",
     },
+    {
+      path: "/dashboard",
+      label: "Painel Administrativo",
+      mobile: true,
+      permission: "dashboard:read:workflowOverview",
+    },
   ];
 
   const canViewAllWorkflows = hasPermission("workflow:read:findAll");
@@ -203,33 +209,33 @@ function Header(): JSX.Element {
           showLogin={!isAuthenticated}
           rightSlot={
             <div className="hidden md:flex items-center gap-2">
-              {isAuthenticated ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="cursor-pointer h-9 rounded-full px-4"
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="cursor-pointer h-9 rounded-full px-4"
+                  >
+                    Viabiliza
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 bg-popover">
+                  <DropdownMenuLabel>Navegação</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+
+                  {isAuthenticated && canViewWorkflowSchemas ? (
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        navigate("/workflows-schema");
+                      }}
                     >
-                      Menu
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 bg-popover">
-                    <DropdownMenuLabel>Navegação</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                      Assuntos
+                    </DropdownMenuItem>
+                  ) : null}
 
-                    {canViewWorkflowSchemas ? (
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onSelect={(event) => {
-                          event.preventDefault();
-                          navigate("/workflows-schema");
-                        }}
-                      >
-                        Assuntos
-                      </DropdownMenuItem>
-                    ) : null}
-
+                  {isAuthenticated ? (
                     <DropdownMenuItem
                       className="cursor-pointer"
                       onSelect={(event) => {
@@ -237,47 +243,47 @@ function Header(): JSX.Element {
                         navigate("/workflows");
                       }}
                     >
-                      Pedidos — Meus
+                      Pedidos
                     </DropdownMenuItem>
+                  ) : null}
 
-                    {canViewAllWorkflows ? (
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onSelect={(event) => {
-                          event.preventDefault();
-                          navigate("/workflows/all");
-                        }}
-                      >
-                        Pedidos — Todos
-                      </DropdownMenuItem>
-                    ) : null}
-
-                    {canViewWorkflows ? (
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onSelect={(event) => {
-                          event.preventDefault();
-                          navigate("/acceptances");
-                        }}
-                      >
-                        Assinaturas
-                      </DropdownMenuItem>
-                    ) : null}
-
-                    <DropdownMenuSeparator />
-
+                  {isAuthenticated && canViewAllWorkflows ? (
                     <DropdownMenuItem
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
-                        navigate("/document-validate");
+                        navigate("/workflows/all");
                       }}
                     >
-                      Consultar documento
+                      Relatório
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : null}
+                  ) : null}
+
+                  {isAuthenticated && canViewWorkflows ? (
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        navigate("/acceptances");
+                      }}
+                    >
+                      Assinaturas
+                    </DropdownMenuItem>
+                  ) : null}
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      navigate("/document-validate");
+                    }}
+                  >
+                    Consultar documento
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {isAuthenticated && administrativeItems.length > 0 ? (
                 <DropdownMenu>
