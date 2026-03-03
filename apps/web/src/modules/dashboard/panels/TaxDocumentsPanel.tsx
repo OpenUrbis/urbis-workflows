@@ -11,23 +11,29 @@ import {
   FaFileAlt,
   FaExclamationTriangle,
 } from "react-icons/fa";
+import { type DashboardFilters } from "../Dashboard";
 
-export function TaxDocumentsPanel() {
+export function TaxDocumentsPanel({ filters }: { filters: DashboardFilters }) {
   const [data, setData] = useState<GetTaxDocumentsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     const client = new ApiClient({
       baseURL: import.meta.env.VITE_BACK_END_API,
       headers: { Authorization: `Bearer ${getAccessToken()}` },
     });
+    const params: Record<string, string> = {};
+    if (filters.dateFrom) params.dateFrom = filters.dateFrom;
+    if (filters.dateTo) params.dateTo = filters.dateTo;
     client.dashboard
-      .getTaxDocuments()
+      .getTaxDocuments(params as any)
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [filters]);
 
   if (loading) {
     return (

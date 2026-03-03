@@ -19,9 +19,18 @@ export interface DashboardWorkflowStatusCount {
 }
 
 export interface DashboardWorkflowBottleneck {
+  activityNamespace: string;
   activityLabel: string;
   activityType: number;
   count: number;
+  avgTimeMs: number | null;
+}
+
+export interface DashboardSchemaBottleneck {
+  schemaId: string;
+  schemaLabel: string;
+  activities: DashboardWorkflowBottleneck[];
+  completedCount: number;
 }
 
 export interface DashboardTimeSeriesPoint {
@@ -32,7 +41,7 @@ export interface DashboardTimeSeriesPoint {
 export interface GetWorkflowOverviewResponse {
   byStage: DashboardWorkflowStageCount[];
   byStatus: DashboardWorkflowStatusCount[];
-  bottlenecks: DashboardWorkflowBottleneck[];
+  bottlenecks: DashboardSchemaBottleneck[];
   createdOverTime: DashboardTimeSeriesPoint[];
   totalWorkflows: number;
   completedWorkflows: number;

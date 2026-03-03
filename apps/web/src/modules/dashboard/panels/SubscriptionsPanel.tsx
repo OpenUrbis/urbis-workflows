@@ -10,8 +10,9 @@ import {
   FaBell,
   FaPlay,
 } from "react-icons/fa";
+import { type DashboardFilters } from "../Dashboard";
 
-export function SubscriptionsPanel() {
+export function SubscriptionsPanel({ filters: _filters }: { filters: DashboardFilters }) {
   const [data, setData] = useState<GetSubscriptionsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

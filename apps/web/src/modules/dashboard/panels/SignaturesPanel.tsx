@@ -12,23 +12,29 @@ import {
   FaTimesCircle,
   FaClock,
 } from "react-icons/fa";
+import { type DashboardFilters } from "../Dashboard";
 
-export function SignaturesPanel() {
+export function SignaturesPanel({ filters }: { filters: DashboardFilters }) {
   const [data, setData] = useState<GetSignaturesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     const client = new ApiClient({
       baseURL: import.meta.env.VITE_BACK_END_API,
       headers: { Authorization: `Bearer ${getAccessToken()}` },
     });
+    const params: Record<string, string> = {};
+    if (filters.dateFrom) params.dateFrom = filters.dateFrom;
+    if (filters.dateTo) params.dateTo = filters.dateTo;
     client.dashboard
-      .getSignatures()
+      .getSignatures(params as any)
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [filters]);
 
   if (loading) {
     return (

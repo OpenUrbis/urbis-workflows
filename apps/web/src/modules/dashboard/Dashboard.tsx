@@ -1,7 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import { SL } from "../../components/ShortcutLabel";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
-import { Button, Card } from "@open-urbis/map-ui";
+import {
+  Button,
+  Card,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@open-urbis/map-ui";
 import {
   FaChartLine,
   FaProjectDiagram,
@@ -21,6 +29,26 @@ import { UsersIamPanel } from "./panels/UsersIamPanel";
 import { SystemHealthPanel } from "./panels/SystemHealthPanel";
 import { SubscriptionsPanel } from "./panels/SubscriptionsPanel";
 import { WorkflowPipelinePanel } from "./panels/WorkflowPipelinePanel";
+
+export interface DashboardFilters {
+  stage: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+const STAGE_OPTIONS = [
+  { value: "production", label: "Produção" },
+  { value: "staging", label: "Homologação" },
+  { value: "development", label: "Desenvolvimento" },
+];
+
+const PERIOD_OPTIONS = [
+  { value: "__all__", label: "Todo o período" },
+  { value: "7", label: "Últimos 7 dias" },
+  { value: "30", label: "Últimos 30 dias" },
+  { value: "90", label: "Últimos 90 dias" },
+  { value: "365", label: "Último ano" },
+];
 
 type PanelKey =
   | "workflows"
@@ -88,7 +116,7 @@ const menus: {
   },
 ];
 
-const panels: Record<PanelKey, React.FC> = {
+const panels: Record<PanelKey, React.FC<{ filters: DashboardFilters }>> = {
   workflows: WorkflowOverviewPanel,
   pipeline: WorkflowPipelinePanel,
   schemas: SchemaManagementPanel,
@@ -102,6 +130,20 @@ const panels: Record<PanelKey, React.FC> = {
 export function Dashboard(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);
   const [subpage, setSubpage] = useState<PanelKey>("workflows");
+  const [stage, setStage] = useState("production");
+  const [period, setPeriod] = useState("__all__");
+
+  const filters: DashboardFilters = React.useMemo(() => {
+    const f: DashboardFilters = { stage };
+    if (period !== "__all__") {
+      const now = new Date();
+      const from = new Date(now);
+      from.setDate(from.getDate() - Number(period));
+      f.dateFrom = from.toISOString();
+      f.dateTo = now.toISOString();
+    }
+    return f;
+  }, [stage, period]);
 
   useEffect(() => {
     const hotkeyMap: Record<string, () => void> = {};
@@ -126,9 +168,47 @@ export function Dashboard(): JSX.Element {
 
   return (
     <div className="flex flex-col space-y-2 mb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-semibold mt-4 mb-6 tracking-tight text-foreground">
+      <h1 className="text-2xl font-semibold mt-4 mb-4 tracking-tight text-foreground">
         Painel Administrativo
       </h1>
+
+      <div className="flex flex-wrap items-center gap-3 mb-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
+            Ambiente
+          </label>
+          <Select value={stage} onValueChange={setStage}>
+            <SelectTrigger className="h-8 w-44 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STAGE_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
+            Período
+          </label>
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="h-8 w-44 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PERIOD_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       <Card className="flex flex-grow border rounded-lg overflow-hidden border-border bg-card text-card-foreground">
         <div className="flex flex-col py-4 w-3/12 border-r border-border bg-card">
@@ -169,7 +249,7 @@ export function Dashboard(): JSX.Element {
           ))}
         </div>
         <div className="flex flex-col p-6 w-9/12 overflow-y-auto bg-background text-foreground">
-          <ActivePanel />
+          <ActivePanel filters={filters} />
         </div>
       </Card>
     </div>

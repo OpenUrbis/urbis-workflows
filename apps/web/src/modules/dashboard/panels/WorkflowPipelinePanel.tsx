@@ -20,6 +20,7 @@ import {
   FaFile,
   FaHourglassHalf,
 } from "react-icons/fa";
+import { type DashboardFilters } from "../Dashboard";
 
 const ACTIVITY_TYPE_ICONS: Record<number, React.ElementType> = {
   0: FaFileAlt,
@@ -34,12 +35,6 @@ const ACTIVITY_TYPE_LABELS: Record<number, string> = {
   2: "Taxa",
   3: "Documento",
 };
-
-const STAGE_OPTIONS = [
-  { value: "production", label: "Produção" },
-  { value: "staging", label: "Homologação" },
-  { value: "development", label: "Desenvolvimento" },
-];
 
 function formatDuration(ms: number | null): string {
   if (ms === null) return "—";
@@ -217,12 +212,13 @@ function SchemaKanban({
   );
 }
 
-export function WorkflowPipelinePanel() {
+export function WorkflowPipelinePanel({ filters }: { filters: DashboardFilters }) {
   const [data, setData] = useState<GetWorkflowPipelineResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stage, setStage] = useState<string>("production");
   const [selectedSchema, setSelectedSchema] = useState<string>("__all__");
+
+  const stage = filters.stage && filters.stage !== "__all__" ? filters.stage : "production";
 
   useEffect(() => {
     setLoading(true);
@@ -235,12 +231,14 @@ export function WorkflowPipelinePanel() {
     if (selectedSchema !== "__all__") {
       params.schemaId = selectedSchema;
     }
+    if (filters.dateFrom) params.dateFrom = filters.dateFrom;
+    if (filters.dateTo) params.dateTo = filters.dateTo;
     client.dashboard
       .getWorkflowPipeline(params as any)
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [stage, selectedSchema]);
+  }, [stage, selectedSchema, filters]);
 
   if (loading) {
     return (
@@ -288,24 +286,6 @@ export function WorkflowPipelinePanel() {
     <div className="flex flex-col gap-6">
       {/* Filters row */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
-            Ambiente
-          </label>
-          <Select value={stage} onValueChange={setStage}>
-            <SelectTrigger className="h-8 w-40 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STAGE_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         <div className="flex flex-col gap-1">
           <label className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
             Assunto

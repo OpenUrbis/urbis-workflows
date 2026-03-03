@@ -11,8 +11,9 @@ import {
   FaSearch,
   FaChartBar,
 } from "react-icons/fa";
+import { type DashboardFilters } from "../Dashboard";
 
-export function SystemHealthPanel() {
+export function SystemHealthPanel({ filters: _filters }: { filters: DashboardFilters }) {
   const [data, setData] = useState<GetSystemHealthResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

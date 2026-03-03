@@ -7,6 +7,7 @@ import { DataTable } from "../components/DataTable";
 import { Badge, Card } from "@open-urbis/map-ui";
 import { Spinner } from "../../../components";
 import { FaProjectDiagram, FaCheck, FaTrash } from "react-icons/fa";
+import { type DashboardFilters } from "../Dashboard";
 
 function formatDuration(ms: number | null): string {
   if (ms === null) return "—";
@@ -17,7 +18,7 @@ function formatDuration(ms: number | null): string {
   return `${Math.round(hours / 24)}d`;
 }
 
-export function SchemaManagementPanel() {
+export function SchemaManagementPanel({ filters: _filters }: { filters: DashboardFilters }) {
   const [data, setData] = useState<GetSchemaManagementResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

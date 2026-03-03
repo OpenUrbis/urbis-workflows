@@ -11,8 +11,9 @@ import {
   FaUsers,
   FaUserSlash,
 } from "react-icons/fa";
+import { type DashboardFilters } from "../Dashboard";
 
-export function UsersIamPanel() {
+export function UsersIamPanel({ filters: _filters }: { filters: DashboardFilters }) {
   const [data, setData] = useState<GetUsersIamResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
