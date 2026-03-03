@@ -14,7 +14,7 @@ import {
   FaClone,
   FaSearch,
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import * as RadixDialog from "@radix-ui/react-dialog";
 import {
   Button,
@@ -44,6 +44,7 @@ export const WorkflowsSchema: React.FC = () => {
   const styleContext = useContext(StyleContext);
   const { isAuthenticated, signIn } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
   const canCreateWorkflow = hasPermission("workflow:write:create");
@@ -51,7 +52,7 @@ export const WorkflowsSchema: React.FC = () => {
   const [workflows, setWorkflows] = useState<WorkflowSchema[]>([]);
   const [search, setSearch] = useState("");
   const [stage, setStage] = useState(
-    canEditWorkflowSchema ? "development" : "production",
+    searchParams.get("stage") || (canEditWorkflowSchema ? "development" : "production"),
   );
   const [isGridView, setIsGridView] = useState(
     localStorage.getItem("listView") !== "true",
@@ -78,6 +79,25 @@ export const WorkflowsSchema: React.FC = () => {
   useEffect(() => {
     fetchWorkflows();
   }, [stage]);
+
+  useEffect(() => {
+    const stageFromUrl = searchParams.get("stage");
+    if (stageFromUrl && stageFromUrl !== stage) {
+      setStage(stageFromUrl);
+    }
+  }, [searchParams, stage]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (stage) {
+      params.set("stage", stage);
+    } else {
+      params.delete("stage");
+    }
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [stage, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (workflows.length === 0) {

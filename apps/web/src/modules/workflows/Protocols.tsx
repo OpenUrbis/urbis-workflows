@@ -290,7 +290,15 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
   }, [filterLabel, filterCreatedByName, filterWorkflowId, filterStatus]);
 
   useEffect(() => {
-    if (mode !== "admin") return;
+    if (mode !== "admin") {
+      const next = new URLSearchParams(searchParams);
+      if (stage) next.set("stage", stage);
+      else next.delete("stage");
+      if (next.toString() !== searchParams.toString()) {
+        setSearchParams(next, { replace: true });
+      }
+      return;
+    }
 
     const params = new URLSearchParams();
     if (stage) params.set("stage", stage);
@@ -324,6 +332,7 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
     sortBy,
     sortOrder,
     setSearchParams,
+    searchParams,
   ]);
 
   const handleSearchChange = (value: string) => {
