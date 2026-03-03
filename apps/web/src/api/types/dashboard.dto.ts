@@ -24,6 +24,9 @@ export interface DashboardWorkflowBottleneck {
   activityType: number;
   count: number;
   avgTimeMs: number | null;
+  stdTimeMs: number | null;
+  medianTimeMs: number | null;
+  oldestPendingMs: number | null;
 }
 
 export interface DashboardSchemaBottleneck {
@@ -31,6 +34,9 @@ export interface DashboardSchemaBottleneck {
   schemaLabel: string;
   activities: DashboardWorkflowBottleneck[];
   completedCount: number;
+  totalWorkflows: number;
+  completionRate: number;
+  avgCompletionTimeMs: number | null;
 }
 
 export interface DashboardTimeSeriesPoint {

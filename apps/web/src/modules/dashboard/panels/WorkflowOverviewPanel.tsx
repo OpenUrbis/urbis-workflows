@@ -59,11 +59,16 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
   const navigate = useNavigate();
 
   const handleActivityClick = useCallback(
-    (activityLabel: string) => {
+    (activityLabel: string, e: React.MouseEvent) => {
       const params = new URLSearchParams();
       if (filters.stage) params.set("stage", filters.stage);
       params.set("status", activityLabel);
-      navigate(`/workflows/all?${params.toString()}`);
+      const url = `/workflows/all?${params.toString()}`;
+      if (e.ctrlKey || e.metaKey) {
+        window.open(url, "_blank");
+      } else {
+        navigate(url);
+      }
     },
     [filters.stage, navigate],
   );
@@ -229,54 +234,100 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
             Nenhum gargalo encontrado para os filtros selecionados.
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            {data.bottlenecks.map((schema) => (
-              <div key={schema.schemaId || schema.schemaLabel}>
-                <h4 className="text-sm font-semibold text-foreground mb-2">
-                  {schema.schemaLabel}
-                </h4>
-                <div className="border border-border rounded-md overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-3 py-1.5 text-xs font-medium text-muted-foreground">Atividade</th>
-                        <th className="text-left px-3 py-1.5 text-xs font-medium text-muted-foreground">Tipo</th>
-                        <th className="text-right px-3 py-1.5 text-xs font-medium text-muted-foreground">Tempo médio</th>
-                        <th className="text-right px-3 py-1.5 text-xs font-medium text-muted-foreground">Qtd</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {schema.activities.map((act) => (
-                        <tr
-                          key={act.activityNamespace}
-                          className="border-b border-border cursor-pointer hover:bg-muted/40 transition-colors"
-                          onClick={() => handleActivityClick(act.activityLabel)}
-                        >
-                          <td className="px-3 py-1.5 text-foreground underline decoration-muted-foreground/30">{act.activityLabel}</td>
-                          <td className="px-3 py-1.5 text-muted-foreground">
-                            {ACTIVITY_TYPE_LABELS[act.activityType] ?? String(act.activityType)}
-                          </td>
-                          <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
-                            {formatStepAge(act.avgTimeMs)}
-                          </td>
-                          <td className="px-3 py-1.5 text-right tabular-nums font-medium text-foreground">{act.count}</td>
+          <div className="flex flex-col gap-6">
+            {data.bottlenecks.map((schema) => {
+              const inProgress = schema.activities.reduce((acc, a) => acc + a.count, 0);
+              const pct = schema.completionRate * 100;
+              const pctColor = pct >= 75 ? "text-green-600" : pct >= 40 ? "text-amber-600" : "text-red-500";
+
+              return (
+                <div key={schema.schemaId || schema.schemaLabel}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold text-foreground">
+                      {schema.schemaLabel}
+                    </h4>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span>Total: <strong className="text-foreground">{schema.totalWorkflows}</strong></span>
+                      <span>Taxa conclusão: <strong className={pctColor}>{pct.toFixed(1)}%</strong></span>
+                      {schema.avgCompletionTimeMs != null && (
+                        <span>Tempo médio conclusão: <strong className="text-foreground">{formatDuration(schema.avgCompletionTimeMs)}</strong></span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="w-full h-1.5 bg-muted rounded-full mb-2 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${pct >= 75 ? "bg-green-500" : pct >= 40 ? "bg-amber-500" : "bg-red-500"}`}
+                      style={{ width: `${Math.min(pct, 100)}%` }}
+                    />
+                  </div>
+
+                  <div className="border border-border rounded-md overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/30">
+                          <th className="text-left px-3 py-1.5 text-xs font-medium text-muted-foreground">Atividade</th>
+                          <th className="text-left px-3 py-1.5 text-xs font-medium text-muted-foreground">Tipo</th>
+                          <th className="text-right px-3 py-1.5 text-xs font-medium text-muted-foreground">Mediana</th>
+                          <th className="text-right px-3 py-1.5 text-xs font-medium text-muted-foreground">Tempo médio</th>
+                          <th className="text-right px-3 py-1.5 text-xs font-medium text-muted-foreground">Desvio</th>
+                          <th className="text-right px-3 py-1.5 text-xs font-medium text-muted-foreground">Mais antigo</th>
+                          <th className="text-right px-3 py-1.5 text-xs font-medium text-muted-foreground">Qtd</th>
                         </tr>
-                      ))}
-                      <tr className="bg-muted/20">
-                        <td className="px-3 py-1.5 text-foreground font-semibold" colSpan={3}>Em andamento</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums font-semibold text-amber-600">
-                          {schema.activities.reduce((acc, a) => acc + a.count, 0)}
-                        </td>
-                      </tr>
-                      <tr className="bg-muted/20">
-                        <td className="px-3 py-1.5 text-foreground font-semibold" colSpan={3}>Concluídos</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums font-semibold text-green-600">{schema.completedCount}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {schema.activities.map((act) => {
+                          const isHot = act.count > 0 && (
+                            (act.oldestPendingMs != null && act.oldestPendingMs > 7 * 86_400_000) ||
+                            act.count >= 10
+                          );
+                          return (
+                            <tr
+                              key={act.activityNamespace}
+                              className={`border-b border-border cursor-pointer hover:bg-muted/40 transition-colors ${isHot ? "bg-red-500/5" : ""}`}
+                              onClick={(e) => handleActivityClick(act.activityLabel, e)}
+                            >
+                              <td className="px-3 py-1.5 text-foreground underline decoration-muted-foreground/30">
+                                <span className="flex items-center gap-1.5">
+                                  {isHot && <span className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0" title="Atenção: gargalo crítico" />}
+                                  {act.activityLabel}
+                                </span>
+                              </td>
+                              <td className="px-3 py-1.5 text-muted-foreground">
+                                {ACTIVITY_TYPE_LABELS[act.activityType] ?? String(act.activityType)}
+                              </td>
+                              <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
+                                {formatDuration(act.medianTimeMs)}
+                              </td>
+                              <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
+                                {formatDuration(act.avgTimeMs)}
+                              </td>
+                              <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
+                                {formatDuration(act.stdTimeMs)}
+                              </td>
+                              <td className={`px-3 py-1.5 text-right tabular-nums ${act.oldestPendingMs != null && act.oldestPendingMs > 7 * 86_400_000 ? "text-red-500 font-medium" : "text-muted-foreground"}`}>
+                                {formatDuration(act.oldestPendingMs)}
+                              </td>
+                              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-foreground">{act.count}</td>
+                            </tr>
+                          );
+                        })}
+                        <tr className="bg-muted/20">
+                          <td className="px-3 py-1.5 text-foreground font-semibold" colSpan={6}>Em andamento</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums font-semibold text-amber-600">
+                            {inProgress}
+                          </td>
+                        </tr>
+                        <tr className="bg-muted/20">
+                          <td className="px-3 py-1.5 text-foreground font-semibold" colSpan={6}>Concluídos</td>
+                          <td className="px-3 py-1.5 text-right tabular-nums font-semibold text-green-600">{schema.completedCount}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>
