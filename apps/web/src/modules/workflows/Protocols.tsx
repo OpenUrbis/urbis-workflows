@@ -50,11 +50,19 @@ import {
   FaFileCsv,
   FaFilePdf,
 } from "react-icons/fa";
-import Papa from "papaparse";
 import { Spinner } from "../../components";
 import { formatId } from "./activities/common";
 import { usePermissions } from "../../reducers/permission.context";
 import { SearchPreviewDialog } from "./components/SearchPreviewDialog";
+import {
+  downloadBlob,
+  exportRowsToCsv,
+  printHtmlViaIframe,
+} from "./utils/workflows-export";
+import {
+  formatDateTimePtBr,
+  formatDateTimePtBrSafe,
+} from "./utils/workflows-date";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -106,11 +114,15 @@ function SortIcon({
   );
 }
 
-export function AllWorkflows(): JSX.Element {
-  return <MyProtocols mode="admin" />;
+export function WorkflowsReportPage(): JSX.Element {
+  return <WorkflowsListPage mode="admin" />;
 }
 
-export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX.Element {
+export function MyWorkflowsPage(): JSX.Element {
+  return <WorkflowsListPage mode="mine" />;
+}
+
+export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX.Element {
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<WorkflowMetadata[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -377,16 +389,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
     return all;
   }, [buildExportParams, mode]);
 
-  const formatDateExport = (dateStr: string) => {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "";
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-  };
+  const formatDateExport = (dateStr: string) => formatDateTimePtBrSafe(dateStr);
 
   const exportCsv = useCallback(async () => {
     setExporting("csv");
@@ -400,14 +403,9 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
         Criado: formatDateExport(String(item.createdAt)),
         Atualizado: formatDateExport(String(item.updatedAt)),
       }));
-      const csv = Papa.unparse(rows);
+      const csv = exportRowsToCsv(rows);
       const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `relatorio-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, `relatorio-${new Date().toISOString().slice(0, 10)}.csv`);
     } catch (err) {
       console.error(err);
       snackbar.error("Erro ao exportar CSV");
@@ -419,12 +417,6 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
     setExporting("pdf");
     try {
       const items = await fetchAllItems();
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) {
-        snackbar.error("Habilite pop-ups para exportar PDF");
-        setExporting(null);
-        return;
-      }
       const tableRows = items
         .map(
           (item) =>
@@ -438,7 +430,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
             </tr>`,
         )
         .join("");
-      printWindow.document.write(`<!DOCTYPE html>
+      const html = `<!DOCTYPE html>
         <html><head><title>Relatório</title>
         <style>
           body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; }
@@ -456,17 +448,9 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
           </tr></thead>
           <tbody>${tableRows}</tbody>
         </table>
-        </body></html>`);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        try {
-          printWindow.print();
-        } catch (e) {
-          console.error(e);
-          snackbar.error("Erro ao abrir impressão do PDF");
-        }
-      }, 400);
+        </body></html>`;
+
+      await printHtmlViaIframe(html, 400);
     } catch (err) {
       console.error(err);
       snackbar.error("Erro ao exportar PDF");
@@ -474,16 +458,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
     setExporting(null);
   }, [fetchAllItems, snackbar]);
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-  };
+  const formatDate = (dateStr: string) => formatDateTimePtBr(dateStr);
 
   return (
     <div className="flex flex-col space-y-8 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

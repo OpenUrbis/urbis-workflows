@@ -9,8 +9,8 @@ import {
   Environments,
   FormsPreset,
   IAM,
-  MyProtocols,
-  AllWorkflows,
+  MyWorkflowsPage,
+  WorkflowsReportPage,
   Profile,
   Workflows,
   Secrets,
@@ -220,7 +220,7 @@ const RouteDefinitions = () => (
         path="/workflows"
         element={
           <PrivateWrapper>
-            <MyProtocols />
+            <MyWorkflowsPage />
           </PrivateWrapper>
         }
       />
@@ -233,7 +233,7 @@ const RouteDefinitions = () => (
         path="/workflows/all"
         element={
           <PrivateWrapper>
-            <AllWorkflows />
+            <WorkflowsReportPage />
           </PrivateWrapper>
         }
       />
