@@ -44,6 +44,36 @@ export const Modules: React.FC = () => {
   }>({ version: 0 });
   const [versions, setVersions] = useState<VersionInfo[]>([]);
 
+  const setAddModeAndSync = (next: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    const currentAdd = searchParams.get("add") === "1";
+    const currentId = searchParams.get("id");
+
+    if (next) {
+      if (!currentAdd) params.set("add", "1");
+      if (currentId) params.delete("id");
+    } else {
+      if (currentAdd) params.delete("add");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const setSelectedIdAndSync = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    const currentId = searchParams.get("id") || "";
+    const currentAdd = searchParams.get("add") === "1";
+
+    if (currentAdd) params.delete("add");
+    if (currentId !== id) params.set("id", id);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
   type VersionInfo = {
     id: string;
     version: number;
@@ -95,21 +125,6 @@ export const Modules: React.FC = () => {
   }, [searchParams, functions, selectedFunction, addingFunction]);
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-    if (addingFunction) {
-      params.set("add", "1");
-      params.delete("id");
-    } else {
-      params.delete("add");
-      if (selectedFunction?.id) params.set("id", selectedFunction.id);
-      else params.delete("id");
-    }
-    if (params.toString() !== searchParams.toString()) {
-      setSearchParams(params, { replace: true });
-    }
-  }, [addingFunction, selectedFunction, searchParams, setSearchParams]);
-
-  useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
@@ -133,10 +148,12 @@ export const Modules: React.FC = () => {
 
   const selectFunctionCallback = async (funConfig: CodeModuleMetadata) => {
     if (funConfig !== undefined && funConfig.id) {
+      setSelectedIdAndSync(funConfig.id);
       setLoading(true);
       const fun = await codeModulesClient.findOne(funConfig.id);
       setSelectedFunction(fun);
       setAddingFunction(false);
+      setAddModeAndSync(false);
       setLoading(false);
 
       setLoadingVersions(true);
@@ -189,6 +206,7 @@ export const Modules: React.FC = () => {
     e?.preventDefault();
     setSelectedFunction(null);
     setAddingFunction(true);
+    setAddModeAndSync(true);
   };
 
   const handleSaveFunction = async () => {

@@ -109,6 +109,36 @@ export const FormsPreset: React.FC = () => {
   }>({ version: 0 });
   const [versions, setVersions] = useState<VersionInfo[]>([]);
 
+  const setAddModeAndSync = (next: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    const currentAdd = searchParams.get("add") === "1";
+    const currentId = searchParams.get("id");
+
+    if (next) {
+      if (!currentAdd) params.set("add", "1");
+      if (currentId) params.delete("id");
+    } else {
+      if (currentAdd) params.delete("add");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const setSelectedIdAndSync = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    const currentId = searchParams.get("id") || "";
+    const currentAdd = searchParams.get("add") === "1";
+
+    if (currentAdd) params.delete("add");
+    if (currentId !== id) params.set("id", id);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
   const fetchPresets = async () => {
     const response = await formsClient.findAll();
     setPresets(response.forms);
@@ -169,21 +199,6 @@ export const FormsPreset: React.FC = () => {
   }, [searchParams, presets, selectedPreset, addingPreset]);
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-    if (addingPreset) {
-      params.set("add", "1");
-      params.delete("id");
-    } else {
-      params.delete("add");
-      if (selectedPreset?.id) params.set("id", selectedPreset.id);
-      else params.delete("id");
-    }
-    if (params.toString() !== searchParams.toString()) {
-      setSearchParams(params, { replace: true });
-    }
-  }, [addingPreset, selectedPreset, searchParams, setSearchParams]);
-
-  useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
@@ -207,11 +222,13 @@ export const FormsPreset: React.FC = () => {
 
   const selectPresetCallback = async (presetConfig: FormMetadata) => {
     if (presetConfig !== undefined && presetConfig.id) {
+      setSelectedIdAndSync(presetConfig.id);
       setLoading(true);
       const preset = await formsClient.findOne(presetConfig.id);
       setLoading(false);
       setSelectedPreset(preset);
       setAddingPreset(false);
+      setAddModeAndSync(false);
 
       setLoadingVersions(true);
       try {
@@ -287,6 +304,7 @@ export const FormsPreset: React.FC = () => {
     e?.preventDefault();
     setSelectedPreset(null);
     setAddingPreset(true);
+    setAddModeAndSync(true);
   };
 
   const handleSavePreset = async () => {

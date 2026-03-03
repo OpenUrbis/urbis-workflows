@@ -104,6 +104,36 @@ export const Environments: React.FC = () => {
   }>({ version: 0 });
   const [versions, setVersions] = useState<VersionInfo[]>([]);
 
+  const setAddModeAndSync = (next: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    const currentAdd = searchParams.get("add") === "1";
+    const currentId = searchParams.get("id");
+
+    if (next) {
+      if (!currentAdd) params.set("add", "1");
+      if (currentId) params.delete("id");
+    } else {
+      if (currentAdd) params.delete("add");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const setSelectedIdAndSync = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    const currentId = searchParams.get("id") || "";
+    const currentAdd = searchParams.get("add") === "1";
+
+    if (currentAdd) params.delete("add");
+    if (currentId !== id) params.set("id", id);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
   const api = new ApiClient({
     baseURL: import.meta.env.VITE_BACK_END_API || "",
     headers: {
@@ -172,21 +202,6 @@ export const Environments: React.FC = () => {
   }, [searchParams, environments, selectedEnvironment, addingEnvironment]);
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-    if (addingEnvironment) {
-      params.set("add", "1");
-      params.delete("id");
-    } else {
-      params.delete("add");
-      if (selectedEnvironment?.id) params.set("id", selectedEnvironment.id);
-      else params.delete("id");
-    }
-    if (params.toString() !== searchParams.toString()) {
-      setSearchParams(params, { replace: true });
-    }
-  }, [addingEnvironment, selectedEnvironment, searchParams, setSearchParams]);
-
-  useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
@@ -212,6 +227,7 @@ export const Environments: React.FC = () => {
     environmentConfig: ConstantVariableMetadata
   ) => {
     if (environmentConfig !== undefined && environmentConfig.id) {
+      setSelectedIdAndSync(environmentConfig.id);
       setLoading(true);
       const environment = await api.constantVariables.findOne(
         environmentConfig.id
@@ -220,6 +236,7 @@ export const Environments: React.FC = () => {
       setSelectedEnvironment(environment);
       setLoading(false);
       setAddingEnvironment(false);
+      setAddModeAndSync(false);
 
       setLoadingVersions(true);
       try {
@@ -271,6 +288,7 @@ export const Environments: React.FC = () => {
     e?.preventDefault();
     setSelectedEnvironment(null);
     setAddingEnvironment(true);
+    setAddModeAndSync(true);
   };
 
   const handleSaveEnvironment = async () => {
