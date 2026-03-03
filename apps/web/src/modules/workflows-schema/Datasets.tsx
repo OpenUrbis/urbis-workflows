@@ -15,6 +15,7 @@ import {
   CreateDatasetHttpDto,
 } from "../../api/types/datasets.dto";
 import { Spinner } from "../../components";
+import { useSearchParams } from "react-router-dom";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -45,6 +46,7 @@ export const Datasets: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const snackbar = useSnackbar();
   const styleContext = useContext(StyleContext);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [datasets, setDatasets] = useState<DatasetConfig[]>([]);
@@ -68,6 +70,43 @@ export const Datasets: React.FC = () => {
     fetchDatasets();
     
   }, []);
+
+  useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingDataset) {
+      setSelectedDataset(null);
+      setAddingDataset(true);
+      return;
+    }
+
+    if (!add && addingDataset) {
+      setAddingDataset(false);
+    }
+
+    if (id && datasets.length > 0 && (!selectedDataset || selectedDataset.id !== id)) {
+      const meta = datasets.find((d) => d.id === id);
+      if (meta) {
+        selectDatasetCallback(meta);
+      }
+    }
+  }, [searchParams, datasets, selectedDataset, addingDataset]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (addingDataset) {
+      params.set("add", "1");
+      params.delete("id");
+    } else {
+      params.delete("add");
+      if (selectedDataset?.id) params.set("id", selectedDataset.id);
+      else params.delete("id");
+    }
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [addingDataset, selectedDataset, searchParams, setSearchParams]);
 
   useEffect(() => {
     hotkeyContext.dispatch({
@@ -231,6 +270,8 @@ export const Datasets: React.FC = () => {
             onSearchChange={searchCallback}
             icon={FaDatabase}
             iconColor="blue"
+            selectedId={selectedDataset?.id}
+            density="compact"
           />
         </div>
         <div className="flex flex-col p-6 w-9/12">

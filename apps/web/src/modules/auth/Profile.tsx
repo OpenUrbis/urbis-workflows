@@ -5,11 +5,25 @@ import { StyleContext } from "../../reducers";
 import { MyRepresentations } from "./MyRepresentation";
 import { MyRepresentatives } from "./MyRepresentatives";
 import { FaUserFriends, FaUserPlus } from "react-icons/fa";
+import { useSearchParams } from "react-router-dom";
 
 export function Profile(): JSX.Element {
   const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
-  const [subpage, setSubpage] = useState<string>("myrepresentations");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [subpage, setSubpage] = useState<string>(() => searchParams.get("tab") || "myrepresentations");
+
+  const setSubpageAndSync = (next: string) => {
+    setSubpage(next);
+    const current = searchParams.get("tab") || "";
+    if (current === next) return;
+    const params = new URLSearchParams(searchParams);
+    if (next) params.set("tab", next);
+    else params.delete("tab");
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
 
   const menus = [
     {
@@ -27,14 +41,21 @@ export function Profile(): JSX.Element {
   ];
 
   useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && tab !== subpage) {
+      setSubpage(tab);
+    }
+  }, [searchParams, subpage]);
+
+  useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
         A: () => {
-          setSubpage("myrepresentations");
+          setSubpageAndSync("myrepresentations");
         },
         Z: () => {
-          setSubpage("myrepresentatives");
+          setSubpageAndSync("myrepresentatives");
         },
       },
     });
@@ -72,7 +93,7 @@ export function Profile(): JSX.Element {
               key={menu.key}
             >
               <button
-                onClick={() => setSubpage(menu.link)}
+                onClick={() => setSubpageAndSync(menu.link)}
                 className="flex justify-between w-full items-center text-card-foreground"
               >
                 <div className="flex items-center space-x-3">

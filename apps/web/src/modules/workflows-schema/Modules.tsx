@@ -16,6 +16,7 @@ import { VersionsMenu } from "./components/VersionsMenu";
 import { TreeList } from "./components/TreeList";
 import { StyleContext } from "../../reducers/style.reducer";
 import { Spinner } from "../../components";
+import { useSearchParams } from "react-router-dom";
 
 const codeModulesClient = new CodeModulesApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -29,6 +30,7 @@ export type FunctionConfig = CodeModuleMetadata;
 export const Modules: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [functions, setFunctions] = useState<CodeModuleMetadata[]>([]);
@@ -69,6 +71,43 @@ export const Modules: React.FC = () => {
   useEffect(() => {
     fetchFunctions();
   }, []);
+
+  useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingFunction) {
+      setSelectedFunction(null);
+      setAddingFunction(true);
+      return;
+    }
+
+    if (!add && addingFunction) {
+      setAddingFunction(false);
+    }
+
+    if (id && functions.length > 0 && (!selectedFunction || selectedFunction.id !== id)) {
+      const meta = functions.find((f) => f.id === id);
+      if (meta) {
+        selectFunctionCallback(meta);
+      }
+    }
+  }, [searchParams, functions, selectedFunction, addingFunction]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (addingFunction) {
+      params.set("add", "1");
+      params.delete("id");
+    } else {
+      params.delete("add");
+      if (selectedFunction?.id) params.set("id", selectedFunction.id);
+      else params.delete("id");
+    }
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [addingFunction, selectedFunction, searchParams, setSearchParams]);
 
   useEffect(() => {
     hotkeyContext.dispatch({
@@ -309,6 +348,7 @@ export const Modules: React.FC = () => {
             onSearchChange={searchCallback}
             icon={FaCode}
             iconColor="blue"
+            selectedId={selectedFunction?.id}
             density="compact"
           />
         </div>

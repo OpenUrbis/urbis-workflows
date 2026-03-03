@@ -21,6 +21,7 @@ import {
   FaChevronRight,
   FaColumns,
 } from "react-icons/fa";
+import { useSearchParams } from "react-router-dom";
 import { WorkflowOverviewPanel } from "./panels/WorkflowOverviewPanel";
 import { SchemaManagementPanel } from "./panels/SchemaManagementPanel";
 import { SignaturesPanel } from "./panels/SignaturesPanel";
@@ -120,9 +121,74 @@ const panels: Record<PanelKey, React.FC<{ filters: DashboardFilters }>> = {
 
 export function Dashboard(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);
-  const [subpage, setSubpage] = useState<PanelKey>("workflows");
-  const [stage, setStage] = useState("production");
-  const [period, setPeriod] = useState("__all__");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [subpage, setSubpage] = useState<PanelKey>(() => {
+    const tab = (searchParams.get("tab") as PanelKey) || "workflows";
+    return (Object.keys(panels) as PanelKey[]).includes(tab) ? tab : "workflows";
+  });
+  const [stage, setStage] = useState(() => searchParams.get("stage") || "production");
+  const [period, setPeriod] = useState(() => searchParams.get("period") || "__all__");
+
+  const syncQueryParams = (next: { tab?: PanelKey; stage?: string; period?: string }) => {
+    const params = new URLSearchParams(searchParams);
+
+    const desiredTab = next.tab ?? subpage;
+    const currentTab = searchParams.get("tab") || "";
+    if (desiredTab) {
+      if (currentTab !== desiredTab) params.set("tab", desiredTab);
+    } else {
+      if (currentTab) params.delete("tab");
+    }
+
+    const desiredStage = next.stage ?? stage;
+    const currentStage = searchParams.get("stage") || "";
+    if (desiredStage) {
+      if (currentStage !== desiredStage) params.set("stage", desiredStage);
+    } else {
+      if (currentStage) params.delete("stage");
+    }
+
+    const desiredPeriod = (next.period ?? period) && (next.period ?? period) !== "__all__"
+      ? (next.period ?? period)
+      : "";
+    const currentPeriod = searchParams.get("period") || "";
+    if (desiredPeriod) {
+      if (currentPeriod !== desiredPeriod) params.set("period", desiredPeriod);
+    } else {
+      if (currentPeriod) params.delete("period");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  useEffect(() => {
+    const tab = (searchParams.get("tab") as PanelKey) || "workflows";
+    const nextTab = (Object.keys(panels) as PanelKey[]).includes(tab) ? tab : "workflows";
+    if (nextTab !== subpage) setSubpage(nextTab);
+
+    const nextStage = searchParams.get("stage") || "production";
+    if (nextStage !== stage) setStage(nextStage);
+
+    const nextPeriod = searchParams.get("period") || "__all__";
+    if (nextPeriod !== period) setPeriod(nextPeriod);
+  }, [searchParams]);
+
+  const setSubpageAndSync = (next: PanelKey) => {
+    setSubpage(next);
+    syncQueryParams({ tab: next });
+  };
+
+  const setStageAndSync = (next: string) => {
+    setStage(next);
+    syncQueryParams({ stage: next });
+  };
+
+  const setPeriodAndSync = (next: string) => {
+    setPeriod(next);
+    syncQueryParams({ period: next });
+  };
 
   const filters: DashboardFilters = React.useMemo(() => {
     const f: DashboardFilters = { stage };
@@ -139,7 +205,7 @@ export function Dashboard(): JSX.Element {
   useEffect(() => {
     const hotkeyMap: Record<string, () => void> = {};
     menus.forEach((menu) => {
-      hotkeyMap[menu.key] = () => setSubpage(menu.link);
+      hotkeyMap[menu.key] = () => setSubpageAndSync(menu.link);
     });
 
     hotkeyContext.dispatch({
@@ -168,7 +234,7 @@ export function Dashboard(): JSX.Element {
           <label className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
             Ambiente
           </label>
-          <Select value={stage} onValueChange={setStage}>
+          <Select value={stage} onValueChange={setStageAndSync}>
             <SelectTrigger className="h-8 w-44 text-xs">
               <SelectValue />
             </SelectTrigger>
@@ -186,7 +252,7 @@ export function Dashboard(): JSX.Element {
           <label className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
             Período
           </label>
-          <Select value={period} onValueChange={setPeriod}>
+          <Select value={period} onValueChange={setPeriodAndSync}>
             <SelectTrigger className="h-8 w-44 text-xs">
               <SelectValue />
             </SelectTrigger>
@@ -208,7 +274,7 @@ export function Dashboard(): JSX.Element {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => setSubpage(menu.link)}
+                onClick={() => setSubpageAndSync(menu.link)}
                 className={`flex justify-between w-full items-center h-auto px-4 py-2.5 font-normal rounded-lg transition-colors duration-150 ${
                   subpage === menu.link
                     ? "bg-primary/10 text-primary hover:bg-primary/20"

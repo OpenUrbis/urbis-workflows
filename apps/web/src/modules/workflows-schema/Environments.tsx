@@ -33,6 +33,7 @@ import {
 } from "../../api/types/constant-variables.dto";
 import { useSnackbar } from "../../hooks/snackbar";
 import { Spinner } from "../../components";
+import { useSearchParams } from "react-router-dom";
 
 type VersionInfo = {
   id: string;
@@ -87,6 +88,7 @@ export const Environments: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
   const snackbar = useSnackbar();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [search, setSearch] = useState("");
@@ -146,6 +148,43 @@ export const Environments: React.FC = () => {
     fetchEnvironments();
     
   }, []);
+
+  useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingEnvironment) {
+      setSelectedEnvironment(null);
+      setAddingEnvironment(true);
+      return;
+    }
+
+    if (!add && addingEnvironment) {
+      setAddingEnvironment(false);
+    }
+
+    if (id && environments.length > 0 && (!selectedEnvironment || selectedEnvironment.id !== id)) {
+      const meta = environments.find((e) => e.id === id);
+      if (meta) {
+        selectEnvironmentCallback(meta);
+      }
+    }
+  }, [searchParams, environments, selectedEnvironment, addingEnvironment]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (addingEnvironment) {
+      params.set("add", "1");
+      params.delete("id");
+    } else {
+      params.delete("add");
+      if (selectedEnvironment?.id) params.set("id", selectedEnvironment.id);
+      else params.delete("id");
+    }
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [addingEnvironment, selectedEnvironment, searchParams, setSearchParams]);
 
   useEffect(() => {
     hotkeyContext.dispatch({

@@ -3,11 +3,25 @@ import { SL } from "../../components/ShortcutLabel";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { Button, Card } from "@open-urbis/map-ui";
 import { FaKey, FaUserTag, FaUsers, FaUserShield, FaChevronRight } from "react-icons/fa";
+import { useSearchParams } from "react-router-dom";
 import { Permissions, Roles, Groups, UserAccess } from ".";
 
 export function IAM(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);
-  const [subpage, setSubpage] = useState<string>("permissions");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [subpage, setSubpage] = useState<string>(() => searchParams.get("tab") || "permissions");
+
+  const setSubpageAndSync = (next: string) => {
+    setSubpage(next);
+    const current = searchParams.get("tab") || "";
+    if (current === next) return;
+    const params = new URLSearchParams(searchParams);
+    if (next) params.set("tab", next);
+    else params.delete("tab");
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
 
   const menus = [
     {
@@ -37,20 +51,27 @@ export function IAM(): JSX.Element {
   ];
 
   useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && tab !== subpage) {
+      setSubpage(tab);
+    }
+  }, [searchParams, subpage]);
+
+  useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
         Q: () => {
-          setSubpage("permissions");
+          setSubpageAndSync("permissions");
         },
         A: () => {
-          setSubpage("roles");
+          setSubpageAndSync("roles");
         },
         Z: () => {
-          setSubpage("groups");
+          setSubpageAndSync("groups");
         },
         W: () => {
-          setSubpage("useraccess");
+          setSubpageAndSync("useraccess");
         },
       },
     });
@@ -82,7 +103,7 @@ export function IAM(): JSX.Element {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => setSubpage(menu.link)}
+                onClick={() => setSubpageAndSync(menu.link)}
                 className={`flex justify-between w-full items-center h-auto px-4 py-2.5 font-normal rounded-lg transition-colors duration-150 ${
                   subpage === menu.link
                     ? "bg-primary/10 text-primary hover:bg-primary/20"

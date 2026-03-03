@@ -28,6 +28,7 @@ import {
   FormData,
   FormMetadata,
 } from "../../api/types/form.dto";
+import { useSearchParams } from "react-router-dom";
 
 const formsClient = new FormsApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -95,6 +96,7 @@ const getFormIcon = (form: FormMetadata) => {
 export const FormsPreset: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [search, setSearch] = useState("");
@@ -143,6 +145,43 @@ export const FormsPreset: React.FC = () => {
   useEffect(() => {
     fetchPresets();
   }, []);
+
+  useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingPreset) {
+      setSelectedPreset(null);
+      setAddingPreset(true);
+      return;
+    }
+
+    if (!add && addingPreset) {
+      setAddingPreset(false);
+    }
+
+    if (id && presets.length > 0 && (!selectedPreset || selectedPreset.id !== id)) {
+      const meta = presets.find((p) => p.id === id);
+      if (meta) {
+        selectPresetCallback(meta);
+      }
+    }
+  }, [searchParams, presets, selectedPreset, addingPreset]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (addingPreset) {
+      params.set("add", "1");
+      params.delete("id");
+    } else {
+      params.delete("add");
+      if (selectedPreset?.id) params.set("id", selectedPreset.id);
+      else params.delete("id");
+    }
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [addingPreset, selectedPreset, searchParams, setSearchParams]);
 
   useEffect(() => {
     hotkeyContext.dispatch({

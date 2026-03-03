@@ -25,6 +25,7 @@ import { TreeList } from "./components/TreeList";
 import { VersionsMenu } from "./components/VersionsMenu";
 import { usePermissions } from "../../reducers/permission.context";
 import { Spinner } from "../../components";
+import { useSearchParams } from "react-router-dom";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "http://localhost:4000",
@@ -65,6 +66,37 @@ export const Secrets: React.FC = () => {
   const [showDecrypted, setShowDecrypted] = useState(false);
   const [decryptedValue, setDecryptedValue] = useState<string | null>(null);
   const [loadingDecrypted, setLoadingDecrypted] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const setAddModeAndSync = (next: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    const currentAdd = searchParams.get("add") === "1";
+    const currentId = searchParams.get("id");
+
+    if (next) {
+      if (!currentAdd) params.set("add", "1");
+      if (currentId) params.delete("id");
+    } else {
+      if (currentAdd) params.delete("add");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const setSelectedIdAndSync = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    const currentId = searchParams.get("id") || "";
+    const currentAdd = searchParams.get("add") === "1";
+
+    if (currentAdd) params.delete("add");
+    if (currentId !== id) params.set("id", id);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
 
   const canViewDecrypted = hasPermission("integration:admin:secrets:findOne");
 
@@ -92,6 +124,28 @@ export const Secrets: React.FC = () => {
   useEffect(() => {
     fetchSecrets();
   }, []);
+
+  useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingSecret) {
+      setSelectedSecret(null);
+      setAddingSecret(true);
+      return;
+    }
+
+    if (!add && addingSecret) {
+      setAddingSecret(false);
+    }
+
+    if (id && secrets.length > 0 && (!selectedSecret || selectedSecret.id !== id)) {
+      const meta = secrets.find((s) => s.id === id);
+      if (meta) {
+        selectSecretCallback(meta);
+      }
+    }
+  }, [searchParams, secrets, selectedSecret, addingSecret]);
 
   useEffect(() => {
     hotkeyContext.dispatch({
@@ -142,6 +196,7 @@ export const Secrets: React.FC = () => {
 
   const selectSecretCallback = async (secretConfig: SecretMetadata) => {
     if (secretConfig !== undefined && secretConfig.id) {
+      setSelectedIdAndSync(secretConfig.id);
       setLoading(true);
       // Reset decrypted state when selecting a new secret
       setShowDecrypted(false);
@@ -150,6 +205,7 @@ export const Secrets: React.FC = () => {
         const secret = await api.integrations.findOneSecret(secretConfig.id);
         setSelectedSecret(secret);
         setAddingSecret(false);
+        setAddModeAndSync(false);
         setLoading(false);
 
         // Load versions separately
@@ -209,6 +265,7 @@ export const Secrets: React.FC = () => {
     e?.preventDefault();
     setSelectedSecret(null);
     setAddingSecret(true);
+    setAddModeAndSync(true);
   };
 
   const handleSaveSecret = async () => {

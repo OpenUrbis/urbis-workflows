@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
 } from "@open-urbis/map-ui";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SL } from "../../components";
 import { FaInbox, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Spinner } from "../../components";
@@ -39,28 +39,26 @@ function EmptyState() {
 export function MyAcceptances(): JSX.Element {
   const [data, setData] = useState<any>([]);
   const pageSize = 10;
-  const [currentPage, setCurrentPage] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [currentPage, setCurrentPage] = useState(() => {
+    const p = parseInt(searchParams.get("page") || "1", 10);
+    return Number.isNaN(p) || p < 1 ? 1 : p;
+  });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const isFirstPage = currentPage === 0;
-  const isLastPage = currentPage === Math.ceil(data.length / pageSize) - 1;
+  const isFirstPage = currentPage === 1;
+  const isLastPage = currentPage === Math.ceil(data.length / pageSize);
 
   const nextPage = () => {
     if (!isLastPage) {
-      setCurrentPage((currentPage) => {
-        handleFetchAcceptances(currentPage + 1);
-        return currentPage + 1;
-      });
+      setCurrentPage((page) => page + 1);
     }
   };
 
   const prevPage = () => {
     if (!isFirstPage) {
-      setCurrentPage((currentPage) => {
-        handleFetchAcceptances(currentPage - 1);
-        return currentPage - 1;
-      });
+      setCurrentPage((page) => page - 1);
     }
   };
 
@@ -88,8 +86,24 @@ export function MyAcceptances(): JSX.Element {
   };
 
   useEffect(() => {
-    handleFetchAcceptances();
-  }, []);
+    setLoading(true);
+    handleFetchAcceptances(currentPage, pageSize);
+  }, [currentPage]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (currentPage && currentPage !== 1) params.set("page", String(currentPage));
+    else params.delete("page");
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [currentPage, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const p = parseInt(searchParams.get("page") || "1", 10);
+    const pageFromUrl = Number.isNaN(p) || p < 1 ? 1 : p;
+    if (pageFromUrl !== currentPage) setCurrentPage(pageFromUrl);
+  }, [searchParams]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -195,7 +209,7 @@ export function MyAcceptances(): JSX.Element {
                   <div>
                     <p className="text-sm text-muted-foreground">
                       Página{" "}
-                      <span className="font-medium">{currentPage + 1}</span> de{" "}
+                      <span className="font-medium">{currentPage}</span> de{" "}
                       <span className="font-medium">
                         {Math.ceil(data.length / pageSize)}
                       </span>
