@@ -28,7 +28,6 @@ import { TaxDocumentsPanel } from "./panels/TaxDocumentsPanel";
 import { UsersIamPanel } from "./panels/UsersIamPanel";
 import { SystemHealthPanel } from "./panels/SystemHealthPanel";
 import { SubscriptionsPanel } from "./panels/SubscriptionsPanel";
-import { WorkflowPipelinePanel } from "./panels/WorkflowPipelinePanel";
 
 export interface DashboardFilters {
   stage: string;
@@ -52,7 +51,6 @@ const PERIOD_OPTIONS = [
 
 type PanelKey =
   | "workflows"
-  | "pipeline"
   | "schemas"
   | "signatures"
   | "taxes"
@@ -71,12 +69,6 @@ const menus: {
     link: "workflows",
     key: "Q",
     icon: <FaChartLine />,
-  },
-  {
-    name: "Pipeline",
-    link: "pipeline",
-    key: "W",
-    icon: <FaColumns />,
   },
   {
     name: "Schemas",
@@ -118,7 +110,6 @@ const menus: {
 
 const panels: Record<PanelKey, React.FC<{ filters: DashboardFilters }>> = {
   workflows: WorkflowOverviewPanel,
-  pipeline: WorkflowPipelinePanel,
   schemas: SchemaManagementPanel,
   signatures: SignaturesPanel,
   taxes: TaxDocumentsPanel,

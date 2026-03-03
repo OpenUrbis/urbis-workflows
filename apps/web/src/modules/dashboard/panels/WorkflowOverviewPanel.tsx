@@ -263,6 +263,12 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
                         </tr>
                       ))}
                       <tr className="bg-muted/20">
+                        <td className="px-3 py-1.5 text-foreground font-semibold" colSpan={3}>Em andamento</td>
+                        <td className="px-3 py-1.5 text-right tabular-nums font-semibold text-amber-600">
+                          {schema.activities.reduce((acc, a) => acc + a.count, 0)}
+                        </td>
+                      </tr>
+                      <tr className="bg-muted/20">
                         <td className="px-3 py-1.5 text-foreground font-semibold" colSpan={3}>Concluídos</td>
                         <td className="px-3 py-1.5 text-right tabular-nums font-semibold text-green-600">{schema.completedCount}</td>
                       </tr>

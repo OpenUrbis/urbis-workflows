@@ -1,7 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import {
   DashboardTimeRangeQuery,
-  DashboardPipelineQueryParams,
   GetWorkflowOverviewResponse,
   GetSchemaManagementResponse,
   GetSignaturesResponse,
@@ -9,7 +8,6 @@ import {
   GetUsersIamResponse,
   GetSystemHealthResponse,
   GetSubscriptionsResponse,
-  GetWorkflowPipelineResponse,
 } from "../types/dashboard.dto";
 
 export class DashboardApiClient {
@@ -111,20 +109,6 @@ export class DashboardApiClient {
     try {
       const response =
         await this.client.get<GetSubscriptionsResponse>("/subscriptions");
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async getWorkflowPipeline(
-    params?: DashboardPipelineQueryParams,
-  ): Promise<GetWorkflowPipelineResponse> {
-    try {
-      const response = await this.client.get<GetWorkflowPipelineResponse>(
-        "/workflow-pipeline",
-        { params },
-      );
       return response.data;
     } catch (error) {
       throw this.handleError(error);
