@@ -47,7 +47,10 @@ import {
   FaFilter,
   FaCalendarAlt,
   FaEye,
+  FaFileCsv,
+  FaFilePdf,
 } from "react-icons/fa";
+import Papa from "papaparse";
 import { Spinner } from "../../components";
 import { formatId } from "./activities/common";
 import { usePermissions } from "../../reducers/permission.context";
@@ -108,10 +111,14 @@ export function AllWorkflows(): JSX.Element {
 }
 
 export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX.Element {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<WorkflowMetadata[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const p = parseInt(searchParams.get("page") || "1", 10);
+    return Number.isNaN(p) || p < 1 ? 1 : p;
+  });
   const [loading, setLoading] = useState(true);
   const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
@@ -125,17 +132,34 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
   const pageSize = 10;
 
   // Search & filter state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(!!searchParams.get("status"));
-  const [filterLabel, setFilterLabel] = useState("");
-  const [filterCreatedByName, setFilterCreatedByName] = useState("");
-  const [filterWorkflowId, setFilterWorkflowId] = useState("");
-  const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
-  const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("query") || "");
+  const [showFilters, setShowFilters] = useState(
+    !!searchParams.get("status") ||
+      !!searchParams.get("label") ||
+      !!searchParams.get("createdByName") ||
+      !!searchParams.get("workflowId") ||
+      !!searchParams.get("dateFrom") ||
+      !!searchParams.get("dateTo")
+  );
+  const [filterLabel, setFilterLabel] = useState(searchParams.get("label") || "");
+  const [filterCreatedByName, setFilterCreatedByName] = useState(searchParams.get("createdByName") || "");
+  const [filterWorkflowId, setFilterWorkflowId] = useState(searchParams.get("workflowId") || "");
+  const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(() => {
+    const v = searchParams.get("dateFrom");
+    if (!v) return undefined;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? undefined : d;
+  });
+  const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(() => {
+    const v = searchParams.get("dateTo");
+    if (!v) return undefined;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? undefined : d;
+  });
 
   // Sort state
-  const [sortBy, setSortBy] = useState<SortField>("timestamp");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("DESC");
+  const [sortBy, setSortBy] = useState<SortField>((searchParams.get("sortBy") as SortField) || "timestamp");
+  const [sortOrder, setSortOrder] = useState<SortOrder>((searchParams.get("sortOrder") as SortOrder) || "DESC");
 
   // Debounce timer for search
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -144,6 +168,11 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
   const isLastPage = currentPage === totalPages;
 
   const [filterStatus, setFilterStatus] = useState(searchParams.get("status") || "");
+
+  const [debouncedFilterLabel, setDebouncedFilterLabel] = useState(filterLabel);
+  const [debouncedFilterCreatedByName, setDebouncedFilterCreatedByName] = useState(filterCreatedByName);
+  const [debouncedFilterWorkflowId, setDebouncedFilterWorkflowId] = useState(filterWorkflowId);
+  const [debouncedFilterStatus, setDebouncedFilterStatus] = useState(filterStatus);
 
   const hasActiveFilters =
     searchQuery ||
@@ -179,10 +208,10 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
         };
 
         if (searchQuery) params.query = searchQuery;
-        if (filterLabel) params.label = filterLabel;
-        if (filterCreatedByName) params.createdByName = filterCreatedByName;
-        if (filterWorkflowId) params.workflowId = filterWorkflowId;
-        if (filterStatus) params.status = filterStatus;
+        if (debouncedFilterLabel) params.label = debouncedFilterLabel;
+        if (debouncedFilterCreatedByName) params.createdByName = debouncedFilterCreatedByName;
+        if (debouncedFilterWorkflowId) params.workflowId = debouncedFilterWorkflowId;
+        if (debouncedFilterStatus) params.status = debouncedFilterStatus;
         if (filterDateFrom) params.dateFrom = filterDateFrom.toISOString();
         if (filterDateTo) {
           const endDate = new Date(filterDateTo);
@@ -194,6 +223,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
           ? await api.workflows.findAllAdmin(params)
           : await api.workflows.findAll(params);
         setData(response.workflows);
+        setTotalItems(response.pagination.total);
         setTotalPages(Math.ceil(response.pagination.total / pageSize));
       } catch (error) {
         console.error(error);
@@ -207,10 +237,10 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
       sortBy,
       sortOrder,
       searchQuery,
-      filterLabel,
-      filterCreatedByName,
-      filterWorkflowId,
-      filterStatus,
+      debouncedFilterLabel,
+      debouncedFilterCreatedByName,
+      debouncedFilterWorkflowId,
+      debouncedFilterStatus,
       filterDateFrom,
       filterDateTo,
       mode,
@@ -227,6 +257,52 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
   }, [
     stage,
     searchQuery,
+    debouncedFilterLabel,
+    debouncedFilterCreatedByName,
+    debouncedFilterWorkflowId,
+    debouncedFilterStatus,
+    filterDateFrom,
+    filterDateTo,
+    sortBy,
+    sortOrder,
+  ]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedFilterLabel(filterLabel);
+      setDebouncedFilterCreatedByName(filterCreatedByName);
+      setDebouncedFilterWorkflowId(filterWorkflowId);
+      setDebouncedFilterStatus(filterStatus);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [filterLabel, filterCreatedByName, filterWorkflowId, filterStatus]);
+
+  useEffect(() => {
+    if (mode !== "admin") return;
+
+    const params = new URLSearchParams();
+    if (stage) params.set("stage", stage);
+    if (currentPage && currentPage !== 1) params.set("page", String(currentPage));
+    if (searchQuery) params.set("query", searchQuery);
+    if (filterLabel) params.set("label", filterLabel);
+    if (filterCreatedByName) params.set("createdByName", filterCreatedByName);
+    if (filterWorkflowId) params.set("workflowId", filterWorkflowId);
+    if (filterStatus) params.set("status", filterStatus);
+    if (filterDateFrom) params.set("dateFrom", filterDateFrom.toISOString());
+    if (filterDateTo) {
+      const endDate = new Date(filterDateTo);
+      endDate.setHours(23, 59, 59, 999);
+      params.set("dateTo", endDate.toISOString());
+    }
+    if (sortBy) params.set("sortBy", sortBy);
+    if (sortOrder) params.set("sortOrder", sortOrder);
+
+    setSearchParams(params, { replace: true });
+  }, [
+    mode,
+    stage,
+    currentPage,
+    searchQuery,
     filterLabel,
     filterCreatedByName,
     filterWorkflowId,
@@ -235,6 +311,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
     filterDateTo,
     sortBy,
     sortOrder,
+    setSearchParams,
   ]);
 
   const handleSearchChange = (value: string) => {
@@ -262,6 +339,140 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
       setSortOrder(field === "label" || field === "createdByName" || field === "workflowId" ? "ASC" : "DESC");
     }
   };
+
+  const [exporting, setExporting] = useState<"csv" | "pdf" | null>(null);
+
+  const buildExportParams = useCallback((): FindAllWorkflowsParams => {
+    const params: FindAllWorkflowsParams = { stage, sortBy, sortOrder };
+    if (searchQuery) params.query = searchQuery;
+    if (debouncedFilterLabel) params.label = debouncedFilterLabel;
+    if (debouncedFilterCreatedByName) params.createdByName = debouncedFilterCreatedByName;
+    if (debouncedFilterWorkflowId) params.workflowId = debouncedFilterWorkflowId;
+    if (debouncedFilterStatus) params.status = debouncedFilterStatus;
+    if (filterDateFrom) params.dateFrom = filterDateFrom.toISOString();
+    if (filterDateTo) {
+      const endDate = new Date(filterDateTo);
+      endDate.setHours(23, 59, 59, 999);
+      params.dateTo = endDate.toISOString();
+    }
+    return params;
+  }, [stage, sortBy, sortOrder, searchQuery, debouncedFilterLabel, debouncedFilterCreatedByName, debouncedFilterWorkflowId, debouncedFilterStatus, filterDateFrom, filterDateTo]);
+
+  const fetchAllItems = useCallback(async (): Promise<WorkflowMetadata[]> => {
+    const batchSize = 100;
+    const baseParams = buildExportParams();
+    const firstResponse = mode === "admin"
+      ? await api.workflows.findAllAdmin({ ...baseParams, page: 1, pageSize: batchSize })
+      : await api.workflows.findAll({ ...baseParams, page: 1, pageSize: batchSize });
+
+    const all = [...firstResponse.workflows];
+    const pages = Math.ceil(firstResponse.pagination.total / batchSize);
+
+    for (let p = 2; p <= pages; p++) {
+      const res = mode === "admin"
+        ? await api.workflows.findAllAdmin({ ...baseParams, page: p, pageSize: batchSize })
+        : await api.workflows.findAll({ ...baseParams, page: p, pageSize: batchSize });
+      all.push(...res.workflows);
+    }
+    return all;
+  }, [buildExportParams, mode]);
+
+  const formatDateExport = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "";
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+
+  const exportCsv = useCallback(async () => {
+    setExporting("csv");
+    try {
+      const items = await fetchAllItems();
+      const rows = items.map((item) => ({
+        Protocolo: item.id,
+        Assunto: item.label,
+        "Criado por": item.createdBy?.name || "",
+        Status: item.status || "Em andamento",
+        Criado: formatDateExport(String(item.createdAt)),
+        Atualizado: formatDateExport(String(item.updatedAt)),
+      }));
+      const csv = Papa.unparse(rows);
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `relatorio-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      snackbar.error("Erro ao exportar CSV");
+    }
+    setExporting(null);
+  }, [fetchAllItems, snackbar]);
+
+  const exportPdf = useCallback(async () => {
+    setExporting("pdf");
+    try {
+      const items = await fetchAllItems();
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        snackbar.error("Habilite pop-ups para exportar PDF");
+        setExporting(null);
+        return;
+      }
+      const tableRows = items
+        .map(
+          (item) =>
+            `<tr>
+              <td>${item.id.slice(0, 8)}</td>
+              <td>${item.label}</td>
+              <td>${item.createdBy?.name || ""}</td>
+              <td>${item.status || "Em andamento"}</td>
+              <td>${formatDateExport(String(item.createdAt))}</td>
+              <td>${formatDateExport(String(item.updatedAt))}</td>
+            </tr>`,
+        )
+        .join("");
+      printWindow.document.write(`<!DOCTYPE html>
+        <html><head><title>Relatório</title>
+        <style>
+          body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; }
+          h1 { font-size: 16px; margin-bottom: 12px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+          th { background: #f5f5f5; font-weight: 600; }
+          tr:nth-child(even) { background: #fafafa; }
+          @media print { body { margin: 10mm; } }
+        </style></head><body>
+        <h1>Relatório — ${items.length} itens</h1>
+        <table>
+          <thead><tr>
+            <th>Protocolo</th><th>Assunto</th><th>Criado por</th><th>Status</th><th>Criado</th><th>Atualizado</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+        </body></html>`);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        try {
+          printWindow.print();
+        } catch (e) {
+          console.error(e);
+          snackbar.error("Erro ao abrir impressão do PDF");
+        }
+      }, 400);
+    } catch (err) {
+      console.error(err);
+      snackbar.error("Erro ao exportar PDF");
+    }
+    setExporting(null);
+  }, [fetchAllItems, snackbar]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -379,6 +590,33 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                   <FaTimes size={12} />
                   <span className="hidden sm:inline">Limpar</span>
                 </Button>
+              )}
+              {mode === "admin" && (
+                <>
+                  <div className="border-l border-border h-6 mx-1" />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={exportCsv}
+                    disabled={!!exporting || totalItems === 0}
+                    className="h-10 px-3 gap-1.5 shrink-0"
+                  >
+                    {exporting === "csv" ? <Spinner size="sm" /> : <FaFileCsv size={14} />}
+                    <span className="hidden sm:inline">CSV</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={exportPdf}
+                    disabled={!!exporting || totalItems === 0}
+                    className="h-10 px-3 gap-1.5 shrink-0"
+                  >
+                    {exporting === "pdf" ? <Spinner size="sm" /> : <FaFilePdf size={14} />}
+                    <span className="hidden sm:inline">PDF</span>
+                  </Button>
+                </>
               )}
             </div>
 
@@ -509,7 +747,7 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
             ) : (
               <CardContent className="p-0">
                 {loading && (
-                  <div className="absolute inset-0 z-10 bg-card/60 flex items-center justify-center">
+                  <div className="fixed inset-0 z-50 bg-card/60 flex items-center justify-center">
                     <Spinner size="lg" />
                   </div>
                 )}
@@ -597,7 +835,14 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                       {data.map((item) => (
                         <TableRow
                           key={item.id}
-                          onClick={() => navigate(`/workflows/${item.id}${searchQuery ? `?highlight=${encodeURIComponent(searchQuery)}` : ""}`)}
+                          onClick={(e: React.MouseEvent) => {
+                            const url = `/workflows/${item.id}${searchQuery ? `?highlight=${encodeURIComponent(searchQuery)}` : ""}`;
+                            if (e.ctrlKey || e.metaKey) {
+                              window.open(url, "_blank");
+                            } else {
+                              navigate(url);
+                            }
+                          }}
                           className="cursor-pointer transition-colors hover:bg-muted/40"
                         >
                           <TableCell>
@@ -714,12 +959,35 @@ export function MyProtocols({ mode = "mine" }: { mode?: "mine" | "admin" }): JSX
                     </Button>
                   </div>
                   <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
+                    <div className="flex items-center gap-3">
                       <p className="text-sm text-muted-foreground">
                         Página{" "}
                         <span className="font-medium">{currentPage}</span> de{" "}
                         <span className="font-medium">{totalPages}</span>
+                        {" "}({totalItems} {totalItems === 1 ? "item" : "itens"})
                       </p>
+                      <input
+                        type="number"
+                        min={1}
+                        max={totalPages}
+                        defaultValue={currentPage}
+                        key={currentPage}
+                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                          if (e.key === "Enter") {
+                            const val = parseInt((e.target as HTMLInputElement).value, 10);
+                            if (!isNaN(val) && val >= 1 && val <= totalPages) {
+                              setCurrentPage(val);
+                            }
+                          }
+                        }}
+                        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                          const val = parseInt(e.target.value, 10);
+                          if (!isNaN(val) && val >= 1 && val <= totalPages) {
+                            setCurrentPage(val);
+                          }
+                        }}
+                        className="w-16 h-7 text-center text-sm rounded border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
                     </div>
                     <div className="flex space-x-2">
                       <Button
