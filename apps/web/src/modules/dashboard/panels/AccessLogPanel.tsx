@@ -80,7 +80,7 @@ export function AccessLogPanel({ filters }: { filters: DashboardFilters }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Total de Acessos" value={data.totalLogs} icon={FaEye} />
         <StatCard
-          label="Workflows Acessados"
+          label="Pedidos Acessados"
           value={data.distinctWorkflows}
           icon={FaListAlt}
           color="success"
@@ -111,9 +111,9 @@ export function AccessLogPanel({ filters }: { filters: DashboardFilters }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="p-4 border border-border bg-card">
           <DataTable
-            title="Top Workflows Acessados"
+            title="Top Pedidos Acessados"
             columns={[
-              { header: "Workflow", accessor: "workflowLabel" },
+              { header: "Pedido", accessor: "workflowLabel" },
               {
                 header: "Acessos",
                 accessor: (r) => r.count,
@@ -146,7 +146,7 @@ export function AccessLogPanel({ filters }: { filters: DashboardFilters }) {
         <DataTable
           title="Acessos Recentes"
           columns={[
-            { header: "Workflow", accessor: "workflowLabel" },
+            { header: "Pedido", accessor: "workflowLabel" },
             { header: "Usuário", accessor: (r) => r.userName || r.userEmail },
             {
               header: "Data",
