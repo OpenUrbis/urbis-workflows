@@ -96,7 +96,6 @@ export function ConfirmForgetPassword(): JSX.Element {
           <FormControl id="code">
             <FormLabel>Código de Confirmação *</FormLabel>
             <Input
-              autoFocus
               placeholder="Código de confirmação"
               type={"text"}
               size="lg"
@@ -130,8 +129,7 @@ export function ConfirmForgetPassword(): JSX.Element {
           </p>
           {error && <p className="text-red-500">{error}</p>}
           <p className="text-sm font-bold">
-            Foi enviado um código de confirmação no e-mail cadastrado. Caso não
-            recebeu aguarde um momento e verifique a caixa de Spam.
+            Comunique o suporte via e-mail e peça o código de confirmação
           </p>
           <button
             type="submit"
