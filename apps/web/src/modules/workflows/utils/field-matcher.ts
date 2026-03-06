@@ -124,8 +124,52 @@ function highlightText(text: string, query: string): string {
 }
 
 /**
+ * Recursively searches a value object for any string/number leaf
+ * that contains the query. Used as fallback for data not covered
+ * by a form definition (e.g. prerequisite $metadata or nested data).
+ */
+function walkValueGeneric(
+  obj: any,
+  query: string,
+  parentPath: string,
+  matches: Omit<FieldMatch, "activityLabel" | "activityNamespace">[],
+  depth = 0,
+): void {
+  if (depth > 8 || !obj) return;
+
+  if (Array.isArray(obj)) {
+    obj.forEach((item, i) =>
+      walkValueGeneric(item, query, `${parentPath}[${i}]`, matches, depth + 1),
+    );
+    return;
+  }
+
+  if (typeof obj === "object") {
+    for (const [key, val] of Object.entries(obj)) {
+      if (key.startsWith("$") && key !== "$metadata") continue; // skip internal keys except metadata
+      walkValueGeneric(val, query, parentPath ? `${parentPath}.${key}` : key, matches, depth + 1);
+    }
+    return;
+  }
+
+  const str = typeof obj === "string" ? obj : typeof obj === "number" ? String(obj) : null;
+  if (str && str.toLowerCase().includes(query.toLowerCase())) {
+    // Derive a human-readable label from the path (last segment, cleaned up)
+    const segments = parentPath.split(".");
+    const lastSegment = segments[segments.length - 1]?.replace(/\[\d+\]$/, "") || parentPath;
+    matches.push({
+      fieldPath: parentPath,
+      fieldLabel: lastSegment,
+      rawValue: str,
+      highlightedValue: highlightText(str, query),
+    });
+  }
+}
+
+/**
  * Given a full workflow (schema + value) and a search query,
  * returns all matching fields grouped by activity.
+ * Searches both FORM activities and Incoming (prerequisite) data.
  */
 export function findFieldMatches(
   schema: SchemaDefinition,
@@ -136,6 +180,7 @@ export function findFieldMatches(
 
   const allMatches: FieldMatch[] = [];
 
+  // 1. Search FORM activities
   for (const activity of schema.activities) {
     // Only FORM activities have searchable dynamic content
     if (activity.type !== ActivityTypeEnum.FORM) continue;
@@ -166,6 +211,53 @@ export function findFieldMatches(
         activityLabel: activity.label,
         activityNamespace: activity.namespace,
       });
+    }
+  }
+
+  // 2. Search Incoming (prerequisite) data
+  if (schema.incoming && schema.incoming.length > 0) {
+    for (const incoming of schema.incoming) {
+      const incomingValue = value[incoming.namespace];
+      if (!incomingValue) continue;
+
+      const fieldMatches: Omit<
+        FieldMatch,
+        "activityLabel" | "activityNamespace"
+      >[] = [];
+
+      // Walk the incoming's form definition if it exists
+      if (incoming.form) {
+        if ((incoming.form as any).type === "block" && (incoming.form as any).block) {
+          walkFields((incoming.form as any).block, incomingValue, query, "", fieldMatches);
+        } else {
+          walkFields([incoming.form], incomingValue, query, "", fieldMatches);
+        }
+      }
+
+      // Also do a generic recursive search on the incoming value
+      // to catch data not covered by the form definition (e.g. $metadata, nested prerequisite data)
+      const genericMatches: Omit<
+        FieldMatch,
+        "activityLabel" | "activityNamespace"
+      >[] = [];
+      walkValueGeneric(incomingValue, query, "", genericMatches);
+
+      // Merge: add generic matches that weren't already found via form walking
+      const existingPaths = new Set(fieldMatches.map((m) => m.fieldPath));
+      for (const gm of genericMatches) {
+        if (!existingPaths.has(gm.fieldPath)) {
+          fieldMatches.push(gm);
+        }
+      }
+
+      const incomingLabel = `Pré-requisito: ${incoming.label}`;
+      for (const match of fieldMatches) {
+        allMatches.push({
+          ...match,
+          activityLabel: incomingLabel,
+          activityNamespace: incoming.namespace,
+        });
+      }
     }
   }
 

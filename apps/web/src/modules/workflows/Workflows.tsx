@@ -428,6 +428,7 @@ export function Workflows(): JSX.Element {
           }}
           apiClient={apiClient}
           styleContext={styleContext}
+          highlightQuery={highlightQuery}
         />
       );
     }

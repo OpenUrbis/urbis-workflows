@@ -17,7 +17,8 @@ export const IncomingActivity: React.FC<{
   onChange: (value: any) => void;
   apiClient: ApiClient;
   styleContext: any;
-}> = ({ selected, value, general, onChange, apiClient, styleContext }) => {
+  highlightQuery?: string;
+}> = ({ selected, value, general, onChange, apiClient, styleContext, highlightQuery }) => {
   const [workflowId, setWorkflowId] = useState("");
   const [workflowData, setWorkflowData] = useState<any>(value ?? null);
   const [valid, setValid] = useState({});
@@ -285,6 +286,7 @@ export const IncomingActivity: React.FC<{
                       [selected.namespace]: workflowData.value,
                     },
                   }}
+                  highlightQuery={highlightQuery}
                 />
               ))}
           </div>
