@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAccessToken } from "../../../auth/token";
 import { ApiClient } from "../../../api";
 import { GetSchemaManagementResponse } from "../../../api/types/dashboard.dto";
@@ -18,10 +19,26 @@ function formatDuration(ms: number | null): string {
   return `${Math.round(hours / 24)}d`;
 }
 
-export function SchemaManagementPanel({ filters: _filters }: { filters: DashboardFilters }) {
+export function SchemaManagementPanel({ filters }: { filters: DashboardFilters }) {
   const [data, setData] = useState<GetSchemaManagementResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleAssuntoClick = useCallback(
+    (schemaLabel: string, e: React.MouseEvent) => {
+      const params = new URLSearchParams();
+      if (filters.stage) params.set("stage", filters.stage);
+      if (schemaLabel) params.set("label", schemaLabel);
+      const url = `/workflows/all?${params.toString()}`;
+      if (e.ctrlKey || e.metaKey) {
+        window.open(url, "_blank");
+      } else {
+        navigate(url);
+      }
+    },
+    [filters.stage, navigate],
+  );
 
   useEffect(() => {
     const client = new ApiClient({
@@ -57,7 +74,18 @@ export function SchemaManagementPanel({ filters: _filters }: { filters: Dashboar
         <DataTable
           title="Ambientes por Assunto"
           columns={[
-            { header: "Assunto", accessor: "schemaLabel" },
+            {
+              header: "Assunto",
+              accessor: (r) => (
+                <button
+                  type="button"
+                  className="text-left text-primary underline decoration-primary/30 hover:decoration-primary transition-colors"
+                  onClick={(e) => handleAssuntoClick(r.schemaLabel, e)}
+                >
+                  {r.schemaLabel}
+                </button>
+              ),
+            },
             {
               header: "DEV",
               accessor: (r) => r.hasDevelopment ? (
@@ -100,7 +128,18 @@ export function SchemaManagementPanel({ filters: _filters }: { filters: Dashboar
           <DataTable
             title="Uso por Assunto"
             columns={[
-              { header: "Assunto", accessor: "schemaLabel" },
+              {
+                header: "Assunto",
+                accessor: (r) => (
+                  <button
+                    type="button"
+                    className="text-left text-primary underline decoration-primary/30 hover:decoration-primary transition-colors"
+                    onClick={(e) => handleAssuntoClick(r.schemaLabel, e)}
+                  >
+                    {r.schemaLabel}
+                  </button>
+                ),
+              },
               { header: "Total", accessor: (r) => r.totalInstances, className: "text-right tabular-nums" },
               { header: "Concluídos", accessor: (r) => r.completedInstances, className: "text-right tabular-nums" },
               { header: "Em Andamento", accessor: (r) => r.inProgressInstances, className: "text-right tabular-nums" },

@@ -16,12 +16,14 @@ import {
   FaHeartbeat,
   FaBell,
   FaChevronRight,
+  FaEye,
 } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import { SchemaManagementPanel } from "./panels/SchemaManagementPanel";
 import { UsersIamPanel } from "./panels/UsersIamPanel";
 import { SystemHealthPanel } from "./panels/SystemHealthPanel";
 import { SubscriptionsPanel } from "./panels/SubscriptionsPanel";
+import { AccessLogPanel } from "./panels/AccessLogPanel";
 import { type DashboardFilters } from "./Dashboard";
 
 const STAGE_OPTIONS = [
@@ -38,7 +40,7 @@ const PERIOD_OPTIONS = [
   { value: "365", label: "Último ano" },
 ];
 
-type PanelKey = "schemas" | "users" | "health" | "subscriptions";
+type PanelKey = "schemas" | "users" | "health" | "subscriptions" | "access-logs";
 
 const menus: {
   name: string;
@@ -70,6 +72,12 @@ const menus: {
     key: "R",
     icon: <FaBell />,
   },
+  {
+    name: "Log de Acesso",
+    link: "access-logs",
+    key: "T",
+    icon: <FaEye />,
+  },
 ];
 
 const panels: Record<PanelKey, React.FC<{ filters: DashboardFilters }>> = {
@@ -77,6 +85,7 @@ const panels: Record<PanelKey, React.FC<{ filters: DashboardFilters }>> = {
   users: UsersIamPanel,
   health: SystemHealthPanel,
   subscriptions: SubscriptionsPanel,
+  "access-logs": AccessLogPanel,
 };
 
 export function AdminPanel(): JSX.Element {

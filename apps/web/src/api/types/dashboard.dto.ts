@@ -222,12 +222,14 @@ export interface DashboardDeadLetterQueueCount {
   queueName: string;
   total: number;
   unprocessed: number;
+  oldestUnprocessedMs: number | null;
 }
 
 export interface GetSystemHealthResponse {
   deadLettersByQueue: DashboardDeadLetterQueueCount[];
   totalDeadLetters: number;
   unprocessedDeadLetters: number;
+  oldestUnprocessedDeadLetterMs: number | null;
   unindexedWorkflows: number;
   unindexedStats: number;
 }
@@ -244,9 +246,56 @@ export interface DashboardSubscriptionTypeCount {
   count: number;
 }
 
+export interface DashboardSubscriptionTimeSeriesPoint {
+  date: string;
+  count: number;
+}
+
 export interface GetSubscriptionsResponse {
   byStatus: DashboardSubscriptionStatusCount[];
   byType: DashboardSubscriptionTypeCount[];
+  createdOverTime: DashboardSubscriptionTimeSeriesPoint[];
   totalSubscriptions: number;
   activeSubscriptions: number;
+  pausedSubscriptions: number;
+  cancelledSubscriptions: number;
+}
+
+// ── Access Logs ──
+
+export interface AccessLogEntry {
+  workflowId: string;
+  workflowLabel: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  timestamp: string;
+}
+
+export interface AccessLogTopWorkflow {
+  workflowId: string;
+  workflowLabel: string;
+  count: number;
+}
+
+export interface AccessLogTopUser {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  count: number;
+}
+
+export interface AccessLogTimeSeriesPoint {
+  date: string;
+  count: number;
+}
+
+export interface GetAccessLogsResponse {
+  recentLogs: AccessLogEntry[];
+  totalLogs: number;
+  distinctWorkflows: number;
+  distinctUsers: number;
+  topWorkflows: AccessLogTopWorkflow[];
+  topUsers: AccessLogTopUser[];
+  accessOverTime: AccessLogTimeSeriesPoint[];
 }

@@ -8,6 +8,7 @@ import {
   GetUsersIamResponse,
   GetSystemHealthResponse,
   GetSubscriptionsResponse,
+  GetAccessLogsResponse,
 } from "../types/dashboard.dto";
 
 export class DashboardApiClient {
@@ -95,20 +96,41 @@ export class DashboardApiClient {
     }
   }
 
-  async getSystemHealth(): Promise<GetSystemHealthResponse> {
+  async getUsersIamWithRange(
+    params?: DashboardTimeRangeQuery,
+  ): Promise<GetUsersIamResponse> {
     try {
-      const response =
-        await this.client.get<GetSystemHealthResponse>("/system-health");
+      const response = await this.client.get<GetUsersIamResponse>("/users-iam", { params });
       return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
   }
 
-  async getSubscriptions(): Promise<GetSubscriptionsResponse> {
+  async getSystemHealth(params?: DashboardTimeRangeQuery): Promise<GetSystemHealthResponse> {
     try {
       const response =
-        await this.client.get<GetSubscriptionsResponse>("/subscriptions");
+        await this.client.get<GetSystemHealthResponse>("/system-health", { params });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getSubscriptions(params?: DashboardTimeRangeQuery): Promise<GetSubscriptionsResponse> {
+    try {
+      const response =
+        await this.client.get<GetSubscriptionsResponse>("/subscriptions", { params });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getAccessLogs(params?: DashboardTimeRangeQuery): Promise<GetAccessLogsResponse> {
+    try {
+      const response =
+        await this.client.get<GetAccessLogsResponse>("/access-logs", { params });
       return response.data;
     } catch (error) {
       throw this.handleError(error);
