@@ -48,16 +48,16 @@ export function SchemaManagementPanel({ filters: _filters }: { filters: Dashboar
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Total de Schemas" value={data.totalSchemas} icon={FaProjectDiagram} />
+        <StatCard label="Total de Assuntos" value={data.totalSchemas} icon={FaProjectDiagram} />
         <StatCard label="Ativos" value={data.activeSchemas} icon={FaCheck} color="success" />
         <StatCard label="Deletados" value={data.deletedSchemas} icon={FaTrash} color="destructive" />
       </div>
 
       <Card className="p-4 border border-border bg-card">
         <DataTable
-          title="Ambientes por Schema"
+          title="Ambientes por Assunto"
           columns={[
-            { header: "Schema", accessor: "schemaLabel" },
+            { header: "Assunto", accessor: "schemaLabel" },
             {
               header: "DEV",
               accessor: (r) => r.hasDevelopment ? (
@@ -98,9 +98,9 @@ export function SchemaManagementPanel({ filters: _filters }: { filters: Dashboar
       {data.usage.length > 0 && (
         <Card className="p-4 border border-border bg-card">
           <DataTable
-            title="Uso por Schema"
+            title="Uso por Assunto"
             columns={[
-              { header: "Schema", accessor: "schemaLabel" },
+              { header: "Assunto", accessor: "schemaLabel" },
               { header: "Total", accessor: (r) => r.totalInstances, className: "text-right tabular-nums" },
               { header: "Concluídos", accessor: (r) => r.completedInstances, className: "text-right tabular-nums" },
               { header: "Em Andamento", accessor: (r) => r.inProgressInstances, className: "text-right tabular-nums" },

@@ -95,13 +95,38 @@ export interface DashboardSignatureAgingBucket {
   count: number;
 }
 
+export interface DashboardSignatureTimeSeriesPoint {
+  date: string;
+  count: number;
+}
+
+export interface DashboardSignatureByLabelCount {
+  label: string;
+  schemaLabel: string;
+  total: number;
+  pending: number;
+  signed: number;
+  rejected: number;
+}
+
+export interface DashboardSignaturePendingByWorkflow {
+  workflowId: string;
+  workflowLabel: string;
+  pendingCount: number;
+  oldestPendingMs: number | null;
+}
+
 export interface GetSignaturesResponse {
   byState: DashboardSignatureStateCount[];
   pendingByAge: DashboardSignatureAgingBucket[];
+  createdOverTime: DashboardSignatureTimeSeriesPoint[];
+  byLabel: DashboardSignatureByLabelCount[];
+  topPendingByWorkflow: DashboardSignaturePendingByWorkflow[];
   totalSignatures: number;
   pendingCount: number;
   signedCount: number;
   rejectedCount: number;
+  avgResolutionTimeMs: number | null;
 }
 
 // ── Tax & Documents Dashboard ──
@@ -111,16 +136,63 @@ export interface DashboardTaxStateCount {
   count: number;
 }
 
+export interface DashboardTaxTimeSeriesPoint {
+  date: string;
+  count: number;
+}
+
+export interface DashboardTaxByLabelCount {
+  label: string;
+  schemaLabel: string;
+  total: number;
+  pending: number;
+  completed: number;
+  failed: number;
+}
+
+export interface DashboardTaxPendingByWorkflow {
+  workflowId: string;
+  workflowLabel: string;
+  pendingCount: number;
+  oldestPendingMs: number | null;
+}
+
 export interface DashboardDocumentStateCount {
   state: string;
   count: number;
 }
 
+export interface DashboardDocumentTimeSeriesPoint {
+  date: string;
+  count: number;
+}
+
+export interface DashboardDocumentByLabelCount {
+  label: string;
+  schemaLabel: string;
+  total: number;
+}
+
+export interface DashboardDocumentByWorkflow {
+  workflowId: string;
+  workflowLabel: string;
+  documentCount: number;
+}
+
 export interface GetTaxDocumentsResponse {
   taxByState: DashboardTaxStateCount[];
+  taxCreatedOverTime: DashboardTaxTimeSeriesPoint[];
+  taxByLabel: DashboardTaxByLabelCount[];
+  topTaxPendingByWorkflow: DashboardTaxPendingByWorkflow[];
   totalTaxes: number;
+  pendingTaxes: number;
+  completedTaxes: number;
   failedTaxes: number;
+  avgTaxResolutionTimeMs: number | null;
   documentByState: DashboardDocumentStateCount[];
+  documentCreatedOverTime: DashboardDocumentTimeSeriesPoint[];
+  documentByLabel: DashboardDocumentByLabelCount[];
+  topDocumentsByWorkflow: DashboardDocumentByWorkflow[];
   totalDocuments: number;
 }
 

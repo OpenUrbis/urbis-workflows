@@ -56,7 +56,7 @@ export function SystemHealthPanel({ filters: _filters }: { filters: DashboardFil
           color={data.unprocessedDeadLetters > 0 ? "warning" : "success"}
         />
         <StatCard
-          label="Workflows Não Indexados"
+          label="Pedidos Não Indexados"
           value={data.unindexedWorkflows}
           icon={FaSearch}
           color={data.unindexedWorkflows > 0 ? "warning" : "success"}

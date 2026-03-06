@@ -59,9 +59,10 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
   const navigate = useNavigate();
 
   const handleActivityClick = useCallback(
-    (activityLabel: string, e: React.MouseEvent) => {
+    (schemaLabel: string, activityLabel: string, e: React.MouseEvent) => {
       const params = new URLSearchParams();
       if (filters.stage) params.set("stage", filters.stage);
+      if (schemaLabel) params.set("label", schemaLabel);
       params.set("status", activityLabel);
       const url = `/workflows/all?${params.toString()}`;
       if (e.ctrlKey || e.metaKey) {
@@ -87,7 +88,7 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
     const d = new Date(bucketStartDate + "T00:00:00Z");
     if (Number.isNaN(d.getTime())) return bucketStartDate;
 
-    const useMonth = rangeDays !== null && rangeDays > 120;
+    const useMonth = rangeDays === null || rangeDays > 120;
     if (useMonth) {
       return d.toLocaleDateString("pt-BR", { month: "short", year: "numeric", timeZone: "UTC" });
     }
@@ -95,25 +96,33 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
   };
 
   const createdSeries = React.useMemo(() => {
-    if (!data) return [] as { date: string; count: number }[];
+    if (!data || data.createdOverTime.length === 0) return [] as { date: string; count: number }[];
 
     const byDate = new Map<string, number>();
     for (const p of data.createdOverTime) {
       byDate.set(p.date.slice(0, 10), p.count);
     }
 
-    const now = new Date();
     const hasExplicitRange = !!filters.dateFrom && !!filters.dateTo;
-    const from = hasExplicitRange ? new Date(filters.dateFrom!) : new Date(now);
-    const to = hasExplicitRange ? new Date(filters.dateTo!) : now;
-    if (!hasExplicitRange) {
-      from.setDate(from.getDate() - 30);
+
+    let from: Date;
+    let to: Date;
+
+    if (hasExplicitRange) {
+      from = new Date(filters.dateFrom!);
+      to = new Date(filters.dateTo!);
+    } else {
+      // Derive range from actual data
+      const dates = data.createdOverTime.map((p) => p.date.slice(0, 10)).sort();
+      from = new Date(dates[0] + "T00:00:00Z");
+      to = new Date(dates[dates.length - 1] + "T00:00:00Z");
     }
 
+    const actualDays = Math.ceil((to.getTime() - from.getTime()) / 86_400_000);
+
     const bucket: "day" | "week" | "month" = (() => {
-      if (rangeDays === null) return "week";
-      if (rangeDays <= 7) return "day";
-      if (rangeDays <= 120) return "week";
+      if (actualDays <= 7) return "day";
+      if (actualDays <= 120) return "week";
       return "month";
     })();
 
@@ -151,7 +160,7 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
       cursor = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1));
     }
     return points;
-  }, [data, filters.dateFrom, filters.dateTo, rangeDays]);
+  }, [data, filters.dateFrom, filters.dateTo]);
 
   useEffect(() => {
     setLoading(true);
@@ -189,7 +198,7 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Total de Workflows"
+          label="Total de Pedidos"
           value={data.totalWorkflows}
           icon={FaLayerGroup}
         />
@@ -215,7 +224,7 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
 
       <Card className="p-4 border border-border bg-card">
         <BarChart
-          title="Criados nos Últimos 30 Dias"
+          title="Pedidos ao Longo do Tempo"
           items={createdSeries.map((r) => ({
             label: formatBucketLabel(r.date),
             value: r.count,
@@ -226,7 +235,7 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
 
       <Card className="p-4 border border-border bg-card">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-          Gargalos — Atividades com Mais Workflows Aguardando
+          Gargalos — Atividades com Mais Pedidos Aguardando
         </h3>
 
         {data.bottlenecks.length === 0 ? (
@@ -285,7 +294,7 @@ export function WorkflowOverviewPanel({ filters }: { filters: DashboardFilters }
                             <tr
                               key={act.activityNamespace}
                               className={`border-b border-border cursor-pointer hover:bg-muted/40 transition-colors ${isHot ? "bg-red-500/5" : ""}`}
-                              onClick={(e) => handleActivityClick(act.activityLabel, e)}
+                              onClick={(e) => handleActivityClick(schema.schemaLabel, act.activityLabel, e)}
                             >
                               <td className="px-3 py-1.5 text-foreground underline decoration-muted-foreground/30">
                                 <span className="flex items-center gap-1.5">
