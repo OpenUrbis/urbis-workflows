@@ -6,6 +6,7 @@ import {
   FaClock,
   FaLock,
   FaProjectDiagram,
+  FaSearch,
 } from "react-icons/fa";
 import {
   ActivityTemplate,
@@ -30,6 +31,7 @@ export const ActivitiesList: React.FC<{
   styleContext: any;
   context?: any;
   incoming?: Incoming[];
+  highlightedNamespaces?: Set<string>;
 }> = ({
   activities,
   activeStep,
@@ -37,6 +39,7 @@ export const ActivitiesList: React.FC<{
   styleContext,
   context = {},
   incoming = [],
+  highlightedNamespaces,
 }) => {
   const getActivityIndex = (activity: ActivityTemplate) =>
     activities.findIndex((a) => a.id === activity.id);
@@ -433,7 +436,14 @@ export const ActivitiesList: React.FC<{
                 {getStatusIcon(status, isActive)}
               </div>
               <div className="flex-1 relative">
-                <div className="font-medium">{activity.label}</div>
+                <div className="font-medium flex items-center gap-1.5">
+                  {activity.label}
+                  {highlightedNamespaces?.has(activity.namespace) && (
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-yellow-400 dark:bg-yellow-500" title="Contém resultado da busca">
+                      <FaSearch size={8} className="text-yellow-900" />
+                    </span>
+                  )}
+                </div>
                 <div className="text-sm opacity-75 flex items-center">
                   <span>{getActivityTypeLabel(activity.type)}</span>
                   {statusLabel && (

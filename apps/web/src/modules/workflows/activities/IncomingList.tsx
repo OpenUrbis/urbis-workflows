@@ -5,6 +5,7 @@ import {
   FaChevronDown,
   FaCheckCircle,
   FaArrowRight,
+  FaSearch,
 } from "react-icons/fa";
 import { Incoming } from "../../../api/types/schema";
 import { truncateText } from "./common";
@@ -17,6 +18,7 @@ export const IncomingList: React.FC<{
   onToggle?: (isOpen: boolean) => void;
   styleContext: any;
   context: any;
+  highlightedNamespaces?: Set<string>;
 }> = ({
   incomings,
   selectedIncoming,
@@ -25,6 +27,7 @@ export const IncomingList: React.FC<{
   onToggle,
   styleContext,
   context,
+  highlightedNamespaces,
 }) => {
   const showDependencies = isOpen ?? incomings.length > 0;
   const completedCount = incomings.filter(
@@ -120,7 +123,14 @@ export const IncomingList: React.FC<{
                     )}
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium">{workflow.label}</div>
+                    <div className="font-medium flex items-center gap-1.5">
+                      {workflow.label}
+                      {highlightedNamespaces?.has(workflow.namespace) && (
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-yellow-400 dark:bg-yellow-500" title="Contém resultado da busca">
+                          <FaSearch size={8} className="text-yellow-900" />
+                        </span>
+                      )}
+                    </div>
                     <Tooltip
                       label={workflow.documentation}
                       placement="top"

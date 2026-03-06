@@ -1,5 +1,5 @@
 import { getAccessToken } from "../../auth/token";
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useMemo, useState, useContext } from "react";
 import {
   Button as DSButton,
   Dialog,
@@ -61,6 +61,7 @@ import { Spinner } from "../../components";
 import { formatDate, formatId } from "./activities/common";
 import { v4 as uuidv4 } from "uuid";
 import { usePermissions } from "../../reducers/permission.context";
+import { findFieldMatches } from "./utils/field-matcher";
 
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -735,6 +736,13 @@ export function Workflows(): JSX.Element {
     }));
   }, [context]);
 
+  // Compute which activity/incoming namespaces contain search matches
+  const highlightedNamespaces = useMemo<Set<string>>(() => {
+    if (!highlightQuery || !workflow?.schema) return new Set();
+    const matches = findFieldMatches(workflow.schema, context, highlightQuery);
+    return new Set(matches.map((m) => m.activityNamespace));
+  }, [highlightQuery, workflow?.schema, context]);
+
   // Add new useEffect to handle incomingListOpen state
   useEffect(() => {
     if (workflow?.schema?.incoming) {
@@ -986,6 +994,7 @@ export function Workflows(): JSX.Element {
                     onToggle={setIncomingListOpen}
                     styleContext={styleContext}
                     context={context}
+                    highlightedNamespaces={highlightedNamespaces}
                   />
                   {/* Divider */}
                   <div className="border-b mb-6"></div>
@@ -1003,6 +1012,7 @@ export function Workflows(): JSX.Element {
                 styleContext={styleContext}
                 context={context}
                 incoming={workflow.schema?.incoming}
+                highlightedNamespaces={highlightedNamespaces}
               />
 
               {/* Divider after activities */}
