@@ -11,23 +11,18 @@ import {
   SelectValue,
 } from "@open-urbis/map-ui";
 import {
-  FaChartLine,
-  FaPen,
-  FaReceipt,
-  FaFileAlt,
+  FaProjectDiagram,
+  FaUsers,
+  FaHeartbeat,
+  FaBell,
   FaChevronRight,
 } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
-import { WorkflowOverviewPanel } from "./panels/WorkflowOverviewPanel";
-import { SignaturesPanel } from "./panels/SignaturesPanel";
-import { TaxesPanel } from "./panels/TaxesPanel";
-import { DocumentsPanel } from "./panels/DocumentsPanel";
-
-export interface DashboardFilters {
-  stage: string;
-  dateFrom?: string;
-  dateTo?: string;
-}
+import { SchemaManagementPanel } from "./panels/SchemaManagementPanel";
+import { UsersIamPanel } from "./panels/UsersIamPanel";
+import { SystemHealthPanel } from "./panels/SystemHealthPanel";
+import { SubscriptionsPanel } from "./panels/SubscriptionsPanel";
+import { type DashboardFilters } from "./Dashboard";
 
 const STAGE_OPTIONS = [
   { value: "production", label: "Produção" },
@@ -43,11 +38,7 @@ const PERIOD_OPTIONS = [
   { value: "365", label: "Último ano" },
 ];
 
-type PanelKey =
-  | "workflows"
-  | "signatures"
-  | "taxes"
-  | "documents";
+type PanelKey = "schemas" | "users" | "health" | "subscriptions";
 
 const menus: {
   name: string;
@@ -56,44 +47,44 @@ const menus: {
   icon: React.ReactNode;
 }[] = [
   {
-    name: "Pedidos",
-    link: "workflows",
+    name: "Assuntos",
+    link: "schemas",
     key: "Q",
-    icon: <FaChartLine />,
+    icon: <FaProjectDiagram />,
   },
   {
-    name: "Assinaturas",
-    link: "signatures",
+    name: "Usuários & IAM",
+    link: "users",
     key: "A",
-    icon: <FaPen />,
+    icon: <FaUsers />,
   },
   {
-    name: "Taxas",
-    link: "taxes",
+    name: "Saúde do Sistema",
+    link: "health",
     key: "E",
-    icon: <FaReceipt />,
+    icon: <FaHeartbeat />,
   },
   {
-    name: "Documentos",
-    link: "documents",
+    name: "Inscrições",
+    link: "subscriptions",
     key: "R",
-    icon: <FaFileAlt />,
+    icon: <FaBell />,
   },
 ];
 
 const panels: Record<PanelKey, React.FC<{ filters: DashboardFilters }>> = {
-  workflows: WorkflowOverviewPanel,
-  signatures: SignaturesPanel,
-  taxes: TaxesPanel,
-  documents: DocumentsPanel,
+  schemas: SchemaManagementPanel,
+  users: UsersIamPanel,
+  health: SystemHealthPanel,
+  subscriptions: SubscriptionsPanel,
 };
 
-export function Dashboard(): JSX.Element {
+export function AdminPanel(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [subpage, setSubpage] = useState<PanelKey>(() => {
-    const tab = (searchParams.get("tab") as PanelKey) || "workflows";
-    return (Object.keys(panels) as PanelKey[]).includes(tab) ? tab : "workflows";
+    const tab = (searchParams.get("tab") as PanelKey) || "schemas";
+    return (Object.keys(panels) as PanelKey[]).includes(tab) ? tab : "schemas";
   });
   const [stage, setStage] = useState(() => searchParams.get("stage") || "production");
   const [period, setPeriod] = useState(() => searchParams.get("period") || "__all__");
@@ -133,8 +124,8 @@ export function Dashboard(): JSX.Element {
   };
 
   useEffect(() => {
-    const tab = (searchParams.get("tab") as PanelKey) || "workflows";
-    const nextTab = (Object.keys(panels) as PanelKey[]).includes(tab) ? tab : "workflows";
+    const tab = (searchParams.get("tab") as PanelKey) || "schemas";
+    const nextTab = (Object.keys(panels) as PanelKey[]).includes(tab) ? tab : "schemas";
     if (nextTab !== subpage) setSubpage(nextTab);
 
     const nextStage = searchParams.get("stage") || "production";
@@ -195,7 +186,7 @@ export function Dashboard(): JSX.Element {
   return (
     <div className="flex flex-col space-y-2 mb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-semibold mt-4 mb-4 tracking-tight text-foreground">
-        Estatísticas
+        Painel Administrativo
       </h1>
 
       <div className="flex flex-wrap items-center gap-3 mb-2">

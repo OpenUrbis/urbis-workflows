@@ -108,6 +108,12 @@ function Header(): JSX.Element {
     },
     {
       path: "/dashboard",
+      label: "Estatísticas",
+      mobile: true,
+      permission: "dashboard:read:workflowOverview",
+    },
+    {
+      path: "/admin-panel",
       label: "Painel Administrativo",
       mobile: true,
       permission: "dashboard:read:workflowOverview",

@@ -2,6 +2,7 @@ import { useContext, useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import MapCallback from "./MapCallback";
 import {
+  AdminPanel,
   ContestUser,
   Dashboard,
   Datasets,
@@ -173,7 +174,7 @@ const RouteDefinitions = () => (
       />
     </Route>
 
-    {/* Dashboard route */}
+    {/* Estatísticas (formerly Dashboard) route */}
     <Route
       element={
         <ProtectedRoute requiredPermission="dashboard:read:workflowOverview" />
@@ -184,6 +185,22 @@ const RouteDefinitions = () => (
         element={
           <PrivateWrapper>
             <Dashboard />
+          </PrivateWrapper>
+        }
+      />
+    </Route>
+
+    {/* Painel Administrativo route */}
+    <Route
+      element={
+        <ProtectedRoute requiredPermission="dashboard:read:workflowOverview" />
+      }
+    >
+      <Route
+        path="/admin-panel"
+        element={
+          <PrivateWrapper>
+            <AdminPanel />
           </PrivateWrapper>
         }
       />
