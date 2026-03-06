@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { UserIamDetailsResponse } from "../types/iam.dto";
 import { userIamStore } from "../services/user-iam-store";
+import { getAccessToken } from "../../auth/token";
 
 export interface ApiClientConfig {
   baseURL: string;
@@ -17,12 +18,24 @@ export abstract class BaseApiClient {
   private removeListener: (() => void) | null = null;
 
   constructor(config: ApiClientConfig) {
+    // Strip any static Authorization header — the interceptor below handles it dynamically
+    const { Authorization, authorization, ...staticHeaders } = config.headers || {};
+
     this.client = axios.create({
       baseURL: `${config.baseURL}${config.path ? "/" + config.path : ""}`,
       headers: {
         "Content-Type": "application/json",
-        ...config.headers,
+        ...staticHeaders,
       },
+    });
+
+    // Attach a fresh access token on every request so we never use a stale/empty token
+    this.client.interceptors.request.use((reqConfig) => {
+      const token = getAccessToken();
+      if (token) {
+        reqConfig.headers.Authorization = `Bearer ${token}`;
+      }
+      return reqConfig;
     });
 
     // Get the initial userIam value from the store

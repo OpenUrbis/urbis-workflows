@@ -191,6 +191,11 @@ export interface FindAllWorkflowsParams {
   createdByName?: string;
   workflowId?: string;
   status?: string;
+  geoBoundsSwLat?: number;
+  geoBoundsSwLng?: number;
+  geoBoundsNeLat?: number;
+  geoBoundsNeLng?: number;
+  structuredQuery?: string;
   sortBy?: string;
   sortOrder?: "ASC" | "DESC";
 }

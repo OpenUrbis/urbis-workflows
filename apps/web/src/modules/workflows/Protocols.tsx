@@ -49,6 +49,7 @@ import {
   FaEye,
   FaFileCsv,
   FaFilePdf,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 import { Spinner } from "../../components";
 import { formatId } from "./activities/common";
@@ -63,6 +64,8 @@ import {
   formatDateTimePtBr,
   formatDateTimePtBrSafe,
 } from "./utils/workflows-date";
+import { GeoFilterMap, GeoBounds } from "./components/GeoFilterMap";
+import { StructuredQueryInput } from "./components/StructuredQueryInput";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
@@ -151,7 +154,9 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
       !!searchParams.get("createdByName") ||
       !!searchParams.get("workflowId") ||
       !!searchParams.get("dateFrom") ||
-      !!searchParams.get("dateTo")
+      !!searchParams.get("dateTo") ||
+      !!searchParams.get("geoBoundsSwLat") ||
+      !!searchParams.get("structuredQuery")
   );
   const [filterLabel, setFilterLabel] = useState(searchParams.get("label") || "");
   const [filterCreatedByName, setFilterCreatedByName] = useState(searchParams.get("createdByName") || "");
@@ -169,6 +174,27 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
     return Number.isNaN(d.getTime()) ? undefined : d;
   });
 
+  // Geo filter state
+  const [geoBounds, setGeoBounds] = useState<GeoBounds | undefined>(() => {
+    const sw = searchParams.get("geoBoundsSwLat");
+    const swLng = searchParams.get("geoBoundsSwLng");
+    const ne = searchParams.get("geoBoundsNeLat");
+    const neLng = searchParams.get("geoBoundsNeLng");
+    if (sw && swLng && ne && neLng) {
+      return {
+        swLat: parseFloat(sw),
+        swLng: parseFloat(swLng),
+        neLat: parseFloat(ne),
+        neLng: parseFloat(neLng),
+      };
+    }
+    return undefined;
+  });
+  const [showGeoMap, setShowGeoMap] = useState(false);
+
+  // Structured query state
+  const [filterStructuredQuery, setFilterStructuredQuery] = useState(searchParams.get("structuredQuery") || "");
+
   // Sort state
   const [sortBy, setSortBy] = useState<SortField>((searchParams.get("sortBy") as SortField) || "timestamp");
   const [sortOrder, setSortOrder] = useState<SortOrder>((searchParams.get("sortOrder") as SortOrder) || "DESC");
@@ -185,6 +211,7 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
   const [debouncedFilterCreatedByName, setDebouncedFilterCreatedByName] = useState(filterCreatedByName);
   const [debouncedFilterWorkflowId, setDebouncedFilterWorkflowId] = useState(filterWorkflowId);
   const [debouncedFilterStatus, setDebouncedFilterStatus] = useState(filterStatus);
+  const [debouncedStructuredQuery, setDebouncedStructuredQuery] = useState(filterStructuredQuery);
 
   const hasActiveFilters =
     searchQuery ||
@@ -193,7 +220,9 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
     filterWorkflowId ||
     filterStatus ||
     filterDateFrom !== undefined ||
-    filterDateTo !== undefined;
+    filterDateTo !== undefined ||
+    geoBounds !== undefined ||
+    filterStructuredQuery;
 
   const nextPage = () => {
     if (!isLastPage) {
@@ -230,6 +259,13 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
           endDate.setHours(23, 59, 59, 999);
           params.dateTo = endDate.toISOString();
         }
+        if (geoBounds) {
+          params.geoBoundsSwLat = geoBounds.swLat;
+          params.geoBoundsSwLng = geoBounds.swLng;
+          params.geoBoundsNeLat = geoBounds.neLat;
+          params.geoBoundsNeLng = geoBounds.neLng;
+        }
+        if (debouncedStructuredQuery) params.structuredQuery = debouncedStructuredQuery;
 
         const response = mode === "admin"
           ? await api.workflows.findAllAdmin(params)
@@ -255,6 +291,8 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
       debouncedFilterStatus,
       filterDateFrom,
       filterDateTo,
+      geoBounds,
+      debouncedStructuredQuery,
       mode,
     ]
   );
@@ -275,6 +313,8 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
     debouncedFilterStatus,
     filterDateFrom,
     filterDateTo,
+    geoBounds,
+    debouncedStructuredQuery,
     sortBy,
     sortOrder,
   ]);
@@ -314,6 +354,13 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
       endDate.setHours(23, 59, 59, 999);
       params.set("dateTo", endDate.toISOString());
     }
+    if (geoBounds) {
+      params.set("geoBoundsSwLat", String(geoBounds.swLat));
+      params.set("geoBoundsSwLng", String(geoBounds.swLng));
+      params.set("geoBoundsNeLat", String(geoBounds.neLat));
+      params.set("geoBoundsNeLng", String(geoBounds.neLng));
+    }
+    if (filterStructuredQuery) params.set("structuredQuery", filterStructuredQuery);
     if (sortBy) params.set("sortBy", sortBy);
     if (sortOrder) params.set("sortOrder", sortOrder);
 
@@ -329,6 +376,8 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
     filterStatus,
     filterDateFrom,
     filterDateTo,
+    geoBounds,
+    filterStructuredQuery,
     sortBy,
     sortOrder,
     setSearchParams,
@@ -342,6 +391,10 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
     }, 400);
   };
 
+  const applyStructuredQuery = () => {
+    setDebouncedStructuredQuery(filterStructuredQuery);
+  };
+
   const clearFilters = () => {
     setSearchQuery("");
     setFilterLabel("");
@@ -350,6 +403,10 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
     setFilterStatus("");
     setFilterDateFrom(undefined);
     setFilterDateTo(undefined);
+    setGeoBounds(undefined);
+    setShowGeoMap(false);
+    setFilterStructuredQuery("");
+    setDebouncedStructuredQuery("");
   };
 
   const handleSort = (field: SortField) => {
@@ -376,8 +433,15 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
       endDate.setHours(23, 59, 59, 999);
       params.dateTo = endDate.toISOString();
     }
+    if (geoBounds) {
+      params.geoBoundsSwLat = geoBounds.swLat;
+      params.geoBoundsSwLng = geoBounds.swLng;
+      params.geoBoundsNeLat = geoBounds.neLat;
+      params.geoBoundsNeLng = geoBounds.neLng;
+    }
+    if (debouncedStructuredQuery) params.structuredQuery = debouncedStructuredQuery;
     return params;
-  }, [stage, sortBy, sortOrder, searchQuery, debouncedFilterLabel, debouncedFilterCreatedByName, debouncedFilterWorkflowId, debouncedFilterStatus, filterDateFrom, filterDateTo]);
+  }, [stage, sortBy, sortOrder, searchQuery, debouncedFilterLabel, debouncedFilterCreatedByName, debouncedFilterWorkflowId, debouncedFilterStatus, filterDateFrom, filterDateTo, geoBounds, debouncedStructuredQuery]);
 
   const fetchAllItems = useCallback(async (): Promise<WorkflowMetadata[]> => {
     const batchSize = 100;
@@ -606,6 +670,7 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
 
             {/* Expandable column filters */}
             {showFilters && (
+              <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 p-4 rounded-xl border border-border bg-muted/20">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted-foreground">
@@ -721,7 +786,70 @@ export function WorkflowsListPage({ mode = "mine" }: { mode?: "mine" | "admin" }
                     </Popover>
                   </div>
                 </div>
+
+                {/* Structured field query */}
+                <div className="sm:col-span-2 lg:col-span-5 space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Consulta por campos
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <StructuredQueryInput
+                        value={filterStructuredQuery}
+                        onChange={setFilterStructuredQuery}
+                        onApply={applyStructuredQuery}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={applyStructuredQuery}
+                      disabled={!filterStructuredQuery || filterStructuredQuery === debouncedStructuredQuery}
+                      className="h-9 px-4 gap-1.5 shrink-0"
+                    >
+                      <FaSearch size={11} />
+                      Buscar
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Geo filter toggle */}
+                <div className="sm:col-span-2 lg:col-span-5 flex items-center gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant={geoBounds ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => setShowGeoMap((v) => !v)}
+                    className={`h-9 px-4 gap-2 text-xs ${
+                      geoBounds ? "border-primary text-primary" : ""
+                    }`}
+                  >
+                    <FaMapMarkerAlt size={12} />
+                    {geoBounds ? "Filtro geoespacial ativo" : "Filtro geoespacial"}
+                    {geoBounds && <span className="w-2 h-2 rounded-full bg-primary" />}
+                  </Button>
+                  {geoBounds && !showGeoMap && (
+                    <span className="text-xs text-muted-foreground font-mono">
+                      [{geoBounds.swLat.toFixed(3)}, {geoBounds.swLng.toFixed(3)}] → [{geoBounds.neLat.toFixed(3)}, {geoBounds.neLng.toFixed(3)}]
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {/* Geo filter map */}
+              {showGeoMap && (
+                <div className="p-4 rounded-xl border border-border bg-muted/20">
+                  <GeoFilterMap
+                    value={geoBounds}
+                    onChange={(bounds) => {
+                      setGeoBounds(bounds);
+                    }}
+                    onClose={() => setShowGeoMap(false)}
+                  />
+                </div>
+              )}
+              </>
             )}
           </div>
 

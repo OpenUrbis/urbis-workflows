@@ -75,7 +75,10 @@ const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = auth.isAuthenticated;
   const accessToken = auth.user?.access_token ?? null;
-  const profile = (auth.user?.profile ?? null) as Record<string, unknown> | null;
+  const profile = (auth.user?.profile ?? null) as Record<
+    string,
+    unknown
+  > | null;
   const accessTokenPayload = decodeJwtPayload(accessToken ?? undefined);
 
   const socialName = pickString(
@@ -83,7 +86,8 @@ const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
     ["socialName", "social_name", "preferred_username", "nickname"],
   );
   const name =
-    pickString([profile, accessTokenPayload], ["name", "given_name"]) ?? socialName;
+    pickString([profile, accessTokenPayload], ["name", "given_name"]) ??
+    socialName;
   const email = pickString(
     [profile, accessTokenPayload],
     ["email", "upn", "preferred_username"],
@@ -103,7 +107,6 @@ const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
   }, [auth]);
 
   const signOut = useCallback(() => {
-    auth.removeUser();
     auth.signoutRedirect();
   }, [auth]);
 
@@ -161,7 +164,9 @@ export const PrivateWrapper: FC<PrivateWrapperProps> = ({ children }) => {
  * Used for pages that should be publicly viewable but may have
  * enhanced functionality when authenticated.
  */
-export const PublicOrPrivateWrapper: FC<PrivateWrapperProps> = ({ children }) => {
+export const PublicOrPrivateWrapper: FC<PrivateWrapperProps> = ({
+  children,
+}) => {
   const { isLoading } = useContext(AuthContext);
 
   if (isLoading) return null;

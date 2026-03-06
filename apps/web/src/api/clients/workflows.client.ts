@@ -243,11 +243,26 @@ export class WorkflowsApiClient extends BaseApiClient {
   }
 
   /**
-   * Submit a form for a workflow activity
-   * @param id Workflow ID
-   * @param data Form data
-   * @returns Updated workflow with form data
+   * Fetch available field labels for structured query autocomplete.
+   * @param search Optional search term to filter labels
+   * @returns Array of field label descriptors
    */
+  async getFieldLabels(
+    search?: string,
+  ): Promise<{ key: string; label: string; type: "text" | "number" }[]> {
+    try {
+      const params: Record<string, string> = {};
+      if (search) params.search = search;
+      const response = await this.client.get<{ key: string; label: string; type: "text" | "number" }[]>(
+        "/field-labels",
+        { params },
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   async form(
     id: string,
     data: FormWorkflowHttpDto
