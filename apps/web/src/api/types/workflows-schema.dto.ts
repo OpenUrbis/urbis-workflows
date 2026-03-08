@@ -29,6 +29,7 @@ export interface CreateWorkflowSchemaDto {
   hooks?: Hook[];
   incoming: Incoming[];
   outgoing: Outgoing[];
+  integrations?: Record<string, any>;
 }
 
 export interface UpdateWorkflowSchemaDto extends CreateWorkflowSchemaDto {}

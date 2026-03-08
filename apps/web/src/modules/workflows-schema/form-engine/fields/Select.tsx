@@ -59,7 +59,7 @@ export const Select: React.FC<FieldSelectProps> = ({
       value={value !== undefined && value !== null ? value.toString() : undefined}
       onValueChange={(selectedValue) => {
         const originalTypeValue = options.items?.find(
-          (item) => item.value.toString() === selectedValue
+          (item) => item.value != null && item.value.toString() === selectedValue
         )?.value;
 
         if (originalTypeValue !== undefined && originalTypeValue !== null) {
@@ -74,14 +74,16 @@ export const Select: React.FC<FieldSelectProps> = ({
         <SelectValue placeholder={options?.placeholder ?? "Selecione"} />
       </SelectTrigger>
       <SelectContent className="z-[1601]">
-        {options?.items?.map((item) => {
+        {options?.items
+          ?.filter((item) => item.value != null)
+          .map((item) => {
           const itemAny = item as any;
           const label =
             itemAny?.label ?? itemAny?.key ?? (itemAny?.value !== undefined ? String(itemAny.value) : "");
 
           return (
             <SelectItem
-              key={fieldKey + "#" + (itemAny?.value !== undefined ? String(itemAny.value) : label)}
+              key={fieldKey + "#" + String(itemAny.value)}
               value={item.value.toString()}
             >
               {label}

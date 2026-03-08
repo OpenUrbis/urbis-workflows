@@ -87,6 +87,7 @@ import { WorkflowConstants } from "./configs/WorkflowConstants";
 import { WorkflowLibrary } from "./configs/WorkflowLibrary";
 import { WorkflowDependencies } from "./configs/WorkflowDependencies";
 import { WorkflowOutgoingDependencies } from "./configs/WorkflowOutgoingDependencies";
+import { Integrations } from "./components/Integrations";
 import {
   loadCodeModules,
   loadConstantVariables,
@@ -211,6 +212,12 @@ const tabConfig = [
     icon: <FaProjectDiagram className="text-purple-500" />,
     label: "Fluxos Subsequentes",
     shortcut: "S",
+  },
+  {
+    id: "integrations",
+    icon: <FaCog className="text-orange-500" />,
+    label: "Integrações SEI",
+    shortcut: "I",
   },
 ];
 
@@ -773,6 +780,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
             : {
                 accessLevel: PrivacyLevelEnum.PUBLIC,
               },
+        integrations: workflowSchema.schema.integrations ?? {},
       };
 
       if (id !== "new") {
@@ -981,6 +989,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
         S: withNoModifiers(() => setSelectedTab("outgoing")),
         A: withNoModifiers(() => setSelectedTab("variables")),
         Z: withNoModifiers(() => setSelectedTab("functions")),
+        I: withNoModifiers(() => setSelectedTab("integrations")),
         M: () => {
           if (!loading) {
             handleSave();
@@ -992,7 +1001,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     return () => {
       hotkeyContext.dispatch({
         type: "UNSET_HOTKEY",
-        delete: ["Q", "W", "E", "A", "Z", "M"],
+        delete: ["Q", "W", "E", "A", "Z", "I", "M"],
       });
     };
   }, [loading, workflowSchema, selectedTab]);
@@ -1664,6 +1673,33 @@ export function WorkflowSchemaEditor(): JSX.Element {
                             schema: {
                               ...workflowSchema.schema,
                               code: newModules,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  ) : selectedTab === "integrations" ? (
+                    <div
+                      className="w-full rounded-2xl border p-4 md:p-6"
+                      style={{
+                        backgroundColor: styleContext.state.backgroundColor,
+                        borderColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    >
+                      <Integrations
+                        data={workflowSchema.schema.integrations?.sei}
+                        onChange={(seiData) =>
+                          updateSubject({
+                            ...workflowSchema,
+                            schema: {
+                              ...workflowSchema.schema,
+                              integrations: {
+                                ...workflowSchema.schema.integrations,
+                                sei: seiData,
+                              },
                             },
                           })
                         }
