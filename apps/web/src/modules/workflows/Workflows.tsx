@@ -1037,10 +1037,7 @@ export function Workflows(): JSX.Element {
 
               {/* SEI Tracking Section - only for existing workflows */}
               {!isCreating && id && (
-                <>
-                  <div className="border-b my-6"></div>
-                  <SeiTracking workflowId={id} />
-                </>
+                <SeiTracking workflowId={id} />
               )}
             </div>
 

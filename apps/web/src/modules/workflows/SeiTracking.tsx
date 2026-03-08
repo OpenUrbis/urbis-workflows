@@ -121,17 +121,14 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
   }
 
   if (!seiState || !seiState.processId) {
-    return (
-      <div className="py-4 text-center text-sm" style={{ color: styleContext.state.textColor }}>
-        Nenhuma integração SEI ativa para este fluxo.
-      </div>
-    );
+    return <></>;
   }
 
   const isDark = styleContext.state.buttonHoverColorWeight !== "200";
 
   return (
     <div className="flex flex-col space-y-4">
+      <div className="border-b mb-2"></div>
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold" style={{ color: styleContext.state.textColor }}>
           Integração SEI
