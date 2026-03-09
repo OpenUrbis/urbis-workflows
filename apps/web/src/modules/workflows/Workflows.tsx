@@ -1036,9 +1036,7 @@ export function Workflows(): JSX.Element {
               )}
 
               {/* SEI Tracking Section - only for existing workflows */}
-              {!isCreating && id && (
-                <SeiTracking workflowId={id} />
-              )}
+              {!isCreating && id && <SeiTracking workflowId={id} />}
             </div>
 
             {/* Activity Content */}
