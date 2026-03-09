@@ -105,14 +105,14 @@ export const Table: React.FC<FieldTableProps> = ({
                       onChange={(v) => {
                         setLocalValue((value: any) => {
                           const newValue = { ...value, [field.key]: v };
-                          onChange(newValue);
+                          queueMicrotask(() => onChange(newValue));
                           return newValue;
                         });
                       }}
                       onValidChange={(v) => {
                         setLocalValid((valid: any) => {
                           const newValid = { ...valid, [field.key]: v };
-                          onValidChange(newValid);
+                          queueMicrotask(() => onValidChange(newValid));
                           return newValid;
                         });
                       }}
@@ -148,14 +148,14 @@ export const Table: React.FC<FieldTableProps> = ({
                     onChange={(v) => {
                       setLocalValue((value: any) => {
                         const newValue = { ...value, [field.key]: v };
-                        onChange(newValue);
+                        queueMicrotask(() => onChange(newValue));
                         return newValue;
                       });
                     }}
                     onValidChange={(v) => {
                       setLocalValid((valid: any) => {
                         const newValid = { ...valid, [field.key]: v };
-                        onValidChange(newValid);
+                        queueMicrotask(() => onValidChange(newValid));
                         return newValid;
                       });
                     }}
