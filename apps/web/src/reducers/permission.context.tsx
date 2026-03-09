@@ -19,6 +19,7 @@ interface PermissionContextType {
     activity: ActivityTemplate,
     accessType?: "read" | "write"
   ) => boolean;
+  hasSensibilityAccess: (fieldSensibilityLevel?: number) => boolean;
   refreshPermissions: () => Promise<void>;
 }
 
@@ -28,6 +29,7 @@ const PermissionContext = createContext<PermissionContextType>({
   error: null,
   hasPermission: () => false,
   hasActivityAccess: () => false,
+  hasSensibilityAccess: () => true,
   refreshPermissions: async () => {},
 });
 
@@ -140,13 +142,19 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
     );
     if (hasRolePermission) return true;
 
-    // Check permissions from groups
-    const hasGroupPermission = userIam.groups?.some((group) =>
+    // Check permissions from groups (via roles)
+    const hasGroupRolePermission = userIam.groups?.some((group) =>
       group.roles?.some((role) =>
         role.permissions?.some((p) => p.code === permission)
       )
     );
-    if (hasGroupPermission) return true;
+    if (hasGroupRolePermission) return true;
+
+    // Check direct permissions from groups
+    const hasGroupDirectPermission = userIam.groups?.some((group) =>
+      group.directPermissions?.some((p) => p.code === permission)
+    );
+    if (hasGroupDirectPermission) return true;
 
     return false;
   };
@@ -228,6 +236,17 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
     return false;
   };
 
+  const hasSensibilityAccess = (fieldSensibilityLevel?: number): boolean => {
+    // If no sensibility level set on the field, allow access
+    if (fieldSensibilityLevel === undefined || fieldSensibilityLevel === 0) {
+      return true;
+    }
+    // If no user IAM details, deny access to sensitive fields
+    if (!userIam) return false;
+    // User must have a sensibility level >= the field's level to access it
+    return (userIam.sensibilityLevel ?? 0) >= fieldSensibilityLevel;
+  };
+
   const refreshPermissions = async () => {
     await fetchUserIam();
   };
@@ -270,6 +289,7 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
         error,
         hasPermission,
         hasActivityAccess,
+        hasSensibilityAccess,
         refreshPermissions,
       }}
     >

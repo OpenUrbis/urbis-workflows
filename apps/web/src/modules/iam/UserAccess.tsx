@@ -78,7 +78,7 @@ export function UserAccess(): JSX.Element {
     groupIds: [] as string[],
     roleIds: [] as string[],
     permissionIds: [] as string[],
-    accessLevel: 1, // Default to REGISTERED (1)
+    sensibilityLevel: 0, // Default to NOT_APPLICABLE (0)
   });
   const [activeTab, setActiveTab] = useState("groups");
   const [searchText, setSearchText] = useState({
@@ -139,7 +139,7 @@ export function UserAccess(): JSX.Element {
       groupIds: user.groups.map((g) => g.id),
       roleIds: user.directRoles.map((r) => r.id),
       permissionIds: user.directPermissions.map((p) => p.id),
-      accessLevel: user.accessLevel || 1, // Use existing accessLevel or default to REGISTERED
+      sensibilityLevel: user.sensibilityLevel ?? 0,
     });
     onOpen();
   };
@@ -193,6 +193,9 @@ export function UserAccess(): JSX.Element {
           uniquePermissions.set(permission.id, permission);
         });
       });
+      (group.directPermissions || []).forEach((permission) => {
+        uniquePermissions.set(permission.id, permission);
+      });
     });
 
     user.directRoles.forEach((role) => {
@@ -214,6 +217,9 @@ export function UserAccess(): JSX.Element {
       role.permissions.forEach((permission) => {
         permissionSet.add(permission.id);
       });
+    });
+    (group.directPermissions || []).forEach((permission) => {
+      permissionSet.add(permission.id);
     });
     return permissionSet.size;
   };
@@ -375,16 +381,12 @@ export function UserAccess(): JSX.Element {
                           </p>
                           <Separator className="my-3" />
                           <p className="text-sm text-foreground mb-2">
-                            <strong>Nível de Acesso:</strong>{" "}
-                            {user.accessLevel === 0
-                              ? "Público"
-                              : user.accessLevel === 1
-                                ? "Registrado"
-                                : user.accessLevel === 2
-                                  ? "Restrito"
-                                  : user.accessLevel === 3
-                                    ? "Confidencial"
-                                    : "Anônimo"}
+                            <strong>Nível de Sensibilidade (LGPD):</strong>{" "}
+                            {user.sensibilityLevel === 0
+                              ? "Não se aplica"
+                              : user.sensibilityLevel === 1
+                                ? "Dados Pessoais"
+                                : "Dados Sensíveis"}
                           </p>
                           <p className="text-sm font-medium text-foreground mb-2">
                             Grupos:
@@ -456,23 +458,21 @@ export function UserAccess(): JSX.Element {
             <div className="p-4 pb-24">
               <div className="mb-6">
                 <Label className="mb-2 block text-sm font-medium text-foreground">
-                  Nível de Acesso
+                  Nível de Sensibilidade (LGPD)
                 </Label>
                 <DSSelect
-                  value={String(formData.accessLevel)}
+                  value={String(formData.sensibilityLevel)}
                   onValueChange={(v) =>
-                    setFormData({ ...formData, accessLevel: parseInt(v) })
+                    setFormData({ ...formData, sensibilityLevel: parseInt(v) })
                   }
                 >
                   <SelectTrigger className="h-9 w-full bg-background border-border text-foreground">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent className="z-[2000]">
-                    <SelectItem value="0">Público</SelectItem>
-                    <SelectItem value="1">Registrado</SelectItem>
-                    <SelectItem value="2">Restrito</SelectItem>
-                    <SelectItem value="3">Confidencial</SelectItem>
-                    <SelectItem value="4">Anônimo</SelectItem>
+                    <SelectItem value="0">Não se aplica</SelectItem>
+                    <SelectItem value="1">Dados Pessoais</SelectItem>
+                    <SelectItem value="2">Dados Sensíveis</SelectItem>
                   </SelectContent>
                 </DSSelect>
               </div>

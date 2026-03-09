@@ -20,13 +20,6 @@ import {
 } from "react-icons/fa";
 import { IFormContext } from "@open-urbis/types";
 import {
-  Select as DSSelect,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@open-urbis/map-ui";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -931,22 +924,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
     });
   };
 
-  // Add function to handle workflow access level changes
-  const handleUpdateWorkflowAccessLevel = (accessLevel: PrivacyLevelEnum) => {
-    if (!workflowSchema) return;
-
-    updateSubject({
-      ...workflowSchema,
-      schema: {
-        ...workflowSchema.schema,
-        control: {
-          ...workflowSchema.schema?.control,
-          accessLevel,
-        },
-      },
-    });
-  };
-
   useEffect(() => {
     fetchSubject();
   }, []);
@@ -1498,48 +1475,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           </FormHelperText>
                         </FormControl>
 
-                        <FormControl>
-                          <FormLabel>Nível de Acesso</FormLabel>
-                          <DSSelect
-                            value={String(selectedActivity.accessLevel)}
-                            onValueChange={(value) => {
-                              handleUpdateActivity(selectedActivityIndex, {
-                                ...selectedActivity,
-                                accessLevel: Number(value) as PrivacyLevelEnum,
-                              });
-                            }}
-                          >
-                            <SelectTrigger
-                              className="h-11 bg-background text-foreground"
-                              style={{ color: styleContext.state.textColor }}
-                            >
-                              <SelectValue placeholder="Selecione o nível de acesso" />
-                            </SelectTrigger>
-                            <SelectContent
-                              className="z-[1601] bg-background text-foreground"
-                              style={{ color: styleContext.state.textColor }}
-                            >
-                              <SelectItem value={String(PrivacyLevelEnum.PUBLIC)}>
-                                Público
-                              </SelectItem>
-                              <SelectItem value={String(PrivacyLevelEnum.REGISTERED)}>
-                                Registrado
-                              </SelectItem>
-                              <SelectItem value={String(PrivacyLevelEnum.RESTRICTED)}>
-                                Restrito
-                              </SelectItem>
-                              <SelectItem value={String(PrivacyLevelEnum.CONFIDENTIAL)}>
-                                Confidencial
-                              </SelectItem>
-                              <SelectItem value={String(PrivacyLevelEnum.ANONYMIZED)}>
-                                Anônimo
-                              </SelectItem>
-                            </SelectContent>
-                          </DSSelect>
-                          <FormHelperText>
-                            Define quem pode acessar esta atividade
-                          </FormHelperText>
-                        </FormControl>
                       </div>
 
                       <div className="flex space-x-6 mb-6">
@@ -1943,57 +1878,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
               Configurações de Acesso
             </h3>
 
-            <FormControl className="mb-6">
-              <FormLabel
-                className="text-foreground"
-                style={{ color: styleContext.state.textColor }}
-              >
-                Nível de Acesso Global
-              </FormLabel>
-              <DSSelect
-                value={String(
-                  workflowSchema?.schema?.control?.accessLevel ??
-                    PrivacyLevelEnum.PUBLIC
-                )}
-                onValueChange={(value) => {
-                  handleUpdateWorkflowAccessLevel(
-                    Number(value) as PrivacyLevelEnum
-                  );
-                }}
-              >
-                <SelectTrigger
-                  className="h-11 bg-background text-foreground"
-                  style={{ color: styleContext.state.textColor }}
-                >
-                  <SelectValue placeholder="Selecione o nível de acesso global" />
-                </SelectTrigger>
-                <SelectContent
-                  className="z-[1601] bg-background text-foreground"
-                  style={{ color: styleContext.state.textColor }}
-                >
-                  <SelectItem value={String(PrivacyLevelEnum.PUBLIC)}>
-                    Público
-                  </SelectItem>
-                  <SelectItem value={String(PrivacyLevelEnum.REGISTERED)}>
-                    Registrado
-                  </SelectItem>
-                  <SelectItem value={String(PrivacyLevelEnum.RESTRICTED)}>
-                    Restrito
-                  </SelectItem>
-                  <SelectItem value={String(PrivacyLevelEnum.CONFIDENTIAL)}>
-                    Confidencial
-                  </SelectItem>
-                  <SelectItem value={String(PrivacyLevelEnum.ANONYMIZED)}>
-                    Anônimo
-                  </SelectItem>
-                </SelectContent>
-              </DSSelect>
-              <FormHelperText>
-                Define o nível de acesso padrão para todo o fluxo de trabalho
-              </FormHelperText>
-            </FormControl>
-
-            <div className="mt-8">
+            <div>
               <PermissionsSelector
                 showBorder={false}
                 permissions={workflowSchema?.schema?.control?.permissions}

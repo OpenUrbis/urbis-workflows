@@ -35,6 +35,7 @@ import { VersionsMenu } from "../components/VersionsMenu";
 import { RenderFieldPrivacyInfo } from "./components/RenderFieldPrivacyInfo";
 import { RenderFieldModelCalculation } from "./components/RenderFieldModelCalculation";
 import { StyleContext } from "../../../reducers";
+import { usePermissions } from "../../../reducers/permission.context";
 
 export type FieldViewProps = {
   parent?: IField;
@@ -142,6 +143,7 @@ export const FieldView: React.FC<FieldViewProps> = ({
   highlightQuery,
 }): JSX.Element => {
   const styleContext = useContext(StyleContext);
+  const { hasSensibilityAccess } = usePermissions();
   const [visible, setVisible] = React.useState(
     field.expressions?.visible ? false : true
   );
@@ -215,7 +217,7 @@ export const FieldView: React.FC<FieldViewProps> = ({
                 ></VersionsMenu>
               )}
             </div>
-            {value?.__redacted ? (
+            {value?.__redacted || !hasSensibilityAccess(options.sensibilityLevel) ? (
               <div
                 className={`font-medium ${
                   styleContext.state.textColor === "#ffffff"
