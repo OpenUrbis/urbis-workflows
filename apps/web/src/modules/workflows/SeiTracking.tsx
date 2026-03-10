@@ -4,6 +4,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSnackbar } from "../../hooks/snackbar";
 import { StyleContext } from "../../reducers";
 import { Spinner } from "../../components/LegacyUi";
+import { FaLink, FaSyncAlt } from "react-icons/fa";
 
 interface SeiMirroredDocument {
   documentId: string;
@@ -130,21 +131,28 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
     <div className="flex flex-col space-y-4">
       <div className="border-b mb-2"></div>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold" style={{ color: styleContext.state.textColor }}>
-          Integração SEI
-        </h3>
+        <div className="flex items-center space-x-2 mb-3 px-3">
+          <FaLink size={14} className="text-gray-500" />
+          <span className="text-sm font-medium text-gray-500">
+            Integração SEI
+          </span>
+        </div>
+
         <button
-          className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm px-4 py-2 rounded-md disabled:opacity-50"
+          type="button"
+          className="h-9 w-9 inline-flex items-center justify-center rounded-md disabled:opacity-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300"
           onClick={handleSyncTracking}
           disabled={syncing}
+          aria-label={syncing ? "Sincronizando tramitação" : "Atualizar tramitação"}
+          title={syncing ? "Sincronizando..." : "Atualizar tramitação"}
         >
-          {syncing ? "Sincronizando..." : "Atualizar Tramitação"}
+          <FaSyncAlt size={14} className={syncing ? "animate-spin" : ""} />
         </button>
       </div>
 
       {/* Process Info */}
       <div
-        className="rounded-lg border p-4 space-y-2"
+        className="rounded-lg border p-4 space-y-2 overflow-hidden"
         style={{
           borderColor: isDark ? "#374151" : "#E5E7EB",
           backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
@@ -175,7 +183,10 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
                 : "Pendente"}
           </span>
           {seiState.processFormatted && (
-            <span className="text-sm font-mono" style={{ color: styleContext.state.textColor }}>
+            <span
+              className="text-sm font-mono break-all"
+              style={{ color: styleContext.state.textColor }}
+            >
               {seiState.processFormatted}
             </span>
           )}
@@ -186,14 +197,16 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
             href={seiState.processLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-blue-500 hover:underline"
+            className="text-sm text-blue-500 hover:underline break-words"
           >
             Acessar processo no SEI
           </a>
         )}
 
         {seiState.error && (
-          <p className="text-sm text-red-500">{seiState.error}</p>
+          <p className="text-sm text-red-500 whitespace-pre-wrap break-words">
+            {seiState.error}
+          </p>
         )}
 
         {seiState.lastSyncAt && (
