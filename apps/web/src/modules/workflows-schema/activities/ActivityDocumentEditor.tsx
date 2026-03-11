@@ -1,16 +1,17 @@
 import React, { useState, useContext } from "react";
 import {
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   FormControl,
-  FormLabel,
   FormHelperText,
-  Tooltip,
+  FormLabel,
   IconButton,
-} from "@chakra-ui/react";
+  Tooltip,
+} from "../../../components";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@open-urbis/map-ui";
 import { IFormContext } from "@open-urbis/types";
 import { DocumentEditor } from "./documents/DocumentEditor";
 import { DocumentPlateEditor } from "./documents/DocumentPlateEditor";
@@ -38,8 +39,8 @@ export const ActivityDocumentEditor = ({
 }: ActivityDocumentEditorProps): JSX.Element => {
   const { id } = useParams<{ id: string }>();
   const [selectedDocumentId, setSelectedDocumentId] = useState<string>("");
-  const [tabIndex, setTabIndex] = useState(0);
-  const isPreview = tabIndex === 1;
+  const [selectedTab, setSelectedTab] = useState("editor");
+  const isPreview = selectedTab === "preview";
   const styleContext = useContext(StyleContext);
 
   // Generate QR code URL based on the current workflow
@@ -217,7 +218,7 @@ export const ActivityDocumentEditor = ({
               .map((doc) => (
                 <div
                   key={doc.id}
-                  className={`p-3 border rounded cursor-pointer flex justify-between items-center group transition-colors duration-150`}
+                  className={`p-3 border rounded-xl cursor-pointer flex justify-between items-center group transition-colors duration-150`}
                   onClick={() => setSelectedDocumentId(doc.id)}
                   style={{
                     backgroundColor:
@@ -268,7 +269,7 @@ export const ActivityDocumentEditor = ({
                     icon={<FaTrash />}
                     size="sm"
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       handleRemoveDocument(doc.id);
                     }}
@@ -286,26 +287,7 @@ export const ActivityDocumentEditor = ({
           <div className="mt-4">
             <button
               onClick={handleAddDocument}
-              className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e",
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e";
-              }}
+              className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <FaPlus size={14} />
               <span>Documento</span>
@@ -315,42 +297,23 @@ export const ActivityDocumentEditor = ({
 
         <div className="w-3/4 pl-4">
           {!selectedDocumentId && (
-            <div className="flex flex-col mt-6 items-center justify-center h-full text-gray-500">
-              <FaFileAlt size={48} className="mb-4 opacity-50" />
+            <div className="flex flex-col mt-4 items-center justify-center min-h-[220px] text-gray-500">
+              <FaFileAlt size={36} className="mb-3 opacity-50" />
               <p
-                className="text-xl font-medium mb-2"
+                className="text-lg font-medium mb-1"
                 style={{ color: styleContext.state.textColor }}
               >
                 Nenhum documento selecionado
               </p>
               <p
-                className="text-sm mb-6"
+                className="text-sm mb-4"
                 style={{ color: styleContext.state.textColor }}
               >
                 Selecione um documento da lista ao lado ou crie um novo
               </p>
               <button
                 onClick={handleAddDocument}
-                className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
-                style={{
-                  backgroundColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#ca8a04"
-                      : "#854d0e",
-                  color: "#ffffff",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#a16207"
-                      : "#713f12";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#ca8a04"
-                      : "#854d0e";
-                }}
+                className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <FaPlus size={14} />
                 <span>Documento</span>
@@ -462,45 +425,41 @@ export const ActivityDocumentEditor = ({
             style={{ backgroundColor: styleContext.state.backgroundColor }}
             className="rounded-lg"
           >
-            <Tabs
-              index={tabIndex}
-              onChange={setTabIndex}
-              variant="enclosed"
-              colorScheme={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "yellow"
-                  : "gray"
-              }
-            >
-              <TabList
+            <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+              <TabsList
                 className="border-b px-4"
                 style={{
                   borderColor:
                     styleContext.state.buttonHoverColorWeight === "200"
                       ? "#E5E7EB"
                       : "#374151",
+                  backgroundColor: "transparent",
                 }}
               >
-                <Tab style={{ color: styleContext.state.textColor }}>
+                <TabsTrigger
+                  value="editor"
+                  style={{ color: styleContext.state.textColor }}
+                >
                   Editor
-                </Tab>
-                <Tab style={{ color: styleContext.state.textColor }}>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="preview"
+                  style={{ color: styleContext.state.textColor }}
+                >
                   Prévia
-                </Tab>
-              </TabList>
+                </TabsTrigger>
+              </TabsList>
 
-              <TabPanels>
-                <TabPanel>
-                  {renderTemplateEditor(
-                    documents.find((doc) => doc.id === selectedDocumentId)!
-                  )}
-                </TabPanel>
-                <TabPanel>
-                  {renderTemplateEditor(
-                    documents.find((doc) => doc.id === selectedDocumentId)!
-                  )}
-                </TabPanel>
-              </TabPanels>
+              <TabsContent value="editor">
+                {renderTemplateEditor(
+                  documents.find((doc) => doc.id === selectedDocumentId)!
+                )}
+              </TabsContent>
+              <TabsContent value="preview">
+                {renderTemplateEditor(
+                  documents.find((doc) => doc.id === selectedDocumentId)!
+                )}
+              </TabsContent>
             </Tabs>
           </div>
         )}

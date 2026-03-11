@@ -16,7 +16,7 @@ export const TitleEditable: React.FC<FieldTitleEditableProps> = ({
     <EditableHeader
       key={key}
       value={props.options.title}
-      className="text-xl font-black"
+      className="text-lg font-semibold"
       onTextChange={(value) => {
         onChange({
           key,

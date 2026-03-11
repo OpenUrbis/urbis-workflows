@@ -1,4 +1,4 @@
-import { Center, Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components/LegacyUi";
 import {
   FaProjectDiagram,
   FaChevronUp,
@@ -91,15 +91,17 @@ export const OutgoingList: React.FC<{
       >
         <button
           onClick={() => setShowDependentWorkflows(!showDependentWorkflows)}
-          className={`w-full flex items-center justify-between p-3 mb-3 rounded-lg ${
+          className={`w-full flex items-center justify-between mb-6 px-3 rounded-lg ${
             styleContext.state.buttonHoverColorWeight === "200"
               ? "hover:bg-gray-100"
               : "hover:bg-gray-800"
           }`}
         >
           <div className="flex items-center space-x-2">
-            <FaProjectDiagram size={14} />
-            <span className="text-sm font-medium">Fluxos Subsequentes</span>
+            <FaProjectDiagram size={14} className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-500">
+              Fluxos Subsequentes
+            </span>
             <span
               className={`text-sm px-2 py-0.5 rounded-full ${
                 styleContext.state.buttonHoverColorWeight === "200"
@@ -110,7 +112,9 @@ export const OutgoingList: React.FC<{
               {outgoing.length}
             </span>
           </div>
-          {showDependentWorkflows ? <FaChevronUp /> : <FaChevronDown />}
+          <div className="text-gray-500">
+            {showDependentWorkflows ? <FaChevronUp /> : <FaChevronDown />}
+          </div>
         </button>
       </Tooltip>
 
@@ -135,30 +139,28 @@ export const OutgoingList: React.FC<{
                   }`}
                   onClick={() => enabled && handleWorkflowClick(workflow)}
                 >
-                  <Center
-                    w="36px"
-                    h="36px"
-                    mr={4}
-                    borderRadius="md"
-                    bg={
-                      enabled
+                  <div
+                    className="flex items-center justify-center mr-4"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 8,
+                      backgroundColor: enabled
                         ? styleContext.state.buttonHoverColorWeight === "200"
-                          ? "green.100"
-                          : "green.800"
+                          ? "#dcfce7"
+                          : "#166534"
                         : styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.300"
-                          : "gray.700"
-                    }
-                    color={
-                      enabled
+                          ? "#d1d5db"
+                          : "#374151",
+                      color: enabled
                         ? styleContext.state.buttonHoverColorWeight === "200"
-                          ? "green.800"
-                          : "green.100"
-                        : "white"
-                    }
+                          ? "#166534"
+                          : "#dcfce7"
+                        : "white",
+                    }}
                   >
                     {enabled ? <FaUnlock size={14} /> : <FaLock size={14} />}
-                  </Center>
+                  </div>
                   <div className="flex-1 relative">
                     <div className="font-medium">{workflow.label}</div>
                     <Tooltip

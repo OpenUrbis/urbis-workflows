@@ -1,4 +1,9 @@
-import { useDisclosure, Tooltip } from "@chakra-ui/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
 import { useContext, useEffect, useState } from "react";
 import { StyleContext } from "../../../../reducers";
 import { FaExternalLinkAlt, FaClock, FaServer } from "react-icons/fa";
@@ -26,7 +31,7 @@ export const Integration: React.FC<FieldIntegrationProps> = ({
   value,
 }) => {
   const styleContext = useContext(StyleContext);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [dynamicLogValue, setDynamicLogValue] = useState<Log[] | undefined>(
     undefined
   );
@@ -81,27 +86,33 @@ export const Integration: React.FC<FieldIntegrationProps> = ({
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center space-x-2 max-w-[90%]">
           <FaServer className="flex-shrink-0 text-gray-400 mt-0.5" size={14} />
-          <Tooltip label={source} placement="top" hasArrow>
-            <span
-              className="text-sm font-medium"
-              style={{ color: styleContext.state.textColor }}
-            >
-              {truncateUrl(source)}
-            </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="text-sm font-medium"
+                style={{ color: styleContext.state.textColor }}
+              >
+                {truncateUrl(source)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{source}</TooltipContent>
           </Tooltip>
         </div>
         <div className="flex-shrink-0 ml-2">
-          <Tooltip label="Mostrar Retorno da Integração" placement="top">
-            <button
-              onClick={onOpen}
-              className={`p-1.5 rounded-lg transition-colors ${
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "hover:bg-gray-100"
-                  : "hover:bg-gray-700"
-              }`}
-            >
-              <FaExternalLinkAlt size={14} className="text-gray-400" />
-            </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setIsOpen(true)}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  styleContext.state.buttonHoverColorWeight === "200"
+                    ? "hover:bg-gray-100"
+                    : "hover:bg-gray-700"
+                }`}
+              >
+                <FaExternalLinkAlt size={14} className="text-gray-400" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Mostrar Retorno da Integração</TooltipContent>
           </Tooltip>
         </div>
       </div>
@@ -123,7 +134,7 @@ export const Integration: React.FC<FieldIntegrationProps> = ({
   );
 
   return (
-    <>
+    <TooltipProvider>
       {displayDefaultLogValue &&
         renderLogCard(
           "Integração executada com sucesso",
@@ -140,12 +151,12 @@ export const Integration: React.FC<FieldIntegrationProps> = ({
 
       <CodeViewerModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={() => setIsOpen(false)}
         title="Retorno da Integração"
         code={value}
         language="json"
         readOnly
       />
-    </>
+    </TooltipProvider>
   );
 };

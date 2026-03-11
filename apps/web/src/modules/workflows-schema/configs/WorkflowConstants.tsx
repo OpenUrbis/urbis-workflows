@@ -1,20 +1,19 @@
+import { getAccessToken } from "../../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
-import {
-  Spinner,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Button,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@chakra-ui/react";
+import { Spinner } from "../../../components/LegacyUi";
 import { FaPlus, FaGlobe, FaCode } from "react-icons/fa";
+import {
+  Button as DSButton,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@open-urbis/map-ui";
 import { ApiClient } from "../../../api";
 import { ConstantVariable } from "../../../api/types/schema";
 import { AddEnvironment } from "../components/AddEnvironment";
@@ -54,13 +53,13 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
     useState<ConstantVariable | null>(null);
   const [constantsSearch, setConstantsSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [isAddingLocal, setIsAddingLocal] = useState(false);
 
   const api = new ApiClient({
     baseURL: import.meta.env.VITE_BACK_END_API || "",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${getAccessToken()}`,
     },
   });
 
@@ -148,7 +147,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
 
     const updatedConstants = [...constants, newConstant];
     onConstantsChange(updatedConstants);
-    onClose();
+    setIsOpen(false);
   };
 
   const handleAddLocalConstant = (localConstant: any) => {
@@ -207,7 +206,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
 
   const handleCloseModal = () => {
     setGlobalSearch("");
-    onClose();
+    setIsOpen(false);
   };
 
   return (
@@ -223,7 +222,7 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
       >
         <div className="flex justify-between items-center mb-4">
           <h2
-            className="text-xl font-bold"
+            className="text-base font-semibold"
             style={{ color: styleContext.state.textColor }}
           >
             Variáveis
@@ -234,13 +233,13 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
           <div className="flex flex-col items-center justify-center py-8 text-gray-500">
             <FaCode size={32} className="mb-4 opacity-50" />
             <p
-              className="text-sm text-center mb-2"
+              className="text-xs text-center mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhuma variável cadastrada
             </p>
             <p
-              className="text-xs text-center"
+              className="text-xs text-center opacity-80"
               style={{ color: styleContext.state.textColor }}
             >
               Adicione uma variável usando o botão abaixo
@@ -259,81 +258,37 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
           />
         )}
         <div className="mt-4">
-          <Menu>
-            <MenuButton
-              as={Button}
-              leftIcon={<FaPlus />}
-              className="bg-yellow-600 hover:bg-yellow-700 w-full px-4 py-2.5 rounded flex items-center justify-center space-x-2"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#ca8a04"
-                  : "#854d0e"
-              }
-              color="#ffffff"
-              _hover={{
-                bg:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12",
-              }}
-            >
-              <div className="flex items-center justify-center space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <DSButton
+                type="button"
+                size="sm"
+                className="w-full rounded-xl px-4 font-medium shadow-sm gap-2"
+              >
+                <FaPlus size={14} />
                 <span>Variável</span>
-                <SL bg="yellow.600">N</SL>
-              </div>
-            </MenuButton>
-            <MenuList
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "white"
-                  : "gray.800"
-              }
-              borderColor={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "gray.200"
-                  : "gray.600"
-              }
-            >
-              <MenuItem
-                icon={<FaGlobe />}
-                onClick={onOpen}
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.100"
-                      : "gray.700",
-                }}
-              >
-                <span style={{ color: styleContext.state.textColor }}>
-                  Importar Global
-                </span>
-              </MenuItem>
-              <MenuItem
-                icon={<FaCode />}
-                onClick={() => setIsAddingLocal(true)}
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.100"
-                      : "gray.700",
-                }}
-              >
-                <span style={{ color: styleContext.state.textColor }}>
-                  Criar Local
-                </span>
-              </MenuItem>
-            </MenuList>
-          </Menu>
+                <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
+              </DSButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="max-h-[300px] overflow-y-auto min-w-[200px]" align="start">
+              <DropdownMenuItem onSelect={() => setIsOpen(true)}>
+                <div className="flex items-center gap-2">
+                  <FaGlobe />
+                  <span style={{ color: styleContext.state.textColor }}>
+                    Importar Global
+                  </span>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setIsAddingLocal(true)}>
+                <div className="flex items-center gap-2">
+                  <FaCode />
+                  <span style={{ color: styleContext.state.textColor }}>
+                    Criar Local
+                  </span>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -358,110 +313,70 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <FaCode size={48} className="mb-4 opacity-50" />
             <p
-              className="text-xl font-medium mb-2"
+              className="text-base font-semibold mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhuma variável selecionada
             </p>
             <p
-              className="text-sm mb-6"
+              className="text-xs mb-4 opacity-80"
               style={{ color: styleContext.state.textColor }}
             >
               Selecione uma variável da lista ao lado ou crie uma nova
             </p>
-            <Menu>
-              <MenuButton
-                as={Button}
-                leftIcon={<FaPlus />}
-                className="px-4 py-2.5 rounded flex items-center justify-center"
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e"
-                }
-                color="#ffffff"
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#a16207"
-                      : "#713f12",
-                }}
-              >
-                <div className="flex items-center justify-center space-x-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <DSButton
+                  type="button"
+                  size="sm"
+                  className="rounded-xl px-4 font-medium shadow-sm gap-2"
+                >
+                  <FaPlus size={14} />
                   <span>Variável</span>
-                  <SL bg="yellow.600">N</SL>
-                </div>
-              </MenuButton>
-              <MenuList
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                borderColor={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.200"
-                    : "gray.600"
-                }
-              >
-                <MenuItem
-                  icon={<FaGlobe />}
-                  onClick={onOpen}
-                  bg={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "white"
-                      : "gray.800"
-                  }
-                  _hover={{
-                    bg:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.100"
-                        : "gray.700",
-                  }}
-                >
-                  <span style={{ color: styleContext.state.textColor }}>
-                    Importar Global
-                  </span>
-                </MenuItem>
-                <MenuItem
-                  icon={<FaCode />}
-                  onClick={() => setIsAddingLocal(true)}
-                  bg={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "white"
-                      : "gray.800"
-                  }
-                  _hover={{
-                    bg:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.100"
-                        : "gray.700",
-                  }}
-                >
-                  <span style={{ color: styleContext.state.textColor }}>
-                    Criar Local
-                  </span>
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                  <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
+                </DSButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="max-h-[300px] overflow-y-auto min-w-[200px]" align="start">
+                <DropdownMenuItem onSelect={() => setIsOpen(true)}>
+                  <div className="flex items-center gap-2">
+                    <FaGlobe />
+                    <span style={{ color: styleContext.state.textColor }}>
+                      Importar Global
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setIsAddingLocal(true)}>
+                  <div className="flex items-center gap-2">
+                    <FaCode />
+                    <span style={{ color: styleContext.state.textColor }}>
+                      Criar Local
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
 
-      <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
-        <ModalOverlay />
-        <ModalContent
-          bg={styleContext.state.backgroundColor}
-          borderColor={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.200"
-              : "gray.600"
-          }
+      <Dialog open={isOpen} onOpenChange={(open) => !open && handleCloseModal()}>
+        <DialogContent
+          className="max-w-3xl"
+          style={{
+            backgroundColor: styleContext.state.backgroundColor,
+            borderColor:
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "#E5E7EB"
+                : "#4B5563",
+            color: styleContext.state.textColor,
+          }}
         >
-          <ModalHeader style={{ color: styleContext.state.textColor }}>
-            Importar variável global
-          </ModalHeader>
-          <ModalBody>
+          <DialogHeader>
+            <DialogTitle style={{ color: styleContext.state.textColor }}>
+              Importar variável global
+            </DialogTitle>
+          </DialogHeader>
+          <div>
             <TreeList
               items={globalConstants}
               search={globalSearch}
@@ -470,29 +385,14 @@ export const WorkflowConstants: React.FC<ConstantsProps> = ({
               icon={FaGlobe}
               iconColor="green"
             />
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              onClick={handleCloseModal}
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-                color: styleContext.state.textColor,
-              }}
-              _hover={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#D1D5DB"
-                    : "#4B5563",
-              }}
-            >
+          </div>
+          <DialogFooter>
+            <DSButton variant="outline" onClick={handleCloseModal}>
               Cancelar
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            </DSButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

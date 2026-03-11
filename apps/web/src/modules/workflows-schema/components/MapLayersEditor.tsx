@@ -1,10 +1,38 @@
 import React, { FC, useContext, useState } from "react";
-import { IconButton, Switch } from "@chakra-ui/react";
+import { IconButton } from "../../../components/LegacyUi";
 import { StyleContext } from "../../../reducers";
 import { FaPlus, FaTrash, FaMap, FaLayerGroup } from "react-icons/fa";
 import { Input, Select } from "../../../components";
 import { BlockPicker } from "react-color";
 import { LayerDescriptor } from "../../../api/types/schema";
+
+const Switch = ({
+  checked,
+  onCheckedChange,
+  className,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  className?: string;
+}) => {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onCheckedChange(!checked)}
+      className={`inline-flex h-6 w-11 items-center rounded-full border transition-colors ${
+        checked ? "bg-primary" : "bg-input"
+      } ${className ?? ""}`}
+    >
+      <span
+        className={`block h-5 w-5 rounded-full bg-background shadow transition-transform ${
+          checked ? "translate-x-5" : "translate-x-0"
+        }`}
+      />
+    </button>
+  );
+};
 
 interface LayersEditorProps {
   layers: LayerDescriptor[];
@@ -119,21 +147,15 @@ const MapLayersEditor: FC<LayersEditorProps> = ({ layers, onSave }) => {
           aria-label="Add Layer"
           icon={<FaPlus />}
           onClick={handleAddLayer}
-          bg={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "teal.100"
-              : "teal.800"
-          }
-          color={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "teal.800"
-              : "teal.100"
-          }
-          _hover={{
-            bg:
+          style={{
+            backgroundColor:
               styleContext.state.buttonHoverColorWeight === "200"
-                ? "teal.200"
-                : "teal.700",
+                ? "#ccfbf1"
+                : "#115e59",
+            color:
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "#115e59"
+                : "#ccfbf1",
           }}
         />
       </div>
@@ -160,21 +182,15 @@ const MapLayersEditor: FC<LayersEditorProps> = ({ layers, onSave }) => {
                 icon={<FaTrash />}
                 onClick={() => handleRemoveLayer(layerIndex)}
                 className="opacity-0 group-hover:opacity-100 transition-opacity"
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.100"
-                    : "gray.800"
-                }
-                color={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.600"
-                    : "gray.200"
-                }
-                _hover={{
-                  bg:
+                style={{
+                  backgroundColor:
                     styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.200"
-                      : "gray.700",
+                      ? "#F3F4F6"
+                      : "#1F2937",
+                  color:
+                    styleContext.state.buttonHoverColorWeight === "200"
+                      ? "#4B5563"
+                      : "#E5E7EB",
                 }}
               />
             </div>
@@ -275,8 +291,8 @@ const MapLayersEditor: FC<LayersEditorProps> = ({ layers, onSave }) => {
                   <div className="flex flex-col space-y-4 w-2/3">
                     <label>Incluir no Pop-up?</label>
                     <Switch
-                      isChecked={!!property?.includeOnPopUp}
-                      onChange={() =>
+                      checked={!!property?.includeOnPopUp}
+                      onCheckedChange={() =>
                         handleSetLayerParseProperties(
                           layerIndex,
                           propertyIndex,
@@ -284,8 +300,6 @@ const MapLayersEditor: FC<LayersEditorProps> = ({ layers, onSave }) => {
                           !property?.includeOnPopUp
                         )
                       }
-                      size={"lg"}
-                      colorScheme="teal"
                       className="pt-3"
                     />
                   </div>
@@ -299,21 +313,15 @@ const MapLayersEditor: FC<LayersEditorProps> = ({ layers, onSave }) => {
                         propertyIndex
                       )
                     }
-                    bg={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.100"
-                        : "gray.800"
-                    }
-                    color={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.600"
-                        : "gray.200"
-                    }
-                    _hover={{
-                      bg:
+                    style={{
+                      backgroundColor:
                         styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.200"
-                          : "gray.700",
+                          ? "#F3F4F6"
+                          : "#1F2937",
+                      color:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#4B5563"
+                          : "#E5E7EB",
                     }}
                   />
                 </div>
@@ -324,21 +332,15 @@ const MapLayersEditor: FC<LayersEditorProps> = ({ layers, onSave }) => {
                   aria-label="Add layer property"
                   icon={<FaPlus />}
                   onClick={() => handleAddLayerParseProperties(layerIndex)}
-                  bg={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "teal.100"
-                      : "teal.800"
-                  }
-                  color={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "teal.800"
-                      : "teal.100"
-                  }
-                  _hover={{
-                    bg:
+                  style={{
+                    backgroundColor:
                       styleContext.state.buttonHoverColorWeight === "200"
-                        ? "teal.200"
-                        : "teal.700",
+                        ? "#ccfbf1"
+                        : "#115e59",
+                    color:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "#115e59"
+                        : "#ccfbf1",
                   }}
                 />
               </div>
@@ -351,21 +353,15 @@ const MapLayersEditor: FC<LayersEditorProps> = ({ layers, onSave }) => {
           aria-label="Add Layer"
           icon={<FaPlus />}
           onClick={handleAddLayer}
-          bg={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "teal.100"
-              : "teal.800"
-          }
-          color={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "teal.800"
-              : "teal.100"
-          }
-          _hover={{
-            bg:
+          style={{
+            backgroundColor:
               styleContext.state.buttonHoverColorWeight === "200"
-                ? "teal.200"
-                : "teal.700",
+                ? "#ccfbf1"
+                : "#115e59",
+            color:
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "#115e59"
+                : "#ccfbf1",
           }}
         />
       </div>

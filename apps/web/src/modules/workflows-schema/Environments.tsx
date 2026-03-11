@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import {
   FaPlus,
@@ -12,8 +13,8 @@ import {
   FaTable,
   FaCode,
 } from "react-icons/fa";
-import { Input, SL } from "../../components";
-import { Spinner, FormControl, FormLabel } from "@chakra-ui/react";
+import { SL } from "../../components";
+import { Button, Input, Label } from "@open-urbis/map-ui";
 import EditableHeader from "../../components/EditableHeader";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import {
@@ -31,6 +32,8 @@ import {
   ConstantTypeEnum,
 } from "../../api/types/constant-variables.dto";
 import { useSnackbar } from "../../hooks/snackbar";
+import { Spinner } from "../../components";
+import { useSearchParams } from "react-router-dom";
 
 type VersionInfo = {
   id: string;
@@ -85,6 +88,7 @@ export const Environments: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
   const snackbar = useSnackbar();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [search, setSearch] = useState("");
@@ -100,10 +104,40 @@ export const Environments: React.FC = () => {
   }>({ version: 0 });
   const [versions, setVersions] = useState<VersionInfo[]>([]);
 
+  const setAddModeAndSync = (next: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    const currentAdd = searchParams.get("add") === "1";
+    const currentId = searchParams.get("id");
+
+    if (next) {
+      if (!currentAdd) params.set("add", "1");
+      if (currentId) params.delete("id");
+    } else {
+      if (currentAdd) params.delete("add");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const setSelectedIdAndSync = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    const currentId = searchParams.get("id") || "";
+    const currentAdd = searchParams.get("add") === "1";
+
+    if (currentAdd) params.delete("add");
+    if (currentId !== id) params.set("id", id);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
   const api = new ApiClient({
     baseURL: import.meta.env.VITE_BACK_END_API || "",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${getAccessToken()}`,
     },
   });
 
@@ -146,6 +180,28 @@ export const Environments: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingEnvironment) {
+      setSelectedEnvironment(null);
+      setAddingEnvironment(true);
+      return;
+    }
+
+    if (!add && addingEnvironment) {
+      setAddingEnvironment(false);
+    }
+
+    if (id && environments.length > 0 && (!selectedEnvironment || selectedEnvironment.id !== id)) {
+      const meta = environments.find((e) => e.id === id);
+      if (meta) {
+        selectEnvironmentCallback(meta);
+      }
+    }
+  }, [searchParams, environments, selectedEnvironment, addingEnvironment]);
+
+  useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
@@ -171,6 +227,7 @@ export const Environments: React.FC = () => {
     environmentConfig: ConstantVariableMetadata
   ) => {
     if (environmentConfig !== undefined && environmentConfig.id) {
+      setSelectedIdAndSync(environmentConfig.id);
       setLoading(true);
       const environment = await api.constantVariables.findOne(
         environmentConfig.id
@@ -179,6 +236,7 @@ export const Environments: React.FC = () => {
       setSelectedEnvironment(environment);
       setLoading(false);
       setAddingEnvironment(false);
+      setAddModeAndSync(false);
 
       setLoadingVersions(true);
       try {
@@ -230,6 +288,7 @@ export const Environments: React.FC = () => {
     e?.preventDefault();
     setSelectedEnvironment(null);
     setAddingEnvironment(true);
+    setAddModeAndSync(true);
   };
 
   const handleSaveEnvironment = async () => {
@@ -338,38 +397,34 @@ export const Environments: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-6 mb-24 px-20 min-h-[80vh]">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-medium text-left">
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
+      <div className="flex items-start justify-between mb-6">
+        <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
           Variáveis de Ambiente
         </h1>
-        <button
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white ${
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "bg-yellow-600 hover:bg-yellow-700"
-              : "bg-yellow-800 hover:bg-yellow-900"
-          }`}
+        <Button
+          type="button"
+          size="sm"
+          className="mt-4 h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={handleAddEnvironmentForm}
           disabled={loading}
         >
           <FaPlus size={16} />
           <span>Variável</span>
           <span className="text-sm opacity-75 ml-2">
-            <SL bg="yellow.600">N</SL>
+            <SL
+              bg="hsl(var(--primary))"
+              className="text-[hsl(var(--primary-foreground))]"
+            >
+              N
+            </SL>
           </span>
-        </button>
+        </Button>
       </div>
 
-      <div className="flex flex-grow border rounded-lg   shadow-sm overflow-hidden">
+      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden border-border bg-card text-card-foreground">
         <div
-          className="w-3/12 border-r"
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-            backgroundColor: styleContext.state.backgroundColor,
-          }}
+          className="w-3/12 border-r border-border bg-card"
         >
           <TreeList
             items={environments}
@@ -379,6 +434,7 @@ export const Environments: React.FC = () => {
             icon={FaFileAlt}
             iconColor="blue"
             getIcon={getConstantTypeIcon}
+            density="compact"
           />
         </div>
         <div className="flex flex-col p-6 w-9/12">
@@ -391,28 +447,31 @@ export const Environments: React.FC = () => {
             <AddEnvironment onAddEnvironment={handleAddEnvironment} />
           )}
           {!loading && selectedEnvironment === null && !addingEnvironment && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <FaFileAlt size={48} className="mb-4 opacity-50" />
-              <p className="text-xl font-medium mb-2">
+              <p className="text-xl font-medium mb-2 text-foreground">
                 Nenhuma variável selecionada
               </p>
               <p className="text-sm mb-6">
                 Selecione uma variável da lista ao lado ou crie uma nova
               </p>
-              <button
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white ${
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-yellow-600 hover:bg-yellow-700"
-                    : "bg-yellow-800 hover:bg-yellow-900"
-                }`}
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleAddEnvironmentForm}
               >
                 <FaPlus size={16} />
                 <span>Variável</span>
                 <span className="text-sm opacity-75 ml-2">
-                  <SL bg="yellow.600">N</SL>
+                  <SL
+                    bg="hsl(var(--primary))"
+                    className="text-[hsl(var(--primary-foreground))]"
+                  >
+                    N
+                  </SL>
                 </span>
-              </button>
+              </Button>
             </div>
           )}
           {!loading && selectedEnvironment !== null && (
@@ -425,7 +484,7 @@ export const Environments: React.FC = () => {
                       onTextChange={(text) =>
                         handleSetEnvironment("label", text)
                       }
-                      className="text-xl md:text-3xl font-black text-center mb-3"
+                      className="text-lg md:text-2xl font-semibold text-center mb-3"
                     />
                     <EditableHeader
                       value={selectedEnvironment.documentation}
@@ -448,29 +507,29 @@ export const Environments: React.FC = () => {
 
               <div className="w-4/5 mx-auto">
                 <div className="flex flex-col space-y-4">
-                  <FormControl id="namespace">
-                    <FormLabel>Chave</FormLabel>
+                  <div id="namespace">
+                    <Label className="mb-1 block">Chave</Label>
                     <Input
                       type="text"
                       placeholder="dir0/dir1/filename"
-                      size="lg"
+                      className="h-10"
                       value={selectedEnvironment.namespace}
                       onChange={(e) =>
                         handleSetEnvironment("namespace", e.target.value)
                       }
                     />
-                  </FormControl>
-                  <FormControl id="type">
-                    <FormLabel>Tipo</FormLabel>
+                  </div>
+                  <div id="type">
+                    <Label className="mb-1 block">Tipo</Label>
                     <Input
                       type="text"
-                      size="lg"
+                      className="h-10"
                       value={getConstantTypeDescription(
                         selectedEnvironment.type
                       )}
                       readOnly
                     />
-                  </FormControl>
+                  </div>
                   <EnvironmentValueForm
                     value={selectedEnvironment.value}
                     type={selectedEnvironment.type}
@@ -491,45 +550,45 @@ export const Environments: React.FC = () => {
                       : "#374151",
                 }}
               >
-                <div className="flex gap-4">
-                  <button
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleDuplicate}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                    }`}
+                    className="h-9 px-4 gap-2"
+                    style={{ color: styleContext.state.textColor }}
                   >
                     <FaRegCopy className="text-sm" />
                     <span>Duplicar</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleRemoveEnvironment}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-red-100 hover:bg-red-200 text-red-600"
-                        : "bg-red-900 hover:bg-red-800 text-red-300"
-                    }`}
+                    className="h-9 px-4 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
                     <FaTrash className="text-sm" />
                     <span>Remover</span>
-                  </button>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground"
+                    onClick={handleSaveEnvironment}
+                    disabled={loading}
+                  >
+                    <FaSave size={14} />
+                    <span>Salvar</span>
+                    <SL
+                      bg="hsl(var(--primary))"
+                      className="text-[hsl(var(--primary-foreground))]"
+                    >
+                      S
+                    </SL>
+                  </Button>
                 </div>
-              </div>
-
-              <div className="fixed bottom-16 right-4 flex space-x-4">
-                <button
-                  className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-yellow-600 hover:bg-yellow-700"
-                      : "bg-yellow-800 hover:bg-yellow-900"
-                  }`}
-                  onClick={handleSaveEnvironment}
-                  disabled={loading}
-                >
-                  <FaSave size={14} />
-                  <span>Salvar</span> <SL bg="yellow.600">S</SL>
-                </button>
               </div>
             </>
           )}

@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrayOptions, IField, IFormContext } from "@open-urbis/types";
 import { FieldBlock } from "../FieldBlock";
-import { IconButton } from "@chakra-ui/react";
+import { Button } from "@open-urbis/map-ui";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { Field } from "../Field";
 
@@ -97,13 +97,17 @@ export const ArrayField: React.FC<FieldArrayProps> = ({
                     className="absolute mt-4 pr-10"
                     style={{ left: "-52px" }}
                   >
-                    <IconButton
-                      aria-label="Remove field"
-                      icon={<FaTrash />}
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      className="h-9 w-9"
                       onClick={() => {
                         handleDelete(positionIndex);
                       }}
-                    />
+                    >
+                      <FaTrash size={14} />
+                    </Button>
                   </div>
                 )}
                 {block.map((f, index) => {
@@ -156,12 +160,14 @@ export const ArrayField: React.FC<FieldArrayProps> = ({
           })}
           {!isReadonly && (
             <div className="flex justify-center p-4">
-              <button
-                className="flex space-x-4 items-center bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2.5 rounded-md"
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleAdd}
               >
                 <FaPlus />
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -175,13 +181,17 @@ export const ArrayField: React.FC<FieldArrayProps> = ({
             <div className="flex flex-col p-6 border rounded-md space-y-4 mb-4">
               {!isReadonly && (
                 <div className="flex items-center space-x-4 font-bold">
-                  <IconButton
-                    aria-label="Remove field"
-                    icon={<FaTrash />}
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="h-9 w-9"
                     onClick={() => {
                       handleDelete(index);
                     }}
-                  />
+                  >
+                    <FaTrash size={14} />
+                  </Button>
                 </div>
               )}
               <div>
@@ -217,13 +227,15 @@ export const ArrayField: React.FC<FieldArrayProps> = ({
         })}
         {!isReadonly && (
           <div className="flex justify-center">
-            <button
-              className="flex space-x-4 items-center bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2.5 rounded-md"
+            <Button
+              type="button"
+              size="sm"
+              className="h-9 px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={handleAdd}
             >
               <FaPlus />
               <span>{options.label}</span>
-            </button>
+            </Button>
           </div>
         )}
       </>
@@ -231,13 +243,15 @@ export const ArrayField: React.FC<FieldArrayProps> = ({
   } else if (!isReadonly) {
     return (
       <div className="flex justify-center">
-        <button
-          className="flex space-x-4 items-center bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2.5 rounded-md"
+        <Button
+          type="button"
+          size="sm"
+          className="h-9 px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={handleAdd}
         >
           <FaPlus />
           <span>{options.label}</span>
-        </button>
+        </Button>
       </div>
     );
   } else {

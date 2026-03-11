@@ -1,4 +1,3 @@
-import { FormControl, FormLabel } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { Input, SL, Select, Textarea } from "../../../components";
 import { HotkeyContext } from "../../../reducers";
@@ -9,6 +8,7 @@ import {
 import { CodeEditor } from "./CodeEditor";
 import DynamicTable from "./DynamicTable";
 import { FaPlus } from "react-icons/fa";
+import { FormControl, FormLabel } from "../../../components";
 
 export type AddEnvironmentProps = {
   onAddEnvironment: (environment: CreateConstantVariableHttpDto) => void;
@@ -86,7 +86,7 @@ export const AddEnvironment: React.FC<AddEnvironmentProps> = ({
 
   const addButton = (
     <button
-      className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80 cursor-pointer"
+      className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-80 cursor-pointer"
       disabled={
         !newEnvironmentForm.label ||
         !newEnvironmentForm.documentation ||
@@ -102,7 +102,8 @@ export const AddEnvironment: React.FC<AddEnvironmentProps> = ({
       }
     >
       <FaPlus size={14} />
-      <span>Adicionar</span> <SL bg="yellow.600">{fixedButton ? "S" : "N"}</SL>
+      <span>Adicionar</span>{" "}
+      <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">{fixedButton ? "S" : "N"}</SL>
     </button>
   );
 

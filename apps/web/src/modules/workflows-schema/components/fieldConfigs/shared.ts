@@ -2,7 +2,6 @@ import {
   FieldTypeEnum,
   IFieldOptionsType,
   InputOptions,
-  PrivacyLevelEnum,
 } from "@open-urbis/types";
 
 export const tooltipExpressions = `
@@ -178,22 +177,6 @@ export const enableApostilleField = {
   expressions: {},
 };
 
-export const accessLevelField = {
-  key: "$.options.accessLevel",
-  type: FieldTypeEnum.Select,
-  options: {
-    label: "Nível de acesso",
-    items: [
-      { label: "Público", value: PrivacyLevelEnum.PUBLIC },
-      { label: "Registrado", value: PrivacyLevelEnum.REGISTERED },
-      { label: "Restrito", value: PrivacyLevelEnum.RESTRICTED },
-      { label: "Confidencial", value: PrivacyLevelEnum.CONFIDENTIAL },
-      { label: "Anônimo", value: PrivacyLevelEnum.ANONYMIZED },
-    ],
-  } as IFieldOptionsType,
-  expressions: {},
-};
-
 export const sensibilityLevelField = {
   key: "$.options.sensibilityLevel",
   type: FieldTypeEnum.Select,
@@ -206,7 +189,6 @@ export const sensibilityLevelField = {
         label: "Dados Sensíveis",
         value: 2,
       },
-      { label: "Dados Anonimizados", value: 3 },
     ],
     tooltip:
       "Classifique o nível de sensibilidade dos dados de acordo com a LGPD e GDPR",
@@ -288,7 +270,6 @@ export const selectionDefaultFields = [
   enableApostilleField,
   tooltipField,
   documentationField,
-  accessLevelField,
   itemsField,
 ];
 
@@ -302,4 +283,4 @@ export const commonDefaultFields = [
   enableApostilleField,
 ];
 
-export const controlDefaultFields = [accessLevelField, sensibilityLevelField];
+export const controlDefaultFields = [sensibilityLevelField];

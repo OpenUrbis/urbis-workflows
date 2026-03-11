@@ -1,16 +1,18 @@
 import React, { useContext } from "react";
 import { InputMask } from "@react-input/mask";
-import {
-  Input as ChakraInput,
-  InputProps as ChakraInputProps,
-} from "@chakra-ui/react";
+import { Input as DSInput } from "@open-urbis/map-ui";
 import { StyleContext } from "../reducers/style.reducer";
 
-interface MaskedInputProps extends Omit<ChakraInputProps, "mask"> {
+interface MaskedInputProps
+  extends Omit<
+    React.ComponentProps<typeof DSInput>,
+    "mask" | "size"
+  > {
   mask: string;
   readOnly?: boolean;
   disabled?: boolean;
   name?: string;
+  size?: "sm" | "md" | "lg" | string;
 }
 
 export const MaskedInput: React.FC<MaskedInputProps> = ({
@@ -18,6 +20,7 @@ export const MaskedInput: React.FC<MaskedInputProps> = ({
   name,
   onChange,
   value,
+  size,
   ...props
 }) => {
   const styleContext = useContext(StyleContext);
@@ -58,27 +61,11 @@ export const MaskedInput: React.FC<MaskedInputProps> = ({
       cursor: props.readOnly || props.disabled ? "not-allowed" : "auto",
       ...props.style,
     },
-    _hover: {
-      borderColor:
-        styleContext.state.buttonHoverColorWeight === "200"
-          ? "gray.300"
-          : "gray.500",
-    },
-    _focus: {
-      borderColor:
-        styleContext.state.buttonHoverColorWeight === "200"
-          ? "blue.500"
-          : "blue.300",
-      boxShadow:
-        styleContext.state.buttonHoverColorWeight === "200"
-          ? "0 0 0 1px var(--chakra-colors-blue-500)"
-          : "0 0 0 1px var(--chakra-colors-blue-300)",
-    },
   };
 
   return (
     <InputMask
-      component={ChakraInput}
+      component={DSInput}
       mask={convertedMask}
       replacement={{
         _: /\d/, // numbers only
@@ -88,6 +75,9 @@ export const MaskedInput: React.FC<MaskedInputProps> = ({
       value={value ?? ""}
       onChange={handleChange}
       onKeyDown={props.readOnly ? undefined : handleKeyDown}
+      className={`${props.className ?? ""} ${
+        props.readOnly || props.disabled ? "cursor-not-allowed" : ""
+      } ${size === "sm" ? "h-8" : size === "md" ? "h-10" : "h-11"}`}
       {...props}
       {...customProps}
       name={name}

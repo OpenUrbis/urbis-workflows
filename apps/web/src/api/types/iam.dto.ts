@@ -1,4 +1,5 @@
 import { PrivacyLevelEnum } from "@open-urbis/types";
+import { SensibilityLevelEnum } from "./schema";
 
 // Types for the IAM module
 export interface Permission {
@@ -26,6 +27,7 @@ export interface Group {
   description: string;
   accessLevel: PrivacyLevelEnum;
   roles: Role[];
+  directPermissions: Permission[];
   createdAt: string;
   updatedAt: string;
 }
@@ -35,6 +37,7 @@ export interface User {
   name: string;
   email: string;
   accessLevel: PrivacyLevelEnum;
+  sensibilityLevel: SensibilityLevelEnum;
   groups: Group[];
   directRoles: Role[];
   directPermissions: Permission[];
@@ -71,12 +74,14 @@ export interface CreateGroupDto {
   name: string;
   description: string;
   roleIds: string[];
+  permissionIds?: string[];
 }
 
 export interface UpdateGroupDto {
   name?: string;
   description?: string;
   roleIds?: string[];
+  permissionIds?: string[];
 }
 
 export interface AssignUserDto {
@@ -84,6 +89,7 @@ export interface AssignUserDto {
   groupIds?: string[];
   roleIds?: string[];
   permissionIds?: string[];
+  sensibilityLevel?: SensibilityLevelEnum;
 }
 
 // Response types
@@ -124,6 +130,7 @@ export interface UserIamDetailsResponse {
   name: string;
   email: string;
   accessLevel: PrivacyLevelEnum;
+  sensibilityLevel: SensibilityLevelEnum;
   groups: Group[];
   directRoles: Role[];
   directPermissions: Permission[];

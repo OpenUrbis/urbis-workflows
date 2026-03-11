@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import {
   FaPen,
@@ -9,8 +10,8 @@ import {
   FaList,
 } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
-import { Input, SL } from "../../components";
-import { Spinner, FormControl, FormLabel } from "@chakra-ui/react";
+import { SL } from "../../components";
+import { Button, Input, Label } from "@open-urbis/map-ui";
 import EditableHeader from "../../components/EditableHeader";
 import { FormEditor } from "./components/FormEditor";
 import { TreeList } from "./components/TreeList";
@@ -21,16 +22,18 @@ import { FormsApiClient } from "../../api/clients/forms.client";
 import { StepEditable } from "./form-engine/fields/StepEditable";
 import { IField } from "@open-urbis/types";
 import { StyleContext } from "../../reducers/style.reducer";
+import { Spinner } from "../../components";
 import {
   CreateFormDto,
   FormData,
   FormMetadata,
 } from "../../api/types/form.dto";
+import { useSearchParams } from "react-router-dom";
 
 const formsClient = new FormsApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
@@ -93,6 +96,7 @@ const getFormIcon = (form: FormMetadata) => {
 export const FormsPreset: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [search, setSearch] = useState("");
@@ -104,6 +108,36 @@ export const FormsPreset: React.FC = () => {
     stage?: string;
   }>({ version: 0 });
   const [versions, setVersions] = useState<VersionInfo[]>([]);
+
+  const setAddModeAndSync = (next: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    const currentAdd = searchParams.get("add") === "1";
+    const currentId = searchParams.get("id");
+
+    if (next) {
+      if (!currentAdd) params.set("add", "1");
+      if (currentId) params.delete("id");
+    } else {
+      if (currentAdd) params.delete("add");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const setSelectedIdAndSync = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    const currentId = searchParams.get("id") || "";
+    const currentAdd = searchParams.get("add") === "1";
+
+    if (currentAdd) params.delete("add");
+    if (currentId !== id) params.set("id", id);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
 
   const fetchPresets = async () => {
     const response = await formsClient.findAll();
@@ -143,6 +177,28 @@ export const FormsPreset: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingPreset) {
+      setSelectedPreset(null);
+      setAddingPreset(true);
+      return;
+    }
+
+    if (!add && addingPreset) {
+      setAddingPreset(false);
+    }
+
+    if (id && presets.length > 0 && (!selectedPreset || selectedPreset.id !== id)) {
+      const meta = presets.find((p) => p.id === id);
+      if (meta) {
+        selectPresetCallback(meta);
+      }
+    }
+  }, [searchParams, presets, selectedPreset, addingPreset]);
+
+  useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
@@ -166,11 +222,13 @@ export const FormsPreset: React.FC = () => {
 
   const selectPresetCallback = async (presetConfig: FormMetadata) => {
     if (presetConfig !== undefined && presetConfig.id) {
+      setSelectedIdAndSync(presetConfig.id);
       setLoading(true);
       const preset = await formsClient.findOne(presetConfig.id);
       setLoading(false);
       setSelectedPreset(preset);
       setAddingPreset(false);
+      setAddModeAndSync(false);
 
       setLoadingVersions(true);
       try {
@@ -246,6 +304,7 @@ export const FormsPreset: React.FC = () => {
     e?.preventDefault();
     setSelectedPreset(null);
     setAddingPreset(true);
+    setAddModeAndSync(true);
   };
 
   const handleSavePreset = async () => {
@@ -363,35 +422,28 @@ export const FormsPreset: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-6 mb-24 px-20 min-h-[80vh]">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-medium text-left">
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
+      <div className="flex items-start justify-between mb-6">
+        <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
           Formulários
         </h1>
-        <button
-          className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 font-medium"
+        <Button
+          type="button"
+          size="sm"
+          className="mt-4 h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={handleAddPresetForm}
           disabled={loading}
         >
           <FaPlus size={16} />
           <span>Formulário</span>
           <span className="text-sm opacity-75 ml-2">
-            <SL bg="yellow.600">N</SL>
+            <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
           </span>
-        </button>
+        </Button>
       </div>
 
-      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden">
-        <div
-          className="w-3/12 border-r"
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-            backgroundColor: styleContext.state.backgroundColor,
-          }}
-        >
+      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden border-border bg-card text-card-foreground">
+        <div className="w-3/12 border-r border-border bg-card">
           <TreeList
             items={presets}
             search={search}
@@ -401,6 +453,7 @@ export const FormsPreset: React.FC = () => {
             iconColor="yellow"
             getIcon={getFormIcon}
             selectedId={selectedPreset?.id}
+            density="compact"
           />
         </div>
         <div className="flex flex-col p-6 w-9/12">
@@ -413,24 +466,26 @@ export const FormsPreset: React.FC = () => {
             <AddFormsPreset onAddPreset={handleAddPreset} />
           )}
           {!loading && selectedPreset === null && !addingPreset && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
-              <FaMinus size={48} className="mb-4 opacity-50" />
-              <p className="text-xl font-medium mb-2">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+              <FaMinus size={40} className="mb-3 opacity-50" />
+              <p className="text-lg font-medium mb-1.5 text-foreground">
                 Nenhum formulário selecionado
               </p>
               <p className="text-sm mb-6">
                 Selecione um formulário da lista ao lado ou crie um novo
               </p>
-              <button
-                className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 font-medium"
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleAddPresetForm}
               >
                 <FaPlus size={16} />
                 <span>Formulário</span>
                 <span className="text-sm opacity-75 ml-2">
-                  <SL bg="yellow.600">N</SL>
+                  <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
                 </span>
-              </button>
+              </Button>
             </div>
           )}
           {!loading && selectedPreset !== null && (
@@ -441,7 +496,7 @@ export const FormsPreset: React.FC = () => {
                     <EditableHeader
                       value={selectedPreset.label}
                       onTextChange={(text) => handleSetPreset("label", text)}
-                      className="text-xl md:text-3xl font-medium text-center mb-3"
+                      className="text-lg md:text-2xl font-semibold text-center mb-3"
                     />
                     <EditableHeader
                       value={selectedPreset.documentation}
@@ -485,18 +540,18 @@ export const FormsPreset: React.FC = () => {
 
               <div className="w-4/5 mx-auto">
                 <div className="flex flex-col space-y-4 mb-8">
-                  <FormControl id="namespace">
-                    <FormLabel>Chave</FormLabel>
+                  <div id="namespace">
+                    <Label className="mb-1 block">Chave</Label>
                     <Input
                       type="text"
                       placeholder="dir0/dir1/filename"
-                      size="lg"
+                      className="h-10"
                       value={selectedPreset.namespace}
                       onChange={(e) =>
                         handleSetPreset("namespace", e.target.value)
                       }
                     />
-                  </FormControl>
+                  </div>
                 </div>
 
                 {selectedPreset.type === "step" ? (
@@ -531,68 +586,52 @@ export const FormsPreset: React.FC = () => {
 
               <div className="flex-grow" />
 
-              <div
-                className="flex justify-end items-center px-8 py-4 border-t mt-8"
-                style={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#E5E7EB"
-                      : "#374151",
-                  backgroundColor: styleContext.state.backgroundColor,
-                }}
-              >
-                <div className="flex gap-4">
-                  <button
+              <div className="flex justify-end items-center px-8 py-4 border-t border-border bg-card mt-8">
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleCodeEditor}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100 hover:bg-gray-200"
-                        : "bg-gray-700 hover:bg-gray-600"
-                    }`}
+                    className="h-9 px-4 gap-2"
                     style={{ color: styleContext.state.textColor }}
                   >
                     <FaPen className="text-sm" />
                     <span>Código</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleDuplicate}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100 hover:bg-gray-200"
-                        : "bg-gray-700 hover:bg-gray-600"
-                    }`}
+                    className="h-9 px-4 gap-2"
                     style={{ color: styleContext.state.textColor }}
                   >
                     <FaRegCopy className="text-sm" />
                     <span>Duplicar</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleRemovePreset}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-red-100 hover:bg-red-200 text-red-600"
-                        : "bg-red-900 hover:bg-red-800 text-red-300"
-                    }`}
+                    className="h-9 px-4 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
                     <FaTrash className="text-sm" />
                     <span>Remover</span>
-                  </button>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground"
+                    onClick={handleSavePreset}
+                    disabled={loading}
+                  >
+                    <FaSave size={14} />
+                    <span>Salvar</span>
+                    <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">S</SL>
+                  </Button>
                 </div>
-              </div>
-
-              <div className="fixed bottom-16 right-4 flex space-x-4">
-                <button
-                  className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-yellow-600 hover:bg-yellow-700"
-                      : "bg-yellow-800 hover:bg-yellow-900"
-                  }`}
-                  onClick={handleSavePreset}
-                  disabled={loading}
-                >
-                  <FaSave size={14} />
-                  <span>Salvar</span> <SL bg="yellow.600">S</SL>
-                </button>
               </div>
             </>
           )}

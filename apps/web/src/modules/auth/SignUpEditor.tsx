@@ -1,5 +1,5 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
-import { Spinner } from "@chakra-ui/react";
 import { SL } from "../../components";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { ApiClient } from "../../api";
@@ -7,11 +7,13 @@ import { useSnackbar } from "../../hooks/snackbar";
 import { FieldTypeEnum, IField } from "@open-urbis/types";
 import { FieldEditable } from "../workflows-schema/form-engine/FieldEditable";
 import { FaSave } from "react-icons/fa";
+import { Button } from "@open-urbis/map-ui";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
@@ -87,27 +89,17 @@ export function SignUpEditor(): JSX.Element {
   }, [loading, config, hotkeyContext]);
 
   return (
-    <div className="pb-20">
-      <div className="flex justify-center sm:px-0 md:px-6 mb-6">
-        <div
-          className="flex flex-col mx-6 md:mx-0 justify-center"
-          style={{ width: window.innerWidth <= 500 ? "100%" : "685px" }}
-        >
-          {loading && (
-            <div className="pt-10 text-center">
-              <Spinner size="xl" />
-            </div>
-          )}
+    <div className="pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {loading && (
+        <div className="pt-10 text-center flex items-center justify-center">
+          <Spinner size="xl" />
         </div>
-      </div>
+      )}
 
       {!loading && config && (
-        <div className="flex w-full justify-center sm:px-0 md:px-20 mt-4">
-          <div
-            className="flex flex-col mx-6 md:mx-0 justify-center"
-            style={{ width: window.innerWidth <= 500 ? "auto" : "685px" }}
-          >
-            <h1 className="text-2xl md:text-3xl font-medium mb-6 text-center">
+        <div className="flex w-full justify-center mt-4">
+          <div className="flex flex-col w-full max-w-[685px]">
+            <h1 className="text-2xl font-semibold tracking-tight mb-6 text-center text-foreground">
               Formulário de cadastro de usuários
             </h1>
             <FieldEditable
@@ -129,14 +121,17 @@ export function SignUpEditor(): JSX.Element {
       )}
 
       <div className="fixed bottom-16 right-4 flex space-x-4">
-        <button
-          className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80"
+        <Button
+          type="button"
+          size="sm"
+          className="h-10 px-5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-80"
           disabled={loading}
           onClick={handleSave}
         >
           <FaSave size={14} />
-          <span>Salvar</span> <SL bg="yellow.600">S</SL>
-        </button>
+          <span>Salvar</span>{" "}
+          <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">S</SL>
+        </Button>
       </div>
     </div>
   );

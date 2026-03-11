@@ -1,14 +1,19 @@
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
-import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
+import { useLocation } from "react-router-dom";
 import { BlockOptions, FieldTypeEnum, IField } from "@open-urbis/types";
 import { Input, MaskedInput, SL } from "../../components";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
+import { AuthContext } from "../../reducers/auth.reducer";
 import { Field } from "../workflows-schema";
+import { Spinner } from "../../components";
+
+const FormControl = ({ children, ...props }: any) => <div {...props}>{children}</div>;
+const FormLabel = ({ children, ...props }: any) => <label {...props}>{children}</label>;
 
 export function ContestUser(): JSX.Element {
   const hotkeyContext = useContext(HotkeyContext);
+  const { signIn } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [document, setDocument] = useState("");
@@ -17,8 +22,6 @@ export function ContestUser(): JSX.Element {
   const [valid, setValid] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
   const location = useLocation();
 
   const getDocumentMask = (value: string) => {
@@ -94,7 +97,7 @@ export function ContestUser(): JSX.Element {
       type: "SET_HOTKEY",
       payload: {
         U: (e) => handleSignUp(e),
-        E: () => navigate("/sign-in"),
+        E: () => signIn(),
       },
     });
 
@@ -162,14 +165,14 @@ export function ContestUser(): JSX.Element {
           <button
             type="submit"
             onClick={handleSignUp}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white text-lg w-full py-3.5 rounded-xl disabled:opacity-80"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg w-full py-3.5 rounded-xl disabled:opacity-80"
             disabled={loading || !email || !document || !name}
           >
             {loading ? (
               <Spinner />
             ) : (
               <>
-                Contestar <SL bg="yellow.500">U</SL>
+                Contestar <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">U</SL>
               </>
             )}
           </button>
@@ -177,8 +180,8 @@ export function ContestUser(): JSX.Element {
         <div className="text-center pt-4">
           Não deseja contestar mais?{" "}
           <button
-            className="cursor-pointer hover:text-yellow-600 text-yellow-500 font-bold"
-            onClick={() => navigate("/login")}
+            className="cursor-pointer hover:text-primary/90 text-primary font-bold"
+            onClick={() => signIn()}
           >
             Entrar <SL>E</SL>
           </button>

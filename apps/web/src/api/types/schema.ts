@@ -230,4 +230,5 @@ export interface SchemaDefinition {
   hooks?: Hook[];
   plugins: PluginConfig[];
   control?: Control;
+  integrations?: Record<string, any>;
 }

@@ -21,37 +21,9 @@ export interface Field {
 }
 
 // Request DTOs
-export interface SignUpHttpDto {
-  email: string;
-  password: string;
-  document: string;
-  name: string;
-  custom: any;
-}
-
 export interface UpdateProfileHttpDto {
   name?: string;
   custom?: any;
-}
-
-export interface ConfirmSignUpHttpDto {
-  email: string;
-  code: string;
-}
-
-export interface SignInHttpDto {
-  email: string;
-  password: string;
-}
-
-export interface ForgetPasswordHttpDto {
-  email: string;
-}
-
-export interface ConfirmForgetPasswordHttpDto {
-  email: string;
-  code: string;
-  newPassword: string;
 }
 
 export interface SetCustomUserFieldsHttpDto {
@@ -91,11 +63,6 @@ export interface UserResponse {
 export interface UserProfileResponse extends UserResponse {
   roles: string[];
   permissions: string[];
-}
-
-export interface SignInResponse {
-  token: string;
-  user: UserProfileResponse;
 }
 
 export interface CustomFieldsResponse {

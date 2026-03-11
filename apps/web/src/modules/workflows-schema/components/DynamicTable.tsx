@@ -1,24 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import Papa from "papaparse";
-import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-  IconButton,
-  Tooltip,
-  Box,
-  Flex,
-  Button,
-  Text,
-  Badge,
-} from "@chakra-ui/react";
 import { FaTrash, FaPlus, FaFileImport, FaTable } from "react-icons/fa";
 import EditableHeader from "../../../components/EditableHeader";
 import { StyleContext } from "../../../reducers";
+import { IconButton, Tooltip } from "../../../components";
 
 interface Row {
   [key: string]: string;
@@ -68,11 +53,10 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   const isDarkMode = styleContext.state.buttonHoverColorWeight === "800";
 
   // Dynamic colors based on theme
-  const borderColor = isDarkMode ? "gray.600" : "gray.200";
-  const hoverBgColor = isDarkMode ? "gray.700" : "gray.100";
-  const bgColor = isDarkMode ? "gray.800" : "white";
-  const buttonColorScheme = isDarkMode ? "blue" : "blue";
-  const emptyTableBg = isDarkMode ? "gray.700" : "gray.50";
+  const borderColor = isDarkMode ? "#4b5563" : "#e5e7eb";
+  const hoverBgColor = isDarkMode ? "#374151" : "#f3f4f6";
+  const bgColor = isDarkMode ? "#1f2937" : "#ffffff";
+  const emptyTableBg = isDarkMode ? "#374151" : "#f9fafb";
 
   useEffect(() => {
     // Only call onChange when data actually changes
@@ -167,159 +151,166 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
 
   // Render empty state when no data
   const renderEmptyState = () => (
-    <Box
-      p={8}
-      textAlign="center"
-      bg={emptyTableBg}
-      borderRadius="md"
-      border="1px dashed"
-      borderColor={borderColor}
+    <div
+      className="p-8 text-center rounded-md border border-dashed"
+      style={{ backgroundColor: emptyTableBg, borderColor }}
     >
       <FaTable
         size={40}
         color={isDarkMode ? "#4A5568" : "#CBD5E0"}
         className="mx-auto mb-4"
       />
-      <Text mb={4} fontSize="lg" color={styleContext.state.textColor}>
+      <div className="mb-4 text-lg" style={{ color: styleContext.state.textColor }}>
         Nenhum dado na tabela
-      </Text>
+      </div>
       {!isDisabled && (
-        <Flex justifyContent="center" gap={4}>
-          <Button
-            leftIcon={<FaPlus />}
+        <div className="flex justify-center gap-4">
+          <button
+            type="button"
             onClick={addColumn}
-            colorScheme={buttonColorScheme}
-            size="sm"
-            variant={isDarkMode ? "outline" : "solid"}
+            className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border transition-colors ${
+              isDarkMode
+                ? "border-gray-600 text-gray-100 hover:bg-gray-700"
+                : "border-gray-200 text-gray-900 hover:bg-gray-100"
+            }`}
           >
+            <FaPlus />
             Adicionar coluna
-          </Button>
-          <Button
-            leftIcon={<FaFileImport />}
-            as="label"
+          </button>
+          <label
             htmlFor="csv-upload-empty"
-            colorScheme={buttonColorScheme}
-            size="sm"
-            variant={isDarkMode ? "outline" : "solid"}
-            cursor="pointer"
+            className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border cursor-pointer transition-colors ${
+              isDarkMode
+                ? "border-gray-600 text-gray-100 hover:bg-gray-700"
+                : "border-gray-200 text-gray-900 hover:bg-gray-100"
+            }`}
           >
+            <FaFileImport />
             Importar CSV
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              className="hidden"
-              id="csv-upload-empty"
-              style={{ display: "none" }}
-            />
-          </Button>
-        </Flex>
+          </label>
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleFileUpload}
+            className="hidden"
+            id="csv-upload-empty"
+          />
+        </div>
       )}
-    </Box>
+    </div>
   );
 
   return (
-    <Box className="dynamic-table-container">
+    <div className="dynamic-table-container">
       {data.headers.length === 0 ? (
         renderEmptyState()
       ) : (
         <>
-          <Flex
-            mb={4}
-            justifyContent="space-between"
-            alignItems="center"
-            flexWrap="wrap"
-            gap={2}
-          >
-            <Badge
-              colorScheme={buttonColorScheme}
-              fontSize="sm"
-              px={2}
-              py={1}
-              borderRadius="md"
+          <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
+            <div
+              className={`text-sm px-2 py-1 rounded-md border ${
+                isDarkMode
+                  ? "bg-gray-800 border-gray-600 text-gray-100"
+                  : "bg-white border-gray-200 text-gray-900"
+              }`}
             >
               {data.rows.length} {data.rows.length === 1 ? "linha" : "linhas"} ×{" "}
               {data.headers.length}{" "}
               {data.headers.length === 1 ? "coluna" : "colunas"}
-            </Badge>
+            </div>
 
             {!isDisabled && (
-              <Flex gap={2} flexWrap="wrap">
-                <Tooltip label="Adicionar coluna" placement="top">
-                  <Button
-                    leftIcon={<FaPlus />}
+              <div className="flex gap-2 flex-wrap">
+                <Tooltip label="Adicionar coluna">
+                  <button
+                    type="button"
                     onClick={addColumn}
-                    size="sm"
-                    colorScheme={buttonColorScheme}
-                    variant="outline"
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border transition-colors ${
+                      isDarkMode
+                        ? "border-gray-600 text-gray-100 hover:bg-gray-700"
+                        : "border-gray-200 text-gray-900 hover:bg-gray-100"
+                    }`}
                   >
+                    <FaPlus />
                     Coluna
-                  </Button>
+                  </button>
                 </Tooltip>
 
-                <Tooltip label="Adicionar linha" placement="top">
-                  <Button
-                    leftIcon={<FaPlus />}
+                <Tooltip label="Adicionar linha">
+                  <button
+                    type="button"
                     onClick={addRow}
-                    size="sm"
-                    colorScheme={buttonColorScheme}
-                    variant="outline"
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border transition-colors ${
+                      isDarkMode
+                        ? "border-gray-600 text-gray-100 hover:bg-gray-700"
+                        : "border-gray-200 text-gray-900 hover:bg-gray-100"
+                    }`}
                   >
+                    <FaPlus />
                     Linha
-                  </Button>
+                  </button>
                 </Tooltip>
 
-                <Tooltip label="Importar CSV" placement="top">
-                  <Button
-                    leftIcon={<FaFileImport />}
-                    as="label"
+                <Tooltip label="Importar CSV">
+                  <label
                     htmlFor="csv-upload"
-                    size="sm"
-                    colorScheme={buttonColorScheme}
-                    variant="outline"
-                    cursor="pointer"
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border cursor-pointer transition-colors ${
+                      isDarkMode
+                        ? "border-gray-600 text-gray-100 hover:bg-gray-700"
+                        : "border-gray-200 text-gray-900 hover:bg-gray-100"
+                    }`}
                   >
+                    <FaFileImport />
                     Importar CSV
-                    <input
-                      type="file"
-                      accept=".csv"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="csv-upload"
-                      style={{ display: "none" }}
-                    />
-                  </Button>
+                  </label>
                 </Tooltip>
-              </Flex>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="csv-upload"
+                />
+              </div>
             )}
-          </Flex>
+          </div>
 
-          <TableContainer
-            border="1px solid"
-            borderColor={borderColor}
-            borderRadius="md"
-            width="100%"
-            maxHeight="600px"
-            overflowY="auto"
+          <div
+            className="w-full overflow-y-auto"
+            style={{
+              borderWidth: 1,
+              borderStyle: "solid",
+              borderColor,
+              borderRadius: 6,
+              maxHeight: 600,
+            }}
           >
-            <Table variant="simple" size="sm">
-              <Thead
-                position="sticky"
-                top={0}
-                zIndex={1}
-                bg={bgColor}
-                borderBottom="1px solid"
-                borderColor={borderColor}
+            <table className="w-full text-sm">
+              <thead
+                style={{
+                  position: "sticky" as any,
+                  top: 0,
+                  zIndex: 1,
+                  backgroundColor: bgColor,
+                  borderBottom: `1px solid ${borderColor}`,
+                }}
               >
-                <Tr>
+                <tr>
                   {data.headers.map((header, index) => (
-                    <Th
+                    <th
                       key={`header-${index}`}
-                      textTransform="none"
-                      borderColor={borderColor}
-                      py={3}
+                      className="text-left font-semibold"
+                      style={{
+                        textTransform: "none",
+                        borderColor,
+                        paddingTop: 12,
+                        paddingBottom: 12,
+                        paddingLeft: 12,
+                        paddingRight: 12,
+                        borderBottom: `1px solid ${borderColor}`,
+                      }}
                     >
-                      <Flex alignItems="center" justifyContent="space-between">
+                      <div className="flex items-center justify-between">
                         <EditableHeader
                           value={header}
                           onTextChange={(text) =>
@@ -334,38 +325,44 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
                           readOnly={isDisabled}
                         />
                         {!isDisabled && (
-                          <Tooltip label="Remover coluna" placement="top">
+                          <Tooltip label="Remover coluna">
                             <IconButton
                               aria-label="delete column"
                               icon={<FaTrash />}
-                              size="xs"
-                              ml={2}
                               onClick={() => deleteColumn(index)}
-                              isDisabled={isDisabled}
-                              colorScheme="red"
-                              variant="ghost"
+                              className="ml-2"
                             />
                           </Tooltip>
                         )}
-                      </Flex>
-                    </Th>
+                      </div>
+                    </th>
                   ))}
                   {!isDisabled && (
-                    <Th width="50px" borderColor={borderColor}></Th>
+                    <th style={{ width: 50, borderBottom: `1px solid ${borderColor}` }} />
                   )}
-                </Tr>
-              </Thead>
-              <Tbody>
+                </tr>
+              </thead>
+              <tbody>
                 {data.rows.map((row, rowIndex) => (
-                  <Tr
+                  <tr
                     key={`row-${rowIndex}`}
-                    _hover={{ bg: hoverBgColor }}
-                    borderColor={borderColor}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as any).style.backgroundColor = hoverBgColor;
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as any).style.backgroundColor = "";
+                    }}
                   >
                     {data.headers.map((header, colIndex) => (
-                      <Td
+                      <td
                         key={`cell-${rowIndex}-${colIndex}`}
-                        borderColor={borderColor}
+                        style={{
+                          borderBottom: `1px solid ${borderColor}`,
+                          paddingLeft: 12,
+                          paddingRight: 12,
+                          paddingTop: 8,
+                          paddingBottom: 8,
+                        }}
                       >
                         <EditableHeader
                           value={row[header]}
@@ -378,31 +375,34 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
                           }}
                           readOnly={isDisabled}
                         />
-                      </Td>
+                      </td>
                     ))}
                     {!isDisabled && (
-                      <Td borderColor={borderColor} width="50px">
-                        <Tooltip label="Remover linha" placement="left">
+                      <td
+                        style={{
+                          width: 50,
+                          borderBottom: `1px solid ${borderColor}`,
+                          paddingLeft: 8,
+                          paddingRight: 8,
+                        }}
+                      >
+                        <Tooltip label="Remover linha">
                           <IconButton
                             aria-label="delete row"
                             icon={<FaTrash />}
-                            size="xs"
                             onClick={() => deleteRow(rowIndex)}
-                            isDisabled={isDisabled}
-                            colorScheme="red"
-                            variant="ghost"
                           />
                         </Tooltip>
-                      </Td>
+                      </td>
                     )}
-                  </Tr>
+                  </tr>
                 ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
+              </tbody>
+            </table>
+          </div>
         </>
       )}
-    </Box>
+    </div>
   );
 };
 

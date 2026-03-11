@@ -1,21 +1,22 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Spinner,
   Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Textarea,
-  IconButton,
-  Tooltip,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Badge,
-} from "@chakra-ui/react";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  Button as DSButton,
+  Input as DSInput,
+  Textarea as DSTextarea,
+  Label,
+} from "@open-urbis/map-ui";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
 import { StyleContext } from "../../reducers";
 import { ApiClient } from "../../api";
@@ -23,11 +24,12 @@ import { Permission } from "../../api/types/iam.dto";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { useSnackbar } from "../../hooks/snackbar";
 import { SideDrawer } from "../../components/SideDrawer";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
@@ -54,7 +56,7 @@ export function Permissions(): JSX.Element {
       const response = await api.iam.getPermissions();
       // Sort permissions by code
       const sortedPermissions = [...response.permissions].sort((a, b) =>
-        a.code.localeCompare(b.code)
+        a.code.localeCompare(b.code),
       );
       setPermissions(sortedPermissions);
     } catch (error) {
@@ -83,7 +85,6 @@ export function Permissions(): JSX.Element {
         delete: ["N"],
       });
     };
-    
   }, []);
 
   const resetFormAndOpen = () => {
@@ -97,7 +98,7 @@ export function Permissions(): JSX.Element {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -133,7 +134,7 @@ export function Permissions(): JSX.Element {
         type: "warning",
         confirmText: "Excluir",
         cancelText: "Cancelar",
-      }
+      },
     );
 
     if (confirmed) {
@@ -163,10 +164,12 @@ export function Permissions(): JSX.Element {
       if (isEdit && selectedPermission) {
         const updated = await api.iam.updatePermission(
           selectedPermission.id,
-          formData
+          formData,
         );
         setPermissions(
-          permissions.map((p) => (p.id === selectedPermission.id ? updated : p))
+          permissions.map((p) =>
+            p.id === selectedPermission.id ? updated : p,
+          ),
         );
         snackbar.success("A permissão foi atualizada com sucesso.");
       } else {
@@ -185,288 +188,169 @@ export function Permissions(): JSX.Element {
 
   return (
     <div className="flex flex-col space-y-6 mb-20">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center h-10">
         <h2
-          className="text-xl font-bold"
+          className="text-lg font-bold text-foreground m-0 leading-none"
           style={{ color: styleContext.state.textColor }}
         >
           Permissões
         </h2>
-        <Button
-          leftIcon={<FaPlus />}
-          colorScheme="orange"
+        <DSButton
+          type="button"
           onClick={resetFormAndOpen}
-          size="sm"
-          bg={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "orange.500"
-              : "orange.600"
-          }
-          _hover={{
-            bg:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "orange.600"
-                : "orange.700",
-          }}
-          color="white"
+          className="h-8 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
+          <FaPlus size={14} />
           Nova Permissão
-        </Button>
+        </DSButton>
       </div>
 
       {isLoading && permissions.length === 0 ? (
         <div className="flex justify-center my-8">
-          <Spinner
-            size="lg"
-            color={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "orange.500"
-                : "orange.400"
-            }
-            thickness="3px"
-          />
+          <Spinner size="xl" />
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden border"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
-        >
+        <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
           <div className="overflow-x-auto w-full">
-            <Table
-              variant="simple"
-              size="md"
-              style={{ tableLayout: "fixed", width: "100%" }}
-            >
-              <Thead>
-                <Tr>
-                  <Th
-                    className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    }
-                    style={{
-                      color: styleContext.state.textColor,
-                      width: "20%",
-                      minWidth: "150px",
-                    }}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead
+                    className="bg-muted/40 text-xs font-semibold text-foreground h-10"
+                    style={{ width: "20%", minWidth: "150px" }}
                   >
                     Nome
-                  </Th>
-                  <Th
-                    className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    }
-                    style={{
-                      color: styleContext.state.textColor,
-                      width: "25%",
-                      minWidth: "180px",
-                    }}
+                  </TableHead>
+                  <TableHead
+                    className="bg-muted/40 text-xs font-semibold text-foreground h-10"
+                    style={{ width: "25%", minWidth: "180px" }}
                   >
                     Código
-                  </Th>
-                  <Th
-                    className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    }
-                    style={{
-                      color: styleContext.state.textColor,
-                      width: "45%",
-                    }}
+                  </TableHead>
+                  <TableHead
+                    className="bg-muted/40 text-xs font-semibold text-foreground h-10"
+                    style={{ width: "45%" }}
                   >
                     Descrição
-                  </Th>
-                  <Th
-                    className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-gray-100"
-                        : "bg-gray-800"
-                    }
+                  </TableHead>
+                  <TableHead
+                    className="bg-muted/40 text-xs font-semibold text-foreground h-10 text-right"
                     style={{
-                      color: styleContext.state.textColor,
                       width: "10%",
                       minWidth: "100px",
-                      textAlign: "right",
-                      whiteSpace: "nowrap",
                     }}
                   >
                     Ações
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {permissions.map((permission) => (
-                  <Tr
+                  <TableRow
                     key={permission.id}
                     className="transition-colors duration-200"
-                    _hover={{
-                      bg:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.50"
-                          : "gray.700",
-                    }}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                    }}
                   >
-                    <Td
-                      fontWeight="medium"
-                      style={{
-                        color: styleContext.state.textColor,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <Tooltip
-                        label={permission.name}
-                        placement="top"
-                        hasArrow
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "white"
-                            : "gray.800"
-                        }
-                      >
-                        <div className="truncate">{permission.name}</div>
-                      </Tooltip>
-                    </Td>
-                    <Td
+                    <TableCell
+                      className="font-medium text-foreground py-2"
                       style={{
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      <Tooltip
-                        label={permission.code}
-                        placement="top"
-                        hasArrow
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "white"
-                            : "gray.800"
-                        }
-                      >
-                        <Badge
-                          colorScheme="orange"
-                          variant="solid"
-                          py="1"
-                          px="2"
-                          className="hover:opacity-80 transition-opacity truncate max-w-full inline-block"
-                          borderRadius="md"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "orange.100"
-                              : "orange.800"
-                          }
-                          color={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "orange.800"
-                              : "orange.200"
-                          }
-                        >
-                          {permission.code}
-                        </Badge>
-                      </Tooltip>
-                    </Td>
-                    <Td
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate cursor-default">
+                              {permission.name}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {permission.name}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell
+                      className="py-2"
                       style={{
-                        color: styleContext.state.textColor,
-                        opacity: 0.9,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      <Tooltip
-                        label={permission.description || "Sem descrição"}
-                        placement="top"
-                        hasArrow
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "white"
-                            : "gray.800"
-                        }
-                      >
-                        <div className="cursor-help truncate">
-                          {permission.description || "Sem descrição"}
-                        </div>
-                      </Tooltip>
-                    </Td>
-                    <Td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-medium px-2 py-0.5 rounded-full truncate max-w-full inline-flex items-center bg-primary/10 text-primary border-primary/20"
+                            >
+                              {permission.code}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {permission.code}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell
+                      className="text-muted-foreground py-2"
+                      style={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-help truncate">
+                              {permission.description || "Sem descrição"}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {permission.description || "Sem descrição"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell className="text-right py-2">
                       <div className="flex justify-end space-x-2 group">
-                        <IconButton
-                          aria-label="Edit"
-                          icon={<FaEdit />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
+                        <DSButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
                           onClick={() => handleEditClick(permission)}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F3F4F6"
-                                : "#4B5563",
-                            color: styleContext.state.textColor,
-                          }}
-                        />
-                        <IconButton
-                          aria-label="Delete"
-                          icon={<FaTrash />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
+                          title="Editar"
+                        >
+                          <FaEdit size={14} />
+                        </DSButton>
+                        <DSButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           onClick={() => handleDeleteClick(permission.id)}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F3F4F6"
-                                : "#4B5563",
-                            color: styleContext.state.textColor,
-                          }}
-                        />
+                          title="Excluir"
+                        >
+                          <FaTrash size={14} />
+                        </DSButton>
                       </div>
-                    </Td>
-                  </Tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
                 {permissions.length === 0 && (
-                  <Tr>
-                    <Td
+                  <TableRow>
+                    <TableCell
                       colSpan={4}
-                      className="text-center py-4"
-                      style={{ color: styleContext.state.textColor }}
+                      className="text-center py-8 text-muted-foreground"
                     >
                       Nenhuma permissão encontrada
-                    </Td>
-                  </Tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </Tbody>
+              </TableBody>
             </Table>
           </div>
         </div>
@@ -485,191 +369,71 @@ export function Permissions(): JSX.Element {
             isEdit
               ? {
                   text: selectedPermission?.code || "",
-                  colorScheme: "orange",
+                  colorScheme: "blue",
                 }
               : undefined
           }
         >
-          <div className="overflow-y-auto">
-            <div
-              className="p-4 border-b"
-              style={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-              }}
-            >
-              <FormControl id="name" mb={4} isRequired>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+          <div className="overflow-y-auto h-full pb-20">
+            <div className="p-4 border-b border-border">
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Nome da Permissão
-                </FormLabel>
-                <Input
+                </Label>
+                <DSInput
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Ex: Visualizar Fluxos de Trabalho"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  py={3}
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#F97316"
-                        : "#EA580C",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #F97316"
-                        : "0 0 0 1px #EA580C",
-                  }}
+                  className="h-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-              </FormControl>
+              </div>
 
-              <FormControl id="code" mb={4} isRequired>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Código
-                </FormLabel>
-                <Input
+                </Label>
+                <DSInput
                   type="text"
                   name="code"
                   value={formData.code}
                   onChange={handleInputChange}
                   placeholder="Ex: workflow:read:*"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  py={3}
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#F97316"
-                        : "#EA580C",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #F97316"
-                        : "0 0 0 1px #EA580C",
-                  }}
+                  className="h-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-                <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <div className="mt-1 text-xs text-muted-foreground">
                   Formato: dominio:tipo_operacao:acao (use * para curingas)
                 </div>
-              </FormControl>
+              </div>
 
-              <FormControl id="description" mb={4}>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Descrição
-                </FormLabel>
-                <Textarea
+                </Label>
+                <DSTextarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Descrição detalhada da permissão..."
-                  borderRadius="md"
-                  borderWidth="1px"
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#F97316"
-                        : "#EA580C",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #F97316"
-                        : "0 0 0 1px #EA580C",
-                  }}
+                  className="min-h-[112px] bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-              </FormControl>
+              </div>
             </div>
           </div>
 
           <div
-            className="absolute bottom-0 left-0 right-0 p-4 border-t flex justify-end space-x-3 z-10"
-            style={{
-              borderColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#E5E7EB"
-                  : "#374151",
-              backgroundColor: styleContext.state.backgroundColor,
-            }}
+            className="absolute bottom-0 left-0 right-0 h-16 px-6 border-t border-border flex items-center justify-end space-x-3 z-10"
+            style={{ backgroundColor: styleContext.state.backgroundColor }}
           >
-            <Button
-              colorScheme="orange"
+            <DSButton
+              type="button"
               onClick={handleSave}
-              isLoading={isLoading}
-              size="md"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "orange.500"
-                  : "orange.600"
-              }
-              _hover={{
-                bg:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "orange.600"
-                    : "orange.700",
-              }}
+              disabled={isLoading}
+              className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isEdit ? "Atualizar" : "Criar"} Permissão
-            </Button>
+            </DSButton>
           </div>
         </SideDrawer>
       )}

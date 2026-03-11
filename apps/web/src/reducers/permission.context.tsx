@@ -19,6 +19,7 @@ interface PermissionContextType {
     activity: ActivityTemplate,
     accessType?: "read" | "write"
   ) => boolean;
+  hasSensibilityAccess: (fieldSensibilityLevel?: number) => boolean;
   refreshPermissions: () => Promise<void>;
 }
 
@@ -28,6 +29,7 @@ const PermissionContext = createContext<PermissionContextType>({
   error: null,
   hasPermission: () => false,
   hasActivityAccess: () => false,
+  hasSensibilityAccess: () => true,
   refreshPermissions: async () => {},
 });
 
@@ -40,24 +42,42 @@ interface PermissionProviderProps {
 export const PermissionProvider: React.FC<PermissionProviderProps> = ({
   children,
 }) => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const {
+    isAuthenticated,
+    accessToken,
+    isLoading: authLoading,
+  } = useContext(AuthContext);
   const [userIam, setUserIam] = useState<UserIamDetailsResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(isAuthenticated);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const apiClient = new ApiClient({
-    baseURL: import.meta.env.VITE_BACK_END_API || "",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-
   const fetchUserIam = async () => {
-    // Don't fetch if not authenticated
+    // Wait for auth flow resolution before deciding permission state
+    if (authLoading) {
+      setLoading(true);
+      return;
+    }
+
+    // No authenticated user means no IAM permissions to load
     if (!isAuthenticated) {
+      setUserIam(null);
+      setError(null);
       setLoading(false);
       return;
     }
+
+    // Authenticated but token not ready yet: keep loading to avoid false denies
+    if (!accessToken) {
+      setLoading(true);
+      return;
+    }
+
+    const apiClient = new ApiClient({
+      baseURL: import.meta.env.VITE_BACK_END_API || "",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     try {
       setLoading(true);
@@ -104,7 +124,7 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
 
     // Call fetchUserIam
     fetchUserIam();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, accessToken, authLoading]);
 
   const hasPermission = (permission: string): boolean => {
     // If not authenticated, always return false
@@ -122,13 +142,19 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
     );
     if (hasRolePermission) return true;
 
-    // Check permissions from groups
-    const hasGroupPermission = userIam.groups?.some((group) =>
+    // Check permissions from groups (via roles)
+    const hasGroupRolePermission = userIam.groups?.some((group) =>
       group.roles?.some((role) =>
         role.permissions?.some((p) => p.code === permission)
       )
     );
-    if (hasGroupPermission) return true;
+    if (hasGroupRolePermission) return true;
+
+    // Check direct permissions from groups
+    const hasGroupDirectPermission = userIam.groups?.some((group) =>
+      group.directPermissions?.some((p) => p.code === permission)
+    );
+    if (hasGroupDirectPermission) return true;
 
     return false;
   };
@@ -210,6 +236,17 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
     return false;
   };
 
+  const hasSensibilityAccess = (fieldSensibilityLevel?: number): boolean => {
+    // If no sensibility level set on the field, allow access
+    if (fieldSensibilityLevel === undefined || fieldSensibilityLevel === 0) {
+      return true;
+    }
+    // If no user IAM details, deny access to sensitive fields
+    if (!userIam) return false;
+    // User must have a sensibility level >= the field's level to access it
+    return (userIam.sensibilityLevel ?? 0) >= fieldSensibilityLevel;
+  };
+
   const refreshPermissions = async () => {
     await fetchUserIam();
   };
@@ -252,6 +289,7 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
         error,
         hasPermission,
         hasActivityAccess,
+        hasSensibilityAccess,
         refreshPermissions,
       }}
     >

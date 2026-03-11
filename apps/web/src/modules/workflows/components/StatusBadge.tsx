@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Badge } from "@chakra-ui/react";
+import { Badge } from "@open-urbis/map-ui";
 import {
   FaCheckCircle,
   FaTimesCircle,
@@ -116,15 +116,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   return (
     <Badge
-      colorScheme={config.colorScheme}
-      display="flex"
-      alignItems="center"
-      px={sizeProps.px}
-      py={sizeProps.py}
-      borderRadius="lg"
-      fontSize={sizeProps.fontSize}
-      fontWeight="medium"
+      variant="outline"
+      className="inline-flex items-center rounded-lg font-medium border-transparent"
       style={{
+        paddingLeft: `${sizeProps.px * 0.25}rem`,
+        paddingRight: `${sizeProps.px * 0.25}rem`,
+        paddingTop: `${sizeProps.py * 0.25}rem`,
+        paddingBottom: `${sizeProps.py * 0.25}rem`,
+        fontSize: sizeProps.fontSize,
         backgroundColor: isDarkMode ? config.darkBg : config.lightBg,
         color: isDarkMode ? config.darkText : config.lightText,
       }}

@@ -5,13 +5,12 @@
   "author": "Renan Tashiro",
   "dependencies": {
     "@babel/parser": "^7.25.8",
-    "@chakra-ui/react": "^2.7.0",
-    "@chakra-ui/tabs": "^3.0.0",
+    "@radix-ui/react-dialog": "^1.1.15",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@monaco-editor/react": "^4.6.0",
     "@open-urbis/types": "*",
-    "@open-urbis/ui": "*",
+    "@open-urbis/map-ui": "*",
     "@react-input/mask": "^2.0.4",
     "@types/node": "^20.1.4",
     "@types/qrcode.react": "^3.0.0",
@@ -27,6 +26,7 @@
     "lodash.debounce": "^4.0.8",
     "lru-cache": "^10.4.0",
     "monaco-editor": "^0.52.0",
+    "oidc-client-ts": "^3.4.1",
     "papaparse": "^5.4.1",
     "proj4": "^2.9.0",
     "qrcode.react": "^4.2.0",
@@ -37,9 +37,11 @@
     "react-icons": "^4.8.0",
     "react-leaflet": "^4.2.1",
     "react-number-format": "^5.4.0",
+    "react-oidc-context": "^3.3.0",
     "react-router-dom": "^6.30.3",
     "react-simple-code-editor": "^0.13.1",
     "reactflow": "^11.11.4",
+    "recharts": "^2.15.4",
     "tailwindcss": "^3.3.2",
     "uuid": "^11.1.0",
     "web-vitals": "^2.1.4"
@@ -74,6 +76,7 @@
     "vitest": "^3.1.1"
   },
   "scripts": {
+    "dev": "vite",
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",

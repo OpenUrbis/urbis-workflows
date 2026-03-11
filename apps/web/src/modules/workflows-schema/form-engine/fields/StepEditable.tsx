@@ -1,30 +1,22 @@
+import { getAccessToken } from "../../../../auth/token";
 import {
-  Stepper,
-  Box,
-  StepIndicator,
-  StepTitle,
-  useSteps,
-  StepStatus,
-  Step,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
   Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-  Center,
-  ButtonProps,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Tooltip,
-  Portal,
-} from "@chakra-ui/react";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
 import {
+  type ComponentProps,
   useState,
   useContext,
   useCallback,
@@ -53,7 +45,7 @@ import { TreeList } from "../../components/TreeList";
 const formsClient = new FormsApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
@@ -77,7 +69,7 @@ type FlattenedField = IField & {
 type StepMenuProps = {
   onAddStep: () => void;
   onImportStep: () => void;
-  buttonProps?: ButtonProps;
+  buttonProps?: ComponentProps<typeof Button>;
   styleContext: any;
   variant?: "icon" | "button";
 };
@@ -90,114 +82,45 @@ const StepMenu: React.FC<StepMenuProps> = ({
   variant = "button",
 }) => {
   return (
-    <Menu>
-      {variant === "button" ? (
-        <MenuButton
-          as={Button}
-          leftIcon={<FaPlus />}
-          style={{
-            backgroundColor:
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        {variant === "button" ? (
+          <Button
+            type="button"
+            size="sm"
+            className={`h-11 rounded-xl px-4 font-semibold shadow-sm inline-flex items-center justify-center gap-2 text-white ${
               styleContext.state.buttonHoverColorWeight === "200"
-                ? "#ca8a04"
-                : "#854d0e",
-            color: "#ffffff",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#a16207"
-                : "#713f12";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#ca8a04"
-                : "#854d0e";
-          }}
-          className="px-4 py-2.5 rounded flex items-center justify-center space-x-2"
-          {...buttonProps}
-        >
-          <span>Etapa</span>
-        </MenuButton>
-      ) : (
-        <MenuButton
-          as={IconButton}
-          aria-label="Add Step"
-          icon={<FaPlus />}
-          bg={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.100"
-              : "gray.800"
-          }
-          color={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.600"
-              : "gray.200"
-          }
-          _hover={{
-            bg:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "gray.200"
-                : "gray.700",
-          }}
-          {...buttonProps}
-        />
-      )}
-      <Portal>
-        <MenuList
-          zIndex={"overlay"}
-          bg={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "white"
-              : "gray.800"
-          }
-          borderColor={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.200"
-              : "gray.600"
-          }
-        >
-          <MenuItem
-            icon={<FaPlus />}
-            onClick={onAddStep}
-            bg={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "white"
-                : "gray.800"
-            }
-            _hover={{
-              bg:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "gray.100"
-                  : "gray.700",
-            }}
+                ? "bg-primary hover:bg-primary/90"
+                : "bg-primary hover:bg-primary/90"
+            }`}
+            {...buttonProps}
           >
-            <span style={{ color: styleContext.state.textColor }}>
-              Nova Etapa
-            </span>
-          </MenuItem>
-          <MenuItem
-            icon={<FaList />}
-            onClick={onImportStep}
-            bg={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "white"
-                : "gray.800"
-            }
-            _hover={{
-              bg:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "gray.100"
-                  : "gray.700",
-            }}
+            <FaPlus size={14} />
+            <span>Etapa</span>
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            className="h-8 w-8"
+            {...buttonProps}
           >
-            <span style={{ color: styleContext.state.textColor }}>
-              Importar Pré-Definido
-            </span>
-          </MenuItem>
-        </MenuList>
-      </Portal>
-    </Menu>
+            <FaPlus size={14} />
+          </Button>
+        )}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={onAddStep} className="flex items-center gap-2">
+          <FaPlus size={12} />
+          <span>Nova Etapa</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onImportStep} className="flex items-center gap-2">
+          <FaList size={12} />
+          <span>Importar Pré-Definido</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
@@ -262,14 +185,10 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
   onValidChange,
   onConfigChange,
 }) => {
-  const { activeStep, setActiveStep } = useSteps({
-    index: 0,
-    count: field?.length ?? 0,
-  });
+  const [activeStep, setActiveStep] = useState(0);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const [rerender, setRerender] = useState<boolean>(true);
   const styleContext = useContext(StyleContext);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isPresetDialogOpen, setIsPresetDialogOpen] = useState(false);
   const [stepPresets, setStepPresets] = useState<any[]>([]);
   const [presetSearch, setPresetSearch] = useState("");
 
@@ -337,7 +256,7 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
         (form) => form.type === "step"
       );
       setStepPresets(filteredPresets);
-      onOpen();
+      setIsPresetDialogOpen(true);
     } catch (error) {
       console.error("Error importing step preset:", error);
       window.alert("Erro ao carregar presets de etapa");
@@ -349,13 +268,21 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
       const fullPreset = await formsClient.findOne(preset.id);
       if (fullPreset) {
         const insertAtIndex = preset.insertAtIndex ?? field.length;
+        const presetForm = (fullPreset as any)?.form;
+        const importedSteps = Array.isArray(presetForm)
+          ? presetForm
+          : Array.isArray(presetForm?.preset)
+            ? presetForm.preset
+            : [];
+
+        if (importedSteps.length === 0) {
+          return;
+        }
+
         const newFields = [...field];
-        newFields.splice(insertAtIndex, 0, {
-          ...fullPreset.form,
-          key: `key-${(field?.length ?? 0) + 1}`,
-        });
+        newFields.splice(insertAtIndex, 0, ...importedSteps);
         onConfigChange(cleanupFieldStructure(newFields) as IField[]);
-        onClose();
+        setIsPresetDialogOpen(false);
       }
     } catch (error) {
       console.error("Error selecting preset:", error);
@@ -365,7 +292,7 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
 
   const handleCloseModal = () => {
     setPresetSearch("");
-    onClose();
+    setIsPresetDialogOpen(false);
   };
 
   const getFlattenedFields = useCallback(
@@ -377,7 +304,7 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
         if (field?.type === "preset" && field?.preset) {
           field.preset.forEach((presetField) => {
             flattened.push({
-              ...structuredClone(presetField),
+              ...presetField,
               presetKey: field.key,
               presetIndex: index,
               isPreset: true,
@@ -386,7 +313,7 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
           });
         } else {
           flattened.push({
-            ...structuredClone(field),
+            ...field,
             stepIndex: stepIndex++,
           });
         }
@@ -480,6 +407,43 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
     [field, flattenedFields]
   );
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const onValidChangeRef = useRef(onValidChange);
+  onValidChangeRef.current = onValidChange;
+  const onConfigChangeRef = useRef(onConfigChange);
+  onConfigChangeRef.current = onConfigChange;
+  const fieldRef = useRef(field);
+  fieldRef.current = field;
+
+  const activeStepRef = useRef(activeStep);
+  activeStepRef.current = activeStep;
+  const flattenedFieldsRef = useRef(flattenedFields);
+  flattenedFieldsRef.current = flattenedFields;
+
+  const handleFieldChange = useCallback((v: any) => {
+    const key = flattenedFieldsRef.current[activeStepRef.current]?.key;
+    if (key) onChangeRef.current(key, v);
+  }, []);
+
+  const handleFieldValidChange = useCallback((valid: any) => {
+    const key = flattenedFieldsRef.current[activeStepRef.current]?.key;
+    if (key) onValidChangeRef.current(key, valid);
+  }, []);
+
+  const handleFieldConfigChange = useCallback((config: IField) => {
+    const activeField = flattenedFieldsRef.current[activeStepRef.current];
+    const targetIndex = activeField?.isPreset
+      ? activeField.presetIndex
+      : activeStepRef.current;
+
+    if (targetIndex !== undefined) {
+      const newFields = [...fieldRef.current];
+      newFields[targetIndex] = config;
+      onConfigChangeRef.current(cleanupFieldStructure(newFields) as IField[]);
+    }
+  }, []);
+
   return (
     <>
       <div
@@ -509,34 +473,19 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
             />
           </div>
         )}
-        <Stepper
-          size="lg"
-          index={activeStep}
-          sx={{
-            border: "none",
-            boxShadow: "none",
-            gap: 0,
-            "& > *": {
-              flex: "0 0 auto",
-            },
-          }}
-          colorScheme="transparent"
-          className="overflow-visible"
-        >
-          {flattenedFields.map((f, index) => {
-            const isPresetEnd =
-              f.isPreset &&
-              (!flattenedFields[index + 1]?.isPreset ||
-                flattenedFields[index + 1]?.presetKey !== f.presetKey);
+        <TooltipProvider>
+          <div className="flex items-center overflow-visible">
+            {flattenedFields.map((f, index) => {
+              const isPresetEnd =
+                f.isPreset &&
+                (!flattenedFields[index + 1]?.isPreset ||
+                  flattenedFields[index + 1]?.presetKey !== f.presetKey);
 
-            return (
-              <div
-                key={`step-${f.key}-${index}`}
-                className="relative group"
-                ref={(el) => (stepRefs.current[index] = el)}
-              >
-                <Step
-                  className="cursor-pointer flex items-center"
+              return (
+                <div
+                  key={`step-${f.key}-${index}`}
+                  className="relative group flex items-center"
+                  ref={(el) => (stepRefs.current[index] = el)}
                   draggable
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
@@ -545,8 +494,7 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
                   <div className="w-[40px] mr-2">
                     {(!f.isPreset ||
                       (f.isPreset && !flattenedFields[index - 1]?.isPreset) ||
-                      flattenedFields[index - 1]?.presetKey !==
-                        f.presetKey) && (
+                      flattenedFields[index - 1]?.presetKey !== f.presetKey) && (
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                         <StepMenu
                           onAddStep={() => {
@@ -563,9 +511,7 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
                             const originalIndex = getOriginalFieldIndex(index);
                             const newFields = [...field];
                             newFields.splice(originalIndex, 0, newStep);
-                            onConfigChange(
-                              cleanupFieldStructure(newFields) as IField[]
-                            );
+                            onConfigChange(cleanupFieldStructure(newFields) as IField[]);
                           }}
                           onImportStep={async () => {
                             const originalIndex = getOriginalFieldIndex(index);
@@ -583,206 +529,98 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
                       </div>
                     )}
                   </div>
-                  <StepIndicator
+
+                  <button
+                    type="button"
                     onClick={() => {
                       setActiveStep(index);
-                      setRerender(false);
-                      setTimeout(() => {
-                        setRerender(true);
-                      }, 0);
                     }}
-                    sx={{
-                      border: "none",
-                      boxShadow: "none",
-                    }}
+                    className="cursor-pointer flex items-center"
                   >
-                    <StepStatus
-                      complete={
-                        <Center
-                          w="36px"
-                          h="36px"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "green.400"
-                              : "green.900"
-                          }
-                          color={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "white"
-                              : "green.200"
-                          }
-                          border="3px solid"
-                          borderColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "green.300"
-                              : "green.400"
-                          }
-                          borderRadius="12px"
-                          _hover={{
-                            bg: "green.600",
-                          }}
-                        >
-                          <FaCheck size={14} />
-                        </Center>
-                      }
-                      incomplete={
-                        <Center
-                          w="36px"
-                          h="36px"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.100"
-                              : "gray.800"
-                          }
-                          border="3px solid"
-                          borderColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.200"
-                              : "gray.600"
-                          }
-                          borderRadius="12px"
-                          _hover={{
-                            bg: "gray.100",
-                            borderColor: "gray.300",
-                          }}
-                        >
-                          <FaCircle
-                            size={8}
-                            color={
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#CBD5E0"
-                                : "#4A5568"
-                            }
-                          />
-                        </Center>
-                      }
-                      active={
-                        <Center
-                          w="36px"
-                          h="36px"
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "green.400"
-                              : "green.600"
-                          }
-                          border="3px solid"
-                          borderColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "green.300"
-                              : "green.400"
-                          }
-                          borderRadius="12px"
-                          color="white"
-                          _hover={{
-                            bg: "green.500",
-                            borderColor: "green.300",
-                          }}
-                        >
-                          <FaCircle size={8} />
-                        </Center>
-                      }
-                    />
-                  </StepIndicator>
+                    <div
+                      className={`h-9 w-9 rounded-xl border-2 flex items-center justify-center transition-colors ${
+                        index < activeStep
+                          ? styleContext.state.buttonHoverColorWeight === "200"
+                            ? "bg-green-500 border-green-400 text-white"
+                            : "bg-green-700 border-green-500 text-white"
+                          : index === activeStep
+                            ? styleContext.state.buttonHoverColorWeight === "200"
+                              ? "bg-green-500 border-green-400 text-white"
+                              : "bg-green-700 border-green-500 text-white"
+                            : styleContext.state.buttonHoverColorWeight === "200"
+                              ? "bg-gray-100 border-gray-200 text-gray-400"
+                              : "bg-gray-800 border-gray-600 text-gray-500"
+                      }`}
+                    >
+                      {index < activeStep ? <FaCheck size={14} /> : <FaCircle size={8} />}
+                    </div>
 
-                  <Box flexShrink="0">
-                    <StepTitle className="flex items-center space-x-2">
-                      <div className="flex items-center ml-2">
-                        <EditableHeader
-                          value={(f.options as BlockOptions).label}
-                          onTextChange={(text: string) => {
-                            const targetIndex = getOriginalFieldIndex(index);
-                            const newFields = [...field];
-                            (
-                              newFields[targetIndex].options as BlockOptions
-                            ).label = text;
-                            onConfigChange(
-                              cleanupFieldStructure(newFields) as IField[]
-                            );
-                          }}
-                          readOnly={f.isPreset}
-                        />
-                        {f.isPreset && (
-                          <Tooltip
-                            label="Esta etapa foi importada de um modelo pré-definido"
-                            placement="top"
-                          >
+                    <div className="ml-2 flex items-center space-x-2">
+                      <EditableHeader
+                        value={(f.options as BlockOptions).label}
+                        onTextChange={(text: string) => {
+                          const targetIndex = getOriginalFieldIndex(index);
+                          const newFields = [...field];
+                          (newFields[targetIndex].options as BlockOptions).label = text;
+                          onConfigChange(cleanupFieldStructure(newFields) as IField[]);
+                        }}
+                        readOnly={f.isPreset}
+                      />
+                      {f.isPreset && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
                             <div className="ml-2 px-1 py-0.5 bg-blue-100 rounded-sm text-[10px] text-blue-700 font-medium opacity-75">
                               P
                             </div>
-                          </Tooltip>
-                        )}
-                        {(f.options as BlockOptions).tooltip && (
-                          <div className="flex items-center mb-1 ml-2.5">
-                            <HelpTooltipClickable
-                              tooltip={
-                                (f.options as BlockOptions).tooltip as string
-                              }
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </StepTitle>
-                  </Box>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Esta etapa foi importada de um modelo pré-definido
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {(f.options as BlockOptions).tooltip && (
+                        <div className="flex items-center mb-1 ml-2.5">
+                          <HelpTooltipClickable
+                            tooltip={(f.options as BlockOptions).tooltip as string}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </button>
+
                   {!f.isPreset && (
-                    <IconButton
-                      aria-label="Remove Step"
-                      icon={<FaTrash />}
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
                       onClick={() => {
                         if (activeStep === index && index > 0) {
                           setActiveStep(index - 1);
                         }
                         handleRemoveStep(index);
                       }}
-                      className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      bg={
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.100"
-                          : "gray.800"
-                      }
-                      color={
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.600"
-                          : "gray.200"
-                      }
-                      _hover={{
-                        bg:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.700",
-                      }}
-                    />
+                      className="h-8 w-8 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <FaTrash size={12} />
+                    </Button>
                   )}
+
                   {f.isPreset && isPresetEnd && (
-                    <>
-                      <IconButton
-                        aria-label="Remove Preset Group"
-                        icon={<FaTrash />}
-                        className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => {
-                          if (f.presetIndex !== undefined) {
-                            handleRemoveStep(index);
-                          }
-                        }}
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.100"
-                            : "gray.800"
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      className="h-8 w-8 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        if (f.presetIndex !== undefined) {
+                          handleRemoveStep(index);
                         }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.600"
-                            : "gray.200"
-                        }
-                        _hover={{
-                          bg:
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.200"
-                              : "gray.700",
-                        }}
-                      />
-                    </>
+                      }}
+                    >
+                      <FaTrash size={12} />
+                    </Button>
                   )}
+
                   {index === flattenedFields.length - 1 && (
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-2">
                       <StepMenu
@@ -801,16 +639,25 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
                       />
                     </div>
                   )}
-                </Step>
-              </div>
-            );
-          })}
-        </Stepper>
+
+                  {index < flattenedFields.length - 1 && (
+                    <div
+                      className={`mx-4 h-px w-10 ${
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "bg-gray-300"
+                          : "bg-gray-600"
+                      }`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </TooltipProvider>
       </div>
 
-      <div>
+      <div key={activeStep}>
         {flattenedFields.length > 0 &&
-          rerender &&
           flattenedFields[activeStep] &&
           (flattenedFields[activeStep].isPreset ? (
             <Field
@@ -821,12 +668,8 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
               field={flattenedFields[activeStep]}
               value={value?.[flattenedFields[activeStep]?.key] ?? {}}
               valid={valid?.[flattenedFields[activeStep]?.key] ?? {}}
-              onChange={(v) => {
-                onChange(flattenedFields[activeStep]?.key, v);
-              }}
-              onValidChange={(valid: any) => {
-                onValidChange(flattenedFields[activeStep].key, valid);
-              }}
+              onChange={handleFieldChange}
+              onValidChange={handleFieldValidChange}
             />
           ) : (
             <FieldEditable
@@ -837,42 +680,27 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
               field={flattenedFields[activeStep]}
               value={value?.[flattenedFields[activeStep]?.key] ?? {}}
               valid={valid?.[flattenedFields[activeStep]?.key] ?? {}}
-              onChange={(v) => {
-                onChange(flattenedFields[activeStep]?.key, v);
-              }}
-              onValidChange={(valid: any) => {
-                onValidChange(flattenedFields[activeStep].key, valid);
-              }}
-              onConfigChange={(config: IField) => {
-                const targetIndex = flattenedFields[activeStep].isPreset
-                  ? flattenedFields[activeStep].presetIndex
-                  : activeStep;
-
-                if (targetIndex !== undefined) {
-                  const newFields = [...field];
-                  newFields[targetIndex] = config;
-                  onConfigChange(cleanupFieldStructure(newFields) as IField[]);
-                }
-              }}
+              onChange={handleFieldChange}
+              onValidChange={handleFieldValidChange}
+              onConfigChange={handleFieldConfigChange}
               onRemove={() => {}}
             />
           ))}
       </div>
 
-      <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
-        <ModalOverlay />
-        <ModalContent
-          bg={styleContext.state.backgroundColor}
-          borderColor={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.200"
-              : "gray.600"
+      <Dialog
+        open={isPresetDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCloseModal();
           }
-        >
-          <ModalHeader style={{ color: styleContext.state.textColor }}>
-            Importar etapa pré-definida
-          </ModalHeader>
-          <ModalBody>
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Importar etapa pré-definida</DialogTitle>
+          </DialogHeader>
+          <div>
             <TreeList
               items={stepPresets.map((preset) => ({
                 id: preset.id,
@@ -889,29 +717,14 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
               iconColor="green"
               getIcon={getFormIcon}
             />
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              onClick={handleCloseModal}
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-                color: styleContext.state.textColor,
-              }}
-              _hover={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#D1D5DB"
-                    : "#4B5563",
-              }}
-            >
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleCloseModal}>
               Cancelar
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

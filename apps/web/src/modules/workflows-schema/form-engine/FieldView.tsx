@@ -35,6 +35,7 @@ import { VersionsMenu } from "../components/VersionsMenu";
 import { RenderFieldPrivacyInfo } from "./components/RenderFieldPrivacyInfo";
 import { RenderFieldModelCalculation } from "./components/RenderFieldModelCalculation";
 import { StyleContext } from "../../../reducers";
+import { usePermissions } from "../../../reducers/permission.context";
 
 export type FieldViewProps = {
   parent?: IField;
@@ -42,19 +43,47 @@ export type FieldViewProps = {
   context: any;
   value: any;
   general: IFormContext;
+  highlightQuery?: string;
 };
+
+/**
+ * Wraps all occurrences of `query` in `text` with <mark> tags (case-insensitive).
+ * Returns an HTML string safe for dangerouslySetInnerHTML.
+ */
+function highlightText(text: string, query: string): string {
+  if (!query || !text) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escaped})`, "gi");
+  return text.replace(regex, "<mark class='search-highlight'>$1</mark>");
+}
+
+/**
+ * Renders a text value with optional search highlighting.
+ */
+function HighlightedValue({ value, query }: { value: any; query?: string }) {
+  const text = value ?? "Não informado";
+  if (!query || typeof text !== "string" || !text.toLowerCase().includes(query.toLowerCase())) {
+    return <span>{text}</span>;
+  }
+  return (
+    <span
+      className="[&_.search-highlight]:bg-yellow-200 [&_.search-highlight]:text-yellow-900 [&_.search-highlight]:rounded-sm [&_.search-highlight]:px-0.5 dark:[&_.search-highlight]:bg-yellow-500/30 dark:[&_.search-highlight]:text-yellow-200"
+      dangerouslySetInnerHTML={{ __html: highlightText(text, query) }}
+    />
+  );
+}
 
 export const FIELD_COMPONENT_MAP: {
   [field: string]: (...args: any[]) => JSX.Element;
 } = {
-  input: ({ value }: FieldInputProps) => (
-    <span>{value ?? "Não informado"}</span>
+  input: ({ value, highlightQuery }: FieldInputProps & { highlightQuery?: string }) => (
+    <HighlightedValue value={value} query={highlightQuery} />
   ),
-  textarea: ({ value }: FieldTextareaProps) => (
-    <span>{value ?? "Não informado"}</span>
+  textarea: ({ value, highlightQuery }: FieldTextareaProps & { highlightQuery?: string }) => (
+    <HighlightedValue value={value} query={highlightQuery} />
   ),
-  select: ({ value }: FieldSelectProps) => (
-    <span>{value ?? "Não informado"}</span>
+  select: ({ value, highlightQuery }: FieldSelectProps & { highlightQuery?: string }) => (
+    <HighlightedValue value={value} query={highlightQuery} />
   ),
   checkbox: ({ field, value, general }: FieldCheckboxProps) => (
     <Checkbox
@@ -66,8 +95,8 @@ export const FIELD_COMPONENT_MAP: {
       general={general}
     />
   ),
-  radio: ({ value }: FieldRadioProps) => (
-    <span>{value ?? "Não informado"}</span>
+  radio: ({ value, highlightQuery }: FieldRadioProps & { highlightQuery?: string }) => (
+    <HighlightedValue value={value} query={highlightQuery} />
   ),
   upload: ({ field, value }: FieldUploadProps) => {
     if (!field) return <span>{value ?? "Não informado"}</span>;
@@ -111,8 +140,10 @@ export const FieldView: React.FC<FieldViewProps> = ({
   general,
   field,
   value,
+  highlightQuery,
 }): JSX.Element => {
   const styleContext = useContext(StyleContext);
+  const { hasSensibilityAccess } = usePermissions();
   const [visible, setVisible] = React.useState(
     field.expressions?.visible ? false : true
   );
@@ -186,7 +217,7 @@ export const FieldView: React.FC<FieldViewProps> = ({
                 ></VersionsMenu>
               )}
             </div>
-            {value?.__redacted ? (
+            {value?.__redacted || !hasSensibilityAccess(options.sensibilityLevel) ? (
               <div
                 className={`font-medium ${
                   styleContext.state.textColor === "#ffffff"
@@ -205,6 +236,7 @@ export const FieldView: React.FC<FieldViewProps> = ({
                     value={dynamicVersionValue}
                     options={options}
                     general={general}
+                    highlightQuery={highlightQuery}
                   />
                 ) : (
                   <FieldComponent
@@ -213,6 +245,7 @@ export const FieldView: React.FC<FieldViewProps> = ({
                     value={value}
                     options={options}
                     general={general}
+                    highlightQuery={highlightQuery}
                   />
                 )}
               </>
@@ -232,6 +265,7 @@ export const FieldView: React.FC<FieldViewProps> = ({
               field={field.block}
               general={general}
               value={value}
+              highlightQuery={highlightQuery}
             ></FieldBlockView>
           </>
         )}
@@ -241,6 +275,7 @@ export const FieldView: React.FC<FieldViewProps> = ({
               field={field.preset}
               general={general}
               value={value}
+              highlightQuery={highlightQuery}
             />
           </>
         )}
@@ -282,6 +317,7 @@ export const FieldView: React.FC<FieldViewProps> = ({
                       $history: general?.$history?.[index],
                     }}
                     value={v}
+                    highlightQuery={highlightQuery}
                   />
                 </div>
               );

@@ -1,19 +1,12 @@
 import axios, { AxiosInstance } from "axios";
 import { CacheService, CacheOptions } from "../services/cache.service";
 import {
-  SignUpHttpDto,
   UpdateProfileHttpDto,
-  ConfirmSignUpHttpDto,
-  SignInHttpDto,
-  ForgetPasswordHttpDto,
-  ConfirmForgetPasswordHttpDto,
   SetCustomUserFieldsHttpDto,
   CreateLinkHttpDto,
   UpdateLinkStatusHttpDto,
   DeleteLinkHttpDto,
-  UserResponse,
   UserProfileResponse,
-  SignInResponse,
   CustomFieldsResponse,
   RepresentativeLinksResponse,
   UserApiResponse,
@@ -55,48 +48,6 @@ export class UsersApiClient {
     try {
       const response = await this.client.get<UserProfileResponse>("/profile");
       return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async signUp(data: SignUpHttpDto): Promise<UserResponse> {
-    try {
-      const response = await this.client.post<UserResponse>("/sign-up", data);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async confirmSignUp(data: ConfirmSignUpHttpDto): Promise<void> {
-    try {
-      await this.client.post("/confirm-sign-up", data);
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async signIn(data: SignInHttpDto): Promise<SignInResponse> {
-    try {
-      const response = await this.client.post<SignInResponse>("/sign-in", data);
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async forgetPassword(data: ForgetPasswordHttpDto): Promise<void> {
-    try {
-      await this.client.post("/forget-password", data);
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async confirmForgetPassword(data: ConfirmForgetPasswordHttpDto): Promise<void> {
-    try {
-      await this.client.post("/confirm-forget-password", data);
     } catch (error) {
       throw this.handleError(error);
     }

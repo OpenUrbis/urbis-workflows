@@ -6,6 +6,7 @@ export const FieldBlockView: React.FC<FieldBlockViewProps> = ({
   field,
   general,
   value,
+  highlightQuery,
 }): JSX.Element => {
   return (
     <>
@@ -23,6 +24,7 @@ export const FieldBlockView: React.FC<FieldBlockViewProps> = ({
               }}
               field={f}
               value={value?.[(f.options as any).key ?? f.key]}
+              highlightQuery={highlightQuery}
             ></FieldView>
           </div>
         );

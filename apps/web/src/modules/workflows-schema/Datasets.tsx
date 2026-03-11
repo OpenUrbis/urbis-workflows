@@ -1,17 +1,7 @@
+import { getAccessToken } from "../../auth/token";
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { FaPlus, FaRetweet, FaTrash, FaSave, FaDatabase } from "react-icons/fa";
 import { SL } from "../../components";
-import {
-  Spinner,
-  Table,
-  TableContainer,
-  Tag,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
 import EditableHeader from "../../components/EditableHeader";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { AddDataset } from "./components/AddDataset";
@@ -24,11 +14,13 @@ import {
   DatasetsEntity,
   CreateDatasetHttpDto,
 } from "../../api/types/datasets.dto";
+import { Spinner } from "../../components";
+import { useSearchParams } from "react-router-dom";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
@@ -54,6 +46,7 @@ export const Datasets: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const snackbar = useSnackbar();
   const styleContext = useContext(StyleContext);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [datasets, setDatasets] = useState<DatasetConfig[]>([]);
@@ -77,6 +70,43 @@ export const Datasets: React.FC = () => {
     fetchDatasets();
     
   }, []);
+
+  useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingDataset) {
+      setSelectedDataset(null);
+      setAddingDataset(true);
+      return;
+    }
+
+    if (!add && addingDataset) {
+      setAddingDataset(false);
+    }
+
+    if (id && datasets.length > 0 && (!selectedDataset || selectedDataset.id !== id)) {
+      const meta = datasets.find((d) => d.id === id);
+      if (meta) {
+        selectDatasetCallback(meta);
+      }
+    }
+  }, [searchParams, datasets, selectedDataset, addingDataset]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (addingDataset) {
+      params.set("add", "1");
+      params.delete("id");
+    } else {
+      params.delete("add");
+      if (selectedDataset?.id) params.set("id", selectedDataset.id);
+      else params.delete("id");
+    }
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [addingDataset, selectedDataset, searchParams, setSearchParams]);
 
   useEffect(() => {
     hotkeyContext.dispatch({
@@ -217,27 +247,21 @@ export const Datasets: React.FC = () => {
           Base de dados
         </h1>
         <button
-          className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 font-medium"
+          className="flex items-center space-x-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors duration-200 font-medium"
           onClick={handleAddDatasetForm}
           disabled={loading}
         >
           <FaPlus size={16} />
           <span>Base de dados</span>
           <span className="text-sm opacity-75 ml-2">
-            <SL bg="yellow.600">N</SL>
+            <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
           </span>
         </button>
       </div>
 
-      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden">
+      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden border-border bg-card text-card-foreground">
         <div
-          className="w-3/12 border-r"
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
+          className="w-3/12 border-r border-border bg-card"
         >
           <TreeList
             items={mapDatasetsToTreeItems(datasets)}
@@ -246,6 +270,8 @@ export const Datasets: React.FC = () => {
             onSearchChange={searchCallback}
             icon={FaDatabase}
             iconColor="blue"
+            selectedId={selectedDataset?.id}
+            density="compact"
           />
         </div>
         <div className="flex flex-col p-6 w-9/12">
@@ -267,13 +293,13 @@ export const Datasets: React.FC = () => {
                 Selecione uma base de dados da lista ao lado ou crie uma nova
               </p>
               <button
-                className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200 font-medium"
+                className="flex items-center space-x-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors duration-200 font-medium"
                 onClick={handleAddDatasetForm}
               >
                 <FaPlus size={16} />
                 <span>Base de dados</span>
                 <span className="text-sm opacity-75 ml-2">
-                  <SL bg="yellow.600">N</SL>
+                  <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">N</SL>
                 </span>
               </button>
             </div>
@@ -286,7 +312,7 @@ export const Datasets: React.FC = () => {
                     <EditableHeader
                       value={selectedDataset.title}
                       onTextChange={(text) => handleSetDataset("title", text)}
-                      className="text-xl md:text-3xl font-black text-center mb-3"
+                      className="text-lg md:text-2xl font-semibold text-center mb-3"
                     />
                     <EditableHeader
                       value={selectedDataset.description}
@@ -301,30 +327,66 @@ export const Datasets: React.FC = () => {
 
               <div className="w-4/5 mx-auto">
                 <div className="flex flex-col space-y-4">
-                  <Tag size={"lg"} className="w-fit">
-                    Inserido {selectedDataset.inserted} de{" "}
-                    {selectedDataset.total}
-                  </Tag>
-                  <TableContainer className="border dark:border-gray-700 rounded-lg">
-                    <Table>
-                      <Thead>
-                        <Tr>
+                  <div
+                    className="w-fit px-3 py-1.5 rounded-full text-sm border"
+                    style={{
+                      borderColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#e5e7eb"
+                          : "#374151",
+                      color: styleContext.state.textColor,
+                      backgroundColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#f8fafc"
+                          : "#111827",
+                    }}
+                  >
+                    Inserido {selectedDataset.inserted} de {selectedDataset.total}
+                  </div>
+                  <div className="border dark:border-gray-700 rounded-lg overflow-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr>
                           {headers.map((header) => (
-                            <Th key={header}>{header}</Th>
+                            <th
+                              key={header}
+                              className="text-left font-semibold px-3 py-2 border-b"
+                              style={{
+                                borderColor:
+                                  styleContext.state.buttonHoverColorWeight ===
+                                  "200"
+                                    ? "#e5e7eb"
+                                    : "#374151",
+                              }}
+                            >
+                              {header}
+                            </th>
                           ))}
-                        </Tr>
-                      </Thead>
-                      <Tbody>
+                        </tr>
+                      </thead>
+                      <tbody>
                         {selectedDataset?.sample?.map((item, index) => (
-                          <Tr key={index}>
+                          <tr key={index}>
                             {headers.map((header) => (
-                              <Td key={header}>{item[header]}</Td>
+                              <td
+                                key={header}
+                                className="px-3 py-2 border-b"
+                                style={{
+                                  borderColor:
+                                    styleContext.state.buttonHoverColorWeight ===
+                                    "200"
+                                      ? "#e5e7eb"
+                                      : "#374151",
+                                }}
+                              >
+                                {item[header]}
+                              </td>
                             ))}
-                          </Tr>
+                          </tr>
                         ))}
-                      </Tbody>
-                    </Table>
-                  </TableContainer>
+                      </tbody>
+                    </table>
+                  </div>
 
                   <Upload
                     fieldKey="dataset-uploader"
@@ -388,19 +450,13 @@ export const Datasets: React.FC = () => {
 
               <div className="fixed bottom-16 right-4 flex space-x-4">
                 <button
-                  className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200"
+                  className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground"
                   onClick={handleSaveDataset}
                   disabled={loading}
-                  style={{
-                    backgroundColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#ca8a04"
-                        : "#854d0e",
-                    color: "#ffffff",
-                  }}
                 >
                   <FaSave size={14} />
-                  <span>Salvar</span> <SL bg="yellow.600">S</SL>
+                  <span>Salvar</span>{" "}
+                  <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">S</SL>
                 </button>
               </div>
             </>

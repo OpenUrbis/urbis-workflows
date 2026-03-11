@@ -1,39 +1,50 @@
+import { getAccessToken } from "../../auth/token";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import {
-  FormControl,
-  FormLabel,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalOverlay,
-  Spinner,
-  useDisclosure,
-} from "@chakra-ui/react";
-import { Input, SL, Select } from "../../components";
-import { HotkeyContext, StyleContext } from "../../reducers";
-import { useNavigate } from "react-router-dom";
-import { MdCheckCircle, MdOutlineError } from "react-icons/md";
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@open-urbis/map-ui";
+import { SL } from "../../components";
+import { HotkeyContext } from "../../reducers";
+import { AuthContext } from "../../reducers/auth.reducer";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { Spinner } from "../../components";
 
 export function DocumentValidate(): JSX.Element {
-  const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
+  const { signIn } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [valid, setValid] = useState(false);
-  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
   const [hash, setHash] = useState("");
   const [protocolId, setProtocolId] = useState("");
   const [documentType, setDocumentType] = useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
-        E: () => navigate("/login"),
+        E: () => signIn(),
         V: () => hash && protocolId && documentType && handleValidate(),
       },
     });
@@ -59,29 +70,29 @@ export function DocumentValidate(): JSX.Element {
         {
           documentType,
           checksum: hash,
-        }
+        },
       );
 
       if (response.status === 201 && response.data.same) {
         setValid(true);
       } else {
         setError(
-          "O documento inserido não é o atual ou não foi gerado pela plataforma, ou as informações inseridas estão incorretas."
+          "O documento inserido não é o atual ou não foi gerado pela plataforma, ou as informações inseridas estão incorretas.",
         );
       }
     } catch (error: any) {
       setError(
-        "Algum erro ocorreu ao tentar consultar o documento, tente novamente."
+        "Algum erro ocorreu ao tentar consultar o documento, tente novamente.",
       );
     } finally {
       setLoading(false);
     }
 
-    onOpen();
+    setIsOpen(true);
   };
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event?.target?.files?.[0];
     if (!file) {
@@ -105,119 +116,129 @@ export function DocumentValidate(): JSX.Element {
   const bufferToHex = (buffer: ArrayBuffer) => {
     const byteArray = new Uint8Array(buffer);
     return Array.from(byteArray, (byte) =>
-      byte.toString(16).padStart(2, "0")
+      byte.toString(16).padStart(2, "0"),
     ).join("");
   };
 
+  const resultMessage = valid
+    ? "O documento inserido é válido e está de acordo com o protocolo informado."
+    : error;
+
   return (
-    <div className="flex flex-wrap justify-center space-x-24 mt-8 xl:mt-16 mb-24">
-      <div
-        className="flex flex-col mx-6 md:mx-0 justify-center space-y-4"
-        style={{ width: window.innerWidth <= 500 ? "auto" : "582px" }}
-      >
-        <h1 className="text-3xl md:text-6xl font-black mb-2">
-          Consultar <span className="text-red-500">Documento</span>
-        </h1>
-        <FormControl id="protocolId">
-          <FormLabel>Identificador do protocolo</FormLabel>
-          <Input
-            placeholder="Identificador do Protocolo"
-            size="lg"
-            value={protocolId}
-            onChange={(e) => setProtocolId(e.target.value.trim())}
-          />
-        </FormControl>
-        <FormControl id="documentType">
-          <FormLabel>Tipo do documento</FormLabel>
-          <Select
-            placeholder="Tipo do documento"
-            size="lg"
-            value={documentType}
-            onChange={(e) => setDocumentType(e.target.value)}
-          >
-            <option key="document-type-license" value="document">
-              Documento
-            </option>
-            <option key="document-type-license" value="plate">
-              Placa
-            </option>
-            <option key="document-type-license" value="tax">
-              Boleto
-            </option>
-          </Select>
-        </FormControl>
-        <FormControl id="upload">
-          <FormLabel>Anexe o documento</FormLabel>
-          <div className="border border-gray-200 rounded-lg py-2 px-4 mb-4 flex justify-between items-center">
-            Código: {hash}
+    <div className="mx-auto mt-8 mb-24 w-full max-w-2xl px-4">
+      <Card className="border-border shadow-none">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold tracking-tight">
+            Consultar Documento
+          </CardTitle>
+          <CardDescription>
+            Verifique a autenticidade informando protocolo, tipo e arquivo.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="protocolId">Identificador do protocolo</Label>
+            <Input
+              id="protocolId"
+              placeholder="Identificador do protocolo"
+              value={protocolId}
+              onChange={(e) => setProtocolId(e.target.value.trim())}
+            />
           </div>
 
-          <label
-            htmlFor="document-uploader"
-            className={`bg-red-600 hover:bg-red-700 text-white text-lg w-full py-2 rounded-xl cursor-pointer text-center block`}
-          >
-            Documento
-          </label>
-          <input
-            id="document-uploader"
-            multiple={false}
-            type="file"
-            accept="*/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-        </FormControl>
-        <button
-          type="submit"
-          className="bg-yellow-600 hover:bg-yellow-700 text-white text-lg w-full py-3.5 rounded-xl disabled:opacity-80"
-          onClick={handleValidate}
-          disabled={!hash || !protocolId || !documentType}
-        >
-          {loading ? (
-            <Spinner />
-          ) : (
-            <>
-              Verificar <SL bg="yellow.500">V</SL>
-            </>
-          )}
-        </button>
-        {!localStorage.getItem("token") && (
-          <div className="text-center pt-4">
-            Quer entrar no sistema?{" "}
-            <button
-              className="cursor-pointer hover:text-yellow-600 text-yellow-500 font-bold"
-              onClick={() => navigate("/login")}
-            >
-              Entrar <SL>E</SL>
-            </button>
+          <div className="space-y-2">
+            <Label htmlFor="documentType">Tipo do documento</Label>
+            <Select value={documentType} onValueChange={setDocumentType}>
+              <SelectTrigger id="documentType">
+                <SelectValue placeholder="Tipo do documento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="document">Documento</SelectItem>
+                <SelectItem value="plate">Placa</SelectItem>
+                <SelectItem value="tax">Boleto</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
-      </div>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent
-          className="px-4 py-10"
-          style={{ minWidth: 400 }}
-          bg={styleContext.state.backgroundColor}
-        >
-          <ModalCloseButton />
-          <ModalBody overflowY="auto" wordBreak="break-word">
-            <div className="flex justify-center mb-6">
-              {valid && <MdCheckCircle size="64" color="green" />}
-              {error && <MdOutlineError size="64" color="red" />}
+
+          <div className="space-y-2">
+            <Label htmlFor="document-uploader">Anexe o documento</Label>
+            <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm break-all">
+              <span className="font-medium">Código:</span> {hash || "—"}
             </div>
-            <div className="flex text-center">
-              {error && <p className="text-lg font-bold">{error}</p>}
-              {valid && (
-                <p className="text-lg font-bold">
-                  O documento inserido é válido e está de acordo com o protocolo
-                  informado.
-                </p>
+
+            <Button type="button" variant="outline" className="w-full" asChild>
+              <label htmlFor="document-uploader" className="cursor-pointer">
+                Selecionar documento
+              </label>
+            </Button>
+
+            <input
+              id="document-uploader"
+              multiple={false}
+              type="file"
+              accept="*/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full gap-2"
+            onClick={handleValidate}
+            disabled={!hash || !protocolId || !documentType || loading}
+          >
+            {loading ? (
+              <>
+                <Spinner />
+                Verificando...
+              </>
+            ) : (
+              <>
+                Verificar <SL bg="primary">V</SL>
+              </>
+            )}
+          </Button>
+
+          {!getAccessToken() && (
+            <p className="text-center text-sm text-muted-foreground">
+              Quer entrar no sistema?{" "}
+              <button
+                className="cursor-pointer font-semibold text-primary hover:underline"
+                onClick={() => signIn()}
+              >
+                Entrar <SL>E</SL>
+              </button>
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex justify-center mb-2">
+              {valid ? (
+                <FaCheckCircle className="h-16 w-16 text-green-600" />
+              ) : (
+                <FaTimesCircle className="h-16 w-16 text-red-600" />
               )}
             </div>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+            <DialogTitle className="text-center">
+              {valid ? "Documento válido" : "Não foi possível validar"}
+            </DialogTitle>
+            <DialogDescription className="text-center text-sm leading-relaxed">
+              {resultMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

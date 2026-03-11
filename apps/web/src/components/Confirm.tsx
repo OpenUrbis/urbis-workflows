@@ -1,13 +1,12 @@
 import React, { FC, useContext, useEffect, useState } from "react";
 import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react";
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@open-urbis/map-ui";
 import { StyleContext } from "../reducers";
 import SL from "./ShortcutLabel";
 import {
@@ -31,7 +30,7 @@ interface ConfirmProps {
 }
 
 const ConfirmModal: FC = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState<string>("");
   const [modalMessage, setModalMessage] = useState<string>("");
   const [modalType, setModalType] = useState<
@@ -51,12 +50,12 @@ const ConfirmModal: FC = () => {
     setConfirmText(confirmParams?.confirmText || "Confirmar");
     setCancelText(confirmParams?.cancelText || "Cancelar");
     if (resolveConfirm) {
-      onOpen();
+      setIsOpen(true);
     }
-  }, [confirmParams, onOpen]);
+  }, [confirmParams]);
 
   const handleClose = () => {
-    onClose();
+    setIsOpen(false);
   };
 
   const handleConfirm = () => {
@@ -121,88 +120,58 @@ const ConfirmModal: FC = () => {
     }
   };
 
-  const getConfirmButtonStyle = () => {
-    switch (modalType) {
-      case "warning":
-        return "bg-yellow-500 hover:bg-yellow-600";
-      case "success":
-        return "bg-green-500 hover:bg-green-600";
-      default:
-        return "bg-blue-500 hover:bg-blue-600";
-    }
-  };
-
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleCancel}
-      motionPreset="slideInBottom"
-      isCentered
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleCancel();
+      }}
     >
-      <ModalOverlay backdropFilter="blur(4px)" />
-      <ModalContent
-        className="shadow-xl"
+      <DialogContent
+        className="shadow-xl bg-background text-foreground [&>button.absolute.right-4.top-4]:hidden"
         style={{
           width: "400px",
-          backgroundColor: styleContext.state.backgroundColor,
         }}
       >
-        <ModalHeader className="px-6 pt-4 pb-4 border-b">
+        <DialogHeader className="pb-4 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {getIcon()}
-              <span
-                className="text-xl font-bold"
-                style={{ color: styleContext.state.textColor }}
-              >
-                {modalTitle}
-              </span>
+              <DialogTitle asChild>
+                <span
+                  className="text-xl font-bold"
+                  style={{ color: styleContext.state.textColor }}
+                >
+                  {modalTitle}
+                </span>
+              </DialogTitle>
             </div>
             <button
               onClick={handleCancel}
               className="hover:bg-opacity-10 rounded p-1.5 transition-colors duration-150"
               style={{
-                color: styleContext.state.buttonHoverColorWeight === "200" ? "#6B7280" : "#9CA3AF",
-                backgroundColor: styleContext.state.buttonHoverColorWeight === "200" 
-                  ? "rgba(107, 114, 128, 0.1)" 
-                  : "rgba(156, 163, 175, 0.1)",
+                color:
+                  styleContext.state.buttonHoverColorWeight === "200"
+                    ? "#6B7280"
+                    : "#9CA3AF",
+                backgroundColor:
+                  styleContext.state.buttonHoverColorWeight === "200"
+                    ? "rgba(107, 114, 128, 0.1)"
+                    : "rgba(156, 163, 175, 0.1)",
               }}
             >
               <FaTimes size={12} />
             </button>
           </div>
-        </ModalHeader>
-        <ModalBody className="px-6 py-6">
+        </DialogHeader>
+
+        <div className="">
           <p style={{ color: styleContext.state.textColor }}>{modalMessage}</p>
-        </ModalBody>
-        <ModalFooter className="px-6 pt-4 pb-4 border-t space-x-3">
-          <button
-            className={`px-6 py-2.5 rounded-lg font-medium text-white transition-colors flex items-center space-x-2 ${getConfirmButtonStyle()}`}
-            onClick={handleConfirm}
-            style={
-              modalType === "warning"
-                ? {
-                    backgroundColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#eab308"
-                        : "#854d0e",
-                  }
-                : modalType === "success"
-                  ? {
-                      backgroundColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#22c55e"
-                          : "#166534",
-                    }
-                  : {
-                      backgroundColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#3b82f6"
-                          : "#1e40af",
-                    }
-            }
-          >
-            <span>{confirmText}</span>
+        </div>
+
+        <DialogFooter className="px-6 pt-4 border-t space-x-3">
+          <Button type="button" onClick={handleConfirm} className="gap-2">
+            {confirmText}
             <SL
               bg={
                 modalType === "warning"
@@ -220,19 +189,14 @@ const ConfirmModal: FC = () => {
             >
               Enter
             </SL>
-          </button>
-          <button
-            className="px-6 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
             onClick={handleCancel}
-            style={{
-              backgroundColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#f3f4f6"
-                  : "#1f2937",
-              color: styleContext.state.textColor,
-            }}
+            className="gap-2"
           >
-            <span>{cancelText}</span>
+            {cancelText}
             <SL
               bg={
                 styleContext.state.buttonHoverColorWeight === "200"
@@ -242,10 +206,10 @@ const ConfirmModal: FC = () => {
             >
               esc
             </SL>
-          </button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

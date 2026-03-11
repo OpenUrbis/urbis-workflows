@@ -86,10 +86,11 @@ export const Table: React.FC<FieldTableProps> = ({
 
   return (
     <div className="flex flex-col" style={{ width: options.width }}>
-      {parsedTable.map((row, rowIndex) => {
-        return (
-          <div className="flex" key={`row-${rowIndex}`}>
-            {row.map((field, colIndex) => {
+      <div className="rounded-md border overflow-hidden">
+        {parsedTable.map((row, rowIndex) => {
+          return (
+            <div className="flex" key={`row-${rowIndex}`}>
+              {row.map((field, colIndex) => {
               const uniqueKey = `${rowIndex}-${colIndex}-${field.key || "empty"}`;
 
               if (field.type === "integration" || field.type === "link") {
@@ -104,14 +105,14 @@ export const Table: React.FC<FieldTableProps> = ({
                       onChange={(v) => {
                         setLocalValue((value: any) => {
                           const newValue = { ...value, [field.key]: v };
-                          onChange(newValue);
+                          queueMicrotask(() => onChange(newValue));
                           return newValue;
                         });
                       }}
                       onValidChange={(v) => {
                         setLocalValid((valid: any) => {
                           const newValid = { ...valid, [field.key]: v };
-                          onValidChange(newValid);
+                          queueMicrotask(() => onValidChange(newValid));
                           return newValid;
                         });
                       }}
@@ -125,9 +126,11 @@ export const Table: React.FC<FieldTableProps> = ({
               return (field.type as any) !== "none" ? (
                 <div
                   key={uniqueKey}
-                  className={`border-x border-t ${
-                    rowIndex + 1 === parsedTable.length ? "border-b" : ""
-                  } ${field.type !== "array" ? "px-4 py-3" : ""}`}
+                  className={`border-l border-t ${
+                    colIndex + 1 === row.length ? "border-r" : ""
+                  } ${rowIndex + 1 === parsedTable.length ? "border-b" : ""} ${
+                    field.type !== "array" ? "px-4 py-3" : ""
+                  }`}
                   style={{
                     width: `${
                       (((field.options as TableOptions).columns ?? row.length) /
@@ -145,14 +148,14 @@ export const Table: React.FC<FieldTableProps> = ({
                     onChange={(v) => {
                       setLocalValue((value: any) => {
                         const newValue = { ...value, [field.key]: v };
-                        onChange(newValue);
+                        queueMicrotask(() => onChange(newValue));
                         return newValue;
                       });
                     }}
                     onValidChange={(v) => {
                       setLocalValid((valid: any) => {
                         const newValid = { ...valid, [field.key]: v };
-                        onValidChange(newValid);
+                        queueMicrotask(() => onValidChange(newValid));
                         return newValid;
                       });
                     }}
@@ -163,7 +166,7 @@ export const Table: React.FC<FieldTableProps> = ({
               ) : (
                 <div
                   key={uniqueKey}
-                  className="border-x"
+                  className={`border-l ${colIndex + 1 === row.length ? "border-r" : ""}`}
                   style={{
                     width: `${
                       (((field.options as TableOptions).columns ?? row.length) /
@@ -173,10 +176,11 @@ export const Table: React.FC<FieldTableProps> = ({
                   }}
                 ></div>
               );
-            })}
-          </div>
-        );
-      })}
+              })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

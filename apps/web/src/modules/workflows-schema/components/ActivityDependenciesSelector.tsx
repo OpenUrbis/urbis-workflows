@@ -1,18 +1,9 @@
 import React, { useState } from "react";
-import {
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Checkbox,
-  Tooltip,
-  Badge,
-  Input,
-  InputGroup,
-  InputLeftElement,
-} from "@chakra-ui/react";
+import { Badge, Checkbox, Input as DSInput } from "@open-urbis/map-ui";
 import { FaProjectDiagram, FaSearch, FaTimes } from "react-icons/fa";
 import { ActivityTemplate } from "../../../api/types/schema";
 import { SideDrawer } from "../../../components/SideDrawer";
+import { FormControl, FormHelperText, FormLabel, Tooltip } from "../../../components";
 
 export interface ActivityDependenciesSelectorProps {
   activities: ActivityTemplate[];
@@ -96,29 +87,20 @@ export const ActivityDependenciesSelector: React.FC<
               selectedDependencies.map((depId) => (
                 <Badge
                   key={depId}
-                  colorScheme="purple"
-                  variant="solid"
-                  className="flex items-center py-1"
-                  borderRadius="md"
+                  variant="outline"
+                  className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center bg-primary/10 text-primary border-primary/20"
                 >
-                  <span className="mx-1">{getActivityLabel(depId)}</span>
+                  <span className="mr-1 truncate max-w-[200px]">
+                    {getActivityLabel(depId)}
+                  </span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleDependency(depId);
                     }}
-                    className="mr-1 hover:bg-opacity-10 rounded p-1 transition-colors duration-150"
-                    style={{
-                      color: "white",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor =
-                        "rgba(255, 255, 255, 0.1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
+                    className="ml-0.5 rounded p-0.5 hover:bg-muted/60 transition-colors"
                     aria-label="Remove"
+                    type="button"
                   >
                     <FaTimes size={10} />
                   </button>
@@ -127,6 +109,7 @@ export const ActivityDependenciesSelector: React.FC<
             )}
           </div>
           <button
+            type="button"
             onClick={handleOpen}
             className={`flex items-center px-4 py-3 rounded-lg transition-colors duration-150 w-full ${
               isOpen
@@ -194,16 +177,12 @@ export const ActivityDependenciesSelector: React.FC<
                   : "#374151",
             }}
           >
-            <InputGroup size="lg">
-              <InputLeftElement
-                pointerEvents="none"
-                height="100%"
-                children={<FaSearch className="text-gray-400" />}
-              />
-              <Input
+            <div className="relative">
+              <DSInput
                 placeholder="Buscar atividades..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 text-base transition-colors duration-200 border rounded-lg"
                 style={{
                   backgroundColor: styleContext.state.backgroundColor,
                   color: styleContext.state.textColor,
@@ -212,24 +191,11 @@ export const ActivityDependenciesSelector: React.FC<
                       ? "#E5E7EB"
                       : "#374151",
                 }}
-                _hover={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#D1D5DB"
-                      : "#4B5563",
-                }}
-                _focus={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#a855f7"
-                      : "#7e22ce",
-                  boxShadow:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "0 0 0 1px #a855f7"
-                      : "0 0 0 1px #7e22ce",
-                }}
               />
-            </InputGroup>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <FaSearch className="text-gray-400" />
+              </div>
+            </div>
           </div>
 
           <div className="p-4">
@@ -280,33 +246,46 @@ export const ActivityDependenciesSelector: React.FC<
                       }}
                     >
                       <div className="flex items-center w-full">
-                        <Checkbox
-                          isChecked={isSelected}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            handleToggleDependency(activity.id);
-                          }}
-                          colorScheme="purple"
-                          size="lg"
+                        <div
                           className="mr-3"
-                          borderRadius="md"
                           onClick={(e) => e.stopPropagation()}
-                          sx={{
-                            "span.chakra-checkbox__control": {
-                              borderRadius: "0.375rem",
-                            },
-                          }}
-                        />
-                        <div className="flex-1">
-                          <Tooltip
-                            label={activity.documentation}
-                            placement="top"
-                            hasArrow
-                            isDisabled={
-                              !activity.documentation ||
-                              activity.documentation.length <= 60
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() =>
+                              handleToggleDependency(activity.id)
                             }
-                          >
+                            className="!rounded-none"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          {activity.documentation &&
+                          activity.documentation.length > 60 ? (
+                            <Tooltip label={activity.documentation}>
+                              <div>
+                                <p
+                                  className="font-medium"
+                                  style={{
+                                    color: styleContext.state.textColor,
+                                  }}
+                                >
+                                  {activity.label}
+                                </p>
+                                <p
+                                  className="text-sm"
+                                  style={{
+                                    color:
+                                      styleContext.state
+                                        .buttonHoverColorWeight === "200"
+                                        ? "#6B7280"
+                                        : "#9CA3AF",
+                                  }}
+                                >
+                                  {activity.namespace}
+                                </p>
+                              </div>
+                            </Tooltip>
+                          ) : (
                             <div>
                               <p
                                 className="font-medium"
@@ -320,8 +299,8 @@ export const ActivityDependenciesSelector: React.FC<
                                 className="text-sm"
                                 style={{
                                   color:
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
+                                    styleContext.state.buttonHoverColorWeight ===
+                                    "200"
                                       ? "#6B7280"
                                       : "#9CA3AF",
                                 }}
@@ -329,7 +308,7 @@ export const ActivityDependenciesSelector: React.FC<
                                 {activity.namespace}
                               </p>
                             </div>
-                          </Tooltip>
+                          )}
                         </div>
                       </div>
                     </div>

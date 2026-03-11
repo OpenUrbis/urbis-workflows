@@ -5,7 +5,7 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
-import { Portal } from "@chakra-ui/react";
+import { createPortal } from "react-dom";
 import { FaTimes } from "react-icons/fa";
 
 // Global drawer management
@@ -345,8 +345,8 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
   // Calculate the right offset based on if disabled
   const rightOffset = disableOffset ? "0" : "0rem";
 
-  return (
-    <Portal>
+  return createPortal(
+    <React.Fragment>
       {/* Overlay for dragging */}
       {isDragging && (
         <div
@@ -439,18 +439,14 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="text-xl font-bold">
+                <div className="text-lg font-bold">
                   {typeof title === "string" ? title : title}
                 </div>
                 {badge && (
                   <div
-                    className={`px-2 py-0.5 rounded-full ${
-                      badge.color
-                        ? `${badge.color.bg} ${badge.color.text}`
-                        : `bg-${badge.colorScheme}-100 text-${badge.colorScheme}-800`
-                    }`}
+                    className={`px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary`}
                   >
-                    <span className="text-xs font-medium">{badge.text}</span>
+                    <span className="text-[10px] font-medium leading-none">{badge.text}</span>
                   </div>
                 )}
               </div>
@@ -474,7 +470,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
               </button>
             </div>
           </div>
-          <div className="pb-6 overflow-y-auto h-[calc(100%-73px)]">
+          <div className="pb-6 overflow-y-auto h-[calc(100%-73px)] text-foreground">
             {children}
           </div>
         </div>
@@ -509,7 +505,8 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
           </div>
         )}
       </div>
-    </Portal>
+    </React.Fragment>,
+    document.body
   );
 };
 

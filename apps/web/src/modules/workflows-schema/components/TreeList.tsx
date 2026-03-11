@@ -1,19 +1,13 @@
 import {
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionIcon,
-  AccordionPanel,
-  Box,
-  InputGroup,
-  InputLeftElement,
   Tooltip,
-} from "@chakra-ui/react";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
 import { FaFolder, FaFolderOpen, FaSearch } from "react-icons/fa";
 import { IconType } from "react-icons";
-import { useContext, useState, useEffect } from "react";
-import { StyleContext } from "../../../reducers";
-import { Input } from "../../../components";
+import { useState, useEffect } from "react";
+import { Input } from "@open-urbis/map-ui";
 
 export interface TreeItem {
   id: string;
@@ -38,6 +32,7 @@ export interface TreeListProps<T extends TreeItem> {
   onSearchChange?: (value: string) => void;
   getIcon?: (item: T) => { icon: IconType; color: string };
   selectedId?: string;
+  density?: "default" | "compact";
 }
 
 const createDirectoryTree = <T extends TreeItem>(
@@ -121,58 +116,40 @@ export const TreeList = <T extends TreeItem>({
   onSearchChange,
   getIcon,
   selectedId,
+  density = "default",
 }: TreeListProps<T>): JSX.Element => {
-  const styleContext = useContext(StyleContext);
   const tree = createDirectoryTree(items);
 
   return (
-    <div className="flex flex-col">
-      <div
-        className="p-4 border-b "
-        style={{
-          borderColor:
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "#E5E7EB"
-              : "#374151",
-          backgroundColor: styleContext.state.backgroundColor,
-        }}
-      >
-        <InputGroup size="lg">
-          <InputLeftElement
-            pointerEvents="none"
-            height="100%"
-            className="z-10"
-            children={
-              <FaSearch
-                className={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "text-gray-500"
-                    : "text-gray-300"
-                }
-                size={16}
-              />
-            }
+    <TooltipProvider>
+      <div className="flex flex-col">
+        <div className="p-4 border-b border-border bg-transparent">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+              <FaSearch className="text-muted-foreground" size={16} />
+            </div>
+            <Input
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              className="h-10 pl-10"
+            />
+          </div>
+        </div>
+        <div className="flex-grow overflow-y-auto p-2 bg-transparent">
+          <DirectoryView
+            node={tree}
+            search={search}
+            onClick={onClick}
+            icon={defaultIcon}
+            iconColor={defaultIconColor}
+            getIcon={getIcon}
+            selectedId={selectedId}
+            density={density}
           />
-          <Input
-            placeholder="Buscar..."
-            value={search}
-            onChange={(e) => onSearchChange?.(e.target.value)}
-            paddingLeft="2.5rem"
-          />
-        </InputGroup>
+        </div>
       </div>
-      <div className="flex-grow overflow-y-auto p-2">
-        <DirectoryView
-          node={tree}
-          search={search}
-          onClick={onClick}
-          icon={defaultIcon}
-          iconColor={defaultIconColor}
-          getIcon={getIcon}
-          selectedId={selectedId}
-        />
-      </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
@@ -185,6 +162,7 @@ const DirectoryView = <T extends TreeItem>({
   level = 0,
   getIcon,
   selectedId,
+  density = "default",
 }: {
   node: DirectoryNode<T>;
   search: string;
@@ -194,8 +172,8 @@ const DirectoryView = <T extends TreeItem>({
   level?: number;
   getIcon?: (item: T) => { icon: IconType; color: string };
   selectedId?: string;
+  density?: "default" | "compact";
 }) => {
-  const styleContext = useContext(StyleContext);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
@@ -248,6 +226,10 @@ const DirectoryView = <T extends TreeItem>({
   const isRootWithOnlyFiles =
     level === 0 && filteredChildren.every(([, child]) => child.type === "file");
   const basePadding = isRootWithOnlyFiles ? 0 : level * 16;
+  const isCompact = density === "compact";
+  const folderOpenSize = isCompact ? 18 : 23;
+  const folderSize = isCompact ? 17 : 21;
+  const itemIconSize = isCompact ? 14 : 18;
 
   const handleFolderClick = (name: string) => {
     setExpandedItems((prev) => {
@@ -262,68 +244,57 @@ const DirectoryView = <T extends TreeItem>({
   };
 
   return (
-    <Accordion
-      allowToggle
-      border={0}
-      className="space-y-1"
-      index={Array.from(expandedItems).map((name) =>
-        filteredChildren.findIndex(([n]) => n === name)
-      )}
-    >
+    <div className="space-y-1">
       {filteredChildren.map(([name, child]) => (
-        <AccordionItem
-          key={name}
-          border={0}
-          className="rounded-lg overflow-hidden"
-        >
+        <div key={name} className="rounded-lg overflow-hidden">
           {child.type === "directory" ? (
             <>
-              <AccordionButton
+              <button
                 onClick={() => handleFolderClick(name)}
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.200"
-                      : "gray.700",
-                }}
-                className="rounded-lg"
-                transition="all 0.2s"
-                px={4}
-                py={2}
+                className={`w-full rounded-lg px-4 ${isCompact ? "py-1.5" : "py-2"} transition-all duration-200 hover:bg-muted`}
               >
-                <Box
+                <span
                   style={{ paddingLeft: `${basePadding}px` }}
-                  as="span"
-                  flex="1"
-                  textAlign="left"
-                  className="flex items-center"
+                  className="flex items-center justify-between"
                 >
-                  {expandedItems.has(name) ? (
-                    <FaFolderOpen className="mr-3 text-yellow-500" size={23} />
-                  ) : (
-                    <FaFolder className="mr-3 text-yellow-500" size={21} />
-                  )}
-                  <span
-                    style={{ color: styleContext.state.textColor }}
-                    className="font-medium"
-                  >
-                    {name}
+                  <span className="flex items-center">
+                    {expandedItems.has(name) ? (
+                      <FaFolderOpen
+                        className={`text-primary ${isCompact ? "mr-2" : "mr-3"}`}
+                        size={folderOpenSize}
+                      />
+                    ) : (
+                      <FaFolder
+                        className={`text-primary ${isCompact ? "mr-2" : "mr-3"}`}
+                        size={folderSize}
+                      />
+                    )}
+                    <span
+                      className={`${isCompact ? "text-sm" : "text-base"} font-medium text-foreground`}
+                    >
+                      {name}
+                    </span>
                   </span>
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <AccordionPanel pb={2} pt={1}>
-                <DirectoryView
-                  node={child}
-                  search={search}
-                  onClick={onClick}
-                  icon={DefaultIcon}
-                  iconColor={defaultIconColor}
-                  level={level + 1}
-                  getIcon={getIcon}
-                  selectedId={selectedId}
-                />
-              </AccordionPanel>
+                  <span className="text-muted-foreground text-xs">
+                    {expandedItems.has(name) ? "−" : "+"}
+                  </span>
+                </span>
+              </button>
+              {expandedItems.has(name) && (
+                <div className="pt-1 pb-2">
+                  <DirectoryView
+                    node={child}
+                    search={search}
+                    onClick={onClick}
+                    icon={DefaultIcon}
+                    iconColor={defaultIconColor}
+                    level={level + 1}
+                    getIcon={getIcon}
+                    selectedId={selectedId}
+                    density={density}
+                  />
+                </div>
+              )}
             </>
           ) : (
             child.items
@@ -343,55 +314,55 @@ const DirectoryView = <T extends TreeItem>({
                 return (
                   <div
                     key={item.id}
-                    className="transition-colors duration-150 rounded-lg"
+                    className={`transition-colors duration-150 rounded-lg ${
+                      isSelected
+                        ? "bg-muted"
+                        : hoveredItem === item.id
+                          ? "bg-muted/70"
+                          : ""
+                    }`}
                     style={{
                       paddingLeft: `${isRootWithOnlyFiles ? 16 : (level + 1) * 16}px`,
-                      backgroundColor: isSelected
-                        ? styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#E5E7EB"
-                          : "#374151"
-                        : hoveredItem === item.id
-                          ? styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#F3F4F6"
-                            : "#4B5563"
-                          : "transparent",
                     }}
                     onMouseEnter={() => setHoveredItem(item.id)}
                     onMouseLeave={() => setHoveredItem(null)}
                   >
                     <button
                       onClick={() => onClick(item)}
-                      className="flex items-center w-full py-2 px-4 rounded-lg hover:bg-opacity-75"
+                      className={`flex items-center w-full ${isCompact ? "py-1.5" : "py-2"} px-4 rounded-lg hover:bg-opacity-75`}
                     >
                       <div className="flex items-center w-full">
                         <Icon
-                          className={`mr-3 text-${itemIcon.color}-500 flex-shrink-0`}
-                          size={18}
+                          className={`text-${itemIcon.color}-500 flex-shrink-0 ${isCompact ? "mr-2" : "mr-3"}`}
+                          size={itemIconSize}
                         />
                         <div className="flex flex-col flex-grow min-w-0 text-left">
-                          <Tooltip
-                            label={item.label}
-                            isDisabled={item.label.length <= 30}
-                            placement="top"
-                            hasArrow
-                          >
-                            <span
-                              style={{ color: styleContext.state.textColor }}
-                              className="font-medium truncate hover:text-yellow-600 transition-colors duration-200"
-                            >
-                              {item.label}
-                            </span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                className={`${isCompact ? "text-sm" : "text-base"} font-medium truncate text-foreground hover:text-primary transition-colors duration-200`}
+                              >
+                                {item.label}
+                              </span>
+                            </TooltipTrigger>
+                            {item.label.length > 30 && (
+                              <TooltipContent side="top">{item.label}</TooltipContent>
+                            )}
                           </Tooltip>
                           {(search.trim() !== "" || item.namespace) && (
-                            <Tooltip
-                              label={item.namespace}
-                              isDisabled={item.namespace.length <= 40}
-                              placement="bottom"
-                              hasArrow
-                            >
-                              <span className="text-sm text-gray-500 dark:text-gray-400 truncate hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
-                                {item.namespace}
-                              </span>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span
+                                  className={`${isCompact ? "text-xs" : "text-sm"} text-muted-foreground truncate hover:text-foreground transition-colors duration-200`}
+                                >
+                                  {item.namespace}
+                                </span>
+                              </TooltipTrigger>
+                              {item.namespace.length > 40 && (
+                                <TooltipContent side="bottom">
+                                  {item.namespace}
+                                </TooltipContent>
+                              )}
                             </Tooltip>
                           )}
                         </div>
@@ -401,8 +372,8 @@ const DirectoryView = <T extends TreeItem>({
                 );
               })
           )}
-        </AccordionItem>
+        </div>
       ))}
-    </Accordion>
+    </div>
   );
 };

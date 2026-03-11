@@ -1,22 +1,20 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import MapCallback from "./MapCallback";
 import {
-  ConfirmForgetPassword,
-  ConfirmSignUp,
+  AdminPanel,
   ContestUser,
+  Dashboard,
   Datasets,
   DocumentValidate,
   Environments,
-  ForgetPassword,
   FormsPreset,
   IAM,
-  MyProtocols,
+  MyWorkflowsPage,
+  WorkflowsReportPage,
   Profile,
   Workflows,
   Secrets,
-  SignIn,
-  SignUp,
   SignUpEditor,
   WorkflowSchemaEditor,
   WorkflowsSchema,
@@ -28,9 +26,11 @@ import { ApostilleOfficial } from "./modules/workflows/ApostilleOfficial";
 import { MyAcceptances } from "./modules/workflows/MyAcceptances";
 import { ProtocolValidate } from "./modules/workflows/ProtocolValidate";
 import {
+  AuthContext,
   DefaultRouteContext,
   PrivateWrapper,
   PublicWrapper,
+  PublicOrPrivateWrapper,
 } from "./reducers/auth.reducer";
 import { PlatePrint } from "./modules/workflows-schema/printers/PlatePrint";
 import { DocumentPrint } from "./modules/workflows-schema/printers/DocumentPrint";
@@ -47,54 +47,32 @@ const DefaultRoute = () => {
   return <Navigate to={defaultRoute} />;
 };
 
+const OidcCallbackRoute = () => {
+  const { isLoading } = useContext(AuthContext);
+
+  if (isLoading) return null;
+
+  return <Navigate to="/workflows-schema" replace />;
+};
+
+const ACCOUNTS_URL = import.meta.env.VITE_ACCOUNTS_URL || "http://localhost:4200";
+
+const AccountsProfileRedirect = () => {
+  useEffect(() => {
+    window.location.href = `${ACCOUNTS_URL}/profile`;
+  }, []);
+
+  return null;
+};
+
 const RouteDefinitions = () => (
   <Routes>
     {/* Public routes */}
-    <Route
-      path="/login"
-      element={
-        <PublicWrapper>
-          <SignIn />
-        </PublicWrapper>
-      }
-    />
-    <Route
-      path="/sign-up"
-      element={
-        <PublicWrapper>
-          <SignUp />
-        </PublicWrapper>
-      }
-    />
-    <Route
-      path="/confirm-sign-up"
-      element={
-        <PublicWrapper>
-          <ConfirmSignUp />
-        </PublicWrapper>
-      }
-    />
     <Route
       path="/contest-user"
       element={
         <PublicWrapper>
           <ContestUser />
-        </PublicWrapper>
-      }
-    />
-    <Route
-      path="/forget-password"
-      element={
-        <PublicWrapper>
-          <ForgetPassword />
-        </PublicWrapper>
-      }
-    />
-    <Route
-      path="/confirm-forget-password"
-      element={
-        <PublicWrapper>
-          <ConfirmForgetPassword />
         </PublicWrapper>
       }
     />
@@ -166,6 +144,7 @@ const RouteDefinitions = () => (
         </PublicWrapper>
       }
     />
+    <Route path="/callback" element={<OidcCallbackRoute />} />
     <Route path="/not-found" element={<NotFound />} />
 
     {/* IAM Error route */}
@@ -195,21 +174,47 @@ const RouteDefinitions = () => (
       />
     </Route>
 
-    {/* Workflow Schema routes */}
+    {/* Estatísticas (formerly Dashboard) route */}
     <Route
       element={
-        <ProtectedRoute requiredPermission="workflow-schema:read:findAll" />
+        <ProtectedRoute requiredPermission="dashboard:read:workflowOverview" />
       }
     >
       <Route
-        path="/workflows-schema"
+        path="/dashboard"
         element={
           <PrivateWrapper>
-            <WorkflowsSchema />
+            <Dashboard />
           </PrivateWrapper>
         }
       />
     </Route>
+
+    {/* Painel Administrativo route */}
+    <Route
+      element={
+        <ProtectedRoute requiredPermission="dashboard:read:workflowOverview" />
+      }
+    >
+      <Route
+        path="/admin-panel"
+        element={
+          <PrivateWrapper>
+            <AdminPanel />
+          </PrivateWrapper>
+        }
+      />
+    </Route>
+
+    {/* Workflow Schema routes - public landing page */}
+    <Route
+      path="/workflows-schema"
+      element={
+        <PublicOrPrivateWrapper>
+          <WorkflowsSchema />
+        </PublicOrPrivateWrapper>
+      }
+    />
 
     <Route
       element={
@@ -227,14 +232,25 @@ const RouteDefinitions = () => (
     </Route>
 
     {/* Workflow routes */}
-    <Route
-      element={<ProtectedRoute requiredPermission="workflow:read:findAll" />}
-    >
+    <Route element={<ProtectedRoute />}>
       <Route
         path="/workflows"
         element={
           <PrivateWrapper>
-            <MyProtocols />
+            <MyWorkflowsPage />
+          </PrivateWrapper>
+        }
+      />
+    </Route>
+
+    <Route
+      element={<ProtectedRoute requiredPermission="workflow:read:findAll" />}
+    >
+      <Route
+        path="/workflows/all"
+        element={
+          <PrivateWrapper>
+            <WorkflowsReportPage />
           </PrivateWrapper>
         }
       />
@@ -385,16 +401,19 @@ const RouteDefinitions = () => (
       />
     </Route>
 
-    {/* Profile route - accessible to all authenticated users */}
+    {/* Representations route - local workflow context */}
     <Route element={<ProtectedRoute />}>
       <Route
-        path="/profile"
+        path="/representations"
         element={
           <PrivateWrapper>
             <Profile />
           </PrivateWrapper>
         }
       />
+
+      {/* Profile route now points to Accounts (source of truth for profile data) */}
+      <Route path="/profile" element={<AccountsProfileRedirect />} />
     </Route>
 
     {/* SignUpEditor route */}

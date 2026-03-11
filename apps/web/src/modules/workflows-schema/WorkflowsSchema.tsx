@@ -1,5 +1,6 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
-import { Input, SL } from "../../components";
+import { SL } from "../../components";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { StyleContext } from "../../reducers/style.reducer";
 import { BsFillGridFill } from "react-icons/bs";
@@ -7,63 +8,54 @@ import {
   FaEdit,
   FaPlus,
   FaThList,
-  FaSearch,
   FaCode,
   FaRocket,
   FaFlask,
-  FaTimes,
   FaClone,
+  FaSearch,
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import * as RadixDialog from "@radix-ui/react-dialog";
 import {
-  Spinner,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@chakra-ui/react";
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  Input,
+} from "@open-urbis/map-ui";
 import { ApiClient } from "../../api";
 import { WorkflowSchema } from "../../api/types/workflows-schema.dto";
-import { CacheOptions } from "../../api/services/cache.service";
 import { PermissionGate } from "../../components/PermissionGate";
 import { usePermissions } from "../../reducers/permission.context";
+import { AuthContext } from "../../reducers/auth.reducer";
+import { Spinner } from "../../components";
 
-// Create a singleton instance
-const getApiClient = (() => {
-  let instance: ApiClient;
-
-  return (options?: { cacheOptions?: CacheOptions }) => {
-    if (!instance) {
-      instance = new ApiClient({
-        baseURL: import.meta.env.VITE_BACK_END_API || "",
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-        },
-      });
-    }
-    return instance;
-  };
-})();
-
-// Use the singleton instance without expiration (default)
-const apiClient = getApiClient();
+// Create API client factory that uses current token
+const createApiClient = () => {
+  const token = getAccessToken();
+  return new ApiClient({
+    baseURL: import.meta.env.VITE_BACK_END_API || "",
+    headers: token ? { authorization: `Bearer ${token}` } : {},
+  });
+};
 
 export const WorkflowsSchema: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
+  const { isAuthenticated, signIn } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
+  const canCreateWorkflow = hasPermission("workflow:write:create");
 
   const [workflows, setWorkflows] = useState<WorkflowSchema[]>([]);
   const [search, setSearch] = useState("");
   const [stage, setStage] = useState(
-    canEditWorkflowSchema ? "development" : "production"
+    searchParams.get("stage") || (canEditWorkflowSchema ? "development" : "production"),
   );
   const [isGridView, setIsGridView] = useState(
-    localStorage.getItem("listView") !== "true"
+    localStorage.getItem("listView") !== "true",
   );
   const [loading, setLoading] = useState(true);
   const showEdit = !localStorage.getItem("showEdit");
@@ -76,7 +68,7 @@ export const WorkflowsSchema: React.FC = () => {
   const fetchWorkflows = async () => {
     setLoading(true);
     try {
-      const workflows = await apiClient.workflowsSchema.findAll(stage);
+      const workflows = await createApiClient().workflowsSchema.findAll(stage);
       setWorkflows(workflows.sort((a, b) => a.label.localeCompare(b.label)));
     } catch (error) {
       console.error("Error fetching workflows:", error);
@@ -86,7 +78,19 @@ export const WorkflowsSchema: React.FC = () => {
 
   useEffect(() => {
     fetchWorkflows();
-    
+  }, [stage]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (stage) {
+      params.set("stage", stage);
+    } else {
+      params.delete("stage");
+    }
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+    // eslint-disable-next-line
   }, [stage]);
 
   useEffect(() => {
@@ -102,7 +106,6 @@ export const WorkflowsSchema: React.FC = () => {
         delete: ["N", "G", "T", "S", "E"],
       });
     };
-    
   }, [workflows]);
 
   const buildHotkeys = () => ({
@@ -133,8 +136,18 @@ export const WorkflowsSchema: React.FC = () => {
     }
   };
 
-  const handleRequest = (workflowId: string) =>
+  const handleRequest = (workflowId: string) => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem(
+        "postLoginRedirectPath",
+        `/workflows/${workflowId}/create?stage=${stage}`,
+      );
+      signIn();
+      return;
+    }
+
     navigate(`/workflows/${workflowId}/create?stage=${stage}`);
+  };
 
   const handEditWorkflows = (workflowId: string) =>
     navigate(`/workflows-schema/${workflowId}`);
@@ -142,7 +155,8 @@ export const WorkflowsSchema: React.FC = () => {
   const handleDuplicate = async (workflowId: string) => {
     setLoading(true);
     try {
-      const newWorkflow = await apiClient.workflowsSchema.copy(workflowId);
+      const newWorkflow =
+        await createApiClient().workflowsSchema.copy(workflowId);
       setWorkflows([...workflows, newWorkflow]);
     } catch (error) {
       console.error("Error duplicating workflow:", error);
@@ -151,20 +165,17 @@ export const WorkflowsSchema: React.FC = () => {
   };
 
   const filteredWorkflows = workflows.filter((workflow) =>
-    workflow.label.toLowerCase().includes(search.toLowerCase())
+    workflow.label.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
-    <div className="flex flex-col space-y-8 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1
-        className="text-2xl md:text-3xl font-medium mt-6"
-        style={{ color: styleContext.state.textColor }}
-      >
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
         Carta de Assuntos
       </h1>
       {showEdit && <StageSelectorButton stage={stage} setStage={setStage} />}
       {loading ? (
-        <LoadingSpinner styleContext={styleContext} />
+        <LoadingSpinner />
       ) : (
         <>
           <div className="flex justify-between items-center">
@@ -172,30 +183,14 @@ export const WorkflowsSchema: React.FC = () => {
               <div className="flex-grow relative">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                    <FaSearch
-                      className={
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "text-gray-500"
-                          : "text-gray-300"
-                      }
-                      size={16}
-                    />
+                    <FaSearch className="text-muted-foreground" size={16} />
                   </div>
                   <Input
                     type="text"
                     placeholder="Buscar assunto..."
-                    size="lg"
                     value={search}
                     onChange={(e: any) => setSearch(e.target.value)}
-                    className={`w-full pl-10 transition-all duration-200 ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "focus:ring-2 focus:ring-yellow-200 border-gray-200"
-                        : "focus:ring-2 focus:ring-yellow-600 border-gray-600 bg-gray-800"
-                    }`}
-                    style={{
-                      color: styleContext.state.textColor,
-                      paddingLeft: "2.5rem",
-                    }}
+                    className="w-full h-10 pl-10 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -211,6 +206,8 @@ export const WorkflowsSchema: React.FC = () => {
             setStage={setStage}
             showEdit={showEdit}
             isGridView={isGridView}
+            isAuthenticated={isAuthenticated}
+            canCreateWorkflow={canCreateWorkflow}
             filteredWorkflows={filteredWorkflows}
             handleRequest={handleRequest}
             handEditWorkflows={handEditWorkflows}
@@ -220,126 +217,72 @@ export const WorkflowsSchema: React.FC = () => {
           />
         </>
       )}
-      <Modal
-        isOpen={!!selectedDescription}
-        onClose={() => setSelectedDescription(null)}
-        motionPreset="slideInBottom"
-        isCentered
+      <RadixDialog.Root
+        open={!!selectedDescription}
+        onOpenChange={(open) => !open && setSelectedDescription(null)}
       >
-        <ModalOverlay backdropFilter="blur(4px)" />
-        <ModalContent
-          className="shadow-xl"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            maxWidth: "600px",
-          }}
-        >
-          <ModalHeader className="px-6 pt-4 pb-4 border-b">
-            <div className="flex justify-between">
-              <span
-                className="text-xl font-bold mt-2 mr-3"
-                style={{ color: styleContext.state.textColor }}
-              >
+        <RadixDialog.Portal>
+          <RadixDialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+          <RadixDialog.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-[640px] translate-x-[-50%] translate-y-[-50%] rounded-2xl border border-muted/80 bg-background p-0 shadow-lg outline-none overflow-hidden">
+            <div className="px-6 pt-6 pb-3">
+              <RadixDialog.Title className="text-xl font-semibold tracking-tight text-foreground">
                 {selectedDescription?.label}
-              </span>
-              <div>
-                <button
-                  onClick={() => setSelectedDescription(null)}
-                  className="hover:bg-opacity-10 rounded p-1.5 transition-colors duration-150"
-                  style={{
-                    color:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#6B7280"
-                        : "#9CA3AF",
-                    backgroundColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "rgba(107, 114, 128, 0.1)"
-                        : "rgba(156, 163, 175, 0.1)",
-                  }}
-                >
-                  <FaTimes size={12} />
-                </button>
-              </div>
+              </RadixDialog.Title>
+              <RadixDialog.Description className="text-sm text-muted-foreground">
+                Descrição completa do assunto selecionado.
+              </RadixDialog.Description>
             </div>
-          </ModalHeader>
-          <ModalBody className="px-6 py-6 overflow-y-auto">
-            <div
-              className="prose dark:prose-invert max-w-none"
-              style={{ color: styleContext.state.textColor }}
-              dangerouslySetInnerHTML={{
-                __html: selectedDescription?.text || "",
-              }}
-            />
-          </ModalBody>
-          <ModalFooter className="px-6 pt-4 pb-4 border-t space-x-3">
-            <button
-              className="px-6 py-2.5 rounded-lg font-medium text-white transition-colors flex items-center space-x-2"
-              onClick={() => {
-                setSelectedDescription(null);
-                if (selectedDescription) {
-                  handleRequest(selectedDescription.id);
-                }
-              }}
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#eab308"
-                    : "#854d0e",
-              }}
-            >
-              <span>Solicitar</span>
-              <SL
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "yellow.600"
-                    : "yellow.800"
-                }
+            <div className="max-h-[55vh] overflow-y-auto px-6 pb-2">
+              <div
+                className="max-w-none text-sm leading-6 text-foreground"
+                dangerouslySetInnerHTML={{
+                  __html: selectedDescription?.text || "",
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-end px-6 py-4 border-t bg-muted/20 gap-2 sm:gap-3">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setSelectedDescription(null);
+                  if (selectedDescription) {
+                    handleRequest(selectedDescription.id);
+                  }
+                }}
+                className="h-9 px-4 gap-2"
               >
-                Enter
-              </SL>
-            </button>
-            <button
-              className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              onClick={() => setSelectedDescription(null)}
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#f3f4f6"
-                    : "#1f2937",
-                color: styleContext.state.textColor,
-              }}
-            >
-              <span>Fechar</span>
-              <SL
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.100"
-                    : "gray.600"
-                }
-              >
-                esc
-              </SL>
-            </button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                <span>Solicitar</span>
+                <SL
+                  bg="hsl(var(--primary))"
+                  className="text-[hsl(var(--primary-foreground))]"
+                >
+                  Enter
+                </SL>
+              </Button>
+              <RadixDialog.Close asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-4 border-border bg-background hover:bg-muted text-foreground"
+                >
+                  Fechar
+                </Button>
+              </RadixDialog.Close>
+            </div>
+          </RadixDialog.Content>
+        </RadixDialog.Portal>
+      </RadixDialog.Root>
     </div>
   );
 };
 
-const LoadingSpinner = ({ styleContext }: { styleContext: any }) => {
+const LoadingSpinner = () => {
   return (
     <div className="flex flex-col items-center justify-center pt-10 space-y-4">
-      <Spinner
-        size="xl"
-        color={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "yellow.500"
-            : "yellow.300"
-        }
-        thickness="3px"
-      />
-      <span style={{ color: styleContext.state.textColor }}>
+      <Spinner size="xl" />
+      <span className="text-sm text-muted-foreground">
         Carregando assuntos...
       </span>
     </div>
@@ -351,6 +294,8 @@ const WorkflowContent = ({
   setStage,
   showEdit,
   isGridView,
+  isAuthenticated,
+  canCreateWorkflow,
   filteredWorkflows,
   handleRequest,
   handEditWorkflows,
@@ -362,18 +307,22 @@ const WorkflowContent = ({
   setStage: (stage: string) => void;
   showEdit: boolean;
   isGridView: boolean;
+  isAuthenticated: boolean;
+  canCreateWorkflow: boolean;
   filteredWorkflows: any[];
   handleRequest: (workflowId: string) => void;
   handEditWorkflows: (workflowId: string) => void;
   handleDuplicate: (workflowId: string) => Promise<void>;
   styleContext: any;
   setSelectedDescription: (
-    desc: { text: string; label: string; id: string } | null
+    desc: { text: string; label: string; id: string } | null,
   ) => void;
 }) => {
   return (
     <WorkflowsList
       filteredWorkflows={filteredWorkflows}
+      isAuthenticated={isAuthenticated}
+      canCreateWorkflow={canCreateWorkflow}
       handleRequest={handleRequest}
       handEditWorkflows={handEditWorkflows}
       handleDuplicate={handleDuplicate}
@@ -392,7 +341,6 @@ const StageSelectorButton = ({
   stage: string;
   setStage: (stage: string) => void;
 }) => {
-  const styleContext = useContext(StyleContext);
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
@@ -402,77 +350,65 @@ const StageSelectorButton = ({
       <div className="flex items-center space-x-2">
         {canEditWorkflowSchema ? (
           <>
-            <button
+            <Button
               onClick={() => setStage("development")}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 font-medium ${
+              variant={stage === "development" ? "secondary" : "ghost"}
+              size="sm"
+              className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "development"
-                  ? styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-200 text-gray-800"
-                    : "bg-gray-700 text-gray-200"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "text-gray-600 hover:bg-gray-100"
-                    : "text-gray-400 hover:bg-gray-700"
+                  ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
               }`}
             >
               <FaCode size={16} />
               <span>Desenvolvimento</span>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setStage("staging")}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 font-medium ${
+              variant={stage === "staging" ? "secondary" : "ghost"}
+              size="sm"
+              className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "staging"
-                  ? styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-200 text-gray-800"
-                    : "bg-gray-700 text-gray-200"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "text-gray-600 hover:bg-gray-100"
-                    : "text-gray-400 hover:bg-gray-700"
+                  ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
               }`}
             >
               <FaFlask size={16} />
               <span>Homologação</span>
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setStage("production")}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 font-medium ${
+              variant={stage === "production" ? "secondary" : "ghost"}
+              size="sm"
+              className={`h-9 rounded-full px-4 gap-2 ${
                 stage === "production"
-                  ? styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-200 text-gray-800"
-                    : "bg-gray-700 text-gray-200"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "text-gray-600 hover:bg-gray-100"
-                    : "text-gray-400 hover:bg-gray-700"
+                  ? "bg-card text-foreground border border-border hover:bg-muted/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
               }`}
             >
               <FaRocket size={16} />
               <span>Produção</span>
-            </button>
+            </Button>
           </>
         ) : null}
       </div>
       <PermissionGate permission="workflow-schema:write:create">
-        <button
+        <Button
           onClick={() => navigate("/workflows-schema/new")}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 font-medium ${
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-              : "bg-yellow-600 hover:bg-yellow-700 text-white"
-          }`}
+          size="sm"
+          className="h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           <FaPlus size={16} />
           <span>Assunto</span>
           <span className="text-sm opacity-75 ml-2">
             <SL
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "yellow.600"
-                  : "yellow.700"
-              }
+              bg="hsl(var(--primary))"
+              className="text-[hsl(var(--primary-foreground))]"
             >
               N
             </SL>
           </span>
-        </button>
+        </Button>
       </PermissionGate>
     </div>
   );
@@ -480,6 +416,8 @@ const StageSelectorButton = ({
 
 const WorkflowsList = ({
   filteredWorkflows,
+  isAuthenticated,
+  canCreateWorkflow,
   handleRequest,
   handEditWorkflows,
   handleDuplicate,
@@ -489,6 +427,8 @@ const WorkflowsList = ({
   setSelectedDescription,
 }: {
   filteredWorkflows: any[];
+  isAuthenticated: boolean;
+  canCreateWorkflow: boolean;
   handleRequest: (workflowId: string) => void;
   handEditWorkflows: (workflowId: string) => void;
   handleDuplicate: (workflowId: string) => Promise<void>;
@@ -496,7 +436,7 @@ const WorkflowsList = ({
   showEdit: boolean;
   styleContext: any;
   setSelectedDescription: (
-    desc: { text: string; label: string; id: string } | null
+    desc: { text: string; label: string; id: string } | null,
   ) => void;
 }) => {
   const [columns, setColumns] = useState(() => {
@@ -530,162 +470,132 @@ const WorkflowsList = ({
       }
     >
       {filteredWorkflows.map((workflow, index) => (
-        <div
+        <Card
           key={workflow.id}
-          className={`group p-4 rounded-lg border transition-all duration-200 ${
-            isGridView ? "hover:shadow-md" : "hover:bg-opacity-50"
-          } ${
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "border-gray-200 hover:border-yellow-400 hover:bg-gray-50"
-              : "border-gray-700 hover:border-yellow-500 hover:bg-gray-800"
-          }`}
-          style={{ backgroundColor: styleContext.state.backgroundColor }}
+          className={`group rounded-2xl border transition-all duration-200 ${
+            isGridView ? "hover:shadow-sm" : "hover:bg-opacity-50"
+          } border-border bg-card text-card-foreground hover:border-primary/60 hover:bg-muted/30`}
         >
-          <div
-            className={`flex ${
-              isGridView ? "flex-col h-full" : "space-x-4"
-            } justify-between`}
-          >
-            <div className="flex-grow">
-              <div className="flex items-center space-x-2 mb-2">
-                <h3
-                  className="font-medium text-lg"
-                  style={{ color: styleContext.state.textColor }}
-                >
-                  {workflow.label}
-                </h3>
-              </div>
-              <div className="relative">
-                <div
-                  className={`text-sm ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "text-gray-600"
-                      : "text-gray-400"
-                  }`}
-                >
-                  <div
-                    className={`${workflow.description.length > 100 ? "line-clamp-3" : ""}`}
-                    dangerouslySetInnerHTML={{
-                      __html: workflow.description,
-                    }}
-                  />
-                  {workflow.description.length > 100 && (
-                    <button
-                      onClick={() =>
-                        setSelectedDescription({
-                          text: workflow.description,
-                          label: workflow.label,
-                          id: workflow.id,
-                        })
-                      }
-                      className={`text-sm mt-1 ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "text-blue-600 hover:text-blue-700"
-                          : "text-blue-400 hover:text-blue-300"
-                      }`}
-                    >
-                      Ver mais
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+          <CardContent className="p-5">
             <div
               className={`flex ${
-                isGridView
-                  ? "flex-col space-y-3 mt-auto pt-4"
-                  : "items-center space-x-3"
-              }`}
+                isGridView ? "flex-col h-full" : "space-x-5"
+              } justify-between`}
             >
-              <PermissionGate permission="workflow:write:create">
-                <button
-                  onClick={() => handleRequest(workflow.id)}
-                  className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg transition-colors duration-200 font-medium min-w-[160px] justify-center ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                      : "bg-yellow-600 hover:bg-yellow-700 text-white"
-                  }`}
-                  title="Solicitar"
-                >
-                  <FaPlus size={18} />
-                  <span>Solicitar</span>
-                  <SL
-                    bg={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "yellow.600"
-                        : "yellow.700"
+              <div className="flex-grow">
+                <div className="flex items-center space-x-2 mb-3">
+                  <h3 className="text-md font-semibold leading-tight text-foreground">
+                    {workflow.label}
+                  </h3>
+                </div>
+                <div className="relative">
+                  <div className="text-sm text-muted-foreground">
+                    <div
+                      className={`text-sm leading-relaxed ${workflow.description.length > 100 ? "line-clamp-3" : ""}`}
+                      dangerouslySetInnerHTML={{
+                        __html: workflow.description,
+                      }}
+                    />
+                    {workflow.description.length > 100 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setSelectedDescription({
+                            text: workflow.description,
+                            label: workflow.label,
+                            id: workflow.id,
+                          })
+                        }
+                        className="h-auto px-0 py-0 text-xs mt-1 font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        Ver mais
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <CardFooter
+                className={`flex ${
+                  isGridView
+                    ? "flex-col space-y-2 mt-auto pt-4"
+                    : "items-center space-x-3"
+                }`}
+              >
+                {(canCreateWorkflow || !isAuthenticated) && (
+                  <Button
+                    onClick={() => handleRequest(workflow.id)}
+                    size="sm"
+                    className="h-9 rounded-full px-5 gap-2 min-w-[150px] bg-primary hover:bg-primary/90 text-primary-foreground"
+                    title={
+                      isAuthenticated ? "Solicitar" : "Entrar para solicitar"
                     }
                   >
-                    {`S+${index + 1}`}
-                  </SL>
-                </button>
-              </PermissionGate>
-              {showEdit && (
-                <div
-                  className={`flex ${
-                    isGridView ? "flex-col space-y-2" : "space-x-2"
-                  }`}
-                >
-                  <PermissionGate permission="workflow-schema:write:update">
-                    <button
-                      onClick={() => handEditWorkflows(workflow.id)}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "text-gray-600 hover:bg-gray-200"
-                          : "text-gray-400 hover:bg-gray-700"
-                      }`}
-                      title="Editar"
+                    <FaPlus size={18} />
+                    <span>Solicitar</span>
+                    <SL
+                      bg="hsl(var(--primary))"
+                      className="text-[hsl(var(--primary-foreground))]"
                     >
-                      <FaEdit size={18} />
-                      <span>Editar</span>
-                      <SL>{`E+${index + 1}`}</SL>
-                    </button>
-                  </PermissionGate>
-                  <PermissionGate permission="workflow-schema:write:copy">
-                    <button
-                      onClick={() => handleDuplicate(workflow.id)}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "text-gray-600 hover:bg-gray-200"
-                          : "text-gray-400 hover:bg-gray-700"
-                      }`}
-                      title="Duplicar"
-                    >
-                      <FaClone size={18} />
-                      <span>Duplicar</span>
-                      <SL>{`D+${index + 1}`}</SL>
-                    </button>
-                  </PermissionGate>
-                </div>
-              )}
+                      {`S+${index + 1}`}
+                    </SL>
+                  </Button>
+                )}
+                {showEdit && (
+                  <div
+                    className={`flex ${
+                      isGridView ? "flex-col space-y-2" : "space-x-2"
+                    }`}
+                  >
+                    <PermissionGate permission="workflow-schema:write:update">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handEditWorkflows(workflow.id)}
+                        className={`h-8 px-3 rounded-md gap-2 ${
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "text-gray-600 hover:bg-gray-200"
+                            : "text-gray-400 hover:bg-gray-700"
+                        }`}
+                        title="Editar"
+                      >
+                        <FaEdit size={18} />
+                        <span>Editar</span>
+                        <SL>{`E+${index + 1}`}</SL>
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate permission="workflow-schema:write:copy">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDuplicate(workflow.id)}
+                        className={`h-8 px-3 rounded-md gap-2 ${
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "text-gray-600 hover:bg-gray-200"
+                            : "text-gray-400 hover:bg-gray-700"
+                        }`}
+                        title="Duplicar"
+                      >
+                        <FaClone size={18} />
+                        <span>Duplicar</span>
+                        <SL>{`D+${index + 1}`}</SL>
+                      </Button>
+                    </PermissionGate>
+                  </div>
+                )}
+              </CardFooter>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
       {filteredWorkflows.length === 0 && (
         <div className="flex flex-col items-center justify-center text-center">
-          <FaSearch
-            size={48}
-            className={`mb-4 opacity-50 ${
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "text-gray-400"
-                : "text-gray-500"
-            }`}
-          />
-          <p
-            className="text-xl font-medium mb-2"
-            style={{ color: styleContext.state.textColor }}
-          >
+          <FaSearch size={48} className="mb-4 text-muted-foreground/60" />
+          <p className="text-xl font-medium mb-2 text-foreground">
             Nenhum assunto encontrado
           </p>
-          <p
-            className={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "text-sm text-gray-500"
-                : "text-sm text-gray-400"
-            }
-          >
-            Tente ajustar sua busca ou criar um novo assunto
+          <p className="text-sm text-muted-foreground">
+            Tente ajustar sua pesquisa ou criar um novo assunto
           </p>
         </div>
       )}
@@ -710,21 +620,20 @@ const ViewButton = ({
 }) => {
   return (
     <div className="flex items-center space-x-2">
-      <button
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
         title={title}
         onClick={onClick}
-        className={`p-2 rounded transition-all duration-200 ${
+        className={`h-8 w-8 transition-all duration-200 ${
           active
-            ? styleContext.state.buttonHoverColorWeight === "200"
-              ? "bg-white text-yellow-600 shadow-sm"
-              : "bg-gray-700 text-yellow-400 shadow-sm"
-            : styleContext.state.buttonHoverColorWeight === "200"
-              ? "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
-              : "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
+            ? "bg-card text-primary border border-border shadow-sm"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
         }`}
       >
         {icon}
-      </button>
+      </Button>
       <SL>{shortcut}</SL>
     </div>
   );
@@ -740,17 +649,11 @@ const ViewButtons = ({
   styleContext: any;
 }) => {
   return (
-    <div className="flex items-center space-x-3.5">
-      <div
-        className={`flex items-center space-x-2 p-1.5 rounded-lg transition-colors duration-150 ${
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "bg-gray-100"
-            : "bg-gray-800"
-        }`}
-      >
+    <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1 p-1 rounded-lg border border-border bg-muted/60 transition-colors duration-150">
         <ViewButton
           active={isGridView}
-          icon={<BsFillGridFill size={24} />}
+          icon={<BsFillGridFill size={18} />}
           onClick={() => setView(false)}
           title="Visualização em grade"
           shortcut="G"
@@ -758,7 +661,7 @@ const ViewButtons = ({
         />
         <ViewButton
           active={!isGridView}
-          icon={<FaThList size={24} />}
+          icon={<FaThList size={18} />}
           onClick={() => setView(true)}
           title="Visualização em lista"
           shortcut="T"

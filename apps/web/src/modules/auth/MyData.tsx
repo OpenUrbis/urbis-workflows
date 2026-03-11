@@ -1,5 +1,5 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
-import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
 import { FaSave } from "react-icons/fa";
 import { BlockOptions, FieldTypeEnum, IField } from "@open-urbis/types";
 import { SL } from "../../components/ShortcutLabel";
@@ -9,11 +9,15 @@ import { Field } from "../workflows-schema";
 import { ApiClient } from "../../api";
 import { UserProfileResponse } from "../../api/types/users.dto";
 import { Input, MaskedInput } from "../../components";
+import { Spinner } from "../../components";
+
+const FormControl = ({ children, ...props }: any) => <div {...props}>{children}</div>;
+const FormLabel = ({ children, ...props }: any) => <label {...props}>{children}</label>;
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
@@ -38,8 +42,7 @@ export function MyData(): JSX.Element {
         setEditProfile(data);
         setGeneral({ $user: data });
       } catch (error) {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+        console.error("Failed to fetch profile:", error);
       } finally {
         setIsLoading(false);
       }
@@ -127,15 +130,16 @@ export function MyData(): JSX.Element {
     <div className="relative min-h-[80vh]">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center pt-10 space-y-4">
-          <Spinner
-            size="xl"
-            color={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "yellow.500"
-                : "yellow.300"
-            }
-            thickness="3px"
-          />
+          <div
+            style={{
+              color:
+                styleContext.state.buttonHoverColorWeight === "200"
+                  ? "#eab308"
+                  : "#fde047",
+            }}
+          >
+            <Spinner size="xl" />
+          </div>
           <span style={{ color: styleContext.state.textColor }}>
             Salvando dados...
           </span>
@@ -205,14 +209,7 @@ export function MyData(): JSX.Element {
 
               {isLoadingConfig && (
                 <div className="flex justify-center items-center">
-                  <Spinner
-                    size="lg"
-                    color={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "yellow.500"
-                        : "yellow.300"
-                    }
-                  />
+                  <Spinner size="lg" />
                 </div>
               )}
               {config && (
@@ -241,11 +238,12 @@ export function MyData(): JSX.Element {
           <div className="fixed bottom-16 right-4 flex space-x-4">
             <button
               onClick={handleSave}
-              className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-yellow-600 hover:bg-yellow-700 text-white disabled:opacity-80"
+              className="px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-80"
               disabled={isLoading}
             >
               <FaSave size={14} />
-              <span>Salvar</span> <SL bg="yellow.600">S</SL>
+              <span>Salvar</span>{" "}
+              <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">S</SL>
             </button>
           </div>
         </>

@@ -1,17 +1,18 @@
 import React, { useContext } from "react";
-import {
-  Textarea as ChakraTextarea,
-  TextareaProps as ChakraTextareaProps,
-} from "@chakra-ui/react";
+import { Textarea as DSTextarea } from "@open-urbis/map-ui";
 import { StyleContext } from "../reducers/style.reducer";
 
-interface TextareaProps extends ChakraTextareaProps {
+interface TextareaProps
+  extends Omit<React.ComponentProps<typeof DSTextarea>, "size"> {
   readOnly?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
+  size?: "sm" | "md" | "lg" | string;
+  [key: string]: any;
 }
 
 export const Textarea: React.FC<TextareaProps> = (props) => {
+  const { size, className, ...rest } = props;
   const styleContext = useContext(StyleContext);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -21,42 +22,21 @@ export const Textarea: React.FC<TextareaProps> = (props) => {
   };
 
   return (
-    <ChakraTextarea
-      {...props}
+    <DSTextarea
+      {...rest}
+      className={`${className ?? ""} ${
+        size === "sm" ? "min-h-[90px]" : size === "md" ? "min-h-[110px]" : "min-h-[120px]"
+      } ${props.readOnly || props.disabled ? "cursor-not-allowed" : ""}`}
       readOnly={props.readOnly}
       disabled={props.disabled}
       onKeyDown={props.readOnly ? undefined : handleKeyDown}
-      // Focus management using a delayed approach to prevent scroll jumping
-      // and ensure the component is fully rendered before focusing.
-      // The delay of 0ms still moves the focus call to the next event loop tick,
-      // which is enough to avoid focus-related issues.
       style={{
         backgroundColor:
           styleContext.state.buttonHoverColorWeight === "200"
             ? "#fafafa"
             : "#2D3748",
         color: styleContext.state.textColor,
-        borderColor:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.200"
-            : "gray.600",
         ...props.style,
-      }}
-      _hover={{
-        borderColor:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.300"
-            : "gray.500",
-      }}
-      _focus={{
-        borderColor:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "blue.500"
-            : "blue.300",
-        boxShadow:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "0 0 0 1px var(--chakra-colors-blue-500)"
-            : "0 0 0 1px var(--chakra-colors-blue-300)",
       }}
       ref={(textarea) => {
         if (textarea && props.autoFocus) {

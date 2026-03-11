@@ -9,7 +9,7 @@ export type FieldParagraphProps = {
 export const Paragraph: React.FC<FieldParagraphProps> = memo(({ options }) => {
   return (
     <p
-      className="font-normal"
+      className="text-sm font-normal"
       dangerouslySetInnerHTML={{ __html: options.html ?? "" }}
     ></p>
   );

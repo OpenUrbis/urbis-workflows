@@ -6,7 +6,14 @@ import {
   ActivityTypeEnum,
   SignatureConfig,
 } from "../api/types/schema";
-import { UseToastOptions } from "@chakra-ui/react";
+
+type ToastOptions = {
+  status?: "success" | "error" | "info" | "warning";
+  title?: string;
+  description?: string;
+  duration?: number;
+  position?: string;
+};
 
 type SnackbarInstance = {
   success: (description: string) => void;
@@ -15,7 +22,7 @@ type SnackbarInstance = {
   warning: (description: string) => void;
   invalidForm: () => void;
   unexpectedError: () => void;
-  onlyToast: (params: UseToastOptions) => void;
+  onlyToast: (params: ToastOptions) => void;
 };
 
 export const loadCodeModules = async (

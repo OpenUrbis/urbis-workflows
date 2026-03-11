@@ -1,24 +1,6 @@
+import { getAccessToken } from "../../auth/token";
+import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import {
-  Spinner,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  useDisclosure,
-  Tooltip,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  IconButton,
-} from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   FaPlus,
@@ -38,7 +20,34 @@ import {
   FaCog,
 } from "react-icons/fa";
 import { IFormContext } from "@open-urbis/types";
-import { Input, Select, SL } from "../../components";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@open-urbis/map-ui";
+import {
+  Button,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  IconButton,
+  Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  SideDrawer,
+  SL,
+  Spinner,
+  Tooltip,
+} from "../../components";
 import EditableHeader from "../../components/EditableHeader";
 import { useSnackbar } from "../../hooks/snackbar";
 import {
@@ -72,6 +81,7 @@ import { WorkflowConstants } from "./configs/WorkflowConstants";
 import { WorkflowLibrary } from "./configs/WorkflowLibrary";
 import { WorkflowDependencies } from "./configs/WorkflowDependencies";
 import { WorkflowOutgoingDependencies } from "./configs/WorkflowOutgoingDependencies";
+import { Integrations } from "./components/Integrations";
 import {
   loadCodeModules,
   loadConstantVariables,
@@ -80,12 +90,11 @@ import {
 import { ActivityDependenciesSelector } from "./components/ActivityDependenciesSelector";
 import { DependencyGraphVisualization } from "./components/DependencyGraphVisualization";
 import { PermissionsSelector } from "./components/PermissionsSelector";
-import SideDrawer from "../../components/SideDrawer";
 
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 
@@ -126,7 +135,7 @@ const calculateReverseVersionNumber = (
   index: number,
   total: number,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): number => {
   const reversedIndex = total - index - 1;
   return pageSize * (page - 1) + (reversedIndex + 1);
@@ -198,45 +207,34 @@ const tabConfig = [
     label: "Fluxos Subsequentes",
     shortcut: "S",
   },
+  {
+    id: "integrations",
+    icon: <FaCog className="text-orange-500" />,
+    label: "Integrações SEI",
+    shortcut: "I",
+  },
 ];
 
 const ActivityMenuButton: React.FC<{
   onAddActivity: (type: ActivityTypeEnum) => void;
   buttonClassName?: string;
-  styleContext: any;
-}> = ({ onAddActivity, buttonClassName, styleContext }) => {
+}> = ({ onAddActivity, buttonClassName }) => {
   return (
-    <Menu>
-      <MenuButton
-        as="button"
-        className={`px-6 py-2.5 rounded-lg flex items-center justify-center ${
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "bg-blue-500 hover:bg-blue-600 text-white"
-            : "bg-blue-800 hover:bg-blue-700 text-blue-100"
-        } ${buttonClassName || ""}`}
-      >
-        <div className="flex items-center">
-          <FaPlus size={14} className="mr-2" />
-          <span>Atividade</span>
-        </div>
-      </MenuButton>
-      <MenuList
-        zIndex={"overlay"}
-        bg={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "white"
-            : "gray.800"
-        }
-        maxHeight="300px"
-        overflowY="auto"
-        boxShadow="lg"
-        border="1px solid"
-        borderColor={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.200"
-            : "gray.600"
-        }
-        py={2}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={`px-6 py-2.5 rounded-lg flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white transition-colors ${buttonClassName || ""}`}
+        >
+          <div className="flex items-center">
+            <FaPlus size={14} className="mr-2" />
+            <span>Atividade</span>
+          </div>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="max-h-[300px] overflow-y-auto min-w-[200px]"
+        align="start"
       >
         {[
           {
@@ -260,32 +258,17 @@ const ActivityMenuButton: React.FC<{
             icon: <FaFileAlt className="text-purple-500" />,
           },
         ].map((item) => (
-          <MenuItem
+          <DropdownMenuItem
             key={item.type}
-            onClick={() => onAddActivity(item.type)}
+            onSelect={() => onAddActivity(item.type)}
             className="flex items-center space-x-2"
-            bg={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "white"
-                : "gray.800"
-            }
-            _hover={{
-              bg:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "gray.100"
-                  : "gray.700",
-            }}
-            px={4}
-            py={2}
           >
             {item.icon}
-            <span style={{ color: styleContext.state.textColor }}>
-              {item.label}
-            </span>
-          </MenuItem>
+            <span>{item.label}</span>
+          </DropdownMenuItem>
         ))}
-      </MenuList>
-    </Menu>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
@@ -306,7 +289,8 @@ export function WorkflowSchemaEditor(): JSX.Element {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [context, setContext] = useState<any>({});
   const [valid, setValid] = useState<any>({});
-  const { isOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+  const onClose = () => setIsOpen(false);
   const [conflictData, setConflictData] = useState<{
     localData: WorkflowSchema;
     backendData: WorkflowSchema;
@@ -325,11 +309,14 @@ export function WorkflowSchemaEditor(): JSX.Element {
     $variables: {},
   });
   const [showDependencyGraph, setShowDependencyGraph] = useState(false);
+  const [seiLegalHypothesis, setSeiLegalHypothesis] = useState<
+    { id: string; description: string }[]
+  >([]);
   const [showConfigDrawer, setShowConfigDrawer] = useState(false);
   // Create a stable ID for the config drawer
   const configDrawerId = React.useMemo(
     () => `workflow-config-${id || "new"}`,
-    [id]
+    [id],
   );
 
   const fetchVersions = async (workflowId: string) => {
@@ -345,12 +332,12 @@ export function WorkflowSchemaEditor(): JSX.Element {
             index,
             versionsResponse.pagination.total,
             versionsResponse.pagination.page,
-            versionsResponse.pagination.pageSize
+            versionsResponse.pagination.pageSize,
           ),
           commitMessage: version.commit,
           timestamp: new Date(version.createdAt).toISOString(),
           createdBy: version.createdBy.name,
-        })
+        }),
       );
 
       setVersionInfos(versionInfos);
@@ -359,7 +346,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
           0,
           versionsResponse.pagination.total,
           versionsResponse.pagination.page,
-          versionsResponse.pagination.pageSize
+          versionsResponse.pagination.pageSize,
         ),
       });
     } catch (error) {
@@ -384,7 +371,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   const checkForConflicts = async (
     backendData: WorkflowSchema,
-    storageId: string
+    storageId: string,
   ) => {
     const savedStateStr = localStorage.getItem(getTempWorkflowKey(storageId));
     const lastUpdateStr = localStorage.getItem(getLastUpdateKey(storageId));
@@ -417,15 +404,15 @@ export function WorkflowSchemaEditor(): JSX.Element {
       const variables = await loadConstantVariables(
         workflow.schema?.constants ?? [],
         apiClient,
-        snackbar
+        snackbar,
       );
       const modules = await loadCodeModules(
         workflow.schema?.code ?? [],
         apiClient,
-        snackbar
+        snackbar,
       );
       const signatureMetadata = loadSignatureMetadata(
-        workflow.schema?.activities ?? []
+        workflow.schema?.activities ?? [],
       );
 
       setEditorGeneral({
@@ -463,7 +450,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     try {
       const workflow = await apiClient.workflowsSchema.findOneVersion(
         workflowSchema.id,
-        versionInfo.id
+        versionInfo.id,
       );
       setWorkflowSchema({
         ...workflow,
@@ -553,7 +540,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
       };
       localStorage.setItem(
         getTempWorkflowKey(storageId),
-        JSON.stringify(newState)
+        JSON.stringify(newState),
       );
       localStorage.setItem(getLastUpdateKey(storageId), Date.now().toString());
       setIsLocalDraft(true);
@@ -617,7 +604,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!workflowSchema || !workflowSchema.schema?.activities) return;
 
     const confirmDelete = await confirmation(
-      "Tem certeza que deseja remover esta atividade?"
+      "Tem certeza que deseja remover esta atividade?",
     );
 
     if (!confirmDelete) return;
@@ -640,7 +627,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   const handleUpdateActivity = (
     index: number,
-    updates: Partial<ActivityTemplate>
+    updates: Partial<ActivityTemplate>,
   ) => {
     if (!workflowSchema || !workflowSchema.schema?.activities) return;
 
@@ -665,7 +652,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
       users: { id: string; name: string; access: "read" | "write" }[];
       roles: { id: string; name: string; access: "read" | "write" }[];
       groups: { id: string; name: string; access: "read" | "write" }[];
-    }
+    },
   ) => {
     if (!workflowSchema || !workflowSchema.schema?.activities) return;
 
@@ -686,7 +673,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
-    index: number
+    index: number,
   ) => {
     setDraggingIndex(index);
     e.dataTransfer.effectAllowed = "move";
@@ -694,7 +681,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   const handleDragOver = (
     e: React.DragEvent<HTMLDivElement>,
-    index: number
+    index: number,
   ) => {
     e.preventDefault();
     if (!workflowSchema?.schema?.activities || draggingIndex === null) return;
@@ -734,7 +721,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!workflowSchema || !id || id === "new") return;
 
     const response = await confirmation(
-      "Tem certeza que deseja remover este assunto?"
+      "Tem certeza que deseja remover este assunto?",
     );
 
     if (!response) {
@@ -762,7 +749,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
         const message = await prompt(
           id === "new"
             ? "Insira uma mensagem descrevendo o novo assunto"
-            : "Insira a mensagem de alteração da versão"
+            : "Insira a mensagem de alteração da versão",
         );
 
         if (!message?.trim()) {
@@ -790,6 +777,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
             : {
                 accessLevel: PrivacyLevelEnum.PUBLIC,
               },
+        integrations: workflowSchema.schema.integrations ?? {},
       };
 
       if (id !== "new") {
@@ -822,7 +810,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!id) return;
 
     const response = await confirmation(
-      "Tem certeza que deseja descartar todas as alterações locais não salvas?"
+      "Tem certeza que deseja descartar todas as alterações locais não salvas?",
     );
 
     if (!response) {
@@ -866,7 +854,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!id || id === "new") return;
 
     const commitMessage = await prompt(
-      "Insira a mensagem de publicação em homologação:"
+      "Insira a mensagem de publicação em homologação:",
     );
     if (!commitMessage?.trim()) return;
 
@@ -894,7 +882,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!id || id === "new") return;
 
     const commitMessage = await prompt(
-      "Insira a mensagem de publicação em produção:"
+      "Insira a mensagem de publicação em produção:",
     );
     if (!commitMessage?.trim()) return;
 
@@ -940,22 +928,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
     });
   };
 
-  // Add function to handle workflow access level changes
-  const handleUpdateWorkflowAccessLevel = (accessLevel: PrivacyLevelEnum) => {
-    if (!workflowSchema) return;
-
-    updateSubject({
-      ...workflowSchema,
-      schema: {
-        ...workflowSchema.schema,
-        control: {
-          ...workflowSchema.schema?.control,
-          accessLevel,
-        },
-      },
-    });
-  };
-
   useEffect(() => {
     fetchSubject();
   }, []);
@@ -966,6 +938,38 @@ export function WorkflowSchemaEditor(): JSX.Element {
       $data: context,
     }));
   }, [context]);
+
+  useEffect(() => {
+    setEditorGeneral((prev) => ({
+      ...prev,
+      $variables: {
+        ...prev.$variables,
+        seiLegalHypothesis,
+      },
+    }));
+  }, [seiLegalHypothesis]);
+
+  useEffect(() => {
+    const seiConfig = workflowSchema?.schema?.integrations?.sei;
+    if (seiConfig?.IdUnidade) {
+      axios
+        .get(
+          `${import.meta.env.VITE_BACK_END_API}/integrations/sei/legal-hypothesis`,
+          {
+            params: { IdUnidade: seiConfig.IdUnidade },
+            headers: { authorization: `Bearer ${getAccessToken()}` },
+          },
+        )
+        .then((response) => {
+          setSeiLegalHypothesis(
+            Array.isArray(response.data) ? response.data : [],
+          );
+        })
+        .catch(() => {
+          // silently ignore - the Integrations page will show its own error
+        });
+    }
+  }, [workflowSchema?.schema?.integrations?.sei?.IdUnidade]);
 
   // Add a new useEffect to refresh secondary data when switching to the activities tab
   useEffect(() => {
@@ -998,6 +1002,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
         S: withNoModifiers(() => setSelectedTab("outgoing")),
         A: withNoModifiers(() => setSelectedTab("variables")),
         Z: withNoModifiers(() => setSelectedTab("functions")),
+        I: withNoModifiers(() => setSelectedTab("integrations")),
         M: () => {
           if (!loading) {
             handleSave();
@@ -1009,7 +1014,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     return () => {
       hotkeyContext.dispatch({
         type: "UNSET_HOTKEY",
-        delete: ["Q", "W", "E", "A", "Z", "M"],
+        delete: ["Q", "W", "E", "A", "Z", "I", "M"],
       });
     };
   }, [loading, workflowSchema, selectedTab]);
@@ -1107,9 +1112,9 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   return (
     <>
-      <div className="flex flex-col space-y-6 mb-24 px-6">
+      <div className="flex flex-col space-y-6 mb-24 px-6 pt-4 md:pt-6">
         {loading ? (
-          <div className="pt-10 text-center">
+          <div className="flex min-h-[60vh] items-center justify-center">
             <Spinner size="xl" />
           </div>
         ) : (
@@ -1148,7 +1153,9 @@ export function WorkflowSchemaEditor(): JSX.Element {
                       >
                         <FaExclamationTriangle className="mr-2" size={14} />
                         <Tooltip label="Este rascunho está salvo apenas neste dispositivo e navegador. As alterações serão perdidas se você limpar os dados do navegador ou acessar de outro dispositivo. Use o botão Salvar para enviar as alterações ao servidor ou Descartar para remover as alterações locais.">
-                          <span>Rascunho salvo apenas neste dispositivo</span>
+                          <span className="text-xs">
+                            Rascunho salvo apenas neste dispositivo
+                          </span>
                         </Tooltip>
                       </div>
                       <button
@@ -1160,28 +1167,20 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         }`}
                       >
                         <FaTrash size={14} />
-                        <span>Descartar Rascunho</span>
+                        <span className="text-xs">Descartar Rascunho</span>
                       </button>
                     </div>
                   )}
                   <div className="mb-4">
                     <EditableHeader
-                      value={workflowSchema.label ?? ""}
+                      value={workflowSchema.label}
                       onTextChange={(text) => {
                         updateSubject({ ...workflowSchema, label: text });
                       }}
-                      className="text-xl md:text-3xl font-medium text-center"
+                      className="text-lg md:text-xl font-semibold text-center max-h-48 overflow-y-auto"
                       style={{ color: styleContext.state.textColor }}
                     />
                   </div>
-                  <EditableHeader
-                    html={workflowSchema.description ?? ""}
-                    onTextChange={(text) => {
-                      updateSubject({ ...workflowSchema, description: text });
-                    }}
-                    className="mb-2 text-center max-h-48 overflow-y-auto"
-                    style={{ color: styleContext.state.textColor }}
-                  />
                 </div>
                 {/* Version menu */}
                 <div className="w-48 flex-shrink-0">
@@ -1198,10 +1197,10 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 </div>
               </div>
               <div className="flex">
-                <div className="w-1/4 border-r pr-4">
+                <div className="w-1/4 border-r pr-4 text-sm">
                   <div className="mb-6">
                     <h2
-                      className="text-xl font-bold mb-4"
+                      className="text-base font-semibold mb-3"
                       style={{ color: styleContext.state.textColor }}
                     >
                       Configuração
@@ -1210,7 +1209,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                       {tabConfig.map((tab) => (
                         <div
                           key={tab.id}
-                          className={`p-3 border rounded cursor-pointer transition-colors duration-150 ${
+                          className={`p-3 border rounded-2xl cursor-pointer transition-colors duration-150 ${
                             selectedTab === tab.id
                               ? styleContext.state.buttonHoverColorWeight ===
                                 "200"
@@ -1315,7 +1314,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                     <>
                       <div className="flex justify-between items-center mb-4">
                         <h2
-                          className="text-xl font-bold"
+                          className="text-base font-semibold"
                           style={{ color: styleContext.state.textColor }}
                         >
                           Atividades
@@ -1348,7 +1347,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                               onDragStart={(e) => handleDragStart(e, index)}
                               onDragOver={(e) => handleDragOver(e, index)}
                               onDrop={handleDrop}
-                              className={`p-3 border rounded cursor-pointer transition-colors duration-150 ${
+                              className={`p-3 border rounded-2xl cursor-pointer transition-colors duration-150 ${
                                 selectedActivityIndex === index
                                   ? styleContext.state
                                       .buttonHoverColorWeight === "200"
@@ -1397,7 +1396,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                                   <div className="text-xl">
                                     <Tooltip
                                       label={getActivityTypeLabel(
-                                        activity.type
+                                        activity.type,
                                       )}
                                     >
                                       <span>
@@ -1425,7 +1424,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                                     icon={<FaTrash />}
                                     size="sm"
                                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={(e) => {
+                                    onClick={(e: React.MouseEvent) => {
                                       e.stopPropagation();
                                       handleRemoveActivity(index);
                                     }}
@@ -1442,14 +1441,13 @@ export function WorkflowSchemaEditor(): JSX.Element {
                                 </div>
                               </div>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                       <div className="mt-4 space-y-2">
                         <ActivityMenuButton
                           onAddActivity={handleAddActivity}
                           buttonClassName="w-full"
-                          styleContext={styleContext}
                         />
                       </div>
                     </>
@@ -1501,7 +1499,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           <Input
                             value={selectedActivity.namespace}
                             onChange={(
-                              e: React.ChangeEvent<HTMLInputElement>
+                              e: React.ChangeEvent<HTMLInputElement>,
                             ) =>
                               handleUpdateActivity(selectedActivityIndex, {
                                 namespace: e.target.value,
@@ -1512,42 +1510,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           />
                           <FormHelperText>
                             Identificador único para esta atividade
-                          </FormHelperText>
-                        </FormControl>
-
-                        <FormControl>
-                          <FormLabel>Nível de Acesso</FormLabel>
-                          <Select
-                            value={selectedActivity.accessLevel}
-                            onChange={(
-                              e: React.ChangeEvent<HTMLSelectElement>
-                            ) =>
-                              handleUpdateActivity(selectedActivityIndex, {
-                                accessLevel: Number(
-                                  e.target.value
-                                ) as PrivacyLevelEnum,
-                              })
-                            }
-                            size="lg"
-                          >
-                            <option value={PrivacyLevelEnum.PUBLIC}>
-                              Público
-                            </option>
-                            <option value={PrivacyLevelEnum.REGISTERED}>
-                              Registrado
-                            </option>
-                            <option value={PrivacyLevelEnum.RESTRICTED}>
-                              Restrito
-                            </option>
-                            <option value={PrivacyLevelEnum.CONFIDENTIAL}>
-                              Confidencial
-                            </option>
-                            <option value={PrivacyLevelEnum.ANONYMIZED}>
-                              Anônimo
-                            </option>
-                          </Select>
-                          <FormHelperText>
-                            Define quem pode acessar esta atividade
                           </FormHelperText>
                         </FormControl>
                       </div>
@@ -1571,7 +1533,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           onChange={(permissions) =>
                             handleUpdatePermissions(
                               selectedActivityIndex,
-                              permissions
+                              permissions,
                             )
                           }
                           styleContext={styleContext}
@@ -1582,28 +1544,48 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
                       {renderActivityEditor(
                         selectedActivity,
-                        selectedActivityIndex
+                        selectedActivityIndex,
                       )}
                     </div>
                   ) : selectedTab === "incoming" ? (
-                    <div className="w-full space-y-8">
-                      <WorkflowDependencies
-                        incoming={workflowSchema.schema.incoming || []}
-                        general={editorGeneral}
-                        currentWorkflowId={id || ""}
-                        onChange={(newIncoming: Incoming[]) =>
-                          updateSubject({
-                            ...workflowSchema,
-                            schema: {
-                              ...workflowSchema.schema,
-                              incoming: newIncoming,
-                            },
-                          })
-                        }
-                      />
+                    <div
+                      className="w-full rounded-2xl border p-4 md:p-6"
+                      style={{
+                        backgroundColor: styleContext.state.backgroundColor,
+                        borderColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    >
+                      <div className="space-y-8">
+                        <WorkflowDependencies
+                          incoming={workflowSchema.schema.incoming || []}
+                          general={editorGeneral}
+                          currentWorkflowId={id || ""}
+                          onChange={(newIncoming: Incoming[]) =>
+                            updateSubject({
+                              ...workflowSchema,
+                              schema: {
+                                ...workflowSchema.schema,
+                                incoming: newIncoming,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
                   ) : selectedTab === "outgoing" ? (
-                    <div className="w-full">
+                    <div
+                      className="w-full rounded-2xl border p-4 md:p-6"
+                      style={{
+                        backgroundColor: styleContext.state.backgroundColor,
+                        borderColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    >
                       <WorkflowOutgoingDependencies
                         outgoing={workflowSchema.schema.outgoing || []}
                         general={editorGeneral}
@@ -1621,7 +1603,16 @@ export function WorkflowSchemaEditor(): JSX.Element {
                       />
                     </div>
                   ) : selectedTab === "variables" ? (
-                    <div className="w-full">
+                    <div
+                      className="w-full rounded-2xl border p-4 md:p-6"
+                      style={{
+                        backgroundColor: styleContext.state.backgroundColor,
+                        borderColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    >
                       <WorkflowConstants
                         constants={workflowSchema.schema.constants}
                         onConstantsChange={(newConstants) =>
@@ -1636,7 +1627,16 @@ export function WorkflowSchemaEditor(): JSX.Element {
                       />
                     </div>
                   ) : selectedTab === "functions" ? (
-                    <div className="w-full">
+                    <div
+                      className="w-full rounded-2xl border p-4 md:p-6"
+                      style={{
+                        backgroundColor: styleContext.state.backgroundColor,
+                        borderColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    >
                       <WorkflowLibrary
                         codeModules={workflowSchema.schema.code}
                         onCodeModulesChange={(newModules) =>
@@ -1650,16 +1650,51 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         }
                       />
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-64">
-                      <FaWpforms size={48} className="text-gray-400 mb-4" />
-                      <p className="text-gray-500 text-lg mb-6">
-                        Crie uma nova atividade para começar a editar
-                      </p>
-                      <ActivityMenuButton
-                        onAddActivity={handleAddActivity}
-                        styleContext={styleContext}
+                  ) : selectedTab === "integrations" ? (
+                    <div
+                      className="w-full rounded-2xl border p-4 md:p-6"
+                      style={{
+                        backgroundColor: styleContext.state.backgroundColor,
+                        borderColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    >
+                      <Integrations
+                        data={workflowSchema.schema.integrations?.sei}
+                        onChange={(seiData) =>
+                          updateSubject({
+                            ...workflowSchema,
+                            schema: {
+                              ...workflowSchema.schema,
+                              integrations: {
+                                ...workflowSchema.schema.integrations,
+                                sei: seiData,
+                              },
+                            },
+                          })
+                        }
                       />
+                    </div>
+                  ) : (
+                    <div
+                      className="w-full rounded-2xl border p-4 md:p-6"
+                      style={{
+                        backgroundColor: styleContext.state.backgroundColor,
+                        borderColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    >
+                      <div className="flex flex-col items-center justify-center h-64">
+                        <FaWpforms size={48} className="text-gray-400 mb-4" />
+                        <p className="text-gray-500 text-lg mb-6">
+                          Crie uma nova atividade para começar a editar
+                        </p>
+                        <ActivityMenuButton onAddActivity={handleAddActivity} />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1684,33 +1719,25 @@ export function WorkflowSchemaEditor(): JSX.Element {
                     </button>
                     <div className="flex">
                       <button
-                        className="bg-yellow-600 hover:bg-yellow-700 text-white pl-6 pr-2 py-2.5 rounded-l-lg shadow-lg flex items-center space-x-2"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground pl-6 pr-2 py-2.5 rounded-l-lg shadow-lg flex items-center space-x-2"
                         onClick={() => handleSave()}
                         disabled={loading}
-                        style={{
-                          backgroundColor:
-                            styleContext.state.backgroundColor === "#000000"
-                              ? "#d97706"
-                              : undefined,
-                          color: "#ffffff",
-                        }}
                       >
                         <FaSave size={14} />
                         <span>
                           {isLocalDraft ? "Salvar Rascunho" : "Salvar"}
                         </span>{" "}
-                        <SL bg="yellow.600">M</SL>
+                        <SL
+                          bg="primary"
+                          className="text-[hsl(var(--primary-foreground))]"
+                        >
+                          M
+                        </SL>
                       </button>
                       <Menu>
                         <MenuButton
                           as="button"
-                          className="px-4 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-r-lg flex items-center justify-center space-x-2"
-                          style={{
-                            backgroundColor:
-                              styleContext.state.backgroundColor === "#000000"
-                                ? "#d97706"
-                                : undefined,
-                          }}
+                          className="px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-r-lg flex items-center justify-center space-x-2"
                         >
                           <div className="flex items-center space-x-2">
                             <FaChevronDown size={12} />
@@ -1785,19 +1812,18 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 )}
                 {id === "new" && (
                   <button
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2"
                     onClick={() => handleSave()}
                     disabled={loading}
-                    style={{
-                      backgroundColor:
-                        styleContext.state.backgroundColor === "#000000"
-                          ? "#d97706"
-                          : undefined,
-                      color: "#ffffff",
-                    }}
                   >
                     <FaSave size={14} />
-                    <span>Criar Assunto</span> <SL bg="yellow.600">M</SL>
+                    <span>Criar Assunto</span>{" "}
+                    <SL
+                      bg="primary"
+                      className="text-[hsl(var(--primary-foreground))]"
+                    >
+                      M
+                    </SL>
                   </button>
                 )}
               </div>
@@ -1897,34 +1923,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
               Configurações de Acesso
             </h3>
 
-            <FormControl className="mb-6">
-              <FormLabel>Nível de Acesso Global</FormLabel>
-              <Select
-                value={
-                  workflowSchema?.schema?.control?.accessLevel ??
-                  PrivacyLevelEnum.PUBLIC
-                }
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  handleUpdateWorkflowAccessLevel(
-                    Number(e.target.value) as PrivacyLevelEnum
-                  )
-                }
-                size="lg"
-              >
-                <option value={PrivacyLevelEnum.PUBLIC}>Público</option>
-                <option value={PrivacyLevelEnum.REGISTERED}>Registrado</option>
-                <option value={PrivacyLevelEnum.RESTRICTED}>Restrito</option>
-                <option value={PrivacyLevelEnum.CONFIDENTIAL}>
-                  Confidencial
-                </option>
-                <option value={PrivacyLevelEnum.ANONYMIZED}>Anônimo</option>
-              </Select>
-              <FormHelperText>
-                Define o nível de acesso padrão para todo o fluxo de trabalho
-              </FormHelperText>
-            </FormControl>
-
-            <div className="mt-8">
+            <div>
               <PermissionsSelector
                 showBorder={false}
                 permissions={workflowSchema?.schema?.control?.permissions}

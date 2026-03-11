@@ -1,20 +1,14 @@
+import { getAccessToken } from "../../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
-import {
-  Spinner,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Button,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@chakra-ui/react";
 import { FaPlus, FaCode, FaGlobe } from "react-icons/fa";
+import {
+  Button as DSButton,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@open-urbis/map-ui";
 import { CodeModulesApiClient } from "../../../api/clients/code-modules.client";
 import { CodeModule } from "../../../api/types/schema";
 import { AddModule } from "../components/AddModule";
@@ -22,6 +16,14 @@ import { TreeList } from "../components/TreeList";
 import { StyleContext } from "../../../reducers/style.reducer";
 import { useSnackbar } from "../../../hooks/snackbar";
 import { CodeModuleEditor } from "./library/CodeModuleEditor";
+import {
+  Button,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Spinner,
+} from "../../../components/LegacyUi";
 import {
   HotkeyContext,
   withNoModifiers,
@@ -60,13 +62,13 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
   const [selectedModule, setSelectedModule] = useState<CodeModule | null>(null);
   const [modulesSearch, setModulesSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [isAddingLocal, setIsAddingLocal] = useState(false);
 
   const api = new CodeModulesApiClient({
     baseURL: import.meta.env.VITE_BACK_END_API || "",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${getAccessToken()}`,
     },
   });
 
@@ -145,7 +147,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
     };
 
     onCodeModulesChange([...codeModules, newModule]);
-    onClose();
+    setIsOpen(false);
   };
 
   const handleAddLocalModule = (localModule: any) => {
@@ -192,7 +194,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
 
   const handleCloseModal = () => {
     setGlobalSearch("");
-    onClose();
+    setIsOpen(false);
   };
 
   return (
@@ -208,7 +210,7 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
       >
         <div className="flex justify-between items-center mb-4">
           <h2
-            className="text-xl font-bold"
+            className="text-base font-semibold"
             style={{ color: styleContext.state.textColor }}
           >
             Módulos
@@ -219,13 +221,13 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
           <div className="flex flex-col items-center justify-center py-8 text-gray-500">
             <FaCode size={32} className="mb-4 opacity-50" />
             <p
-              className="text-sm text-center mb-2"
+              className="text-xs text-center mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhum módulo cadastrado
             </p>
             <p
-              className="text-xs text-center"
+              className="text-xs text-center opacity-80"
               style={{ color: styleContext.state.textColor }}
             >
               Adicione um módulo usando o botão abaixo
@@ -246,76 +248,50 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
         <div className="mt-4">
           <Menu>
             <MenuButton
-              as={Button}
-              leftIcon={<FaPlus />}
-              className="bg-yellow-600 hover:bg-yellow-700 w-full px-4 py-2.5 rounded flex items-center justify-center space-x-2"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#ca8a04"
-                  : "#854d0e"
-              }
-              color="#ffffff"
-              _hover={{
-                bg:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12",
-              }}
+              className="h-10 w-full rounded-xl px-4 text-sm font-medium shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <div className="flex items-center justify-center space-x-2">
+                <FaPlus size={14} />
                 <span>Módulo</span>
-                <SL bg="yellow.600">N</SL>
+                <SL bg="primary">N</SL>
               </div>
             </MenuButton>
             <MenuList
-              bg={
+              className={`min-w-[220px] border ${
                 styleContext.state.buttonHoverColorWeight === "200"
-                  ? "white"
-                  : "gray.800"
-              }
-              borderColor={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "gray.200"
-                  : "gray.600"
-              }
+                  ? "bg-white border-gray-200"
+                  : "bg-gray-800 border-gray-600"
+              }`}
             >
               <MenuItem
-                icon={<FaCode />}
-                onClick={onOpen}
-                bg={
+                onClick={() => setIsOpen(true)}
+                className={`cursor-pointer ${
                   styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.100"
-                      : "gray.700",
-                }}
+                    ? "hover:bg-gray-100"
+                    : "hover:bg-gray-700"
+                }`}
               >
-                <span style={{ color: styleContext.state.textColor }}>
-                  Importar Global
-                </span>
+                <div className="flex items-center gap-2">
+                  <FaCode />
+                  <span style={{ color: styleContext.state.textColor }}>
+                    Importar Global
+                  </span>
+                </div>
               </MenuItem>
               <MenuItem
-                icon={<FaCode />}
                 onClick={() => setIsAddingLocal(true)}
-                bg={
+                className={`cursor-pointer ${
                   styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "gray.100"
-                      : "gray.700",
-                }}
+                    ? "hover:bg-gray-100"
+                    : "hover:bg-gray-700"
+                }`}
               >
-                <span style={{ color: styleContext.state.textColor }}>
-                  Criar Local
-                </span>
+                <div className="flex items-center gap-2">
+                  <FaCode />
+                  <span style={{ color: styleContext.state.textColor }}>
+                    Criar Local
+                  </span>
+                </div>
               </MenuItem>
             </MenuList>
           </Menu>
@@ -340,89 +316,63 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <FaCode size={48} className="mb-4 opacity-50" />
             <p
-              className="text-xl font-medium mb-2"
+              className="text-base font-semibold mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhum módulo selecionado
             </p>
             <p
-              className="text-sm mb-6"
+              className="text-xs mb-4 opacity-80"
               style={{ color: styleContext.state.textColor }}
             >
               Selecione um módulo da lista ao lado ou crie um novo
             </p>
             <Menu>
               <MenuButton
-                as={Button}
-                leftIcon={<FaPlus />}
-                className="px-4 py-2.5 rounded flex items-center justify-center"
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e"
-                }
-                color="#ffffff"
-                _hover={{
-                  bg:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#a16207"
-                      : "#713f12",
-                }}
+                className="h-10 rounded-xl px-4 text-sm font-medium shadow-sm inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <div className="flex items-center justify-center space-x-2">
+                  <FaPlus size={14} />
                   <span>Módulo</span>
-                  <SL bg="yellow.600">N</SL>
+                  <SL bg="primary">N</SL>
                 </div>
               </MenuButton>
               <MenuList
-                bg={
+                className={`min-w-[220px] border ${
                   styleContext.state.buttonHoverColorWeight === "200"
-                    ? "white"
-                    : "gray.800"
-                }
-                borderColor={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.200"
-                    : "gray.600"
-                }
+                    ? "bg-white border-gray-200"
+                    : "bg-gray-800 border-gray-600"
+                }`}
               >
                 <MenuItem
-                  icon={<FaCode />}
-                  onClick={onOpen}
-                  bg={
+                  onClick={() => setIsOpen(true)}
+                  className={`cursor-pointer ${
                     styleContext.state.buttonHoverColorWeight === "200"
-                      ? "white"
-                      : "gray.800"
-                  }
-                  _hover={{
-                    bg:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.100"
-                        : "gray.700",
-                  }}
+                      ? "hover:bg-gray-100"
+                      : "hover:bg-gray-700"
+                  }`}
                 >
-                  <span style={{ color: styleContext.state.textColor }}>
-                    Importar Global
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <FaCode />
+                    <span style={{ color: styleContext.state.textColor }}>
+                      Importar Global
+                    </span>
+                  </div>
                 </MenuItem>
                 <MenuItem
-                  icon={<FaCode />}
                   onClick={() => setIsAddingLocal(true)}
-                  bg={
+                  className={`cursor-pointer ${
                     styleContext.state.buttonHoverColorWeight === "200"
-                      ? "white"
-                      : "gray.800"
-                  }
-                  _hover={{
-                    bg:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.100"
-                        : "gray.700",
-                  }}
+                      ? "hover:bg-gray-100"
+                      : "hover:bg-gray-700"
+                  }`}
                 >
-                  <span style={{ color: styleContext.state.textColor }}>
-                    Criar Local
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <FaCode />
+                    <span style={{ color: styleContext.state.textColor }}>
+                      Criar Local
+                    </span>
+                  </div>
                 </MenuItem>
               </MenuList>
             </Menu>
@@ -430,51 +380,57 @@ export const WorkflowLibrary: React.FC<LibraryProps> = ({
         )}
       </div>
 
-      <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
-        <ModalOverlay />
-        <ModalContent
-          bg={styleContext.state.backgroundColor}
-          borderColor={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.200"
-              : "gray.600"
-          }
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCloseModal();
+        }}
+      >
+        <DialogContent
+          className="sm:max-w-3xl"
+          style={{
+            backgroundColor: styleContext.state.backgroundColor,
+            borderColor:
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "#e5e7eb"
+                : "#4b5563",
+          }}
         >
-          <ModalHeader style={{ color: styleContext.state.textColor }}>
-            Importar módulo global
-          </ModalHeader>
-          <ModalBody>
+          <DialogHeader>
+            <DialogTitle asChild>
+              <span style={{ color: styleContext.state.textColor }}>
+                Importar módulo global
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div>
             <TreeList
               items={globalModules}
               search={globalSearch}
-              onClick={(module) => handleAddGlobalModule(module)}
+              onClick={handleAddGlobalModule}
               onSearchChange={setGlobalSearch}
               icon={FaGlobe}
               iconColor="green"
             />
-          </ModalBody>
-          <ModalFooter>
+          </div>
+
+          <DialogFooter>
             <Button
               onClick={handleCloseModal}
               style={{
                 backgroundColor:
                   styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
+                    ? "#f3f4f6"
+                    : "#1f2937",
                 color: styleContext.state.textColor,
-              }}
-              _hover={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#D1D5DB"
-                    : "#4B5563",
               }}
             >
               Cancelar
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

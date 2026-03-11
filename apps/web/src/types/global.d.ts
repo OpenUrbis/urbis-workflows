@@ -5,6 +5,7 @@ export interface ProtocolIntegrations {
     IdUnidade?: string;
     IdTipoProcedimento?: string;
     NivelAcesso?: 0 | 1 | 2;
+    IdHipoteseLegal?: string | number;
     CoverLetterIdSerie?: number;
     DocumentIdSerie?: number;
     PlateIdSerie?: number;

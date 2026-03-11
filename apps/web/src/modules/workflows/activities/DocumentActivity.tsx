@@ -1,5 +1,6 @@
+import { getAccessToken } from "../../../auth/token";
 import React, { useContext, useState, useEffect } from "react";
-import { Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components/LegacyUi";
 import {
   FaFileAlt,
   FaHistory,
@@ -31,7 +32,7 @@ import { StatusType } from "../components/StatusBadge";
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 

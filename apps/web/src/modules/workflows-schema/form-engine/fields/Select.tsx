@@ -1,7 +1,13 @@
 import { IField, IFormContext, SelectOptions } from "@open-urbis/types";
 import { useContext } from "react";
 import { FaCaretSquareDown } from "react-icons/fa";
-import { Select as SelectBase } from "../../../../components";
+import {
+  Select as DSSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@open-urbis/map-ui";
 import { StyleContext } from "../../../../reducers/style.reducer";
 
 export type FieldSelectProps = {
@@ -49,30 +55,42 @@ export const Select: React.FC<FieldSelectProps> = ({
   }
 
   return (
-    <SelectBase
-      placeholder={options?.placeholder}
-      size="lg"
-      onChange={(e) => {
-        // Convert back to original type before calling onChange
+    <DSSelect
+      value={value !== undefined && value !== null ? value.toString() : undefined}
+      onValueChange={(selectedValue) => {
         const originalTypeValue = options.items?.find(
-          (item) => item.value.toString() === e.target.value
+          (item) => item.value != null && item.value.toString() === selectedValue
         )?.value;
 
         if (originalTypeValue !== undefined && originalTypeValue !== null) {
           onChange(originalTypeValue);
         } else {
-          onChange(e.target.value);
+          onChange(selectedValue);
         }
       }}
-      className={`flex-grow ${isReadonly ? "cursor-not-allowed" : ""}`}
-      value={value}
       disabled={isReadonly}
     >
-      {options?.items?.map((item) => (
-        <option key={fieldKey + "#" + item.label} value={item.value}>
-          {item.label}
-        </option>
-      ))}
-    </SelectBase>
+      <SelectTrigger className={`w-full h-11 ${isReadonly ? "cursor-not-allowed" : ""}`}>
+        <SelectValue placeholder={options?.placeholder ?? "Selecione"} />
+      </SelectTrigger>
+      <SelectContent className="z-[1601]">
+        {options?.items
+          ?.filter((item) => item.value != null)
+          .map((item) => {
+          const itemAny = item as any;
+          const label =
+            itemAny?.label ?? itemAny?.key ?? (itemAny?.value !== undefined ? String(itemAny.value) : "");
+
+          return (
+            <SelectItem
+              key={fieldKey + "#" + String(itemAny.value)}
+              value={item.value.toString()}
+            >
+              {label}
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </DSSelect>
   );
 };

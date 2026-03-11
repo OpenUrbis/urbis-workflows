@@ -1,4 +1,3 @@
-import { Radio as RadioBase, RadioGroup } from "@chakra-ui/react";
 import { useContext } from "react";
 import { FaDotCircle } from "react-icons/fa";
 import { IField, IFormContext, RadioOptions } from "@open-urbis/types";
@@ -55,38 +54,44 @@ export const Radio: React.FC<FieldRadioProps> = ({
   }
 
   return (
-    <RadioGroup
-      colorScheme="yellow"
-      onChange={(selectedValue) => {
-        if (!isReadonly) {
-          // Convert back to original type before calling onChange
-          const originalTypeValue = items.find(
-            (item) => item.value.toString() === selectedValue
-          )?.value;
-
-          if (originalTypeValue !== undefined && originalTypeValue !== null) {
-            onChange(originalTypeValue);
-          } else {
-            onChange(selectedValue);
-          }
-        }
-      }}
-      value={currentValue}
-    >
+    <div role="radiogroup">
       {items.map((item) => (
         <div key={`${fieldKey}-${item.label}`} className="mb-1">
-          <RadioBase
-            size="lg"
-            value={item.value.toString()}
-            disabled={isReadonly}
-            className={isReadonly ? "cursor-not-allowed" : ""}
+          <label
+            className={`inline-flex items-center gap-2 ${
+              isReadonly ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+            }`}
           >
-            <span className={isReadonly ? "cursor-not-allowed" : ""}>
-              {item.label}
-            </span>
-          </RadioBase>
+            <input
+              type="radio"
+              name={fieldKey}
+              className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+              value={item.value.toString()}
+              checked={currentValue === item.value.toString()}
+              disabled={isReadonly}
+              onChange={(e) => {
+                if (!isReadonly) {
+                  const selectedValue = e.target.value;
+                  const originalTypeValue = items.find(
+                    (currentItem) =>
+                      currentItem.value.toString() === selectedValue
+                  )?.value;
+
+                  if (
+                    originalTypeValue !== undefined &&
+                    originalTypeValue !== null
+                  ) {
+                    onChange(originalTypeValue);
+                  } else {
+                    onChange(selectedValue);
+                  }
+                }
+              }}
+            />
+            <span>{item.label}</span>
+          </label>
         </div>
       ))}
-    </RadioGroup>
+    </div>
   );
 };

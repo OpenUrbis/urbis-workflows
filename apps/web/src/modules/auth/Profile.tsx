@@ -1,45 +1,61 @@
 import React, { useContext, useEffect, useState } from "react";
 import { SL } from "../../components/ShortcutLabel";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
-import { MyData } from "./MyData";
 import { StyleContext } from "../../reducers";
 import { MyRepresentations } from "./MyRepresentation";
 import { MyRepresentatives } from "./MyRepresentatives";
-import { FaUser, FaUserFriends, FaUserPlus } from "react-icons/fa";
+import { FaUserFriends, FaUserPlus } from "react-icons/fa";
+import { useSearchParams } from "react-router-dom";
 
 export function Profile(): JSX.Element {
   const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
-  const [subpage, setSubpage] = useState<string>("mydata");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [subpage, setSubpage] = useState<string>(() => searchParams.get("tab") || "myrepresentations");
+
+  const setSubpageAndSync = (next: string) => {
+    setSubpage(next);
+    const current = searchParams.get("tab") || "";
+    if (current === next) return;
+    const params = new URLSearchParams(searchParams);
+    if (next) params.set("tab", next);
+    else params.delete("tab");
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
 
   const menus = [
-    { name: "Meus dados", link: "mydata", key: "1", icon: <FaUser /> },
     {
       name: "Minhas representações",
       link: "myrepresentations",
-      key: "2",
+      key: "1",
       icon: <FaUserFriends />,
     },
     {
       name: "Meus representantes",
       link: "myrepresentatives",
-      key: "3",
+      key: "2",
       icon: <FaUserPlus />,
     },
   ];
 
   useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && tab !== subpage) {
+      setSubpage(tab);
+    }
+  }, [searchParams, subpage]);
+
+  useEffect(() => {
     hotkeyContext.dispatch({
       type: "SET_HOTKEY",
       payload: {
-        Q: () => {
-          setSubpage("mydata");
-        },
         A: () => {
-          setSubpage("myrepresentations");
+          setSubpageAndSync("myrepresentations");
         },
         Z: () => {
-          setSubpage("myrepresentatives");
+          setSubpageAndSync("myrepresentatives");
         },
       },
     });
@@ -47,28 +63,21 @@ export function Profile(): JSX.Element {
     return () => {
       hotkeyContext.dispatch({
         type: "UNSET_HOTKEY",
-        delete: ["Q", "A", "Z"],
+        delete: ["A", "Z"],
       });
     };
     
   }, []);
 
   return (
-    <div className="flex flex-col space-y-2 mb-20 px-20">
-      <h1 className="text-2xl md:text-3xl font-medium mb-6 text-left">
-        Meu Perfil
+    <div className="flex flex-col space-y-2 mb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 className="text-2xl font-semibold mt-4 mb-6 tracking-tight text-foreground">
+        Representações
       </h1>
 
-      <div className="flex flex-grow border rounded-lg overflow-hidden">
+      <div className="flex flex-grow border rounded-lg overflow-hidden border-border bg-card text-card-foreground">
         <div
-          className="flex flex-col py-4 w-3/12 border-r"
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-            backgroundColor: styleContext.state.backgroundColor,
-          }}
+          className="flex flex-col py-4 w-3/12 border-r border-border bg-card"
         >
           {menus.map((menu) => (
             <div
@@ -84,13 +93,12 @@ export function Profile(): JSX.Element {
               key={menu.key}
             >
               <button
-                onClick={() => setSubpage(menu.link)}
-                className="flex justify-between w-full items-center"
-                style={{ color: styleContext.state.textColor }}
+                onClick={() => setSubpageAndSync(menu.link)}
+                className="flex justify-between w-full items-center text-card-foreground"
               >
                 <div className="flex items-center space-x-3">
                   {menu.icon}
-                  <span>{menu.name}</span>
+                  <span className="text-sm font-medium">{menu.name}</span>
                 </div>
                 <SL>{menu.key}</SL>
               </button>
@@ -98,7 +106,6 @@ export function Profile(): JSX.Element {
           ))}
         </div>
         <div className="flex flex-col p-6 w-9/12 overflow-y-auto">
-          {subpage === "mydata" && <MyData />}
           {subpage === "myrepresentations" && <MyRepresentations />}
           {subpage === "myrepresentatives" && <MyRepresentatives />}
         </div>

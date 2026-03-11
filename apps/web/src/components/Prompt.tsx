@@ -1,13 +1,12 @@
 import React, { FC, useContext, useEffect, useState } from "react";
 import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-} from "@chakra-ui/react";
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@open-urbis/map-ui";
 import { IField, FieldTypeEnum, TextAreaOptions } from "@open-urbis/types";
 import { Field } from "../modules/workflows-schema/form-engine/Field";
 import { StyleContext } from "../reducers";
@@ -46,12 +45,12 @@ const PromptModal: FC<PromptProps> = ({
   fields,
   options,
 }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState<string>(defaultValue);
   const [modalTitle, setModalTitle] = useState<string>(title);
   const [formFields, setFields] = useState<any[]>(fields || []);
   const [modalOptions, setModalOptions] = useState<IPromptPropsOptions>(
-    options || {}
+    options || {},
   );
   const [promptParams, setPromptParamsState] = useState<PromptProps>({});
   const [form, setForm] = useState<any>(input || {});
@@ -69,9 +68,8 @@ const PromptModal: FC<PromptProps> = ({
     setForm(promptParams?.defaultValue || {});
     setModalOptions(promptParams?.options || {});
     if (resolvePrompt) {
-      onOpen();
+      setIsOpen(true);
     }
-    
   }, [resolvePrompt, promptParams]);
 
   useEffect(() => {
@@ -80,19 +78,17 @@ const PromptModal: FC<PromptProps> = ({
     if (validator) resultValidate = !validator(input);
 
     if (hasError !== resultValidate) setHasError(resultValidate);
-
-    
   }, [input]);
 
   const handleClose = () => {
     // Focus on the close button before closing the modal
     const closeButton = document.querySelector(
-      '[aria-label="Close"]'
+      '[aria-label="Close"]',
     ) as HTMLButtonElement;
     if (closeButton) {
       closeButton.focus();
     }
-    onClose();
+    setIsOpen(false);
   };
 
   const handleConfirm = () => {
@@ -120,7 +116,7 @@ const PromptModal: FC<PromptProps> = ({
     title: string,
     defaultValue?: string,
     fields?: any[],
-    options?: any
+    options?: any,
   ) => {
     return new Promise<string | null>((resolve) => {
       if (setPromptParams) {
@@ -268,9 +264,9 @@ const PromptModal: FC<PromptProps> = ({
               className={`w-32 px-4 py-3 text-2xl font-bold text-center rounded-lg border ${
                 hasError
                   ? "border-red-400 focus:border-red-500"
-                  : "border-gray-200 focus:border-yellow-400"
+                  : "border-gray-200 focus:border-primary"
               } focus:outline-none focus:ring-2 ${
-                hasError ? "focus:ring-red-200" : "focus:ring-yellow-100"
+                hasError ? "focus:ring-red-200" : "focus:ring-primary/20"
               }`}
               placeholder="0"
               style={{
@@ -287,8 +283,8 @@ const PromptModal: FC<PromptProps> = ({
               <SL
                 bg={
                   styleContext.state.buttonHoverColorWeight === "200"
-                    ? "yellow.100"
-                    : "yellow.800"
+                    ? "primary"
+                    : "primary"
                 }
                 className="ml-1"
                 alwaysShow
@@ -336,29 +332,27 @@ const PromptModal: FC<PromptProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleCancel}
-      motionPreset="slideInBottom"
-      isCentered
-      onEsc={handleCancel}
-      closeOnEsc={false}
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleCancel();
+      }}
     >
-      <ModalOverlay backdropFilter="blur(4px)" />
-      <ModalContent
-        className="px-6 py-"
+      <DialogContent
+        className="shadow-xl bg-background text-foreground [&>button.absolute.right-4.top-4]:hidden"
         style={{
-          minWidth: isIndexSelector ? "400px" : "400px",
-          maxWidth: "600px",
-          backgroundColor: styleContext.state.backgroundColor,
+          width: "900px",
+          maxHeight: "85vh",
         }}
       >
-        <ModalHeader className="p-4 border-b">
+        <DialogHeader className="pb-4 pt-0 border-b">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 text-xl mt-4">
-              <span style={{ color: styleContext.state.textColor }}>
-                {modalTitle}
-              </span>
+            <div className="flex items-center space-x-3 text-xl">
+              <DialogTitle asChild>
+                <span style={{ color: styleContext.state.textColor }}>
+                  {modalTitle}
+                </span>
+              </DialogTitle>
               {modalOptions?.tooltip && (
                 <div className="text-sm">
                   <HelpTooltipClickable
@@ -387,61 +381,40 @@ const PromptModal: FC<PromptProps> = ({
               <FaTimes size={12} />
             </button>
           </div>
-        </ModalHeader>
-        <ModalBody
-          className={`my-4 ${isIndexSelector ? "text-center" : ""}`}
+        </DialogHeader>
+
+        <div
+          className={`${isIndexSelector ? "text-center" : ""}`}
           style={{ color: styleContext.state.textColor }}
         >
           {renderInputArea()}
           {renderError()}
-        </ModalBody>
-        <ModalFooter className="pt-4 border-t space-x-3">
-          <button
-            className={`px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2
-              ${
-                hasError
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-yellow-600 hover:bg-yellow-700 text-white"
-              }`}
+        </div>
+
+        <DialogFooter className="border-t space-x-3">
+          <Button
+            type="button"
             disabled={hasError}
             onClick={handleConfirm}
-            style={
-              hasError
-                ? undefined
-                : {
-                    backgroundColor:
-                      styleContext.state.backgroundColor === "#000000"
-                        ? "#d97706"
-                        : undefined,
-                    color: "#ffffff",
-                  }
-            }
+            className="gap-2"
           >
-            <span>{isIndexSelector ? "Selecionar" : "Confirmar"}</span>
+            {isIndexSelector ? "Selecionar" : "Confirmar"}
             <SL
-              bg={
-                hasError
-                  ? "gray.200"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "yellow.600"
-                    : "yellow.900"
+              bg={hasError ? "gray.200" : "primary"}
+              className={
+                hasError ? undefined : "text-[hsl(var(--primary-foreground))]"
               }
             >
               Enter
             </SL>
-          </button>
-          <button
-            className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2"
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
             onClick={handleCancel}
-            style={{
-              backgroundColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#f3f4f6"
-                  : "#1f2937",
-              color: styleContext.state.textColor,
-            }}
+            className="gap-2"
           >
-            <span>Cancelar</span>
+            Cancelar
             <SL
               bg={
                 styleContext.state.buttonHoverColorWeight === "200"
@@ -451,10 +424,10 @@ const PromptModal: FC<PromptProps> = ({
             >
               esc
             </SL>
-          </button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
