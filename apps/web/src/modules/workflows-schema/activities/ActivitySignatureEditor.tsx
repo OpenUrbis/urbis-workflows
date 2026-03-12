@@ -65,7 +65,7 @@ export const ActivitySignatureEditor = ({
 
   const handleRemoveSignature = async (id: string) => {
     const response = await confirmation(
-      "Tem certeza que deseja remover este formulário de aceite?"
+      "Tem certeza que deseja remover este formulário de assinatura?"
     );
 
     if (!response) {
