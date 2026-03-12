@@ -54,6 +54,7 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   document: "Documento",
   tax: "Taxa",
   upload: "Arquivo Anexado",
+  despacho: "Despacho",
 };
 
 export const SeiTracking: React.FC<SeiTrackingProps> = ({

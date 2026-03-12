@@ -8,8 +8,13 @@ export interface ProtocolIntegrations {
     IdHipoteseLegal?: string | number;
     CoverLetterIdSerie?: number;
     DocumentIdSerie?: number;
+    /** @deprecated Use DocumentIdSerie for document and plate */
     PlateIdSerie?: number;
     TaxDocumentIdSerie?: number;
+    FormIdSerie?: number;
+    SignatureIdSerie?: number;
+    DespachoIdSerie?: number;
+    UploadIdSerie?: number;
     coverLetter?: string;
     /** Template do resumo usado em agendarPublicacao ao encerrar o processo no SEI */
     publicationSummaryTemplate?: string;
