@@ -1197,7 +1197,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 </div>
               </div>
               <div className="flex">
-                <div className="w-1/4 border-r pr-4 text-sm">
+                <div className="w-1/4 border-r pr-4 text-sm shrink-0">
                   <div className="mb-6">
                     <h2
                       className="text-base font-semibold mb-3"
