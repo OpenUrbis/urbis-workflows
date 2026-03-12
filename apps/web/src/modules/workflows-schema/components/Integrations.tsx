@@ -24,6 +24,14 @@ enum LoadingTypes {
   SEI_LEGAL_HYPOTHESIS = 4,
 }
 
+/** SEI Serie Aplicabilidade: T=internos e externos, I=internos, E=externos, F=formulários */
+const SEI_APPLICABILITY_LABELS: Record<string, string> = {
+  T: "Documentos internos e externos",
+  I: "Documentos internos",
+  E: "Documentos externos",
+  F: "Formulários",
+};
+
 export type IntegrationsProps = {
   data: ProtocolIntegrations["sei"] | undefined;
   onChange: (data: ProtocolIntegrations["sei"]) => void;
@@ -44,7 +52,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
     { id: string; description: string }[]
   >([]);
   const [seiDocumentsTypes, setSeiDocumentsTypes] = useState<
-    { id: string; description: string }[]
+    { id: string; description: string; applicability?: string }[]
   >([]);
   const [seiLegalHypothesis, setSeiLegalHypothesis] = useState<
     { id: string; description: string }[]
@@ -195,12 +203,15 @@ export const Integrations: React.FC<IntegrationsProps> = ({
     // eslint-disable-next-line
   }, [integrations?.IdUnidade, integrations?.NivelAcesso]);
 
-  // Helper to filter items (max 50 visible)
+  // Helper to filter items (max 50 visible); preserves extra fields (e.g. applicability)
   const filterItems = useCallback(
-    (items: { id: string; description: string }[], search: string) => {
+    <T extends { id: string; description: string }>(
+      items: T[],
+      search: string,
+    ): { filtered: T[]; total: number } => {
       if (!search) return { filtered: items.slice(0, 50), total: items.length };
       const q = search.toLowerCase();
-      const matches: { id: string; description: string }[] = [];
+      const matches: T[] = [];
       let total = 0;
       for (const item of items) {
         if (item.description.toLowerCase().includes(q)) {
@@ -461,7 +472,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                     {filteredCoverDocs.map((type) => (
                       <div
                         key={`cover-${type.id}`}
-                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground truncate"
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           setIntegrations({ ...integrations, CoverLetterIdSerie: Number(type.id) });
@@ -469,7 +480,12 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                           setCoverDocDropdownOpen(false);
                         }}
                       >
-                        {type.description}
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
                       </div>
                     ))}
                     {totalFilteredCoverDocs > 50 && (
@@ -578,7 +594,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                     {filteredDocs.map((type) => (
                       <div
                         key={`doc-${type.id}`}
-                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground truncate"
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           setIntegrations({
@@ -590,7 +606,12 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                           setDocDropdownOpen(false);
                         }}
                       >
-                        {type.description}
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
                       </div>
                     ))}
                     {totalFilteredDocs > 50 && (
@@ -634,7 +655,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                     {filteredTaxDocs.map((type) => (
                       <div
                         key={`tax-${type.id}`}
-                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground truncate"
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           setIntegrations({ ...integrations, TaxDocumentIdSerie: Number(type.id) });
@@ -642,7 +663,12 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                           setTaxDocDropdownOpen(false);
                         }}
                       >
-                        {type.description}
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
                       </div>
                     ))}
                     {totalFilteredTaxDocs > 50 && (
