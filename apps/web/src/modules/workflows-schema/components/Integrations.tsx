@@ -951,10 +951,49 @@ export const Integrations: React.FC<IntegrationsProps> = ({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="IdVeiculoPublicacao">Id do veículo de publicação (SEI)</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="StaMotivoPublicacao">Motivo da publicação</Label>
+              <HelpTooltipClickable
+                tooltip={
+                  '<p class="mb-2">Usado como <strong>StaMotivo</strong> na chamada <strong>agendarPublicacao</strong> do SEI ao encerrar o processo.</p>' +
+                  '<p><strong>Valores:</strong> 1 = Publicação, 2 = Retificação, 3 = Republicação, 4 = Apostilamento.</p>'
+                }
+              />
+            </div>
+            <Select
+              value={String(integrations?.StaMotivoPublicacao ?? 1)}
+              onValueChange={(value) => {
+                setIntegrations({
+                  ...integrations,
+                  StaMotivoPublicacao: Number(value) as 1 | 2 | 3 | 4,
+                });
+              }}
+            >
+              <SelectTrigger id="StaMotivoPublicacao" className="h-11 bg-background text-foreground">
+                <SelectValue placeholder="Selecione o motivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Publicação</SelectItem>
+                <SelectItem value="2">Retificação</SelectItem>
+                <SelectItem value="3">Republicação</SelectItem>
+                <SelectItem value="4">Apostilamento</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="IdVeiculoPublicacao">Id do veículo de publicação (SEI)</Label>
+              <HelpTooltipClickable
+                tooltip={
+                  '<p class="mb-2"><strong>Identificador do veículo de publicação</strong> no SEI, usado em <strong>agendarPublicacao</strong> ao encerrar o processo.</p>' +
+                  '<p class="mb-2">Para obter o valor: consulte a administração do SEI ou a documentação do seu órgão (configuração de veículos de publicação / diário oficial). O ID é fornecido pelo SEI.</p>' +
+                  '<p>Opcional: se não informado, o agendamento de publicação não será disparado.</p>'
+                }
+              />
+            </div>
             <DSInput
               id="IdVeiculoPublicacao"
-              placeholder="Opcional. Informado em agendarPublicacao ao encerrar."
+              placeholder="Ex.: ID do veículo no SEI (consultar administração SEI)"
               value={integrations?.IdVeiculoPublicacao ?? ""}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setIntegrations({

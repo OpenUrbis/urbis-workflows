@@ -20,6 +20,8 @@ export interface ProtocolIntegrations {
     publicationSummaryTemplate?: string;
     /** Id do veículo de publicação (SEI), usado em agendarPublicacao ao encerrar */
     IdVeiculoPublicacao?: string;
+    /** Motivo da publicação: 1=Publicação, 2=Retificação, 3=Republicação, 4=Apostilamento */
+    StaMotivoPublicacao?: 1 | 2 | 3 | 4;
   };
   register?: {
     sei?: {
