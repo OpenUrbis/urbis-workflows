@@ -11,6 +11,8 @@ interface SeiMirroredDocument {
   activityId: string;
   seiDocumentId?: string;
   seiDocumentLink?: string;
+  /** SEI publication ID from agendarPublicacao (e.g. for despacho) */
+  seiPublicationId?: string;
   type: string;
   accessLevel: number;
   legalHypothesisId?: string | number;
@@ -29,7 +31,7 @@ interface SeiIntegrationState {
   processId?: string;
   processLink?: string;
   processFormatted?: string;
-  status?: "PENDING" | "OPEN" | "ERROR";
+  status?: "PENDING" | "OPEN" | "ERROR" | "CLOSED";
   error?: string;
   documents?: SeiMirroredDocument[];
   tracking?: SeiTrackingEntry[];
@@ -166,22 +168,28 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
               backgroundColor:
                 seiState.status === "OPEN"
                   ? "rgba(34, 197, 94, 0.15)"
-                  : seiState.status === "ERROR"
-                    ? "rgba(239, 68, 68, 0.15)"
-                    : "rgba(107, 114, 128, 0.15)",
+                  : seiState.status === "CLOSED"
+                    ? "rgba(59, 130, 246, 0.15)"
+                    : seiState.status === "ERROR"
+                      ? "rgba(239, 68, 68, 0.15)"
+                      : "rgba(107, 114, 128, 0.15)",
               color:
                 seiState.status === "OPEN"
                   ? "#16a34a"
-                  : seiState.status === "ERROR"
-                    ? "#dc2626"
-                    : "#6b7280",
+                  : seiState.status === "CLOSED"
+                    ? "#2563eb"
+                    : seiState.status === "ERROR"
+                      ? "#dc2626"
+                      : "#6b7280",
             }}
           >
             {seiState.status === "OPEN"
               ? "Aberto"
-              : seiState.status === "ERROR"
-                ? "Erro"
-                : "Pendente"}
+              : seiState.status === "CLOSED"
+                ? "Encerrado"
+                : seiState.status === "ERROR"
+                  ? "Erro"
+                  : "Pendente"}
           </span>
           {seiState.processFormatted && (
             <span
@@ -254,6 +262,7 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
                   <th className="text-left py-2.5 px-3 font-medium">Arquivo</th>
                   <th className="text-left py-2.5 px-3 font-medium">Acesso</th>
                   <th className="text-left py-2.5 px-3 font-medium">Data</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Publicação</th>
                 </tr>
               </thead>
               <tbody>
@@ -278,6 +287,9 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
                       {doc.syncedAt
                         ? new Date(doc.syncedAt).toLocaleString("pt-BR")
                         : "-"}
+                    </td>
+                    <td className="py-2.5 px-3 font-mono text-xs">
+                      {doc.seiPublicationId ?? "-"}
                     </td>
                   </tr>
                 ))}
