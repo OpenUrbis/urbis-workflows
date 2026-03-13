@@ -40,6 +40,7 @@ jobs:
           echo "VITE_OIDC_REDIRECT_URI=${{ secrets.VITE_OIDC_REDIRECT_URI }}" >> $GITHUB_ENV
           echo "VITE_OIDC_SILENT_REDIRECT_URI=${{ secrets.VITE_OIDC_SILENT_REDIRECT_URI }}" >> $GITHUB_ENV
           echo "VITE_ACCOUNTS_URL=${{ secrets.VITE_ACCOUNTS_URL }}" >> $GITHUB_ENV
+          echo "VITE_BACK_END_FILES=${{ secrets.VITE_BACK_END_FILES }}" >> $GITHUB_ENV
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
