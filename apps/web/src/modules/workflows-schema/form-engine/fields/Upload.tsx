@@ -61,14 +61,14 @@ const getFileIcon = (filename: string) => {
   }
 };
 
-// Helper to get friendly file name
-const getFriendlyFileName = (filename: string) => {
-  // Extract just the actual file name without path and timestamp
-  const parts = filename.split("/");
-  const actualFileName = parts[parts.length - 1];
+const FILES_API_BASE =
+  import.meta.env.VITE_BACK_END_FILES ?? "https://api.mapa.urbis.sampa.br";
 
-  // Remove timestamp prefix if it exists
-  return actualFileName.replace(/^\d+_/, "");
+// Helper to get friendly file name from S3 key or original name
+const getFriendlyFileName = (key: string, originalName?: string) => {
+  if (originalName) return originalName;
+  const parts = key.split("/");
+  return parts[parts.length - 1] ?? key;
 };
 
 // Helper to format file size
@@ -94,111 +94,132 @@ export const Upload: React.FC<FieldUploadProps> = ({
     [filename: string]: number;
   }>({});
   const [uploadedFiles, setUploadedFiles] = useState<string[]>(
-    Array.isArray(value) ? value : value?.length > 0 ? [value] : []
+    Array.isArray(value) ? value : value?.length > 0 ? [value] : [],
   );
   const [fileDetails, setFileDetails] = useState<{
-    [filename: string]: { size: number; type: string; lastModified: number };
+    [key: string]: {
+      size: number;
+      type: string;
+      lastModified: number;
+      originalName?: string;
+    };
   }>({});
   const [inputKey, setInputKey] = useState(Date.now());
   const [isDragging, setIsDragging] = useState(false);
 
   const uploadFileToServer = useCallback(
-    async (fileName: string, file: File) => {
+    async (file: File) => {
+      let key: string | null = null;
       try {
-        // Store file details for future reference
-        setFileDetails((prev) => ({
-          ...prev,
-          [fileName]: {
-            size: file.size,
-            type: file.type,
-            lastModified: file.lastModified,
-          },
-        }));
-
-        const { data } = await axios.post(
-          `${import.meta.env.VITE_BACK_END_API}/datasets/generate-presigned-url`,
+        const { data } = await axios.post<{
+          uploadURL: string;
+          key: string;
+        }>(
+          `${FILES_API_BASE}/files/upload-url`,
           {
-            dirName: options.dir,
-            fileName: fileName,
-            fileType: file.type,
+            contentType: file.type,
+            folderPath: options.dir,
           },
           {
             headers: {
-              authorization: `Bearer ${getAccessToken()}`,
+              authorization: `Bearer ${getAccessToken() ?? ""}`,
             },
-          }
+          },
         );
 
-        setUploadedFiles((prevFiles: string[]) => [...prevFiles, fileName]);
+        key = data.key;
+        setFileDetails((prev) => ({
+          ...prev,
+          [data.key]: {
+            size: file.size,
+            type: file.type,
+            lastModified: file.lastModified,
+            originalName: file.name,
+          },
+        }));
+        setUploadedFiles((prevFiles: string[]) => [...prevFiles, data.key]);
 
-        await axios.put(data.url, file, {
+        await axios.put(data.uploadURL, file, {
           headers: {
             "Content-Type": file.type,
           },
           onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / (progressEvent?.total ?? -1)
+              (progressEvent.loaded * 100) / (progressEvent?.total ?? -1),
             );
             setUploadProgress((prevProgress) => ({
               ...prevProgress,
-              [fileName]: percentCompleted,
+              [data.key]: percentCompleted,
             }));
           },
         });
 
         snackbar.success(
-          `Arquivo ${getFriendlyFileName(fileName)} carregado com sucesso`
+          `Arquivo ${getFriendlyFileName(data.key, file.name)} carregado com sucesso`,
         );
+        return data.key;
       } catch (error) {
         console.log(error);
-        snackbar.error(`Falha ao carregar ${getFriendlyFileName(fileName)}`);
-
-        // Remove failed upload from list
-        setUploadedFiles((prev) => prev.filter((f) => f !== fileName));
+        snackbar.error(`Falha ao carregar ${file.name}`);
+        if (key) {
+          setUploadedFiles((prev) => prev.filter((k) => k !== key));
+          setFileDetails((prev) => {
+            const next = { ...prev };
+            delete next[key!];
+            return next;
+          });
+          setUploadProgress((prev) => {
+            const next = { ...prev };
+            delete next[key!];
+            return next;
+          });
+        }
+        throw error;
       }
     },
-    [snackbar, options.dir]
+    [snackbar, options.dir],
   );
 
   const handleFileUpload = useCallback(
-    (files: FileList | null) => {
-      if (files) {
-        const validFiles = Array.from(files).filter((file) => {
-          const isSizeValid = !options.maxSize || file.size <= options.maxSize;
-          const isExtensionValid =
-            !options.supportedExtensions ||
-            options.supportedExtensions.some((ext) =>
-              file.name.toLowerCase().endsWith(ext.toLowerCase())
-            );
+    async (files: FileList | null) => {
+      if (!files) return;
+      const validFiles = Array.from(files).filter((file) => {
+        const isSizeValid = !options.maxSize || file.size <= options.maxSize;
+        const isExtensionValid =
+          !options.supportedExtensions ||
+          options.supportedExtensions.some((ext) =>
+            file.name.toLowerCase().endsWith(ext.toLowerCase()),
+          );
 
-          if (!isSizeValid) {
-            snackbar.error(
-              `O arquivo ${file.name} ultrapassa o limite permitido de ${formatFileSize(options.maxSize || 0)}.`
-            );
+        if (!isSizeValid) {
+          snackbar.error(
+            `O arquivo ${file.name} ultrapassa o limite permitido de ${formatFileSize(options.maxSize || 0)}.`,
+          );
+        }
+
+        if (!isExtensionValid) {
+          snackbar.error(
+            `O arquivo ${file.name} não é de um tipo suportado. Tipos aceitos: ${options.supportedExtensions?.join(", ")}`,
+          );
+        }
+
+        return isSizeValid && isExtensionValid;
+      });
+
+      if (validFiles.length > 0) {
+        const keys: string[] = [];
+        for (const file of validFiles) {
+          try {
+            const key = await uploadFileToServer(file);
+            keys.push(key);
+          } catch {
+            // Error already handled in uploadFileToServer
           }
-
-          if (!isExtensionValid) {
-            snackbar.error(
-              `O arquivo ${file.name} não é de um tipo suportado. Tipos aceitos: ${options.supportedExtensions?.join(", ")}`
-            );
-          }
-
-          return isSizeValid && isExtensionValid;
-        });
-
-        if (validFiles.length > 0) {
-          const code = (Math.random() + 1).toString(36).substring(7);
-
-          const filenamesWithTimestamp = validFiles.map((file) => {
-            const fileName = `${code}/${new Date().getTime()}_${file.name}`;
-            uploadFileToServer(fileName, file);
-            return fileName;
-          });
-
+        }
+        if (keys.length > 0) {
+          const existing = Array.isArray(value) ? value : value ? [value] : [];
           onChange(
-            options.multiple === false
-              ? filenamesWithTimestamp[0]
-              : filenamesWithTimestamp
+            options.multiple === false ? keys[0] : [...existing, ...keys],
           );
         }
       }
@@ -210,26 +231,25 @@ export const Upload: React.FC<FieldUploadProps> = ({
       options.supportedExtensions,
       options.multiple,
       snackbar,
-    ]
+    ],
   );
 
-  const removeUploadedFile = (filename: string) => {
+  const removeUploadedFile = (key: string) => {
     setUploadedFiles((prevFiles) => {
-      const newFiles = prevFiles.filter((file) => file !== filename);
+      const newFiles = prevFiles.filter((k) => k !== key);
       onChange(options.multiple === false ? "" : newFiles);
       return newFiles;
     });
 
-    // Remove from progress and details
     setUploadProgress((prev) => {
       const newProgress = { ...prev };
-      delete newProgress[filename];
+      delete newProgress[key];
       return newProgress;
     });
 
     setFileDetails((prev) => {
       const newDetails = { ...prev };
-      delete newDetails[filename];
+      delete newDetails[key];
       return newDetails;
     });
 
@@ -255,7 +275,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
         setIsDragging(false);
       }
     },
-    [isReadonly]
+    [isReadonly],
   );
 
   // Handle drop event
@@ -272,7 +292,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
         handleFileUpload(e.dataTransfer.files);
       }
     },
-    [handleFileUpload, isReadonly]
+    [handleFileUpload, isReadonly],
   );
 
   return (
@@ -280,14 +300,18 @@ export const Upload: React.FC<FieldUploadProps> = ({
       {/* File list */}
       {uploadedFiles.length > 0 && (
         <div className="mb-4 space-y-3">
-          {uploadedFiles.map((filename) => {
-            const progress = uploadProgress[filename] || 0;
+          {uploadedFiles.map((key) => {
+            const progress = uploadProgress[key] || 0;
             const isUploading = progress > 0 && progress < 100;
-            const friendlyName = getFriendlyFileName(filename);
+            const details = fileDetails[key];
+            const friendlyName = getFriendlyFileName(
+              key,
+              details?.originalName,
+            );
 
             return (
               <div
-                key={filename}
+                key={key}
                 className={`border rounded-lg overflow-hidden transition-all duration-200 ${
                   isLightMode
                     ? "border-gray-200 bg-white"
@@ -298,7 +322,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
                   <div
                     className={`flex-shrink-0 mr-3 ${isLightMode ? "text-gray-500" : "text-gray-300"}`}
                   >
-                    {getFileIcon(filename)}
+                    {getFileIcon(friendlyName)}
                   </div>
                   <div className="flex-grow min-w-0">
                     <div
@@ -309,11 +333,11 @@ export const Upload: React.FC<FieldUploadProps> = ({
                       {friendlyName}
                     </div>
 
-                    {fileDetails[filename] && (
+                    {details && (
                       <div
                         className={`text-xs ${isLightMode ? "text-gray-500" : "text-gray-400"}`}
                       >
-                        {formatFileSize(fileDetails[filename].size)}
+                        {formatFileSize(details.size)}
                       </div>
                     )}
 
@@ -332,7 +356,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
                     {!isUploading && (
                       <>
                         <button
-                          onClick={() => downloadFile(options.dir, filename)}
+                          onClick={() => downloadFile(key)}
                           className={`p-1.5 rounded-full transition-colors ${
                             isLightMode
                               ? "text-gray-500 hover:text-primary hover:bg-primary/10"
@@ -343,7 +367,7 @@ export const Upload: React.FC<FieldUploadProps> = ({
                           <FiDownload size={18} />
                         </button>
                         <button
-                          onClick={() => removeUploadedFile(filename)}
+                          onClick={() => removeUploadedFile(key)}
                           className={`p-1.5 rounded-full transition-colors ${
                             isLightMode
                               ? "text-gray-500 hover:text-primary hover:bg-primary/10"
