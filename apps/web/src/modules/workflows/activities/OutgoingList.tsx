@@ -46,7 +46,7 @@ export const OutgoingList: React.FC<{
       return (
         !!context[activityNamespace] &&
         (context[activityNamespace].state === ActivityStateEnum.COMPLETED ||
-          context[activityNamespace].state === ActivityStateEnum.IN_PROGRESS) // tmp until full implementation
+          context[activityNamespace].state === ActivityStateEnum.IN_PROGRESS)
       );
     });
   };
