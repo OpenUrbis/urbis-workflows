@@ -38,6 +38,21 @@ interface SeiIntegrationState {
   lastSyncAt?: string;
 }
 
+/** Publication details from SEI consultarPublicacao (agendarPublicacao follow-up) */
+interface SeiPublicationDetails {
+  idPublicacao?: string;
+  idDocumento?: string;
+  estado?: string;
+  estadoLabel?: string;
+  dataPublicacao?: string;
+  dataDisponibilizacao?: string;
+  resumo?: string;
+  nomeVeiculo?: string;
+  numero?: string;
+  staMotivo?: string;
+  staMotivoLabel?: string;
+}
+
 export interface SeiTrackingProps {
   workflowId: string;
 }
@@ -67,6 +82,7 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [seiState, setSeiState] = useState<SeiIntegrationState | null>(null);
+  const [publicationDetails, setPublicationDetails] = useState<Record<string, SeiPublicationDetails | null>>({});
 
   const fetchTracking = async () => {
     setLoading(true);
@@ -115,6 +131,46 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
     fetchTracking();
     // eslint-disable-next-line
   }, [workflowId]);
+
+  // Fetch publication details for documents that have seiPublicationId
+  useEffect(() => {
+    if (!workflowId || !seiState?.documents?.length) {
+      setPublicationDetails({});
+      return;
+    }
+    const ids = seiState.documents
+      .map((d) => d.seiPublicationId)
+      .filter((id): id is string => !!id);
+    if (ids.length === 0) {
+      setPublicationDetails({});
+      return;
+    }
+    const api = import.meta.env.VITE_BACK_END_API;
+    const token = getAccessToken();
+    if (!api || !token) return;
+
+    let cancelled = false;
+    const details: Record<string, SeiPublicationDetails | null> = {};
+    Promise.all(
+      ids.map(async (idPublicacao) => {
+        if (cancelled) return;
+        try {
+          const res = await axios.get<SeiPublicationDetails | null>(
+            `${api}/integrations/sei/tracking/${workflowId}/publication/${idPublicacao}`,
+            { headers: { authorization: `Bearer ${token}` } }
+          );
+          if (!cancelled) details[idPublicacao] = res.data ?? null;
+        } catch {
+          if (!cancelled) details[idPublicacao] = null;
+        }
+      })
+    ).then(() => {
+      if (!cancelled) setPublicationDetails(details);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [workflowId, seiState?.documents]);
 
   if (loading) {
     return (
@@ -266,33 +322,71 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {seiState.documents.map((doc, idx) => (
-                  <tr
-                    key={idx}
-                    style={{
-                      borderBottomWidth: idx < seiState.documents!.length - 1 ? 1 : 0,
-                      borderColor: isDark ? "#374151" : "#E5E7EB",
-                    }}
-                  >
-                    <td className="py-2.5 px-3">
-                      {DOC_TYPE_LABELS[doc.type] || doc.type}
-                    </td>
-                    <td className="py-2.5 px-3 font-mono text-xs">
-                      {doc.fileName || doc.documentId}
-                    </td>
-                    <td className="py-2.5 px-3">
-                      {ACCESS_LEVEL_LABELS[doc.accessLevel] || doc.accessLevel}
-                    </td>
-                    <td className="py-2.5 px-3 text-xs">
-                      {doc.syncedAt
-                        ? new Date(doc.syncedAt).toLocaleString("pt-BR")
-                        : "-"}
-                    </td>
-                    <td className="py-2.5 px-3 font-mono text-xs">
-                      {doc.seiPublicationId ?? "-"}
-                    </td>
-                  </tr>
-                ))}
+                {seiState.documents.map((doc, idx) => {
+                  const pubId = doc.seiPublicationId ?? "";
+                  const pub = pubId ? publicationDetails[pubId] : undefined;
+                  return (
+                    <tr
+                      key={idx}
+                      style={{
+                        borderBottomWidth: idx < seiState.documents!.length - 1 ? 1 : 0,
+                        borderColor: isDark ? "#374151" : "#E5E7EB",
+                      }}
+                    >
+                      <td className="py-2.5 px-3">
+                        {DOC_TYPE_LABELS[doc.type] || doc.type}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-xs">
+                        {doc.fileName || doc.documentId}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        {ACCESS_LEVEL_LABELS[doc.accessLevel] || doc.accessLevel}
+                      </td>
+                      <td className="py-2.5 px-3 text-xs">
+                        {doc.syncedAt
+                          ? new Date(doc.syncedAt).toLocaleString("pt-BR")
+                          : "-"}
+                      </td>
+                      <td className="py-2.5 px-3 text-xs">
+                        {doc.seiPublicationId ? (
+                          <div className="flex flex-col gap-0.5">
+                            {pub ? (
+                              <>
+                                <span className="font-medium">
+                                  {pub.estadoLabel ?? pub.estado ?? "—"}
+                                  {pub.dataPublicacao
+                                    ? ` (${pub.dataPublicacao})`
+                                    : ""}
+                                </span>
+                                {pub.nomeVeiculo && (
+                                  <span style={{ color: isDark ? "#9CA3AF" : "#6B7280" }}>
+                                    {pub.nomeVeiculo}
+                                  </span>
+                                )}
+                                {pub.resumo && (
+                                  <span
+                                    className="line-clamp-2"
+                                    style={{ color: isDark ? "#9CA3AF" : "#6B7280" }}
+                                    title={pub.resumo}
+                                  >
+                                    {pub.resumo}
+                                  </span>
+                                )}
+                                <span className="font-mono text-[10px] opacity-75">
+                                  ID: {doc.seiPublicationId}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="font-mono">{doc.seiPublicationId}</span>
+                            )}
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
