@@ -312,7 +312,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     $user: undefined,
     $variables: {},
   });
-  const [showDependencyGraph, setShowDependencyGraph] = useState(false);
+  // const [showDependencyGraph, setShowDependencyGraph] = useState(false);
   const [seiLegalHypothesis, setSeiLegalHypothesis] = useState<
     { id: string; description: string }[]
   >([]);
@@ -1326,7 +1326,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         >
                           Atividades
                         </h2>
-                        <Tooltip
+                        {/* <Tooltip
                           label="Visualizar grafo de dependências"
                           placement="top"
                           hasArrow
@@ -1343,7 +1343,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           >
                             <FaProjectDiagram size={16} />
                           </button>
-                        </Tooltip>
+                        </Tooltip> */}
                       </div>
                       <div className="space-y-2">
                         {workflowSchema.schema?.activities?.map(
@@ -1902,7 +1902,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
       </Modal>
 
       {/* Dependency Graph Visualization Modal */}
-      <DependencyGraphVisualization
+      {/* <DependencyGraphVisualization
         isOpen={showDependencyGraph}
         onClose={() => setShowDependencyGraph(false)}
         activities={workflowSchema?.schema?.activities || []}
@@ -1910,7 +1910,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
         outgoing={workflowSchema?.schema?.outgoing || []}
         styleContext={styleContext}
         currentActivityId={selectedActivity?.id}
-      />
+      /> */}
 
       {/* Advanced Configuration Drawer */}
       <SideDrawer
