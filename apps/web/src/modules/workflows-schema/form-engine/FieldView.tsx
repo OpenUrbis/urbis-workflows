@@ -6,7 +6,6 @@ import {
   IFieldOptionsType,
   IFormContext,
   InputOptions,
-  UploadOptions,
 } from "@open-urbis/types";
 import { FieldBlockView } from "./FieldBlockView";
 import {
@@ -101,23 +100,20 @@ export const FIELD_COMPONENT_MAP: {
   upload: ({ field, value }: FieldUploadProps) => {
     if (!field) return <span>{value ?? "Não informado"}</span>;
 
+    const keys = Array.isArray(value) ? value : value ? [value] : [];
+    if (keys.length === 0) return <span>{value ?? "Não informado"}</span>;
+
     return (
       <div>
-        {value.length > 0 ? (
-          (value as string[]).map((file: string, index: number) => (
-            <div
-              key={`${field.key}-${file}-${index}`}
-              className="cursor-pointer"
-              onClick={() =>
-                downloadFile((field?.options as UploadOptions).dir, file)
-              }
-            >
-              {file}
-            </div>
-          ))
-        ) : (
-          <span>{value ?? "Não informado"}</span>
-        )}
+        {keys.map((key: string, index: number) => (
+          <div
+            key={`${field.key}-${key}-${index}`}
+            className="cursor-pointer"
+            onClick={() => downloadFile(key)}
+          >
+            {key.split("/").pop() ?? key}
+          </div>
+        ))}
       </div>
     );
   },

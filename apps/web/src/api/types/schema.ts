@@ -114,12 +114,19 @@ export interface FormTemplate {
   form: IField;
 }
 
+/** Per-activity SEI sync override; falls back to schema integrations when not set */
+export interface SeiIntegrationActivityConfig {
+  IdSerie?: number;
+}
+
 export interface SignaturesTemplate {
   signatures: SignatureConfig[];
+  seiIntegration?: SeiIntegrationActivityConfig;
 }
 
 export interface TaxTemplate {
   taxes: TaxConfig[];
+  seiIntegration?: SeiIntegrationActivityConfig;
 }
 
 export type DocumentTemplateType = "document" | "plate" | "custom" | "certificate";
@@ -183,6 +190,7 @@ export interface DocumentConfig {
 
 export interface DocumentTemplate {
   documents: DocumentConfig[];
+  seiIntegration?: SeiIntegrationActivityConfig;
 }
 
 export interface PrerequisiteWorkflowTemplate {

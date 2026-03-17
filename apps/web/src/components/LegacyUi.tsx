@@ -28,7 +28,7 @@ export const Spinner = ({
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={`animate-spin ${
+    className={`animate-spin text-primary ${
       size === "xl"
         ? "h-10 w-10"
         : size === "lg"

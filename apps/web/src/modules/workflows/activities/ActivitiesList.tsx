@@ -63,14 +63,16 @@ export const ActivitiesList: React.FC<{
     });
   };
 
-  // Check if an activity is completed based on its state
+  // Check if an activity is completed based on its state.
+  // IN_PROGRESS is treated as completed so signature (and legacy) activities that
+  // may still have state=1 when done align with report status; backend now sets
+  // COMPLETED when all signatures are signed.
   const isActivityCompleted = (activity: ActivityTemplate): boolean => {
     if (!activity.namespace || !context[activity.namespace]) return false;
 
-    // Check if the activity state is COMPLETED (2)
     return (
       context[activity.namespace].state === ActivityStateEnum.COMPLETED ||
-      context[activity.namespace].state === ActivityStateEnum.IN_PROGRESS // tmp until full implementation
+      context[activity.namespace].state === ActivityStateEnum.IN_PROGRESS
     );
   };
 
@@ -103,13 +105,13 @@ export const ActivitiesList: React.FC<{
         const dependency = activities.find((act) => act.id === dependencyId);
         if (!dependency || !dependency.namespace) return false;
 
-        // Check if the dependency state is COMPLETED
+        // Check if the dependency state is COMPLETED (or IN_PROGRESS for alignment)
         return (
           !!context[dependency.namespace] &&
           (context[dependency.namespace].state ===
             ActivityStateEnum.COMPLETED ||
             context[dependency.namespace].state ===
-              ActivityStateEnum.IN_PROGRESS) // tmp until full implementation
+              ActivityStateEnum.IN_PROGRESS)
         );
       });
     }

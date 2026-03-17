@@ -4,13 +4,15 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSnackbar } from "../../hooks/snackbar";
 import { StyleContext } from "../../reducers";
 import { Spinner } from "../../components/LegacyUi";
-import { FaLink, FaSyncAlt } from "react-icons/fa";
+import { FaFileAlt, FaHistory, FaLink, FaSyncAlt } from "react-icons/fa";
 
 interface SeiMirroredDocument {
   documentId: string;
   activityId: string;
   seiDocumentId?: string;
   seiDocumentLink?: string;
+  /** SEI publication ID from agendarPublicacao (e.g. for despacho) */
+  seiPublicationId?: string;
   type: string;
   accessLevel: number;
   legalHypothesisId?: string | number;
@@ -29,11 +31,26 @@ interface SeiIntegrationState {
   processId?: string;
   processLink?: string;
   processFormatted?: string;
-  status?: "PENDING" | "OPEN" | "ERROR";
+  status?: "PENDING" | "OPEN" | "ERROR" | "CLOSED";
   error?: string;
   documents?: SeiMirroredDocument[];
   tracking?: SeiTrackingEntry[];
   lastSyncAt?: string;
+}
+
+/** Publication details from SEI consultarPublicacao (agendarPublicacao follow-up) */
+interface SeiPublicationDetails {
+  idPublicacao?: string;
+  idDocumento?: string;
+  estado?: string;
+  estadoLabel?: string;
+  dataPublicacao?: string;
+  dataDisponibilizacao?: string;
+  resumo?: string;
+  nomeVeiculo?: string;
+  numero?: string;
+  staMotivo?: string;
+  staMotivoLabel?: string;
 }
 
 export interface SeiTrackingProps {
@@ -54,6 +71,7 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   document: "Documento",
   tax: "Taxa",
   upload: "Arquivo Anexado",
+  despacho: "Despacho",
 };
 
 export const SeiTracking: React.FC<SeiTrackingProps> = ({
@@ -64,6 +82,7 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [seiState, setSeiState] = useState<SeiIntegrationState | null>(null);
+  const [publicationDetails, setPublicationDetails] = useState<Record<string, SeiPublicationDetails | null>>({});
 
   const fetchTracking = async () => {
     setLoading(true);
@@ -112,6 +131,46 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
     fetchTracking();
     // eslint-disable-next-line
   }, [workflowId]);
+
+  // Fetch publication details for documents that have seiPublicationId
+  useEffect(() => {
+    if (!workflowId || !seiState?.documents?.length) {
+      setPublicationDetails({});
+      return;
+    }
+    const ids = seiState.documents
+      .map((d) => d.seiPublicationId)
+      .filter((id): id is string => !!id);
+    if (ids.length === 0) {
+      setPublicationDetails({});
+      return;
+    }
+    const api = import.meta.env.VITE_BACK_END_API;
+    const token = getAccessToken();
+    if (!api || !token) return;
+
+    let cancelled = false;
+    const details: Record<string, SeiPublicationDetails | null> = {};
+    Promise.all(
+      ids.map(async (idPublicacao) => {
+        if (cancelled) return;
+        try {
+          const res = await axios.get<SeiPublicationDetails | null>(
+            `${api}/integrations/sei/tracking/${workflowId}/publication/${idPublicacao}`,
+            { headers: { authorization: `Bearer ${token}` } }
+          );
+          if (!cancelled) details[idPublicacao] = res.data ?? null;
+        } catch {
+          if (!cancelled) details[idPublicacao] = null;
+        }
+      })
+    ).then(() => {
+      if (!cancelled) setPublicationDetails(details);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [workflowId, seiState?.documents]);
 
   if (loading) {
     return (
@@ -165,22 +224,28 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
               backgroundColor:
                 seiState.status === "OPEN"
                   ? "rgba(34, 197, 94, 0.15)"
-                  : seiState.status === "ERROR"
-                    ? "rgba(239, 68, 68, 0.15)"
-                    : "rgba(107, 114, 128, 0.15)",
+                  : seiState.status === "CLOSED"
+                    ? "rgba(59, 130, 246, 0.15)"
+                    : seiState.status === "ERROR"
+                      ? "rgba(239, 68, 68, 0.15)"
+                      : "rgba(107, 114, 128, 0.15)",
               color:
                 seiState.status === "OPEN"
                   ? "#16a34a"
-                  : seiState.status === "ERROR"
-                    ? "#dc2626"
-                    : "#6b7280",
+                  : seiState.status === "CLOSED"
+                    ? "#2563eb"
+                    : seiState.status === "ERROR"
+                      ? "#dc2626"
+                      : "#6b7280",
             }}
           >
             {seiState.status === "OPEN"
               ? "Aberto"
-              : seiState.status === "ERROR"
-                ? "Erro"
-                : "Pendente"}
+              : seiState.status === "CLOSED"
+                ? "Encerrado"
+                : seiState.status === "ERROR"
+                  ? "Erro"
+                  : "Pendente"}
           </span>
           {seiState.processFormatted && (
             <span
@@ -220,52 +285,108 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
       {/* Mirrored Documents */}
       {seiState.documents && seiState.documents.length > 0 && (
         <div>
-          <h4
-            className="text-sm font-semibold mb-2"
-            style={{ color: styleContext.state.textColor }}
+          <div className="flex items-center space-x-2 mb-3 px-3">
+            <FaFileAlt size={14} className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-500">
+              Documentos Espelhados
+            </span>
+            <span
+              className={`text-sm px-2 py-0.5 rounded-full ${
+                isDark ? "bg-purple-900 text-purple-100" : "bg-purple-100 text-purple-800"
+              }`}
+            >
+              {seiState.documents.length}
+            </span>
+          </div>
+          <div
+            className="overflow-x-auto rounded-lg border"
+            style={{
+              borderColor: isDark ? "#374151" : "#E5E7EB",
+              backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+            }}
           >
-            Documentos Espelhados ({seiState.documents.length})
-          </h4>
-          <div className="overflow-x-auto">
             <table className="w-full text-sm" style={{ color: styleContext.state.textColor }}>
               <thead>
                 <tr
                   style={{
+                    backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.04)",
                     borderBottomWidth: 1,
                     borderColor: isDark ? "#374151" : "#E5E7EB",
                   }}
                 >
-                  <th className="text-left py-2 px-2 font-medium">Tipo</th>
-                  <th className="text-left py-2 px-2 font-medium">Arquivo</th>
-                  <th className="text-left py-2 px-2 font-medium">Acesso</th>
-                  <th className="text-left py-2 px-2 font-medium">Data</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Tipo</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Arquivo</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Acesso</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Data</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Publicação</th>
                 </tr>
               </thead>
               <tbody>
-                {seiState.documents.map((doc, idx) => (
-                  <tr
-                    key={idx}
-                    style={{
-                      borderBottomWidth: 1,
-                      borderColor: isDark ? "#1f2937" : "#F3F4F6",
-                    }}
-                  >
-                    <td className="py-2 px-2">
-                      {DOC_TYPE_LABELS[doc.type] || doc.type}
-                    </td>
-                    <td className="py-2 px-2 font-mono text-xs">
-                      {doc.fileName || doc.documentId}
-                    </td>
-                    <td className="py-2 px-2">
-                      {ACCESS_LEVEL_LABELS[doc.accessLevel] || doc.accessLevel}
-                    </td>
-                    <td className="py-2 px-2 text-xs">
-                      {doc.syncedAt
-                        ? new Date(doc.syncedAt).toLocaleString("pt-BR")
-                        : "-"}
-                    </td>
-                  </tr>
-                ))}
+                {seiState.documents.map((doc, idx) => {
+                  const pubId = doc.seiPublicationId ?? "";
+                  const pub = pubId ? publicationDetails[pubId] : undefined;
+                  return (
+                    <tr
+                      key={idx}
+                      style={{
+                        borderBottomWidth: idx < seiState.documents!.length - 1 ? 1 : 0,
+                        borderColor: isDark ? "#374151" : "#E5E7EB",
+                      }}
+                    >
+                      <td className="py-2.5 px-3">
+                        {DOC_TYPE_LABELS[doc.type] || doc.type}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-xs">
+                        {doc.fileName || doc.documentId}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        {ACCESS_LEVEL_LABELS[doc.accessLevel] || doc.accessLevel}
+                      </td>
+                      <td className="py-2.5 px-3 text-xs">
+                        {doc.syncedAt
+                          ? new Date(doc.syncedAt).toLocaleString("pt-BR")
+                          : "-"}
+                      </td>
+                      <td className="py-2.5 px-3 text-xs">
+                        {doc.seiPublicationId ? (
+                          <div className="flex flex-col gap-0.5">
+                            {pub ? (
+                              <>
+                                <span className="font-medium">
+                                  {pub.estadoLabel ?? pub.estado ?? "—"}
+                                  {pub.dataPublicacao
+                                    ? ` (${pub.dataPublicacao})`
+                                    : ""}
+                                </span>
+                                {pub.nomeVeiculo && (
+                                  <span style={{ color: isDark ? "#9CA3AF" : "#6B7280" }}>
+                                    {pub.nomeVeiculo}
+                                  </span>
+                                )}
+                                {pub.resumo && (
+                                  <span
+                                    className="line-clamp-2"
+                                    style={{ color: isDark ? "#9CA3AF" : "#6B7280" }}
+                                    title={pub.resumo}
+                                  >
+                                    {pub.resumo}
+                                  </span>
+                                )}
+                                <span className="font-mono text-[10px] opacity-75">
+                                  ID: {doc.seiPublicationId}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="font-mono">{doc.seiPublicationId}</span>
+                            )}
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -275,25 +396,39 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
       {/* Tracking History */}
       {seiState.tracking && seiState.tracking.length > 0 && (
         <div>
-          <h4
-            className="text-sm font-semibold mb-2"
-            style={{ color: styleContext.state.textColor }}
+          <div className="flex items-center space-x-2 mb-3 px-3">
+            <FaHistory size={14} className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-500">
+              Tramitação
+            </span>
+            <span
+              className={`text-sm px-2 py-0.5 rounded-full ${
+                isDark ? "bg-purple-900 text-purple-100" : "bg-purple-100 text-purple-800"
+              }`}
+            >
+              {seiState.tracking.length}
+            </span>
+          </div>
+          <div
+            className="overflow-x-auto rounded-lg border"
+            style={{
+              borderColor: isDark ? "#374151" : "#E5E7EB",
+              backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+            }}
           >
-            Tramitação ({seiState.tracking.length})
-          </h4>
-          <div className="overflow-x-auto">
             <table className="w-full text-sm" style={{ color: styleContext.state.textColor }}>
               <thead>
                 <tr
                   style={{
+                    backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.04)",
                     borderBottomWidth: 1,
                     borderColor: isDark ? "#374151" : "#E5E7EB",
                   }}
                 >
-                  <th className="text-left py-2 px-2 font-medium">Data</th>
-                  <th className="text-left py-2 px-2 font-medium">Ação</th>
-                  <th className="text-left py-2 px-2 font-medium">Unidade</th>
-                  <th className="text-left py-2 px-2 font-medium">Usuário</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Data</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Ação</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Unidade</th>
+                  <th className="text-left py-2.5 px-3 font-medium">Usuário</th>
                 </tr>
               </thead>
               <tbody>
@@ -301,18 +436,18 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
                   <tr
                     key={idx}
                     style={{
-                      borderBottomWidth: 1,
-                      borderColor: isDark ? "#1f2937" : "#F3F4F6",
+                      borderBottomWidth: idx < seiState.tracking!.length - 1 ? 1 : 0,
+                      borderColor: isDark ? "#374151" : "#E5E7EB",
                     }}
                   >
-                    <td className="py-2 px-2 text-xs whitespace-nowrap">
+                    <td className="py-2.5 px-3 text-xs whitespace-nowrap">
                       {entry.timestamp
                         ? new Date(entry.timestamp).toLocaleString("pt-BR")
                         : "-"}
                     </td>
-                    <td className="py-2 px-2">{entry.action}</td>
-                    <td className="py-2 px-2">{entry.unit || "-"}</td>
-                    <td className="py-2 px-2">{entry.user || "-"}</td>
+                    <td className="py-2.5 px-3">{entry.action}</td>
+                    <td className="py-2.5 px-3">{entry.unit || "-"}</td>
+                    <td className="py-2.5 px-3">{entry.user || "-"}</td>
                   </tr>
                 ))}
               </tbody>

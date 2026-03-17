@@ -2,7 +2,10 @@ import { useContext, useState } from "react";
 import { FieldTypeEnum, IField, IFormContext } from "@open-urbis/types";
 import { FieldEditable } from "../form-engine/FieldEditable";
 import { FaPlus, FaTrash, FaSignature } from "react-icons/fa";
-import { SignatureConfig } from "../../../api/types/schema";
+import {
+  SignatureConfig,
+  SeiIntegrationActivityConfig,
+} from "../../../api/types/schema";
 import { StyleContext } from "../../../reducers";
 import { Input, Textarea } from "../../../components";
 import {
@@ -12,17 +15,26 @@ import {
   IconButton,
   Tooltip,
 } from "../../../components";
+import { SeiDocumentTypeSelector } from "../components/SeiDocumentTypeSelector";
+import { ProtocolIntegrations } from "../../../types/global";
 
 export type SignatureEditorProps = {
   signatures: SignatureConfig[];
   general: IFormContext;
   onChange: (value: SignatureConfig[]) => void;
+  /** When set, show SEI document type selector for sync; uses schema integrations as fallback */
+  integrationsSei?: ProtocolIntegrations["sei"];
+  seiIntegration?: SeiIntegrationActivityConfig;
+  onSeiIntegrationChange?: (config: SeiIntegrationActivityConfig | undefined) => void;
 };
 
 export const ActivitySignatureEditor = ({
   signatures,
   general,
   onChange,
+  integrationsSei,
+  seiIntegration,
+  onSeiIntegrationChange,
 }: SignatureEditorProps): JSX.Element => {
   const [selectedSignatureId, setSelectedSignatureId] = useState<string>("");
   const [value, setValue] = useState<any>({});
@@ -78,6 +90,26 @@ export const ActivitySignatureEditor = ({
 
   return (
     <div className="flex w-full">
+      {integrationsSei?.IdUnidade &&
+        integrationsSei?.IdTipoProcedimento &&
+        onSeiIntegrationChange != null && (
+        <div className="w-full mb-6 p-4 rounded-lg border bg-muted/30">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            Sincronização SEI
+          </h3>
+          <SeiDocumentTypeSelector
+            label="Tipo de documento no SEI"
+            value={seiIntegration?.IdSerie}
+            onChange={(idSerie) =>
+              onSeiIntegrationChange(
+                idSerie != null ? { IdSerie: idSerie } : undefined
+              )
+            }
+            integrationsSei={integrationsSei}
+            fallbackKey="SignatureIdSerie"
+          />
+        </div>
+      )}
       <div className="w-1/4 border-r pr-4">
         <h2
           className="text-xl font-bold mb-4"
