@@ -20,22 +20,32 @@ import DocumentCertificateEditor from "./documents/DocumentCertificateEditor";
 import {
   DocumentConfig,
   DocumentTemplateType,
+  SeiIntegrationActivityConfig,
 } from "../../../api/types/schema";
 import { FaPlus, FaTrash, FaFileAlt } from "react-icons/fa";
 import { StyleContext } from "../../../reducers";
 import { useParams } from "react-router-dom";
 import { Input, Select, Textarea } from "../../../components";
+import { SeiDocumentTypeSelector } from "../components/SeiDocumentTypeSelector";
+import { ProtocolIntegrations } from "../../../types/global";
 
 export type ActivityDocumentEditorProps = {
   documents: DocumentConfig[];
   general: IFormContext;
   onChange: (documents: DocumentConfig[]) => void;
+  /** When set, show SEI document type selector for sync; uses schema integrations as fallback */
+  integrationsSei?: ProtocolIntegrations["sei"];
+  seiIntegration?: SeiIntegrationActivityConfig;
+  onSeiIntegrationChange?: (config: SeiIntegrationActivityConfig | undefined) => void;
 };
 
 export const ActivityDocumentEditor = ({
   documents,
   general,
   onChange,
+  integrationsSei,
+  seiIntegration,
+  onSeiIntegrationChange,
 }: ActivityDocumentEditorProps): JSX.Element => {
   const { id } = useParams<{ id: string }>();
   const [selectedDocumentId, setSelectedDocumentId] = useState<string>("");
@@ -204,6 +214,26 @@ export const ActivityDocumentEditor = ({
 
   return (
     <div className="flex flex-col w-full">
+      {integrationsSei?.IdUnidade &&
+        integrationsSei?.IdTipoProcedimento &&
+        onSeiIntegrationChange != null && (
+        <div className="mb-6 p-4 rounded-lg border bg-muted/30">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            Sincronização SEI
+          </h3>
+          <SeiDocumentTypeSelector
+            label="Tipo de documento no SEI"
+            value={seiIntegration?.IdSerie}
+            onChange={(idSerie) =>
+              onSeiIntegrationChange(
+                idSerie != null ? { IdSerie: idSerie } : undefined
+              )
+            }
+            integrationsSei={integrationsSei}
+            fallbackKey="DocumentIdSerie"
+          />
+        </div>
+      )}
       <div className="flex mb-8">
         <div className="w-1/4 border-r pr-4">
           <h2

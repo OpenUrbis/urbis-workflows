@@ -162,13 +162,30 @@ function Header(): JSX.Element {
     navigate(href);
   }
 
+  // Close all menus so only one can be open at a time when using shortcuts
+  const openViabilizaMenu = () => {
+    setAdminMenuOpen(false);
+    setUserMenuOpen(false);
+    setViabilizaMenuOpen(true);
+  };
+  const openAdminMenu = () => {
+    setViabilizaMenuOpen(false);
+    setUserMenuOpen(false);
+    setAdminMenuOpen(true);
+  };
+  const openUserMenu = () => {
+    setViabilizaMenuOpen(false);
+    setAdminMenuOpen(false);
+    setUserMenuOpen(true);
+  };
+
   // Setup hotkeys: 1 = Viabiliza, 2 = Administração, 3 = menu do usuário; user uses arrow keys to select
   useEffect(() => {
     if (isAuthenticated && !loading) {
       const hotkeyMap: Record<string, any> = {
-        "1": withNoModifiers(() => setViabilizaMenuOpen(true)),
-        "2": withNoModifiers(() => setAdminMenuOpen(true)),
-        "3": withNoModifiers(() => setUserMenuOpen(true)),
+        "1": withNoModifiers(openViabilizaMenu),
+        "2": withNoModifiers(openAdminMenu),
+        "3": withNoModifiers(openUserMenu),
       };
       hotkeyContext.dispatch({
         type: "SET_HOTKEY",
@@ -219,7 +236,13 @@ function Header(): JSX.Element {
             <div className="hidden md:flex items-center gap-2">
               <DropdownMenu
                 open={viabilizaMenuOpen}
-                onOpenChange={setViabilizaMenuOpen}
+                onOpenChange={(open) => {
+                  setViabilizaMenuOpen(open);
+                  if (open) {
+                    setAdminMenuOpen(false);
+                    setUserMenuOpen(false);
+                  }
+                }}
               >
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -242,6 +265,7 @@ function Header(): JSX.Element {
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
+                        setViabilizaMenuOpen(false);
                         navigate("/workflows-schema");
                       }}
                     >
@@ -254,6 +278,7 @@ function Header(): JSX.Element {
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
+                        setViabilizaMenuOpen(false);
                         navigate("/workflows");
                       }}
                     >
@@ -266,6 +291,7 @@ function Header(): JSX.Element {
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
+                        setViabilizaMenuOpen(false);
                         navigate("/workflows/all");
                       }}
                     >
@@ -278,6 +304,7 @@ function Header(): JSX.Element {
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
+                        setViabilizaMenuOpen(false);
                         navigate("/acceptances");
                       }}
                     >
@@ -291,6 +318,7 @@ function Header(): JSX.Element {
                     className="cursor-pointer"
                     onSelect={(event) => {
                       event.preventDefault();
+                      setViabilizaMenuOpen(false);
                       navigate("/document-validate");
                     }}
                   >
@@ -302,7 +330,13 @@ function Header(): JSX.Element {
               {isAuthenticated && administrativeItems.length > 0 ? (
                 <DropdownMenu
                   open={adminMenuOpen}
-                  onOpenChange={setAdminMenuOpen}
+                  onOpenChange={(open) => {
+                    setAdminMenuOpen(open);
+                    if (open) {
+                      setViabilizaMenuOpen(false);
+                      setUserMenuOpen(false);
+                    }
+                  }}
                 >
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -325,6 +359,7 @@ function Header(): JSX.Element {
                         className="cursor-pointer"
                         onSelect={(event) => {
                           event.preventDefault();
+                          setAdminMenuOpen(false);
                           navigate(item.path);
                         }}
                       >
@@ -338,7 +373,13 @@ function Header(): JSX.Element {
               {isAuthenticated ? (
                 <DropdownMenu
                   open={userMenuOpen}
-                  onOpenChange={setUserMenuOpen}
+                  onOpenChange={(open) => {
+                    setUserMenuOpen(open);
+                    if (open) {
+                      setViabilizaMenuOpen(false);
+                      setAdminMenuOpen(false);
+                    }
+                  }}
                 >
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -375,6 +416,7 @@ function Header(): JSX.Element {
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
+                        setUserMenuOpen(false);
                         window.location.href =
                           "https://conta.urbis.prefeitura.sp.gov.br";
                       }}
@@ -386,6 +428,7 @@ function Header(): JSX.Element {
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
+                        setUserMenuOpen(false);
                         signOut();
                       }}
                     >

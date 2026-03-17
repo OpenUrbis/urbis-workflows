@@ -1064,20 +1064,33 @@ export function WorkflowSchemaEditor(): JSX.Element {
           />
         );
       }
-      case ActivityTypeEnum.DOCUMENT:
+      case ActivityTypeEnum.DOCUMENT: {
+        const documentTemplate = activity.template as DocumentTemplate;
         return (
           <ActivityDocumentEditor
-            documents={(activity.template as DocumentTemplate).documents}
+            documents={documentTemplate.documents}
             general={editorGeneral}
             onChange={(newDocuments) => {
               handleUpdateActivity(index, {
                 template: {
+                  ...documentTemplate,
                   documents: newDocuments,
+                } as DocumentTemplate,
+              });
+            }}
+            integrationsSei={workflowSchema?.schema?.integrations?.sei}
+            seiIntegration={documentTemplate.seiIntegration}
+            onSeiIntegrationChange={(seiIntegration) => {
+              handleUpdateActivity(index, {
+                template: {
+                  ...documentTemplate,
+                  seiIntegration,
                 } as DocumentTemplate,
               });
             }}
           />
         );
+      }
       case ActivityTypeEnum.SIGNATURE: {
         const signatureTemplate = activity.template as SignaturesTemplate;
         return (
@@ -1088,7 +1101,18 @@ export function WorkflowSchemaEditor(): JSX.Element {
               onChange={(newSignatures) => {
                 handleUpdateActivity(index, {
                   template: {
+                    ...signatureTemplate,
                     signatures: newSignatures,
+                  } as SignaturesTemplate,
+                });
+              }}
+              integrationsSei={workflowSchema?.schema?.integrations?.sei}
+              seiIntegration={signatureTemplate.seiIntegration}
+              onSeiIntegrationChange={(seiIntegration) => {
+                handleUpdateActivity(index, {
+                  template: {
+                    ...signatureTemplate,
+                    seiIntegration,
                   } as SignaturesTemplate,
                 });
               }}
@@ -1096,7 +1120,8 @@ export function WorkflowSchemaEditor(): JSX.Element {
           </div>
         );
       }
-      case ActivityTypeEnum.TAX:
+      case ActivityTypeEnum.TAX: {
+        const taxTemplate = activity.template as TaxTemplate;
         return (
           <ActivityTaxEditor
             activity={activity}
@@ -1107,8 +1132,19 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 template: value.template,
               });
             }}
+            integrationsSei={workflowSchema?.schema?.integrations?.sei}
+            seiIntegration={taxTemplate.seiIntegration}
+            onSeiIntegrationChange={(seiIntegration) => {
+              handleUpdateActivity(index, {
+                template: {
+                  ...taxTemplate,
+                  seiIntegration,
+                },
+              });
+            }}
           />
         );
+      }
       default:
         return <div>Activity type not supported</div>;
     }
