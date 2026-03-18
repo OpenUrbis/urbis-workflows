@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { MapDataIntegrationField } from "@open-urbis/map";
 import { MapOptions as BaseMapOptions } from "@open-urbis/types";
 
@@ -15,28 +15,61 @@ export type FieldMapPickerProps = {
   onChange?: (value: unknown) => void;
 };
 
+function hasLoadedDwgData(v: unknown): boolean {
+  if (v == null || typeof v !== "object") return false;
+  const o = v as Record<string, unknown>;
+  const keys = Object.keys(o);
+  if (keys.length === 0) return false;
+  if (o.s3_metadata) return true;
+  return keys.some((k) =>
+    ["dados", "geometrias", "features", "blocos", "value"].includes(k),
+  );
+}
+
 export const MapPickerField: React.FC<FieldMapPickerProps> = ({
   fieldKey,
   options,
   value,
   onChange,
 }) => {
+  const [justLoaded, setJustLoaded] = useState(false);
+  useEffect(() => {
+    if (value == null || (typeof value === "object" && Object.keys(value as object).length === 0)) {
+      setJustLoaded(false);
+    } else if (hasLoadedDwgData(value)) {
+      setJustLoaded(true);
+    }
+  }, [value]);
+
   const handleChange = useCallback(
     (data: unknown) => {
+      if (data != null && typeof data === "object" && Object.keys(data).length > 0) {
+        setJustLoaded(true);
+      }
       onChange?.(data);
     },
     [onChange]
   );
+
+  const loaded = justLoaded || hasLoadedDwgData(value);
 
   return (
     <div
       key={fieldKey}
       style={{
         width: options?.width ?? "100%",
-        height: options?.height ?? "400px",
-        minHeight: "320px",
         borderRadius: "1rem",
-        overflow: "hidden",
+        ...(loaded
+          ? {
+              minHeight: "min(640px, 80vh)",
+              height: "auto",
+              overflow: "visible",
+            }
+          : {
+              height: options?.height ?? "400px",
+              minHeight: "320px",
+              overflow: "hidden",
+            }),
       }}
     >
       <MapDataIntegrationField

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FiChevronDown } from "react-icons/fi";
 import { MapPicker } from "@open-urbis/map";
 import { MapOptions as BaseMapOptions } from "@open-urbis/types";
 
@@ -48,15 +49,9 @@ export type FieldMapPerimeterProps = {
   onChange?: (value: unknown) => void;
 };
 
-const FichaDoImovel = ({
-  value,
-  onClose,
-}: {
-  value: MapPickerValueLike;
-  onClose: () => void;
-}) => {
+function FichaDropdownBody({ value }: { value: MapPickerValueLike }) {
   const resumo = useMemo(() => {
-    const editFeature = value?.editFeature;
+    const editFeature = value?.editFeature ?? value?.perimetroProtocolo;
     const geometry = editFeature?.geometry ?? undefined;
     const coords = editFeature?.geometry?.coordinates ?? undefined;
     return {
@@ -68,54 +63,34 @@ const FichaDoImovel = ({
   }, [value]);
 
   return (
-    <div className="absolute inset-0 bg-background/95 backdrop-blur pointer-events-auto z-50">
-      <div className="flex flex-col h-full w-full">
-        <div className="p-4 border-b flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-bold">Ficha do imóvel</h3>
-            <p className="text-sm text-muted-foreground">
-              Perímetro para protocolo e dados derivados
-            </p>
-          </div>
-          <button
-            type="button"
-            className="px-3 py-1.5 rounded-lg border hover:bg-accent/50 transition-colors text-sm"
-            onClick={onClose}
-          >
-            Fechar
-          </button>
+    <div className="border-t border-border bg-muted/20 px-3 py-3 max-h-[min(320px,42vh)] overflow-y-auto">
+      <div className="mb-3 rounded-lg border border-border p-3 bg-card">
+        <div className="text-xs font-semibold mb-2 text-muted-foreground">
+          Resumo
         </div>
-
-        <div className="flex-1 overflow-auto p-4">
-          <div className="mb-4 rounded-lg border p-3 bg-card">
-            <div className="text-xs font-semibold mb-2 text-muted-foreground">
-              Resumo
-            </div>
-            <pre className="text-xs font-mono whitespace-pre-wrap break-words">
-              {JSON.stringify(resumo, null, 2)}
-            </pre>
-          </div>
-
-          <div className="rounded-lg border p-3 bg-card">
-            <div className="text-xs font-semibold mb-2 text-muted-foreground">
-              Payload (editFeature + interseções)
-            </div>
-            <pre className="text-xs font-mono whitespace-pre-wrap break-words">
-              {JSON.stringify(
-                {
-                  editFeature: value?.editFeature ?? null,
-                  intersections: value?.intersections ?? null,
-                },
-                null,
-                2
-              )}
-            </pre>
-          </div>
+        <pre className="text-xs font-mono whitespace-pre-wrap break-words">
+          {JSON.stringify(resumo, null, 2)}
+        </pre>
+      </div>
+      <div className="rounded-lg border border-border p-3 bg-card">
+        <div className="text-xs font-semibold mb-2 text-muted-foreground">
+          Payload (editFeature + interseções)
         </div>
+        <pre className="text-xs font-mono whitespace-pre-wrap break-words max-h-48 overflow-y-auto">
+          {JSON.stringify(
+            {
+              editFeature:
+                value?.editFeature ?? value?.perimetroProtocolo ?? null,
+              intersections: value?.intersections ?? null,
+            },
+            null,
+            2
+          )}
+        </pre>
       </div>
     </div>
   );
-};
+}
 
 function getEditFeature(value: unknown): any {
   if (!value || typeof value !== "object") return undefined;
@@ -129,28 +104,26 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
   value,
   onChange,
 }) => {
-  const [showFicha, setShowFicha] = useState(false);
+  const [fichaOpen, setFichaOpen] = useState(false);
   const openedFromInitialRef = useRef(false);
-  const showFichaRef = useRef(showFicha);
-  showFichaRef.current = showFicha;
+  const fichaOpenRef = useRef(fichaOpen);
+  fichaOpenRef.current = fichaOpen;
   const flushScheduled = useRef(false);
   const latestPayloadRef = useRef<MapPickerValueLike | null>(null);
 
   const initialEditFeature = useMemo(() => getEditFeature(value), [value]);
 
   useEffect(() => {
-    // Abrir automaticamente quando o componente for instanciado com editFeature já presente.
     if (openedFromInitialRef.current) return;
     if (initialEditFeature) {
-      setShowFicha(true);
+      setFichaOpen(true);
       openedFromInitialRef.current = true;
     }
   }, [initialEditFeature]);
 
   useEffect(() => {
-    // Se o component for montado com um novo fieldKey (re-instancia), reinicia a regra.
     openedFromInitialRef.current = false;
-    setShowFicha(!!initialEditFeature);
+    setFichaOpen(!!initialEditFeature);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldKey]);
 
@@ -170,8 +143,8 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
           const nextValue = latestPayloadRef.current;
           if (!nextValue) return;
           onChange?.(nextValue);
-          if (nextValue.editFeature && !showFichaRef.current) {
-            setShowFicha(true);
+          if (nextValue.editFeature && !fichaOpenRef.current) {
+            setFichaOpen(true);
             openedFromInitialRef.current = true;
           }
         });
@@ -181,6 +154,9 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
   );
 
   const mode = onChange ? "editable" : "selected";
+
+  const displayValue = (value as MapPickerValueLike) ?? {};
+  const hasPerimetro = !!getEditFeature(displayValue);
 
   return (
     <div
@@ -196,14 +172,61 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
         flexDirection: "column",
       }}
     >
+      <div className="shrink-0 z-20 border-b border-border bg-card">
+        <button
+          type="button"
+          id={`perimetro-ficha-toggle-${fieldKey}`}
+          aria-expanded={fichaOpen}
+          aria-controls={`perimetro-ficha-panel-${fieldKey}`}
+          onClick={() => setFichaOpen((o) => !o)}
+          className={
+            "flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 " +
+            (fichaOpen ? "bg-accent/30" : "")
+          }
+        >
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-foreground">
+                Ficha do imóvel
+              </span>
+              {hasPerimetro ? (
+                <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
+                  Perímetro definido
+                </span>
+              ) : (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                  Aguardando perímetro
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Perímetro para protocolo e dados derivados
+            </p>
+          </div>
+          <FiChevronDown
+            className={
+              "h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 " +
+              (fichaOpen ? "rotate-180" : "")
+            }
+            aria-hidden
+          />
+        </button>
+        {fichaOpen && (
+          <div
+            id={`perimetro-ficha-panel-${fieldKey}`}
+            role="region"
+            aria-labelledby={`perimetro-ficha-toggle-${fieldKey}`}
+          >
+            <FichaDropdownBody value={displayValue} />
+          </div>
+        )}
+      </div>
       <div className="map-perimeter-field-embed-inner min-h-0 min-w-0 flex-1">
         <MapPicker
           mode={mode}
           layerConfig={MAP_PERIMETER_LAYER_CONFIG as any}
           onChange={handleChange}
           initialData={(value as MapPickerValueLike) ?? undefined}
-          overlay={showFicha ? <FichaDoImovel value={value as any} onClose={() => setShowFicha(false)} /> : undefined}
-          hideMap={showFicha}
           hideLayerManager={true}
         />
       </div>
