@@ -43,7 +43,15 @@ export type FieldMapProps = {
   fieldKey: string;
   options: MapOptions;
   value?: {
-    geometries: Geometry[];
+    geometries?: Geometry[];
+    editFeature?: {
+      geometry?: {
+        type?: string;
+        coordinates?: any;
+      };
+      [k: string]: any;
+    };
+    [k: string]: any;
   };
 };
 
@@ -81,6 +89,44 @@ export const Map: React.FC<FieldMapProps> = ({ fieldKey, options, value }) => {
             ),
           };
         });
+      } else if (value.editFeature?.geometry?.coordinates) {
+        // Accept new map-perimeter payload and render it on the legacy map.
+        // Value from MapPicker is GeoJSON-like: geometry.coordinates may be Polygon or MultiPolygon.
+        const geometryType = value.editFeature?.geometry?.type;
+        const rawCoordinates = value.editFeature?.geometry?.coordinates;
+
+        const ringCoords =
+          geometryType === "Polygon"
+            ? rawCoordinates?.[0]
+            : geometryType === "MultiPolygon"
+              ? rawCoordinates?.[0]?.[0]
+              : rawCoordinates?.[0]?.[0] ?? rawCoordinates;
+
+        const ringLngLatPairs: [number, number][] = Array.isArray(ringCoords)
+          ? (ringCoords as [number, number][])
+          : [];
+
+        if (ringLngLatPairs.length > 0) {
+          const x0 = Number(ringLngLatPairs[0]?.[0]);
+          const y0 = Number(ringLngLatPairs[0]?.[1]);
+          const looksWgs84 = Math.abs(x0) <= 180 && Math.abs(y0) <= 90;
+
+          const converted = looksWgs84
+            ? ringLngLatPairs.map(([lng, lat]) => [lat, lng] as [number, number])
+            : convertCoordinates(ringLngLatPairs).map((c) => [
+                c.lat,
+                c.lng,
+              ]);
+
+          geometries = [
+            {
+              title: "Perímetro",
+              color: "#14b8a6",
+              properties: [],
+              coordinates: converted as [number, number][],
+            },
+          ];
+        }
       } else if (options.layers && options.layers.length > 0) {
         geometries = options.layers
           .map((layer) => {

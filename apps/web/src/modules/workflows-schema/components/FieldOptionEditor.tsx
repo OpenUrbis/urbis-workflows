@@ -78,6 +78,8 @@ const fieldTypeColors = {
   integration: { bg: "bg-indigo-100", text: "text-indigo-800" },
   link: { bg: "bg-pink-100", text: "text-pink-800" },
   map: { bg: "bg-teal-100", text: "text-teal-800" },
+  mapPicker: { bg: "bg-teal-100", text: "text-teal-800" },
+  mapPerimeter: { bg: "bg-teal-100", text: "text-teal-800" },
   preset: { bg: "bg-cyan-100", text: "text-cyan-800" },
   table: { bg: "bg-amber-100", text: "text-amber-800" },
 };
@@ -97,6 +99,8 @@ const fieldTypeLabels = {
   integration: "Integração",
   link: "Vínculo",
   map: "Mapa",
+  mapPicker: "DWG",
+  mapPerimeter: "Perímetro",
   preset: "Preset",
   table: "Tabela",
 };
