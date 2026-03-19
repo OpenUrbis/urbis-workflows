@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
-import { Input, SL } from "../../components";
+// import { FormControl, FormLabel, Spinner } from "@chakra-ui/react";
+// import { Input, SL } from "../../components";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 
 export function ConfirmSignUp(): JSX.Element {
@@ -72,7 +72,7 @@ export function ConfirmSignUp(): JSX.Element {
           Confirme seu cadastro
         </h1>
         <form className="flex flex-col space-y-4" onSubmit={handleConfirm}>
-          <FormControl id="email">
+          {/* <FormControl id="email">
             <FormLabel>E-mail *</FormLabel>
             <Input
               type={"email"}
@@ -92,13 +92,14 @@ export function ConfirmSignUp(): JSX.Element {
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
-          </FormControl>
+          </FormControl> */}
           {error && <p className="text-red-500">{error}</p>}
           <p className="text-sm font-bold">
-            Foi enviado um código de confirmação no e-mail cadastrado. Caso não
-            recebeu aguarde um momento e verifique a caixa de Spam.
+            Comunique o suporte para habilitar sua conta.
+            {/* Foi enviado um código de confirmação no e-mail cadastrado. Caso não
+            recebeu aguarde um momento e verifique a caixa de Spam. */}
           </p>
-          <button
+          {/* <button
             type="submit"
             className="bg-yellow-600 hover:bg-yellow-700 text-white text-lg w-full py-3.5 rounded-xl disabled:opacity-80"
             disabled={loading || !code}
@@ -110,7 +111,7 @@ export function ConfirmSignUp(): JSX.Element {
                 Confirmar <SL bg="yellow.500">U</SL>
               </>
             )}
-          </button>
+          </button> */}
         </form>
       </div>
       <div className="hidden md:flex">

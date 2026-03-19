@@ -1,5 +1,12 @@
 import React, { FormEvent, useContext, useEffect, useState } from "react";
-import { FaPlus, FaTrash, FaSave, FaKey } from "react-icons/fa";
+import {
+  FaPlus,
+  FaTrash,
+  FaSave,
+  FaKey,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 import { Input, SL } from "../../components";
 import { Spinner } from "@chakra-ui/react";
 import EditableHeader from "../../components/EditableHeader";
@@ -15,6 +22,7 @@ import {
 } from "../../api/types/integrations.dto";
 import { TreeList } from "./components/TreeList";
 import { VersionsMenu } from "./components/VersionsMenu";
+import { usePermissions } from "../../reducers/permission.context";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "http://localhost:4000",
@@ -38,6 +46,7 @@ type VersionInfo = {
 export const Secrets: React.FC = () => {
   const hotkeyContext = useContext(HotkeyContext);
   const styleContext = useContext(StyleContext);
+  const { hasPermission } = usePermissions();
   const [loading, setLoading] = useState(true);
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [search, setSearch] = useState("");
@@ -51,6 +60,11 @@ export const Secrets: React.FC = () => {
     stage?: string;
   }>({ version: 0 });
   const [versions, setVersions] = useState<VersionInfo[]>([]);
+  const [showDecrypted, setShowDecrypted] = useState(false);
+  const [decryptedValue, setDecryptedValue] = useState<string | null>(null);
+  const [loadingDecrypted, setLoadingDecrypted] = useState(false);
+
+  const canViewDecrypted = hasPermission("integration:admin:secrets:findOne");
 
   const calculateReverseVersionNumber = (
     index: number,
@@ -91,7 +105,6 @@ export const Secrets: React.FC = () => {
         delete: ["N"],
       });
     };
-    
   }, [loading]);
 
   const searchCallback = (search: string) => {
@@ -128,6 +141,9 @@ export const Secrets: React.FC = () => {
   const selectSecretCallback = async (secretConfig: SecretMetadata) => {
     if (secretConfig !== undefined && secretConfig.id) {
       setLoading(true);
+      // Reset decrypted state when selecting a new secret
+      setShowDecrypted(false);
+      setDecryptedValue(null);
       try {
         const secret = await api.integrations.findOneSecret(secretConfig.id);
         setSelectedSecret(secret);
@@ -302,6 +318,28 @@ export const Secrets: React.FC = () => {
     }
   };
 
+  const handleToggleDecrypted = async () => {
+    if (!selectedSecret || !canViewDecrypted) return;
+
+    if (!showDecrypted) {
+      setLoadingDecrypted(true);
+      try {
+        const decryptedSecret = await api.integrations.findOneDecryptedSecret(
+          selectedSecret.id
+        );
+        setDecryptedValue(decryptedSecret.value);
+        setShowDecrypted(true);
+      } catch (error) {
+        console.error("Failed to fetch decrypted secret:", error);
+      } finally {
+        setLoadingDecrypted(false);
+      }
+    } else {
+      setShowDecrypted(false);
+      setDecryptedValue(null);
+    }
+  };
+
   return (
     <div className="flex flex-col space-y-6 mb-24 px-20 min-h-[80vh]">
       <div className="flex items-center justify-between mb-6">
@@ -445,13 +483,36 @@ export const Secrets: React.FC = () => {
                         <label className="block text-sm font-medium mb-1">
                           Valor atual
                         </label>
-                        <Input
-                          type="text"
-                          placeholder="O valor do segredo está oculto por segurança"
-                          size="lg"
-                          readOnly
-                          value="********"
-                        />
+                        <div className="relative">
+                          <Input
+                            type="text"
+                            placeholder="O valor do segredo está oculto por segurança"
+                            size="lg"
+                            readOnly
+                            value={
+                              showDecrypted ? decryptedValue || "" : "********"
+                            }
+                          />
+                          {canViewDecrypted && (
+                            <button
+                              onClick={handleToggleDecrypted}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                              disabled={loadingDecrypted}
+                            >
+                              {loadingDecrypted ? (
+                                <Spinner size="sm" />
+                              ) : showDecrypted ? (
+                                <FaEyeSlash size={16} />
+                              ) : (
+                                <FaEye size={16} />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Por motivos de segurança, o valor atual do segredo não
+                          é exibido.
+                        </p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-1">
@@ -466,10 +527,6 @@ export const Secrets: React.FC = () => {
                             handleSetSecret("newValue", e.target.value)
                           }
                         />
-                        <p className="text-sm text-gray-500 mt-1">
-                          Por motivos de segurança, o valor atual do segredo não
-                          é exibido. Para atualizar, digite o novo valor acima.
-                        </p>
                       </div>
                     </div>
                   </div>
