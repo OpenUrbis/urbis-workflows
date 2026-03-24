@@ -58,6 +58,8 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     resolve: {
+      /** One React instance app-wide (invalid hook call / `dispatcher.useRef` if duplicated). */
+      dedupe: ["react", "react-dom"],
       alias: {
         react: reactRoot,
         "react-dom": reactDomRoot,
@@ -75,6 +77,8 @@ export default defineConfig(({ mode }) => {
      */
     optimizeDeps: {
       include: [
+        "react",
+        "react-dom",
         "@preact/signals-react",
         "@preact/signals-core",
         "@open-urbis/map",
