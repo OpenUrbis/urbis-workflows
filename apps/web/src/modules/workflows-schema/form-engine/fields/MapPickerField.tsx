@@ -27,6 +27,28 @@ function hasLoadedDwgData(v: unknown): boolean {
   );
 }
 
+/** Scoped overrides for @open-urbis/map MapDataStructuredView (right column only). */
+const MAP_SIDEBAR_SCROLL_CSS = `
+            /* Radix ScrollArea: allow horizontal pan when labels extend past sidebar width */
+            .map-picker-field-wrapper .grid > div:nth-child(2) [data-radix-scroll-area-viewport] {
+              overflow-x: auto !important;
+            }
+
+            /* Accordion triggers + grid rows: scroll long labels instead of clipping (truncate) */
+            .map-picker-field-wrapper .grid > div:nth-child(2) .flex.items-center.gap-2.overflow-hidden {
+              overflow-x: auto !important;
+              overflow-y: hidden !important;
+              min-width: 0;
+              -webkit-overflow-scrolling: touch;
+            }
+
+            .map-picker-field-wrapper .grid > div:nth-child(2) .truncate {
+              overflow: visible !important;
+              text-overflow: clip !important;
+              white-space: nowrap !important;
+            }
+`;
+
 export const MapPickerField: React.FC<FieldMapPickerProps> = ({
   fieldKey,
   options,
@@ -39,7 +61,10 @@ export const MapPickerField: React.FC<FieldMapPickerProps> = ({
 
   const [justLoaded, setJustLoaded] = useState(false);
   useEffect(() => {
-    if (value == null || (typeof value === "object" && Object.keys(value as object).length === 0)) {
+    if (
+      value == null ||
+      (typeof value === "object" && Object.keys(value as object).length === 0)
+    ) {
       setJustLoaded(false);
     } else if (hasLoadedDwgData(value)) {
       setJustLoaded(true);
@@ -55,11 +80,12 @@ export const MapPickerField: React.FC<FieldMapPickerProps> = ({
       setJustLoaded(hasLoadedDwgData(data));
       onChange?.(data);
     },
-    [onChange]
+    [onChange],
   );
 
   const loaded = justLoaded || hasLoadedDwgData(value);
-  const hasExplicitHeight = typeof options?.height === "string" && options.height.trim().length > 0;
+  const hasExplicitHeight =
+    typeof options?.height === "string" && options.height.trim().length > 0;
   const wrapperHeight = hasExplicitHeight
     ? options.height
     : loaded
@@ -127,6 +153,8 @@ export const MapPickerField: React.FC<FieldMapPickerProps> = ({
                 grid-template-columns: 2fr 1fr !important;
               }
             }
+
+            ${MAP_SIDEBAR_SCROLL_CSS}
           `}</style>
 
           <div style={{ height: "100%", width: "100%" }}>
@@ -179,10 +207,7 @@ export const MapPickerField: React.FC<FieldMapPickerProps> = ({
           }
         }
 
-        /* When stacked, avoid horizontal scroll/overflow. */
-        .map-picker-field-wrapper .overflow-x-auto {
-          overflow-x: hidden !important;
-        }
+        ${MAP_SIDEBAR_SCROLL_CSS}
       `}</style>
 
       <button
