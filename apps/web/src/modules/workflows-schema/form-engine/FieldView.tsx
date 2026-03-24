@@ -13,6 +13,8 @@ import {
   FieldCheckboxProps,
   FieldInputProps,
   FieldMapProps,
+  FieldMapPickerProps,
+  FieldMapPerimeterProps,
   FieldRadioProps,
   FieldSelectProps,
   FieldTableViewProps,
@@ -22,6 +24,8 @@ import {
   Label,
   Link,
   Map,
+  MapPickerField,
+  MapPerimeterField,
   Paragraph,
   TableView,
   Title,
@@ -119,6 +123,23 @@ export const FIELD_COMPONENT_MAP: {
   },
   map: ({ fieldKey, options, value }: FieldMapProps) => (
     <Map fieldKey={fieldKey} options={options} value={value} />
+  ),
+  mapPicker: ({ field, options, value }: FieldMapPickerProps) => (
+    <MapPickerField
+      field={field}
+      fieldKey={field.key}
+      options={options}
+      value={value}
+    />
+  ),
+  mapPerimeter: ({ field, options, value, general }: FieldMapPerimeterProps) => (
+    <MapPerimeterField
+      field={field}
+      fieldKey={field.key}
+      options={options}
+      value={value}
+      general={general}
+    />
   ),
   table: ({ options, value, general }: FieldTableViewProps) => (
     <TableView

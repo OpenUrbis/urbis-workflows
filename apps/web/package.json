@@ -5,12 +5,15 @@
   "author": "Renan Tashiro",
   "dependencies": {
     "@babel/parser": "^7.25.8",
-    "@radix-ui/react-dialog": "^1.1.15",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@monaco-editor/react": "^4.6.0",
-    "@open-urbis/types": "*",
+    "@open-urbis/map": "1.0.1",
     "@open-urbis/map-ui": "*",
+    "@open-urbis/types": "*",
+    "@preact/signals-core": "^1.14.0",
+    "@preact/signals-react": "^3.9.0",
+    "@radix-ui/react-dialog": "^1.1.15",
     "@react-input/mask": "^2.0.4",
     "@types/node": "^20.1.4",
     "@types/qrcode.react": "^3.0.0",
@@ -51,6 +54,7 @@
   },
   "devDependencies": {
     "@open-urbis/eslint-config": "*",
+    "@preact/signals-react-transform": "^0.8.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -71,6 +75,7 @@
     "jsdom": "^26.1.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.0",
+    "sass-embedded": "^1.98.0",
     "typescript": "^5.0.4",
     "vite": "^6.3.1",
     "vitest": "^3.1.1"

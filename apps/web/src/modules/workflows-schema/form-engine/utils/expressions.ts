@@ -231,14 +231,14 @@ export function validCallback(
         onValidChange(isValid);
       }
     } else if (calcValid === undefined) {
-      checkRequiredFieldIfisValid(field, context, onValidChange);
+      checkRequiredFieldIfisValid(field, context, onValidChange, setValidState);
     }
   } else if (
     !["block", "integration", "preset", "subtitle", "table", "title"].includes(
       field.type
     )
   ) {
-    checkRequiredFieldIfisValid(field, context, onValidChange);
+    checkRequiredFieldIfisValid(field, context, onValidChange, setValidState);
   }
 }
 
@@ -295,29 +295,60 @@ export function modelCallback(
   }
 }
 
+/** Same rules as MapPickerField.hasLoadedDwgData — required mapPicker must have DWG payload, not just `{}`. */
+function mapPickerHasPayload(value: unknown): boolean {
+  if (value == null || typeof value !== "object") return false;
+  const o = value as Record<string, unknown>;
+  const keys = Object.keys(o);
+  if (keys.length === 0) return false;
+  if (o.s3_metadata) return true;
+  return keys.some((k) =>
+    ["dados", "geometrias", "features", "blocos", "value"].includes(k),
+  );
+}
+
+/** Perimeter is satisfied when a feature with coordinates exists (editFeature or perimetroProtocolo). */
+function mapPerimeterHasPayload(value: unknown): boolean {
+  if (value == null || typeof value !== "object") return false;
+  const o = value as Record<string, unknown>;
+  const feat = o.editFeature ?? o.perimetroProtocolo;
+  if (!feat || typeof feat !== "object") return false;
+  const g = (feat as { geometry?: { coordinates?: unknown } }).geometry;
+  return !!(g && g.coordinates);
+}
+
 function checkRequiredFieldIfisValid(
   field: IField,
   context: any,
-  onValidChange: (valid: boolean) => void
+  onValidChange: (valid: boolean) => void,
+  setValidState?: (valid: boolean | ValidState) => void
 ) {
   const isRequired = field?.options?.required === true;
 
-  if (isRequired) {
-    const value = context?.[field.key];
-    const valueIsNegative =
-      value === undefined ||
-      value === null ||
-      value === "" ||
-      (typeof value === "object" && Object.keys(value).length === 0);
+  if (!isRequired) return;
 
-    if (field.type === "array") {
-      if (valueIsNegative) {
-        // exceção quando é um array
-        onValidChange([{ $: false }] as any);
-      }
-    } else {
-      onValidChange(!valueIsNegative);
+  const value = context?.[field.key];
+  let valueIsNegative =
+    value === undefined ||
+    value === null ||
+    value === "" ||
+    (typeof value === "object" && Object.keys(value).length === 0);
+
+  if (field.type === "mapPicker") {
+    valueIsNegative = !mapPickerHasPayload(value);
+  } else if (field.type === "mapPerimeter") {
+    valueIsNegative = !mapPerimeterHasPayload(value);
+  }
+
+  if (field.type === "array") {
+    if (valueIsNegative) {
+      onValidChange([{ $: false }] as any);
+      setValidState?.(false);
     }
+  } else {
+    const ok = !valueIsNegative;
+    onValidChange(ok);
+    setValidState?.(ok ? true : false);
   }
 }
 
