@@ -1827,10 +1827,10 @@
     tailwindcss-animate "^1.0.7"
     vaul "^0.9.0"
 
-"@open-urbis/map@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@open-urbis/map/-/map-1.0.0.tgz#a582f6a13bd6ba5a3f67f04fc991fc7779ace0bd"
-  integrity sha512-Fr6d1iO+hfotOylTbPlOxFg3BT6eH7KYLMRM1wAxR4fDtMdFpVuWp0uoQ73saj+YjI9tWJWQDPFZT4IpttpKyg==
+"@open-urbis/map@*":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@open-urbis/map/-/map-1.0.1.tgz#c54b8a211a340e7ee4679d09f5e1fc48f60aa522"
+  integrity sha512-d8KTW95qq4VkZd2lGNx6LNEEld4RmupkLaaGXpJndPxCaQ+9feTAGUei99XY0FIpcheBQ/kxm58Xf3U/fypzcQ==
   dependencies:
     "@deck.gl/core" "^9.0.0"
     "@deck.gl/extensions" "^9.0.0"
