@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { FiChevronDown } from "react-icons/fi";
 import { MapPicker } from "@open-urbis/map";
+import { Map as LegacyMapField } from "./Map";
 import {
   IField,
   IFormContext,
@@ -128,13 +129,29 @@ function toMapPickerInitialData(
   return edit && !v.editFeature ? { ...v, editFeature: edit } : { ...v };
 }
 
+function valueForReadOnlyMap(v: unknown): Record<string, unknown> | undefined {
+  if (v == null || typeof v !== "object") return undefined;
+  const o = v as MapPickerValueLike;
+  const edit = o.editFeature ?? o.perimetroProtocolo;
+  if (!edit) return o as Record<string, unknown>;
+  return { ...(o as Record<string, unknown>), editFeature: edit };
+}
+
 export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
   fieldKey,
   options,
   value,
   onChange,
   valid,
+  general,
 }) => {
+  /**
+   * MapPicker always calls startEditing() on load, which puts Mapbox GL Draw in direct_select
+   * (vertices draggable) even when `mode="selected"`. For protocol / FieldView we must not use
+   * MapPicker — the legacy Leaflet Map already renders editFeature GeoJSON read-only.
+   */
+  const readOnly = !onChange || general?.$state === "view";
+
   const showInvalid = options?.required === true && valid === false;
   const invalidRing =
     "ring-2 ring-destructive/80 ring-offset-2 ring-offset-background";
@@ -203,10 +220,9 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
     [onChange],
   );
 
-  const mode = onChange ? "editable" : "selected";
-
   const displayValue = (value as MapPickerValueLike) ?? {};
   const hasPerimetro = !!getEditFeature(displayValue);
+  const legacyMapValue = valueForReadOnlyMap(value);
 
   return (
     <div
@@ -274,14 +290,24 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
         )}
       </div>
       <div className="map-perimeter-field-embed-inner min-h-0 min-w-0 flex-1 relative overflow-hidden">
-        <MapPicker
-          key={`map-perimeter-picker-${fieldKey}-${mapPickerInstanceKey}`}
-          mode={mode}
-          layerConfig={MAP_PERIMETER_LAYER_CONFIG as any}
-          onChange={handleChange}
-          initialData={mapPickerInitialData}
-          hideLayerManager={true}
-        />
+        {readOnly ? (
+          <div className="h-full w-full min-h-[280px]">
+            <LegacyMapField
+              fieldKey={fieldKey}
+              options={options as any}
+              value={legacyMapValue}
+            />
+          </div>
+        ) : (
+          <MapPicker
+            key={`map-perimeter-picker-${fieldKey}-${mapPickerInstanceKey}`}
+            mode="editable"
+            layerConfig={MAP_PERIMETER_LAYER_CONFIG as any}
+            onChange={handleChange}
+            initialData={mapPickerInitialData}
+            hideLayerManager={true}
+          />
+        )}
       </div>
     </div>
   );

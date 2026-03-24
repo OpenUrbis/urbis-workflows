@@ -132,12 +132,13 @@ export const FIELD_COMPONENT_MAP: {
       value={value}
     />
   ),
-  mapPerimeter: ({ field, options, value }: FieldMapPerimeterProps) => (
+  mapPerimeter: ({ field, options, value, general }: FieldMapPerimeterProps) => (
     <MapPerimeterField
       field={field}
       fieldKey={field.key}
       options={options}
       value={value}
+      general={general}
     />
   ),
   table: ({ options, value, general }: FieldTableViewProps) => (
