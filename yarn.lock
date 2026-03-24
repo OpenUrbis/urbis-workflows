@@ -1827,7 +1827,7 @@
     tailwindcss-animate "^1.0.7"
     vaul "^0.9.0"
 
-"@open-urbis/map@*":
+"@open-urbis/map@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@open-urbis/map/-/map-1.0.1.tgz#c54b8a211a340e7ee4679d09f5e1fc48f60aa522"
   integrity sha512-d8KTW95qq4VkZd2lGNx6LNEEld4RmupkLaaGXpJndPxCaQ+9feTAGUei99XY0FIpcheBQ/kxm58Xf3U/fypzcQ==

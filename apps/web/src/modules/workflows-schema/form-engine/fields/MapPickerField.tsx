@@ -1,19 +1,25 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { MapDataIntegrationField } from "@open-urbis/map";
-import { MapOptions as BaseMapOptions } from "@open-urbis/types";
+import {
+  IField,
+  IFormContext,
+  MapOptions as BaseMapOptions,
+} from "@open-urbis/types";
 import { FiMaximize2, FiX } from "react-icons/fi";
 
 /**
  * New map field type using @open-urbis/map (MapDataIntegrationField).
  * DWG / project data field ("mapPicker"). Legacy read-only map remains type "map".
- * Same props contract as other form fields (field, options, value, onChange) for retrocompatibility.
  */
 export type FieldMapPickerProps = {
-  field: { key: string };
+  field: IField;
   fieldKey: string;
   options: BaseMapOptions & { width?: string; height?: string };
   value?: unknown;
   onChange?: (value: unknown) => void;
+  general?: IFormContext;
+  valid?: boolean;
+  onValidChange?: (valid: boolean) => void;
 };
 
 function hasLoadedDwgData(v: unknown): boolean {
@@ -54,7 +60,12 @@ export const MapPickerField: React.FC<FieldMapPickerProps> = ({
   options,
   value,
   onChange,
+  valid,
 }) => {
+  const showInvalid = options?.required === true && valid === false;
+  const invalidRing =
+    "ring-2 ring-destructive/80 ring-offset-2 ring-offset-background rounded-2xl";
+
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [mapInstanceKey, setMapInstanceKey] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -126,8 +137,10 @@ export const MapPickerField: React.FC<FieldMapPickerProps> = ({
         </button>
 
         <div
-          className="map-picker-field-wrapper"
+          className={`map-picker-field-wrapper ${showInvalid ? invalidRing : ""}`}
           ref={wrapperRef}
+          data-invalid={showInvalid || undefined}
+          aria-invalid={showInvalid || undefined}
           style={{
             width: "100%",
             height: "100%",
@@ -173,8 +186,10 @@ export const MapPickerField: React.FC<FieldMapPickerProps> = ({
   return (
     <div
       key={fieldKey}
-      className="map-picker-field-wrapper"
+      className={`map-picker-field-wrapper ${showInvalid ? invalidRing : ""}`}
       ref={wrapperRef}
+      data-invalid={showInvalid || undefined}
+      aria-invalid={showInvalid || undefined}
       style={{
         width: options?.width ?? "100%",
         borderRadius: "1rem",

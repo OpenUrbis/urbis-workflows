@@ -1,7 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FiChevronDown } from "react-icons/fi";
 import { MapPicker } from "@open-urbis/map";
-import { MapOptions as BaseMapOptions } from "@open-urbis/types";
+import {
+  IField,
+  IFormContext,
+  MapOptions as BaseMapOptions,
+} from "@open-urbis/types";
 
 /** Fallback layer schema when `/maps/config/map` is unavailable (schema editor). Patched MapPicker syncs layerWithRootEditTemplate to this id. */
 const MAP_PERIMETER_LAYER_ID = "workflow-schema-perimetro";
@@ -42,11 +52,14 @@ type MapPickerValueLike = {
 };
 
 export type FieldMapPerimeterProps = {
-  field: { key: string };
+  field: IField;
   fieldKey: string;
   options: BaseMapOptions & { width?: string; height?: string };
   value?: unknown;
   onChange?: (value: unknown) => void;
+  general?: IFormContext;
+  valid?: boolean;
+  onValidChange?: (valid: boolean) => void;
 };
 
 function FichaDropdownBody({ value }: { value: MapPickerValueLike }) {
@@ -84,7 +97,7 @@ function FichaDropdownBody({ value }: { value: MapPickerValueLike }) {
               intersections: value?.intersections ?? null,
             },
             null,
-            2
+            2,
           )}
         </pre>
       </div>
@@ -98,20 +111,47 @@ function getEditFeature(value: unknown): any {
   return v.editFeature ?? v.perimetroProtocolo;
 }
 
+/** MapPicker only hydrates `initialData.editFeature` on mount (not `perimetroProtocolo`). */
+function toMapPickerInitialData(
+  value: unknown,
+): MapPickerValueLike | undefined {
+  if (value == null || typeof value !== "object") return undefined;
+  const v = value as MapPickerValueLike;
+  const edit = v.editFeature ?? v.perimetroProtocolo;
+  if (
+    !edit &&
+    !(v.selectedFeatures && v.selectedFeatures.length) &&
+    !v.digitalAddress
+  ) {
+    return undefined;
+  }
+  return edit && !v.editFeature ? { ...v, editFeature: edit } : { ...v };
+}
+
 export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
   fieldKey,
   options,
   value,
   onChange,
+  valid,
 }) => {
+  const showInvalid = options?.required === true && valid === false;
+  const invalidRing =
+    "ring-2 ring-destructive/80 ring-offset-2 ring-offset-background";
   const [fichaOpen, setFichaOpen] = useState(false);
   const openedFromInitialRef = useRef(false);
   const fichaOpenRef = useRef(fichaOpen);
   fichaOpenRef.current = fichaOpen;
   const flushScheduled = useRef(false);
   const latestPayloadRef = useRef<MapPickerValueLike | null>(null);
+  const [mapPickerInstanceKey, setMapPickerInstanceKey] = useState(0);
+  const prevHadEditFeatureRef = useRef(false);
 
   const initialEditFeature = useMemo(() => getEditFeature(value), [value]);
+  const mapPickerInitialData = useMemo(
+    () => toMapPickerInitialData(value),
+    [value],
+  );
 
   useEffect(() => {
     if (openedFromInitialRef.current) return;
@@ -124,8 +164,18 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
   useEffect(() => {
     openedFromInitialRef.current = false;
     setFichaOpen(!!initialEditFeature);
+    prevHadEditFeatureRef.current = !!getEditFeature(value);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldKey]);
+
+  // Remount once when saved perímetro appears (MapPicker hydrates initialData only on mount). Avoid remount on layout resize — ficha toggle changes height and was killing WebGL / react-map-gl; MapView already map.resize()s.
+  useEffect(() => {
+    const has = !!getEditFeature(value);
+    if (has && !prevHadEditFeatureRef.current) {
+      setMapPickerInstanceKey((k) => k + 1);
+    }
+    prevHadEditFeatureRef.current = has;
+  }, [value]);
 
   const handleChange = useCallback(
     (payload: MapPickerValueLike) => {
@@ -150,7 +200,7 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
         });
       }
     },
-    [onChange]
+    [onChange],
   );
 
   const mode = onChange ? "editable" : "selected";
@@ -161,7 +211,9 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
   return (
     <div
       key={fieldKey}
-      className="map-perimeter-field-embed rounded-2xl border border-border bg-card shadow-sm"
+      className={`map-perimeter-field-embed rounded-2xl border border-border bg-card shadow-sm ${showInvalid ? invalidRing : ""}`}
+      data-invalid={showInvalid || undefined}
+      aria-invalid={showInvalid || undefined}
       style={{
         width: options?.width ?? "100%",
         height: options?.height ?? "min(420px, 55vh)",
@@ -221,16 +273,16 @@ export const MapPerimeterField: React.FC<FieldMapPerimeterProps> = ({
           </div>
         )}
       </div>
-      <div className="map-perimeter-field-embed-inner min-h-0 min-w-0 flex-1">
+      <div className="map-perimeter-field-embed-inner min-h-0 min-w-0 flex-1 relative overflow-hidden">
         <MapPicker
+          key={`map-perimeter-picker-${fieldKey}-${mapPickerInstanceKey}`}
           mode={mode}
           layerConfig={MAP_PERIMETER_LAYER_CONFIG as any}
           onChange={handleChange}
-          initialData={(value as MapPickerValueLike) ?? undefined}
+          initialData={mapPickerInitialData}
           hideLayerManager={true}
         />
       </div>
     </div>
   );
 };
-

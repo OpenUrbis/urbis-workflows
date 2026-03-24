@@ -8,7 +8,7 @@
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@monaco-editor/react": "^4.6.0",
-    "@open-urbis/map": "*",
+    "@open-urbis/map": "1.0.1",
     "@open-urbis/map-ui": "*",
     "@open-urbis/types": "*",
     "@preact/signals-core": "^1.14.0",
