@@ -231,14 +231,14 @@ export function validCallback(
         onValidChange(isValid);
       }
     } else if (calcValid === undefined) {
-      checkRequiredFieldIfisValid(field, context, onValidChange, setValidState);
+      checkRequiredFieldIfisValid(field, context, onValidChange);
     }
   } else if (
     !["block", "integration", "preset", "subtitle", "table", "title"].includes(
       field.type
     )
   ) {
-    checkRequiredFieldIfisValid(field, context, onValidChange, setValidState);
+    checkRequiredFieldIfisValid(field, context, onValidChange);
   }
 }
 
@@ -320,8 +320,7 @@ function mapPerimeterHasPayload(value: unknown): boolean {
 function checkRequiredFieldIfisValid(
   field: IField,
   context: any,
-  onValidChange: (valid: boolean) => void,
-  setValidState?: (valid: boolean | ValidState) => void
+  onValidChange: (valid: boolean) => void
 ) {
   const isRequired = field?.options?.required === true;
 
@@ -334,21 +333,20 @@ function checkRequiredFieldIfisValid(
     value === "" ||
     (typeof value === "object" && Object.keys(value).length === 0);
 
-  if (field.type === "mapPicker") {
+  const fieldType = field.type as unknown as string;
+  if (fieldType === "mapPicker") {
     valueIsNegative = !mapPickerHasPayload(value);
-  } else if (field.type === "mapPerimeter") {
+  } else if (fieldType === "mapPerimeter") {
     valueIsNegative = !mapPerimeterHasPayload(value);
   }
 
   if (field.type === "array") {
     if (valueIsNegative) {
       onValidChange([{ $: false }] as any);
-      setValidState?.(false);
     }
   } else {
     const ok = !valueIsNegative;
     onValidChange(ok);
-    setValidState?.(ok ? true : false);
   }
 }
 
