@@ -15,6 +15,7 @@ import { IFormContext } from "@open-urbis/types";
 import { DocumentEditor } from "./documents/DocumentEditor";
 import { DocumentPlateEditor } from "./documents/DocumentPlateEditor";
 import { DocumentCustomEditor } from "./documents/DocumentCustomEditor";
+import DocumentCertificateEditor from "./documents/DocumentCertificateEditor";
 import {
   DocumentConfig,
   DocumentTemplateType,
@@ -181,6 +182,20 @@ export const ActivityDocumentEditor = ({
             showPreview={isPreview}
           />
         );
+        case "certificate": 
+      return (
+        <DocumentCertificateEditor
+          doc={doc}
+          value={doc}
+          onChange={(value) => {
+            const newDocs = documents.map((d) =>
+              d.id === doc.id ? value : d
+            );
+            onChange(newDocs);
+          }}
+          showPreview={isPreview}
+        />
+      );
       default:
         return <div>Template type not supported</div>;
     }
@@ -383,6 +398,7 @@ export const ActivityDocumentEditor = ({
                     <option value="document">Documento</option>
                     <option value="plate">Placa</option>
                     <option value="custom">Personalizado</option>
+                    <option value="certificate">Certidão</option> 
                   </Select>
                   <FormHelperText
                     style={{ color: styleContext.state.textColor }}
