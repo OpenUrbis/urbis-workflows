@@ -1,14 +1,7 @@
-import {
-  IconButton,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from "@chakra-ui/react";
 import { Editor } from "@monaco-editor/react";
 import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import { IconButton } from "../LegacyUi";
 import {
   isValidJsonAny,
   isValidJsonStr,
@@ -79,35 +72,44 @@ export const AdvancedJsonEditor = (props: IAdvancedJsonEditorProp) => {
       );
 
     return (
-      <Tabs
-        variant="enclosed"
-        index={tabIndex}
-        onChange={(i) => {
-          setTabIndex(i);
-        }}
-      >
-        <TabList>
-          {editors.map((editor) => (
-            <Tab key={editor.id}>
-              <span className="tab-name">
-                {editor.path.length
-                  ? ["root", ...editor.path].join(".")
-                  : "root"}
-              </span>
-              <IconButton
-                size={"xs"}
-                aria-label="Copy item"
-                onClick={() => closeTab(editor.id)}
+      <div className="flex flex-col h-full">
+        <div className="flex flex-wrap gap-1 border-b px-2 py-1">
+          {editors.map((editor, i) => {
+            const isActive = tabIndex === i;
+            return (
+              <button
+                key={editor.id}
+                type="button"
+                onClick={() => setTabIndex(i)}
+                className={`inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm ${
+                  isActive ? "bg-muted" : "hover:bg-muted/50"
+                }`}
               >
-                <FaTimes />
-              </IconButton>
-            </Tab>
-          ))}
-        </TabList>
-        <TabPanels>
-          {editors.map((editor, index) => (
-            <TabPanel key={editor.id} padding={0}>
+                <span className="tab-name">
+                  {editor.path.length
+                    ? ["root", ...editor.path].join(".")
+                    : "root"}
+                </span>
+                <IconButton
+                  aria-label="Close tab"
+                  onClick={(e: any) => {
+                    e.stopPropagation();
+                    closeTab(editor.id);
+                  }}
+                  className="h-6 w-6"
+                  icon={<FaTimes />}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex-1">
+          {editors.map((editor, index) => {
+            if (index !== tabIndex) return null;
+            return (
               <Editor
+                key={editor.id}
                 height="80vh"
                 defaultLanguage="json"
                 defaultValue={editor.value}
@@ -116,15 +118,14 @@ export const AdvancedJsonEditor = (props: IAdvancedJsonEditorProp) => {
                 beforeMount={(monaco) =>
                   setEditors((editors) => {
                     editors[index].monaco = monaco;
-
                     return editors;
                   })
                 }
               />
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </Tabs>
+            );
+          })}
+        </div>
+      </div>
     );
   };
 

@@ -1,31 +1,29 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Spinner,
   Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Textarea,
-  IconButton,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Badge,
   Checkbox,
-  Stack,
-  Box,
-  Divider,
-  Text,
-  InputGroup,
-  InputLeftElement,
-  Flex,
-  Collapse,
-  Select,
-  FormHelperText,
-} from "@chakra-ui/react";
+  Separator,
+  Button as DSButton,
+  Input as DSInput,
+  Select as DSSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea as DSTextarea,
+  Label,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
 import {
   FaEdit,
   FaPlus,
@@ -41,19 +39,24 @@ import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { useSnackbar } from "../../hooks/snackbar";
 import InfoTooltip from "../../components/InfoTooltip";
 import { SideDrawer } from "../../components/SideDrawer";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
+// Badge wrapper component with cursor pointer
 const ClickableBadge: React.FC<React.ComponentProps<typeof Badge>> = ({
   children,
   ...props
 }) => (
-  <Badge {...props} className={`${props.className || ""} cursor-pointer`}>
+  <Badge
+    {...props}
+    className={`text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center cursor-pointer ${props.className || ""}`}
+  >
     {children}
   </Badge>
 );
@@ -253,363 +256,192 @@ export function Roles(): JSX.Element {
   };
 
   return (
-    <div className="flex flex-col space-y-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="flex flex-col space-y-6 mb-20">
+      <div className="flex justify-between items-center h-10">
         <h2
-          className="text-xl font-bold"
+          className="text-lg font-bold text-foreground m-0 leading-none"
           style={{ color: styleContext.state.textColor }}
         >
           Funções
         </h2>
-        <Button
-          leftIcon={<FaPlus />}
-          colorScheme="purple"
+        <DSButton
+          type="button"
           onClick={resetFormAndOpen}
-          size="sm"
-          bg={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "purple.500"
-              : "purple.600"
-          }
-          _hover={{
-            bg:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "purple.600"
-                : "purple.700",
-          }}
-          color="white"
+          className="h-8 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
+          <FaPlus size={14} />
           Nova Função
-        </Button>
+        </DSButton>
       </div>
 
       {isLoading && roles.length === 0 ? (
         <div className="flex justify-center my-8">
-          <Spinner
-            size="lg"
-            color={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "purple.500"
-                : "purple.400"
-            }
-            thickness="3px"
-          />
+          <Spinner size="xl" />
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden border"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
-        >
-          <Table variant="simple" size="md">
-            <Thead>
-              <Tr>
-                <Th
-                  width="40px"
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                ></Th>
-                <Th
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                >
+        <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10 bg-muted/40 h-10 px-3"></TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold tracking-wide text-foreground">
                   Nome
-                </Th>
-                <Th
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                >
+                </TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold tracking-wide text-foreground">
                   Descrição
-                </Th>
-                <Th
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                >
+                </TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold tracking-wide text-foreground">
                   Permissões
-                </Th>
-                <Th
-                  width="100px"
-                  textAlign="right"
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                >
+                </TableHead>
+                <TableHead className="w-[100px] text-right bg-muted/40 h-10 px-4 text-xs font-semibold tracking-wide text-foreground">
                   Ações
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {roles.map((role) => (
                 <React.Fragment key={role.id}>
-                  <Tr
-                    className="transition-colors duration-200"
-                    _hover={{
-                      bg:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.50"
-                          : "gray.700",
-                    }}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                    }}
-                  >
-                    <Td
+                  <TableRow className="transition-colors duration-200">
+                    <TableCell
                       onClick={() => toggleRoleExpand(role.id)}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-foreground py-2"
                     >
                       {expandedRoles[role.id] ? (
                         <FaChevronDown />
                       ) : (
                         <FaChevronRight />
                       )}
-                    </Td>
-                    <Td
-                      fontWeight="medium"
-                      style={{ color: styleContext.state.textColor }}
-                    >
+                    </TableCell>
+                    <TableCell className="font-medium text-foreground py-2">
                       {role.name}
-                    </Td>
-                    <Td
-                      className="max-w-xs truncate"
-                      style={{
-                        color: styleContext.state.textColor,
-                        opacity: 0.9,
-                      }}
-                    >
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate text-muted-foreground py-2">
                       {role.description}
-                    </Td>
-                    <Td>
+                    </TableCell>
+                    <TableCell className="py-2">
                       <div className="flex flex-wrap gap-1 max-w-md">
                         {role.permissions.length > 0 ? (
                           role.permissions.slice(0, 2).map((permission) => (
                             <InfoTooltip
                               key={permission.id}
                               content={
-                                <Box>
-                                  <Text fontWeight="bold" mb={2}>
+                                <div className="space-y-2 text-foreground">
+                                  <p className="font-bold text-foreground">
                                     Detalhes da Permissão:
-                                  </Text>
-                                  <Text mb={1} fontSize="sm">
-                                    Nome: {permission.name}
-                                  </Text>
-                                  <Text mb={1} fontSize="sm">
-                                    Código: {permission.code}
-                                  </Text>
-                                  <Text mb={1} fontSize="sm">
-                                    Descrição: {permission.description}
-                                  </Text>
-                                </Box>
+                                  </p>
+                                  <p className="text-sm text-foreground">
+                                    <span className="font-medium">Nome:</span>{" "}
+                                    {permission.name}
+                                  </p>
+                                  <p className="text-sm text-foreground">
+                                    <span className="font-medium">Código:</span>{" "}
+                                    <code className="bg-muted px-1 rounded text-foreground">
+                                      {permission.code}
+                                    </code>
+                                  </p>
+                                  <p className="text-sm text-foreground">
+                                    <span className="font-medium">
+                                      Descrição:
+                                    </span>{" "}
+                                    {permission.description}
+                                  </p>
+                                </div>
                               }
-                              placement="top"
                               showIcon={false}
                             >
                               <ClickableBadge
-                                colorScheme="purple"
-                                variant="solid"
-                                className="flex items-center py-1 hover:opacity-80 transition-opacity"
-                                borderRadius="md"
-                                bg={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "purple.100"
-                                    : "purple.800"
-                                }
-                                color={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "purple.800"
-                                    : "purple.200"
-                                }
+                                variant="outline"
+                                className="bg-primary/10 text-primary border-primary/20"
                               >
-                                <span className="mx-1">{permission.code}</span>
+                                {permission.code}
                               </ClickableBadge>
                             </InfoTooltip>
                           ))
                         ) : (
-                          <Text fontSize="xs" color="gray.500">
+                          <span className="text-xs text-muted-foreground">
                             Sem permissões
-                          </Text>
+                          </span>
                         )}
                         {role.permissions.length > 2 && (
                           <InfoTooltip
                             content={
-                              <Box>
-                                <Text fontWeight="bold" mb={2}>
-                                  Permissões adicionais:
-                                </Text>
+                              <div className="space-y-2 text-foreground">
+                                <p className="font-bold">Permissões adicionais:</p>
                                 {role.permissions.slice(2).map((permission) => (
-                                  <Text
-                                    key={permission.id}
-                                    mb={1}
-                                    fontSize="sm"
-                                  >
+                                  <p key={permission.id} className="text-sm">
                                     • {permission.code} - {permission.name}
-                                  </Text>
+                                  </p>
                                 ))}
-                              </Box>
+                              </div>
                             }
-                            placement="top"
                             showIcon={false}
                           >
                             <ClickableBadge
-                              colorScheme="gray"
-                              py="1"
-                              px="2"
-                              className="hover:opacity-80 transition-opacity"
-                              borderRadius="md"
-                              bg={
-                                styleContext.state.buttonHoverColorWeight ===
-                                "200"
-                                  ? "gray.200"
-                                  : "gray.600"
-                              }
-                              color={
-                                styleContext.state.buttonHoverColorWeight ===
-                                "200"
-                                  ? "gray.700"
-                                  : "gray.200"
-                              }
+                              variant="secondary"
+                              className="bg-muted text-muted-foreground border-transparent"
                             >
                               +{role.permissions.length - 2}
                             </ClickableBadge>
                           </InfoTooltip>
                         )}
                       </div>
-                    </Td>
-                    <Td textAlign="right">
+                    </TableCell>
+                    <TableCell className="text-right py-2">
                       <div className="flex justify-end space-x-2 group">
-                        <IconButton
-                          aria-label="Edit"
-                          icon={<FaEdit />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
+                        <DSButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
                           onClick={() => handleEditClick(role)}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F3F4F6"
-                                : "#4B5563",
-                            color: styleContext.state.textColor,
-                          }}
-                        />
-                        <IconButton
-                          aria-label="Delete"
-                          icon={<FaTrash />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleDeleteClick(role.id)}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F3F4F6"
-                                : "#4B5563",
-                            color: styleContext.state.textColor,
-                          }}
-                        />
-                      </div>
-                    </Td>
-                  </Tr>
-                  <Tr>
-                    <Td colSpan={5} p={0}>
-                      <Collapse in={expandedRoles[role.id] || false}>
-                        <Box
-                          p={4}
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.50"
-                              : "gray.800"
-                          }
-                          borderBottomWidth="1px"
-                          borderBottomColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "#E5E7EB"
-                              : "#374151"
-                          }
+                          title="Editar"
                         >
-                          <Flex justifyContent="space-between" mb={2}>
-                            <Text
-                              fontWeight="bold"
-                              style={{ color: styleContext.state.textColor }}
-                            >
-                              Detalhes da Função
-                            </Text>
+                          <FaEdit size={14} />
+                        </DSButton>
+                        <DSButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleDeleteClick(role.id)}
+                          title="Excluir"
+                        >
+                          <FaTrash size={14} />
+                        </DSButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  {expandedRoles[role.id] && (
+                    <TableRow className="bg-muted/30">
+                      <TableCell colSpan={5} className="p-0">
+                        <div className="p-4 border-b border-border">
+                          <div className="flex justify-between items-center mb-2">
+                            <p className="font-bold text-foreground">Detalhes da Função</p>
                             <InfoTooltip
                               content={
-                                <Box>
-                                  <Text fontWeight="bold" mb={2}>
-                                    Permissões efetivas:
-                                  </Text>
-                                  <Text fontSize="xs" mb={2}>
-                                    (Todas as permissões atribuídas a esta
-                                    função)
-                                  </Text>
+                                <div className="space-y-2 text-foreground">
+                                  <p className="font-bold text-foreground">Permissões efetivas:</p>
+                                  <p className="text-xs mb-2 text-muted-foreground">
+                                    (Todas as permissões atribuídas a esta função)
+                                  </p>
                                   {role.permissions.map((perm) => (
-                                    <Text key={perm.id} mb={1} fontSize="sm">
+                                    <p key={perm.id} className="text-sm text-foreground">
                                       • {perm.name}
-                                    </Text>
+                                    </p>
                                   ))}
-                                </Box>
+                                </div>
                               }
-                              placement="top"
                               showIcon={false}
                             >
                               <ClickableBadge
-                                colorScheme="purple"
-                                py="1"
-                                px="2"
-                                className="hover:opacity-80 transition-opacity"
-                                borderRadius="md"
-                                bg={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "purple.100"
-                                    : "purple.800"
-                                }
-                                color={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "purple.800"
-                                    : "purple.200"
-                                }
+                                variant="outline"
+                                className="bg-primary/10 text-primary border-primary/20"
                               >
                                 {role.permissions.length} permissões
                               </ClickableBadge>
                             </InfoTooltip>
-                          </Flex>
-                          <Divider mb={3} />
+                          </div>
+                          <Separator className="my-3" />
 
-                          <Text
-                            fontSize="sm"
-                            fontWeight="medium"
-                            mb={2}
-                            style={{ color: styleContext.state.textColor }}
-                          >
+                          <p className="text-sm font-medium mb-2 text-foreground">
                             <strong>Nível de Acesso:</strong>{" "}
                             {role.accessLevel === 0
                               ? "Público"
@@ -620,138 +452,69 @@ export function Roles(): JSX.Element {
                                   : role.accessLevel === 3
                                     ? "Confidencial"
                                     : "Anônimo"}
-                          </Text>
+                          </p>
 
-                          <Text
-                            fontSize="sm"
-                            fontWeight="medium"
-                            mb={2}
-                            style={{ color: styleContext.state.textColor }}
-                          >
+                          <p className="text-sm font-medium mb-2 text-foreground">
                             Permissões nesta função:
-                          </Text>
+                          </p>
                           {role.permissions.length > 0 ? (
-                            <Stack spacing={2}>
+                            <div className="space-y-2">
                               {role.permissions.map((permission) => (
-                                <Box
+                                <div
                                   key={permission.id}
-                                  p={2}
-                                  bg={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "white"
-                                      : "gray.700"
-                                  }
-                                  borderWidth="1px"
-                                  borderRadius="md"
-                                  borderColor={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "#E5E7EB"
-                                      : "#4B5563"
-                                  }
+                                  className="p-2 bg-background border border-border rounded-md shadow-sm"
                                 >
-                                  <Flex
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                  >
-                                    <Text
-                                      fontWeight="medium"
-                                      style={{
-                                        color: styleContext.state.textColor,
-                                      }}
-                                    >
+                                  <div className="flex justify-between items-center">
+                                    <p className="font-medium text-foreground text-sm">
                                       {permission.name}
-                                    </Text>
+                                    </p>
                                     <InfoTooltip
                                       content={
-                                        <Box>
-                                          <Text fontWeight="bold" mb={2}>
-                                            Detalhes da Permissão:
-                                          </Text>
-                                          <Text mb={1} fontSize="sm">
-                                            Nome: {permission.name}
-                                          </Text>
-                                          <Text mb={1} fontSize="sm">
-                                            Código: {permission.code}
-                                          </Text>
-                                          <Text mb={1} fontSize="sm">
-                                            Descrição: {permission.description}
-                                          </Text>
-                                        </Box>
+                                        <div className="space-y-2 text-foreground">
+                                          <p className="font-bold text-foreground">Detalhes da Permissão:</p>
+                                          <p className="text-sm text-foreground"><span className="font-medium">Nome:</span> {permission.name}</p>
+                                          <p className="text-sm text-foreground"><span className="font-medium">Código:</span> <code className="bg-muted px-1 rounded text-foreground">{permission.code}</code></p>
+                                          <p className="text-sm text-foreground"><span className="font-medium">Descrição:</span> {permission.description}</p>
+                                        </div>
                                       }
-                                      placement="top"
                                       showIcon={false}
                                     >
                                       <ClickableBadge
-                                        colorScheme="purple"
-                                        py="1"
-                                        px="2"
-                                        className="hover:opacity-80 transition-opacity"
-                                        borderRadius="md"
-                                        bg={
-                                          styleContext.state
-                                            .buttonHoverColorWeight === "200"
-                                            ? "purple.100"
-                                            : "purple.800"
-                                        }
-                                        color={
-                                          styleContext.state
-                                            .buttonHoverColorWeight === "200"
-                                            ? "purple.800"
-                                            : "purple.200"
-                                        }
+                                        variant="outline"
+                                        className="bg-primary/10 text-primary border-primary/20"
                                       >
                                         {permission.code}
                                       </ClickableBadge>
                                     </InfoTooltip>
-                                  </Flex>
-                                  <Text
-                                    fontSize="sm"
-                                    color={
-                                      styleContext.state
-                                        .buttonHoverColorWeight === "200"
-                                        ? "gray.600"
-                                        : "gray.400"
-                                    }
-                                    mt={1}
-                                  >
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-1">
                                     {permission.description}
-                                  </Text>
-                                </Box>
+                                  </p>
+                                </div>
                               ))}
-                            </Stack>
+                            </div>
                           ) : (
-                            <Text
-                              fontSize="sm"
-                              color={
-                                styleContext.state.buttonHoverColorWeight ===
-                                "200"
-                                  ? "gray.600"
-                                  : "gray.400"
-                              }
-                            >
+                            <p className="text-sm text-muted-foreground italic">
                               Esta função não possui permissões atribuídas.
-                            </Text>
+                            </p>
                           )}
-                        </Box>
-                      </Collapse>
-                    </Td>
-                  </Tr>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </React.Fragment>
               ))}
               {roles.length === 0 && (
-                <Tr>
-                  <Td
+                <TableRow>
+                  <TableCell
                     colSpan={5}
-                    className="text-center py-4"
-                    style={{ color: styleContext.state.textColor }}
+                    className="text-center py-8 text-muted-foreground"
                   >
                     Nenhuma função encontrada
-                  </Td>
-                </Tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </Tbody>
+            </TableBody>
           </Table>
         </div>
       )}
@@ -770,352 +533,146 @@ export function Roles(): JSX.Element {
             colorScheme: "purple",
           }}
         >
-          <div className="overflow-y-auto">
-            <div
-              className="p-4 border-b"
-              style={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-              }}
-            >
-              <FormControl id="name" mb={4} isRequired>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+          <div className="overflow-y-auto h-full pb-20">
+            <div className="p-4 border-b border-border">
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Nome da Função
-                </FormLabel>
-                <Input
+                </Label>
+                <DSInput
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Ex: Administrador de Fluxos"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  py={3}
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#3182CE"
-                        : "#4299E1",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #3182CE"
-                        : "0 0 0 1px #4299E1",
-                  }}
+                  className="h-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-              </FormControl>
+              </div>
 
-              <FormControl id="description" mb={4}>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Descrição
-                </FormLabel>
-                <Textarea
+                </Label>
+                <DSTextarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Descrição detalhada da função..."
-                  borderRadius="md"
-                  borderWidth="1px"
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#3182CE"
-                        : "#4299E1",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #3182CE"
-                        : "0 0 0 1px #4299E1",
-                  }}
+                  className="min-h-[112px] bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-              </FormControl>
+              </div>
 
-              <FormControl id="accessLevel" mb={4}>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Nível de Acesso
-                </FormLabel>
-                <Select
-                  name="accessLevel"
-                  value={formData.accessLevel}
-                  onChange={(e) =>
+                </Label>
+                <DSSelect
+                  value={String(formData.accessLevel)}
+                  onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      accessLevel: parseInt(e.target.value),
+                      accessLevel: parseInt(value, 10),
                     })
                   }
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
                 >
-                  <option value={0}>Público</option>
-                  <option value={1}>Registrado</option>
-                  <option value={2}>Restrito</option>
-                  <option value={3}>Confidencial</option>
-                  <option value={4}>Anônimo</option>
-                </Select>
-                <FormHelperText
-                  style={{
-                    color:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.600"
-                        : "gray.400",
-                  }}
-                >
+                  <SelectTrigger className="h-9 w-full bg-background text-foreground border-border">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[2000]">
+                    <SelectItem value="0">Público</SelectItem>
+                    <SelectItem value="1">Registrado</SelectItem>
+                    <SelectItem value="2">Restrito</SelectItem>
+                    <SelectItem value="3">Confidencial</SelectItem>
+                    <SelectItem value="4">Anônimo</SelectItem>
+                  </SelectContent>
+                </DSSelect>
+                <p className="mt-1 text-xs text-muted-foreground">
                   Define o nível de acesso desta função
-                </FormHelperText>
-              </FormControl>
+                </p>
+              </div>
             </div>
 
             <div className="p-4">
-              <p
-                className="text-sm mb-4 font-medium"
-                style={{ color: styleContext.state.textColor }}
-              >
+              <p className="text-sm mb-4 font-medium text-foreground">
                 Selecione as permissões para esta função:
               </p>
 
               <div className="mb-4">
-                <div
-                  className="relative"
-                  style={{
-                    color: styleContext.state.textColor,
-                  }}
-                >
-                  <InputGroup size="lg">
-                    <InputLeftElement
-                      pointerEvents="none"
-                      height="100%"
-                      children={<FaSearch className="text-gray-400" />}
-                    />
-                    <Input
-                      placeholder="Buscar permissões..."
-                      value={permissionFilter}
-                      onChange={(e) => setPermissionFilter(e.target.value)}
-                      style={{
-                        backgroundColor: styleContext.state.backgroundColor,
-                        color: styleContext.state.textColor,
-                        borderColor:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#E5E7EB"
-                            : "#374151",
-                      }}
-                      _hover={{
-                        borderColor:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#D1D5DB"
-                            : "#4B5563",
-                      }}
-                      _focus={{
-                        borderColor:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "#3182CE"
-                            : "#4299E1",
-                        boxShadow:
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "0 0 0 1px #3182CE"
-                            : "0 0 0 1px #4299E1",
-                      }}
-                    />
-                  </InputGroup>
+                <div className="relative">
+                  <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                  <DSInput
+                    placeholder="Buscar permissões..."
+                    value={permissionFilter}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPermissionFilter(e.target.value)
+                    }
+                    className="h-9 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+                  />
                 </div>
               </div>
 
               {Object.entries(groupedPermissions).length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                  <FaSearch size={32} className="mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-1">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <FaSearch size={32} className="mb-4 opacity-60" />
+                  <p className="text-lg font-medium mb-1 text-foreground">
                     Nenhuma permissão encontrada
                   </p>
                   <p className="text-sm">Tente buscar com outros termos</p>
                 </div>
               ) : (
-                <Box maxH="400px" overflowY="auto">
+                <div className="max-h-[400px] overflow-y-auto space-y-6 pr-2">
                   {Object.entries(groupedPermissions).map(
-                    ([category, permissions]) => (
-                      <Box key={category} mb={4}>
-                        <Text
-                          fontWeight="bold"
-                          mb={2}
-                          color={styleContext.state.textColor}
-                        >
-                          {category}
-                        </Text>
-                        <Stack spacing={2}>
-                          {permissions.map((permission) => (
-                            <Box
+                    ([domain, domainPermissions]) => (
+                      <div key={domain} className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{domain}</span>
+                          <Separator className="flex-1" />
+                        </div>
+                        <div className="space-y-2">
+                          {domainPermissions.map((permission) => (
+                            <div
                               key={permission.id}
-                              p={3}
-                              borderRadius="lg"
-                              transition="all 0.2s"
-                              cursor="pointer"
-                              onClick={() =>
-                                handlePermissionChange(permission.id)
-                              }
-                              style={{
-                                backgroundColor:
-                                  formData.permissionIds.includes(permission.id)
-                                    ? styleContext.state
-                                        .buttonHoverColorWeight === "200"
-                                      ? "rgba(139, 92, 246, 0.1)"
-                                      : "rgba(124, 58, 237, 0.2)"
-                                    : "transparent",
-                              }}
-                              _hover={{
-                                bg: !formData.permissionIds.includes(
-                                  permission.id
-                                )
-                                  ? styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                    ? "rgba(243, 244, 246, 0.8)"
-                                    : "rgba(31, 41, 55, 0.5)"
-                                  : undefined,
-                              }}
+                              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
                             >
-                              <div className="flex items-center w-full">
-                                <Checkbox
-                                  isChecked={formData.permissionIds.includes(
-                                    permission.id
-                                  )}
-                                  onChange={(e) => {
-                                    e.stopPropagation();
-                                    handlePermissionChange(permission.id);
-                                  }}
-                                  colorScheme="purple"
-                                  size="lg"
-                                  className="mr-3"
-                                  borderRadius="md"
-                                  onClick={(e) => e.stopPropagation()}
-                                  sx={{
-                                    "span.chakra-checkbox__control": {
-                                      borderRadius: "0.375rem",
-                                    },
-                                  }}
-                                />
-                                <div className="flex-1">
-                                  <Text
-                                    fontWeight="medium"
-                                    color={styleContext.state.textColor}
-                                  >
-                                    {permission.name}
-                                  </Text>
-                                  <Text
-                                    fontSize="xs"
-                                    color={
-                                      styleContext.state
-                                        .buttonHoverColorWeight === "200"
-                                        ? "gray.600"
-                                        : "gray.400"
-                                    }
-                                  >
-                                    <code>{permission.code}</code>
-                                    {permission.description &&
-                                      ` - ${permission.description}`}
-                                  </Text>
-                                </div>
-                              </div>
-                            </Box>
+                              <Checkbox
+                                id={permission.id}
+                                checked={formData.permissionIds.includes(permission.id)}
+                                onCheckedChange={() => handlePermissionChange(permission.id)}
+                                className="!rounded-none shrink-0"
+                              />
+                              <Label
+                                htmlFor={permission.id}
+                                className="flex-1 cursor-pointer"
+                              >
+                                <div className="text-sm font-medium text-foreground leading-tight">{permission.name}</div>
+                                <div className="text-xs text-muted-foreground">{permission.code}</div>
+                              </Label>
+                            </div>
                           ))}
-                        </Stack>
-                        <Divider my={2} />
-                      </Box>
+                        </div>
+                      </div>
                     )
                   )}
-                </Box>
+                </div>
               )}
-              <Text
-                fontSize="sm"
-                color={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.600"
-                    : "gray.400"
-                }
-                mt={2}
-              >
+              <p className="mt-2 text-sm text-muted-foreground">
                 Selecionadas: {formData.permissionIds.length} permissões
-              </Text>
+              </p>
             </div>
           </div>
 
           <div
-            className="absolute bottom-0 left-0 right-0 p-4 border-t flex justify-end space-x-3 z-10"
-            style={{
-              borderColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#E5E7EB"
-                  : "#374151",
-              backgroundColor: styleContext.state.backgroundColor,
-            }}
+            className="absolute bottom-0 left-0 right-0 h-16 px-6 border-t border-border flex items-center justify-end space-x-3 z-10"
+            style={{ backgroundColor: styleContext.state.backgroundColor }}
           >
-            <Button
-              colorScheme="purple"
+            <DSButton
+              type="button"
               onClick={handleSave}
-              isLoading={isLoading}
-              size="md"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "purple.500"
-                  : "purple.600"
-              }
-              _hover={{
-                bg:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "purple.600"
-                    : "purple.700",
-              }}
+              disabled={isLoading}
+              className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isEdit ? "Atualizar" : "Criar"} Função
-            </Button>
+            </DSButton>
           </div>
         </SideDrawer>
       )}

@@ -13,7 +13,12 @@ import { MapScrollManager } from "../../components/MapScrollManager";
 import { MapOptions as BaseMapOptions } from "@open-urbis/types";
 import { LayerDescriptor } from "../../../../api/types/schema";
 import { StyleContext } from "../../../../reducers/style.reducer";
-import { Tooltip } from "@chakra-ui/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
 import L from "leaflet";
 import React from "react";
 
@@ -226,7 +231,7 @@ export const Map: React.FC<FieldMapProps> = ({ fieldKey, options, value }) => {
   };
 
   return (
-    <>
+    <TooltipProvider>
       <MapContainer
         key={fieldKey}
         style={{
@@ -344,26 +349,25 @@ export const Map: React.FC<FieldMapProps> = ({ fieldKey, options, value }) => {
                         {geom.title}
                       </h2>
                     </div>
-                    <Tooltip
-                      label="Centralizar esta área no mapa"
-                      placement="top"
-                      hasArrow
-                    >
-                      <button
-                        onClick={() => {
-                          setBounds([]);
-                          setTimeout(() => setBounds(geom.coordinates), 0);
-                        }}
-                        className={`flex items-center space-x-1 text-sm transition-colors ${
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "text-gray-600 hover:text-gray-800"
-                            : "text-gray-300 hover:text-white"
-                        }`}
-                        title="Centralizar no mapa"
-                      >
-                        <MdCenterFocusStrong size={16} />
-                        <span>Centralizar</span>
-                      </button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => {
+                            setBounds([]);
+                            setTimeout(() => setBounds(geom.coordinates), 0);
+                          }}
+                          className={`flex items-center space-x-1 text-sm transition-colors ${
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "text-gray-600 hover:text-gray-800"
+                              : "text-gray-300 hover:text-white"
+                          }`}
+                          title="Centralizar no mapa"
+                        >
+                          <MdCenterFocusStrong size={16} />
+                          <span>Centralizar</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>Centralizar esta área no mapa</TooltipContent>
                     </Tooltip>
                   </div>
 
@@ -407,7 +411,7 @@ export const Map: React.FC<FieldMapProps> = ({ fieldKey, options, value }) => {
             </div>
           </div>
         )}
-    </>
+    </TooltipProvider>
   );
 };
 

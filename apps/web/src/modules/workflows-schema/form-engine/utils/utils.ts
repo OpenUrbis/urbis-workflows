@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../../auth/token";
 import axios from "axios";
 
 export async function downloadFile(dir: string | undefined, filename: string) {
@@ -10,7 +11,7 @@ export async function downloadFile(dir: string | undefined, filename: string) {
       },
       {
         headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
+          authorization: `Bearer ${getAccessToken()}`,
         },
       }
     );

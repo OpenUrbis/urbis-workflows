@@ -55,6 +55,8 @@ export interface WorkflowMetadata {
   createdAt: Date;
   updatedBy: UserData;
   updatedAt: Date;
+  status?: string;
+  currentStep?: string;
 }
 
 export interface SignatureValue {
@@ -174,6 +176,28 @@ export interface GenerateTaxHttpDto {
 export interface FormWorkflowHttpDto {
   activityId: string;
   form: any;
+}
+
+// Search / Filter params for findAll
+export interface FindAllWorkflowsParams {
+  stage?: string;
+  page?: number;
+  pageSize?: number;
+  query?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  label?: string;
+  description?: string;
+  createdByName?: string;
+  workflowId?: string;
+  status?: string;
+  geoBoundsSwLat?: number;
+  geoBoundsSwLng?: number;
+  geoBoundsNeLat?: number;
+  geoBoundsNeLng?: number;
+  structuredQuery?: string;
+  sortBy?: string;
+  sortOrder?: "ASC" | "DESC";
 }
 
 // Response DTOs

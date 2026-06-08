@@ -1,33 +1,15 @@
-import {
-  IconButton,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Step,
-  StepIcon,
-  StepIndicator,
-  StepNumber,
-  Stepper,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Tag,
-  useDisclosure,
-  useSteps,
-} from "@chakra-ui/react";
+import { getAccessToken } from "../../auth/token";
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { FaDownload, FaExpand } from "react-icons/fa";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@open-urbis/map-ui";
+import { FaDownload, FaExpand, FaTimes } from "react-icons/fa";
 import { RiBarcodeFill } from "react-icons/ri";
 import { useNavigate, useParams } from "react-router-dom";
 import { IField } from "@open-urbis/types";
 import logoCityHallImg from "../../assets/logo_white.png";
 import { useSnackbar } from "../../hooks/snackbar";
 import { StyleContext } from "../../reducers";
+import { IconButton, Spinner } from "../../components/LegacyUi";
 import { Field } from "../workflows-schema";
 import { VersionsMenu } from "../workflows-schema/components/VersionsMenu";
 import { FieldView } from "../workflows-schema/form-engine/FieldView";
@@ -52,18 +34,15 @@ export function Document(): JSX.Element {
     field?: IField;
     protocol?: any;
   }>();
-  const { activeStep, setActiveStep } = useSteps({
-    index: 1,
-    count: 4,
-  });
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [activeStep, setActiveStep] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
 
   const fetchProtocol = async () => {
     const response = await axios.get(
       `${import.meta.env.VITE_BACK_END_API}/protocols/${id}`,
       {
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -72,6 +51,7 @@ export function Document(): JSX.Element {
 
     if (response.data.status === "WAITING_ACCEPTANCE") {
       setMaxStepEnable(1);
+      setActiveStep(1);
     } else if (response.data.status === "WAITING_TAX_PAYMENT") {
       setActiveStep(2);
       setMaxStepEnable(2);
@@ -102,7 +82,7 @@ export function Document(): JSX.Element {
         `${import.meta.env.VITE_BACK_END_API}/protocols/${id}/versions/${version}`,
         {
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );
@@ -140,7 +120,7 @@ export function Document(): JSX.Element {
         },
         {
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );
@@ -159,7 +139,7 @@ export function Document(): JSX.Element {
       `${import.meta.env.VITE_BACK_END_API}/protocols/tax/${id}/browser`,
       {
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -176,7 +156,7 @@ export function Document(): JSX.Element {
       {},
       {
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -193,7 +173,7 @@ export function Document(): JSX.Element {
           version,
         },
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -218,7 +198,7 @@ export function Document(): JSX.Element {
           version,
         },
         headers: {
-          authorization: `${localStorage.getItem("token")}`,
+          authorization: `${getAccessToken()}`,
         },
       }
     );
@@ -250,6 +230,13 @@ export function Document(): JSX.Element {
     REJECTED: "Rejeitado",
   };
 
+  const steps = [
+    { index: 0, title: "Pedido" },
+    { index: 1, title: "Assinaturas" },
+    { index: 2, title: "Taxa" },
+    { index: 3, title: "Documento" },
+  ];
+
   const formVersions = protocol
     ? protocol.versions.filter(
         (version) => version.type === "apostille" || version.type === "create"
@@ -275,7 +262,7 @@ export function Document(): JSX.Element {
               <>
                 <div className="text-end x">
                   <button
-                    className={`bg-yellow-600 hover:bg-yellow-700 text-white text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                    className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
                     onClick={handleExtraApostille}
                   >
                     Ex Officio
@@ -283,7 +270,7 @@ export function Document(): JSX.Element {
                 </div>
                 <div className="text-end">
                   <button
-                    className={`bg-yellow-600 hover:bg-yellow-700 text-white text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                    className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
                     onClick={handleApostille}
                   >
                     Apostilar
@@ -293,69 +280,46 @@ export function Document(): JSX.Element {
             )}
           </div>
 
-          <Stepper
-            size="lg"
-            colorScheme="red"
-            orientation={window.innerWidth <= 500 ? "vertical" : "horizontal"}
-            index={activeStep}
-          >
-            <Step>
-              <StepIndicator
-                className="cursor-pointer"
-                onClick={() => setActiveStep(0)}
-              >
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-              <StepTitle>Pedido</StepTitle>
-              <StepSeparator></StepSeparator>
-            </Step>
-            <Step>
-              <StepIndicator
-                className="cursor-pointer"
-                onClick={() => setActiveStep(1)}
-              >
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-              <StepTitle>Assinaturas</StepTitle>
-              <StepSeparator></StepSeparator>
-            </Step>
-            <Step>
-              <StepIndicator
-                className="cursor-pointer"
-                onClick={() => setActiveStep(2)}
-              >
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-              <StepTitle>Taxa</StepTitle>
-              <StepSeparator></StepSeparator>
-            </Step>
-            <Step>
-              <StepIndicator
-                className="cursor-pointer"
-                onClick={() => setActiveStep(3)}
-              >
-                <StepStatus
-                  complete={<StepIcon />}
-                  incomplete={<StepNumber />}
-                  active={<StepNumber />}
-                />
-              </StepIndicator>
-              <StepTitle>Documento</StepTitle>
-              <StepSeparator></StepSeparator>
-            </Step>
-          </Stepper>
+          <div className="flex flex-wrap items-center gap-3 pb-2">
+            {steps.map((s, idx) => {
+              const isActive = activeStep === s.index;
+              const isComplete = activeStep > s.index;
+              return (
+                <div key={s.index} className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveStep(s.index)}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <span
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 text-sm font-semibold"
+                      style={{
+                        backgroundColor: isActive || isComplete ? "#ef4444" : "transparent",
+                        borderColor: isActive || isComplete ? "#ef4444" : (styleContext.state.buttonHoverColorWeight === "200" ? "#E5E7EB" : "#374151"),
+                        color: isActive || isComplete ? "white" : styleContext.state.textColor,
+                      }}
+                    >
+                      {idx + 1}
+                    </span>
+                    <span style={{ color: styleContext.state.textColor }}>
+                      {s.title}
+                    </span>
+                  </button>
+                  {idx < steps.length - 1 && (
+                    <span
+                      className="h-px w-10"
+                      style={{
+                        backgroundColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
           {/* Protocol */}
           {activeStep === 0 && protocol && (
@@ -420,7 +384,7 @@ export function Document(): JSX.Element {
               ></Field>
               <div className="text-center">
                 <button
-                  className={`bg-yellow-600 hover:bg-yellow-700 text-white text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                  className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
                   onClick={handleAccept}
                 >
                   Aceitar
@@ -481,17 +445,25 @@ export function Document(): JSX.Element {
                     <div className="flex-grow"></div>
                     <div className="flex flex-col space-y-6">
                       <div className="flex justify-end">
-                        <Tag
-                          size={"lg"}
-                          color={COLOR_MAPPER[acceptance.status as any]}
+                        <span
+                          className="inline-flex rounded-full px-3 py-1 text-sm font-semibold"
+                          style={{
+                            backgroundColor:
+                              acceptance.status === "ACCEPTED"
+                                ? "rgba(34, 197, 94, 0.15)"
+                                : acceptance.status === "REJECTED"
+                                  ? "rgba(239, 68, 68, 0.15)"
+                                  : "rgba(107, 114, 128, 0.15)",
+                            color: styleContext.state.textColor,
+                          }}
                         >
                           {LABEL_MAPPER[acceptance.status as any]}
-                        </Tag>
+                        </span>
                       </div>
                       {acceptance.status === "ACCEPTED" && (
                         <div
                           onClick={() => {
-                            onOpen();
+                            setIsOpen(true);
                             setOpenedAcceptance(acceptance);
                           }}
                           className="flex items-center space-x-2 cursor-pointer"
@@ -511,16 +483,45 @@ export function Document(): JSX.Element {
             })}
 
           {protocol && (
-            <Modal isOpen={isOpen} onClose={onClose}>
-              <ModalOverlay />
-              <ModalContent
+            <Dialog
+              open={isOpen}
+              onOpenChange={(open) => {
+                if (!open) setIsOpen(false);
+              }}
+            >
+              <DialogContent
                 className="px-4 py-6"
-                style={{ minWidth: 685, maxHeight: "80vh" }}
-                bg={styleContext.state.backgroundColor}
+                style={{ minWidth: 685, maxHeight: "80vh", backgroundColor: styleContext.state.backgroundColor }}
               >
-                <ModalHeader>Dados da assinatura</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody overflowY="auto" wordBreak="break-word">
+                <DialogHeader>
+                  <div className="flex items-center justify-between gap-4">
+                    <DialogTitle asChild>
+                      <span style={{ color: styleContext.state.textColor }}>
+                        Dados da assinatura
+                      </span>
+                    </DialogTitle>
+                    <button
+                      type="button"
+                      aria-label="Close"
+                      onClick={() => setIsOpen(false)}
+                      className="rounded p-1.5 transition-colors duration-150"
+                      style={{
+                        color:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#6B7280"
+                            : "#9CA3AF",
+                        backgroundColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "rgba(107, 114, 128, 0.1)"
+                            : "rgba(156, 163, 175, 0.1)",
+                      }}
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
+                </DialogHeader>
+
+                <div className="overflow-y-auto break-words">
                   <FieldView
                     context={openedAcceptance.value}
                     field={protocol.acceptance[openedAcceptance.type]}
@@ -529,13 +530,14 @@ export function Document(): JSX.Element {
                       $variables: protocol.environment,
                       $data: openedAcceptance.value,
                       $modules: parseFunctions(protocol?.function ?? {}),
+                      $history: protocol.diff,
                       $state: "view",
                     }}
                     value={openedAcceptance.value}
                   ></FieldView>
-                </ModalBody>
-              </ModalContent>
-            </Modal>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
 
           {/* Tax */}
@@ -560,7 +562,7 @@ export function Document(): JSX.Element {
                 protocolo por "Pedidos".
               </p>
               <div
-                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xl py-4 px-6 rounded-xl disabled:opacity-80 cursor-pointer"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80 cursor-pointer"
                 onClick={mockCallPayment}
               >
                 <RiBarcodeFill className="inline" size={42} /> Baixar boleto
@@ -582,7 +584,7 @@ export function Document(): JSX.Element {
             <div className="flex flex-col space-y-4 justify-center text-center pt-6 cursor-pointer">
               <div
                 onClick={() => downloadDocument()}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xl py-4 px-6 rounded-xl disabled:opacity-80"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80"
               >
                 <img
                   className="inline mr-2"
@@ -598,7 +600,7 @@ export function Document(): JSX.Element {
             <div className="flex flex-col space-y-4 justify-center text-center cursor-pointer">
               <div
                 onClick={() => downloadPlate()}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xl py-4 px-6 rounded-xl disabled:opacity-80"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80"
               >
                 <img
                   className="inline mr-2"
@@ -641,7 +643,6 @@ export function Document(): JSX.Element {
                         {version.type}
                         {version.type === "document" && (
                           <IconButton
-                            size={"sm"}
                             aria-label="Retry Preset"
                             icon={<FaDownload />}
                             onClick={() => downloadDocument(version.version)}
@@ -651,7 +652,6 @@ export function Document(): JSX.Element {
                         )}
                         {version.type === "plate" && (
                           <IconButton
-                            size={"sm"}
                             aria-label="Retry Preset"
                             icon={<FaDownload />}
                             onClick={() => downloadPlate(version.version)}

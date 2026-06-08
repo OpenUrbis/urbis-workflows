@@ -1,5 +1,5 @@
-import { IconButton, Spinner, Tooltip } from "@chakra-ui/react";
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import { IconButton, Spinner, Tooltip } from "../../../components";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaTrash,
   FaEyeSlash,
@@ -61,6 +61,35 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
   const [localValue, setLocalValue] = useState(value);
   const [localValid, setLocalValid] = useState(valid);
   const [showHidden, setShowHidden] = useState(false);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    setLocalValid(valid);
+  }, [valid]);
+
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const onValidChangeRef = useRef(onValidChange);
+  onValidChangeRef.current = onValidChange;
+
+  const handleBlockChange = useCallback((k: string, v: any) => {
+    setLocalValue((current: any) => {
+      const newLocalValue = { ...current, [k]: v };
+      onChangeRef.current(newLocalValue);
+      return newLocalValue;
+    });
+  }, []);
+
+  const handleBlockValidChange = useCallback((k: string, v: any) => {
+    setLocalValid((current: any) => {
+      const newLocalValid = { ...current, [k]: v };
+      onValidChangeRef.current(newLocalValid);
+      return newLocalValid;
+    });
+  }, []);
 
   const FieldComponent = FIELD_COMPONENT_MAP[field.type] || (() => <></>);
 
@@ -139,21 +168,16 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
         aria-label="Remove field"
         icon={<FaTrash />}
         onClick={onRemove}
-        bg={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.100"
-            : "gray.800"
-        }
-        color={
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.600"
-            : "gray.200"
-        }
-        _hover={{
-          bg:
+        className="transition-colors"
+        style={{
+          backgroundColor:
             styleContext.state.buttonHoverColorWeight === "200"
-              ? "gray.200"
-              : "gray.700",
+              ? "#f3f4f6"
+              : "#1f2937",
+          color:
+            styleContext.state.buttonHoverColorWeight === "200"
+              ? "#4b5563"
+              : "#e5e7eb",
         }}
       />
     );
@@ -333,7 +357,7 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
           key={`block-field-${field.key}`}
           className={`${
             (options as BlockOptions).card
-              ? `w-full rounded ${
+              ? `w-full rounded-md ${
                   (options as BlockOptions).hideCardBorder
                     ? "border-none px-6 pt-6"
                     : "border border-gray-200 p-6"
@@ -423,20 +447,8 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
               general={general}
               value={localValue}
               valid={localValid}
-              onChange={(k, v) => {
-                setLocalValue((current: any) => {
-                  const newLocalValue = { ...current, [k]: v };
-                  onChange(newLocalValue);
-                  return newLocalValue;
-                });
-              }}
-              onValidChange={(k, v) => {
-                setLocalValid((current: any) => {
-                  const newLocalValid = { ...current, [k]: v };
-                  onValidChange(newLocalValid);
-                  return newLocalValid;
-                });
-              }}
+              onChange={handleBlockChange}
+              onValidChange={handleBlockValidChange}
               onConfigChange={(f: IField[]) => {
                 onConfigChange({ ...field, block: f });
               }}
@@ -460,7 +472,7 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
         >
           {fieldOptionEditor}
           {renderFieldContent(
-            <div className="p-6 w-full border rounded space-y-4">
+            <div className="p-6 w-full border rounded-md space-y-4">
               <div className="flex items-center w-full">
                 <Tooltip label="Campo do tipo preset" placement="top">
                   <div
@@ -485,20 +497,8 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
                 general={general}
                 value={localValue}
                 valid={localValid}
-                onChange={(k, v) => {
-                  setLocalValue((current: any) => {
-                    const newLocalValue = { ...current, [k]: v };
-                    onChange(newLocalValue);
-                    return newLocalValue;
-                  });
-                }}
-                onValidChange={(k, v) => {
-                  setLocalValid((current: any) => {
-                    const newLocalValid = { ...current, [k]: v };
-                    onValidChange(newLocalValid);
-                    return newLocalValid;
-                  });
-                }}
+                onChange={handleBlockChange}
+                onValidChange={handleBlockValidChange}
               />
             </div>
           )}
@@ -529,7 +529,7 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
                   />
                 )}
               </div>
-              <div className="p-6 w-full border rounded space-y-4">
+              <div className="p-6 w-full border rounded-md space-y-4">
                 <FormEditor
                   fields={field.block as IField[]}
                   general={general}

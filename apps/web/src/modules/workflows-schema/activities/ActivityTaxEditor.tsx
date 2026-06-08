@@ -1,17 +1,18 @@
 import { useContext, useState } from "react";
 import { IFormContext } from "@open-urbis/types";
 import {
-  IconButton,
   FormControl,
-  FormLabel,
   FormHelperText,
+  FormLabel,
+  IconButton,
   Tooltip,
+} from "../../../components";
+import {
   Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-} from "@chakra-ui/react";
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@open-urbis/map-ui";
 import { FaPlus, FaTrash, FaFileInvoiceDollar } from "react-icons/fa";
 import {
   ActivityTypeEnum,
@@ -41,7 +42,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
   onChange,
 }) => {
   const [selectedTaxId, setSelectedTaxId] = useState<string>("");
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState("calculation");
   const styleContext = useContext(StyleContext);
 
   if (activity.type !== ActivityTypeEnum.TAX) {
@@ -153,7 +154,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
               .map((tax) => (
                 <div
                   key={tax.id}
-                  className={`p-3 border rounded cursor-pointer flex justify-between items-center group transition-colors duration-150`}
+                  className={`p-3 border rounded-xl cursor-pointer flex justify-between items-center group transition-colors duration-150`}
                   onClick={() => setSelectedTaxId(tax.id)}
                   style={{
                     backgroundColor:
@@ -196,7 +197,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
                     icon={<FaTrash />}
                     size="sm"
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       handleRemoveTax(tax.id);
                     }}
@@ -214,26 +215,7 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
           <div className="mt-4">
             <button
               onClick={handleAddTax}
-              className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e",
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e";
-              }}
+              className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <FaPlus size={14} />
               <span>Taxa</span>
@@ -310,42 +292,23 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
             </div>
           )}
           {!selectedTaxId && (
-            <div className="flex flex-col mt-6 items-center justify-center h-full text-gray-500">
-              <FaFileInvoiceDollar size={48} className="mb-4 opacity-50" />
+            <div className="flex flex-col mt-4 items-center justify-center min-h-[220px] text-gray-500">
+              <FaFileInvoiceDollar size={36} className="mb-3 opacity-50" />
               <p
-                className="text-xl font-medium mb-2"
+                className="text-lg font-medium mb-1"
                 style={{ color: styleContext.state.textColor }}
               >
                 Nenhuma taxa selecionada
               </p>
               <p
-                className="text-sm mb-6"
+                className="text-sm mb-4"
                 style={{ color: styleContext.state.textColor }}
               >
                 Selecione uma taxa da lista ao lado ou crie uma nova
               </p>
               <button
                 onClick={handleAddTax}
-                className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
-                style={{
-                  backgroundColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#ca8a04"
-                      : "#854d0e",
-                  color: "#ffffff",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#a16207"
-                      : "#713f12";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor =
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#ca8a04"
-                      : "#854d0e";
-                }}
+                className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <FaPlus size={14} />
                 <span>Taxa</span>
@@ -360,62 +323,61 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
           style={{ backgroundColor: styleContext.state.backgroundColor }}
           className="rounded-lg"
         >
-          <Tabs
-            index={selectedTab}
-            onChange={setSelectedTab}
-            variant="enclosed"
-            colorScheme={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "yellow"
-                : "gray"
-            }
-          >
-            <TabList
+          <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+            <TabsList
               className="border-b px-4"
               style={{
                 borderColor:
                   styleContext.state.buttonHoverColorWeight === "200"
                     ? "#E5E7EB"
                     : "#374151",
+                backgroundColor: "transparent",
               }}
             >
-              <Tab style={{ color: styleContext.state.textColor }}>
+              <TabsTrigger
+                value="calculation"
+                style={{ color: styleContext.state.textColor }}
+              >
                 Cálculo da Taxa
-              </Tab>
-              <Tab style={{ color: styleContext.state.textColor }}>
+              </TabsTrigger>
+              <TabsTrigger
+                value="document-editor"
+                style={{ color: styleContext.state.textColor }}
+              >
                 Editor do Documento
-              </Tab>
-              <Tab style={{ color: styleContext.state.textColor }}>
+              </TabsTrigger>
+              <TabsTrigger
+                value="document-preview"
+                style={{ color: styleContext.state.textColor }}
+              >
                 Prévia do Documento
-              </Tab>
-            </TabList>
+              </TabsTrigger>
+            </TabsList>
 
-            <TabPanels>
-              <TabPanel>
-                <TaxCalculationEditor
-                  tax={selectedTax}
-                  context={context}
-                  general={general}
-                  styleContext={styleContext}
-                  onChangeTaxCalculation={handleChangeTaxCalculation}
-                />
-              </TabPanel>
-              <TabPanel>
-                <BillingDocumentEditor
-                  tax={selectedTax}
-                  styleContext={styleContext}
-                  onChangeBillingTemplate={handleChangeBillingTemplate}
-                />
-              </TabPanel>
-              <TabPanel>
-                <BillingDocumentPreview
-                  tax={selectedTax}
-                  styleContext={styleContext}
-                  context={context}
-                  general={general}
-                />
-              </TabPanel>
-            </TabPanels>
+            <TabsContent value="calculation">
+              <TaxCalculationEditor
+                tax={selectedTax}
+                context={context}
+                general={general}
+                styleContext={styleContext}
+                onChangeTaxCalculation={handleChangeTaxCalculation}
+              />
+            </TabsContent>
+            <TabsContent value="document-editor">
+              <BillingDocumentEditor
+                tax={selectedTax}
+                styleContext={styleContext}
+                onChangeBillingTemplate={handleChangeBillingTemplate}
+              />
+            </TabsContent>
+            <TabsContent value="document-preview">
+              <BillingDocumentPreview
+                tax={selectedTax}
+                styleContext={styleContext}
+                context={context}
+                general={general}
+              />
+            </TabsContent>
           </Tabs>
         </div>
       )}

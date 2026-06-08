@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../auth/token";
 import React, { FormEvent, useContext, useEffect, useState } from "react";
 import {
   FaPlus,
@@ -7,11 +8,11 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
-import { Input, SL } from "../../components";
-import { Spinner } from "@chakra-ui/react";
+import { SL } from "../../components";
 import EditableHeader from "../../components/EditableHeader";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { StyleContext } from "../../reducers/style.reducer";
+import { Button, Input, Label } from "@open-urbis/map-ui";
 import { AddSecret } from "./components/AddSecret";
 import { ApiClient } from "../../api";
 import {
@@ -23,11 +24,13 @@ import {
 import { TreeList } from "./components/TreeList";
 import { VersionsMenu } from "./components/VersionsMenu";
 import { usePermissions } from "../../reducers/permission.context";
+import { Spinner } from "../../components";
+import { useSearchParams } from "react-router-dom";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "http://localhost:4000",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 
@@ -63,6 +66,37 @@ export const Secrets: React.FC = () => {
   const [showDecrypted, setShowDecrypted] = useState(false);
   const [decryptedValue, setDecryptedValue] = useState<string | null>(null);
   const [loadingDecrypted, setLoadingDecrypted] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const setAddModeAndSync = (next: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    const currentAdd = searchParams.get("add") === "1";
+    const currentId = searchParams.get("id");
+
+    if (next) {
+      if (!currentAdd) params.set("add", "1");
+      if (currentId) params.delete("id");
+    } else {
+      if (currentAdd) params.delete("add");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const setSelectedIdAndSync = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    const currentId = searchParams.get("id") || "";
+    const currentAdd = searchParams.get("add") === "1";
+
+    if (currentAdd) params.delete("add");
+    if (currentId !== id) params.set("id", id);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
 
   const canViewDecrypted = hasPermission("integration:admin:secrets:findOne");
 
@@ -90,6 +124,28 @@ export const Secrets: React.FC = () => {
   useEffect(() => {
     fetchSecrets();
   }, []);
+
+  useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingSecret) {
+      setSelectedSecret(null);
+      setAddingSecret(true);
+      return;
+    }
+
+    if (!add && addingSecret) {
+      setAddingSecret(false);
+    }
+
+    if (id && secrets.length > 0 && (!selectedSecret || selectedSecret.id !== id)) {
+      const meta = secrets.find((s) => s.id === id);
+      if (meta) {
+        selectSecretCallback(meta);
+      }
+    }
+  }, [searchParams, secrets, selectedSecret, addingSecret]);
 
   useEffect(() => {
     hotkeyContext.dispatch({
@@ -140,6 +196,7 @@ export const Secrets: React.FC = () => {
 
   const selectSecretCallback = async (secretConfig: SecretMetadata) => {
     if (secretConfig !== undefined && secretConfig.id) {
+      setSelectedIdAndSync(secretConfig.id);
       setLoading(true);
       // Reset decrypted state when selecting a new secret
       setShowDecrypted(false);
@@ -148,6 +205,7 @@ export const Secrets: React.FC = () => {
         const secret = await api.integrations.findOneSecret(secretConfig.id);
         setSelectedSecret(secret);
         setAddingSecret(false);
+        setAddModeAndSync(false);
         setLoading(false);
 
         // Load versions separately
@@ -207,6 +265,7 @@ export const Secrets: React.FC = () => {
     e?.preventDefault();
     setSelectedSecret(null);
     setAddingSecret(true);
+    setAddModeAndSync(true);
   };
 
   const handleSaveSecret = async () => {
@@ -341,35 +400,32 @@ export const Secrets: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-6 mb-24 px-20 min-h-[80vh]">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl md:text-3xl font-medium text-left">Segredos</h1>
-        <button
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white ${
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "bg-yellow-600 hover:bg-yellow-700"
-              : "bg-yellow-800 hover:bg-yellow-900"
-          }`}
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
+      <div className="flex items-start justify-between mb-6">
+        <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">Segredos</h1>
+        <Button
+          type="button"
+          size="sm"
+          className="mt-4 h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={handleAddSecretForm}
           disabled={loading}
         >
           <FaPlus size={16} />
           <span>Segredo</span>
           <span className="text-sm opacity-75 ml-2">
-            <SL bg="yellow.600">N</SL>
+            <SL
+              bg="hsl(var(--primary))"
+              className="text-[hsl(var(--primary-foreground))]"
+            >
+              N
+            </SL>
           </span>
-        </button>
+        </Button>
       </div>
 
-      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden">
+      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden border-border bg-card text-card-foreground">
         <div
-          className="w-3/12 border-r"
-          style={{
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
+          className="w-3/12 border-r border-border bg-card"
         >
           <TreeList
             items={secrets}
@@ -378,6 +434,7 @@ export const Secrets: React.FC = () => {
             onSearchChange={searchCallback}
             icon={FaKey}
             iconColor="blue"
+            density="compact"
           />
         </div>
         <div className="flex flex-col p-6 w-9/12">
@@ -390,28 +447,31 @@ export const Secrets: React.FC = () => {
             <AddSecret onAddSecret={handleAddSecret} />
           )}
           {!loading && selectedSecret === null && !addingSecret && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <FaKey size={48} className="mb-4 opacity-50" />
-              <p className="text-xl font-medium mb-2">
+              <p className="text-xl font-medium mb-2 text-foreground">
                 Nenhum segredo selecionado
               </p>
               <p className="text-sm mb-6">
                 Selecione um segredo da lista ao lado ou crie um novo
               </p>
-              <button
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200 text-white ${
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-yellow-600 hover:bg-yellow-700"
-                    : "bg-yellow-800 hover:bg-yellow-900"
-                }`}
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleAddSecretForm}
               >
                 <FaPlus size={16} />
                 <span>Segredo</span>
                 <span className="text-sm opacity-75 ml-2">
-                  <SL bg="yellow.600">N</SL>
+                  <SL
+                    bg="hsl(var(--primary))"
+                    className="text-[hsl(var(--primary-foreground))]"
+                  >
+                    N
+                  </SL>
                 </span>
-              </button>
+              </Button>
             </div>
           )}
           {selectedSecret !== null && (
@@ -430,7 +490,7 @@ export const Secrets: React.FC = () => {
                           onTextChange={(text) =>
                             handleSetSecret("label", text)
                           }
-                          className="text-xl md:text-3xl font-black text-center mb-3"
+                          className="text-lg md:text-2xl font-semibold text-center mb-3"
                         />
                         <EditableHeader
                           value={selectedSecret.documentation}
@@ -454,25 +514,25 @@ export const Secrets: React.FC = () => {
                   <div className="w-4/5 mx-auto">
                     <div className="flex flex-col space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <Label className="block text-sm font-medium mb-1">
                           ID
-                        </label>
+                        </Label>
                         <Input
                           type="text"
                           placeholder="ID"
-                          size="lg"
+                          className="h-10"
                           value={selectedSecret.id}
                           readOnly
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <Label className="block text-sm font-medium mb-1">
                           Chave
-                        </label>
+                        </Label>
                         <Input
                           type="text"
                           placeholder="dir0/dir1/filename"
-                          size="lg"
+                          className="h-10"
                           value={selectedSecret.namespace}
                           onChange={(e) =>
                             handleSetSecret("namespace", e.target.value)
@@ -480,48 +540,51 @@ export const Secrets: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <Label className="block text-sm font-medium mb-1">
                           Valor atual
-                        </label>
+                        </Label>
                         <div className="relative">
                           <Input
                             type="text"
                             placeholder="O valor do segredo está oculto por segurança"
-                            size="lg"
+                            className="h-10"
                             readOnly
                             value={
                               showDecrypted ? decryptedValue || "" : "********"
                             }
                           />
                           {canViewDecrypted && (
-                            <button
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
                               onClick={handleToggleDecrypted}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
                               disabled={loadingDecrypted}
                             >
                               {loadingDecrypted ? (
-                                <Spinner size="sm" />
+                                <Spinner />
                               ) : showDecrypted ? (
                                 <FaEyeSlash size={16} />
                               ) : (
                                 <FaEye size={16} />
                               )}
-                            </button>
+                            </Button>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           Por motivos de segurança, o valor atual do segredo não
                           é exibido.
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-1">
+                        <Label className="block text-sm font-medium mb-1">
                           Novo valor
-                        </label>
+                        </Label>
                         <Input
                           type="text"
                           placeholder="Digite o novo valor do segredo"
-                          size="lg"
+                          className="h-10"
                           value={selectedSecret.newValue || ""}
                           onChange={(e) =>
                             handleSetSecret("newValue", e.target.value)
@@ -542,34 +605,34 @@ export const Secrets: React.FC = () => {
                           : "#374151",
                     }}
                   >
-                    <div className="flex gap-4">
-                      <button
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={handleRemoveSecret}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "bg-red-100 hover:bg-red-200 text-red-600"
-                            : "bg-red-900 hover:bg-red-800 text-red-300"
-                        }`}
+                        className="h-9 px-4 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                       >
                         <FaTrash className="text-sm" />
                         <span>Remover</span>
-                      </button>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground"
+                        onClick={handleSaveSecret}
+                        disabled={loading}
+                      >
+                        <FaSave size={14} />
+                        <span>Salvar</span>
+                        <SL
+                          bg="hsl(var(--primary))"
+                          className="text-[hsl(var(--primary-foreground))]"
+                        >
+                          S
+                        </SL>
+                      </Button>
                     </div>
-                  </div>
-
-                  <div className="fixed bottom-16 right-4 flex space-x-4">
-                    <button
-                      className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 transition-colors duration-200 text-white ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-yellow-600 hover:bg-yellow-700"
-                          : "bg-yellow-800 hover:bg-yellow-900"
-                      }`}
-                      onClick={handleSaveSecret}
-                      disabled={loading}
-                    >
-                      <FaSave size={14} />
-                      <span>Salvar</span> <SL bg="yellow.600">S</SL>
-                    </button>
                   </div>
                 </>
               )}

@@ -91,7 +91,7 @@ const EditableHeader: React.FC<EditableHeaderProps> = ({
   const emptyStyle = "text-gray-400 italic min-w-[140px]";
   const nonEmptyStyle = "";
   const editingStyle =
-    "outline-none border-b-2 border-yellow-500 dark:border-yellow-600 focus:border-yellow-600 dark:focus:border-yellow-500";
+    "outline-none border-b-2 border-primary focus:border-primary";
 
   return (
     <div>

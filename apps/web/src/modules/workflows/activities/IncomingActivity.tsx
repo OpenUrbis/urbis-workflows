@@ -1,4 +1,4 @@
-import { Spinner, Badge, Tooltip } from "@chakra-ui/react";
+import { Spinner, Tooltip } from "../../../components/LegacyUi";
 import { IFormContext } from "@open-urbis/types";
 import { useState, useEffect } from "react";
 import { FaLink, FaExternalLinkAlt, FaUnlink, FaPlus } from "react-icons/fa";
@@ -17,7 +17,8 @@ export const IncomingActivity: React.FC<{
   onChange: (value: any) => void;
   apiClient: ApiClient;
   styleContext: any;
-}> = ({ selected, value, general, onChange, apiClient, styleContext }) => {
+  highlightQuery?: string;
+}> = ({ selected, value, general, onChange, apiClient, styleContext, highlightQuery }) => {
   const [workflowId, setWorkflowId] = useState("");
   const [workflowData, setWorkflowData] = useState<any>(value ?? null);
   const [valid, setValid] = useState({});
@@ -130,9 +131,7 @@ export const IncomingActivity: React.FC<{
                 type="submit"
                 disabled={!workflowId}
                 className={`px-4 py-2 rounded-md text-white font-medium transition-colors ${
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-yellow-500 hover:bg-yellow-600"
-                    : "bg-yellow-600 hover:bg-yellow-700"
+                  "bg-primary hover:bg-primary/90 text-primary-foreground"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 Buscar
@@ -189,9 +188,18 @@ export const IncomingActivity: React.FC<{
                   />
                 </div>
                 <div className="space-y-1">
-                  <Badge colorScheme="blue" fontSize="sm">
+                  <span
+                    className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                    style={{
+                      backgroundColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "rgba(59, 130, 246, 0.12)"
+                          : "rgba(59, 130, 246, 0.25)",
+                      color: styleContext.state.textColor,
+                    }}
+                  >
                     {value.$metadata?.workflowId}
-                  </Badge>
+                  </span>
                   <h3
                     className="font-medium mt-2"
                     style={{ color: styleContext.state.textColor }}
@@ -278,6 +286,7 @@ export const IncomingActivity: React.FC<{
                       [selected.namespace]: workflowData.value,
                     },
                   }}
+                  highlightQuery={highlightQuery}
                 />
               ))}
           </div>

@@ -1,4 +1,3 @@
-import { IconButton } from "@chakra-ui/react";
 import { useContext, useState, useEffect } from "react";
 import { IField, IFormContext, MapOptions } from "@open-urbis/types";
 import { FaEllipsisV, FaChevronUp, FaChevronDown } from "react-icons/fa";
@@ -9,6 +8,7 @@ import { createFieldConfig } from "./fieldConfigs";
 import React from "react";
 import { SideDrawer } from "../../../components/SideDrawer";
 import { PermissionsSelector } from "./PermissionsSelector";
+import { IconButton } from "../../../components";
 
 // Add utility functions for items conversion
 const convertItemsToString = (
@@ -325,120 +325,122 @@ export const FieldOptionEditor: React.FC<FieldOptionEditorProps> = ({
             },
           }}
         >
-          <Field
-            parent={editorConfig}
-            field={editorConfig}
-            general={general}
-            value={formValue}
-            valid={{}}
-            onChange={handleFieldChange}
-            onValidChange={() => {}}
-            context={formValue}
-            validContext={{}}
-          />
-          {(field.type === "map" || field.type === ("documentMap" as any)) && (
-            <div className="flex px-2 flex-col mt-8">
-              <div
-                className="flex items-center space-x-2 text-lg p-4"
-                style={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#E5E7EB"
-                      : "#374151",
-                }}
-              >
-                <div className="flex items-center space-x-3 flex-1">
-                  <label className="font-medium">Camadas do Mapa</label>
-                </div>
+          <div className="text-foreground">
+            <Field
+              parent={editorConfig}
+              field={editorConfig}
+              general={general}
+              value={formValue}
+              valid={{}}
+              onChange={handleFieldChange}
+              onValidChange={() => {}}
+              context={formValue}
+              validContext={{}}
+            />
+            {(field.type === "map" || field.type === ("documentMap" as any)) && (
+              <div className="flex px-2 flex-col mt-8">
                 <div
-                  className="flex items-center space-x-2 cursor-pointer text-blue-500 hover:text-blue-700 transition-colors"
-                  onClick={() => setIsMapLayersOpen(!isMapLayersOpen)}
-                >
-                  {isMapLayersOpen ? (
-                    <>
-                      <FaChevronUp size={14} />
-                      <span className="text-sm">Recolher</span>
-                    </>
-                  ) : (
-                    <>
-                      <FaChevronDown size={14} />
-                      <span className="text-sm">Expandir</span>
-                    </>
-                  )}
-                </div>
-              </div>
-              {isMapLayersOpen && (
-                <MapLayersEditor
-                  layers={(field.options as MapOptions)?.layers ?? []}
-                  onSave={(layers) => {
-                    onChange({
-                      ...field,
-                      options: {
-                        ...field.options,
-                        layers,
-                      } as MapOptions,
-                    });
+                  className="flex items-center space-x-2 text-lg p-4"
+                  style={{
+                    borderColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "#E5E7EB"
+                        : "#374151",
                   }}
-                />
-              )}
-            </div>
-          )}
-
-          {/* Check if the editor config has a controlSection before showing permissions */}
-          {editorConfig.block?.some((section) => section.key === "control") && (
-            <div className="flex px-2 flex-col mt-8">
-              <div
-                className="flex items-center space-x-2 text-lg p-4"
-                style={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#E5E7EB"
-                      : "#374151",
-                }}
-              >
-                <div className="flex items-center space-x-3 flex-1">
-                  <label className="font-medium">Controle de Permissões</label>
-                </div>
-                <div
-                  className="flex items-center space-x-2 cursor-pointer text-blue-500 hover:text-blue-700 transition-colors"
-                  onClick={() => setIsPermissionsOpen(!isPermissionsOpen)}
                 >
-                  {isPermissionsOpen ? (
-                    <>
-                      <FaChevronUp size={14} />
-                      <span className="text-sm">Recolher</span>
-                    </>
-                  ) : (
-                    <>
-                      <FaChevronDown size={14} />
-                      <span className="text-sm">Expandir</span>
-                    </>
-                  )}
+                  <div className="flex items-center space-x-3 flex-1">
+                    <label className="font-medium">Camadas do Mapa</label>
+                  </div>
+                  <div
+                    className="flex items-center space-x-2 cursor-pointer text-blue-500 hover:text-blue-700 transition-colors"
+                    onClick={() => setIsMapLayersOpen(!isMapLayersOpen)}
+                  >
+                    {isMapLayersOpen ? (
+                      <>
+                        <FaChevronUp size={14} />
+                        <span className="text-sm">Recolher</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaChevronDown size={14} />
+                        <span className="text-sm">Expandir</span>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-              {isPermissionsOpen && (
-                <div className="px-4 pb-4">
-                  <PermissionsSelector
-                    showBorder={false}
-                    permissions={field.options.permissions}
-                    onChange={(permissions) => {
+                {isMapLayersOpen && (
+                  <MapLayersEditor
+                    layers={(field.options as MapOptions)?.layers ?? []}
+                    onSave={(layers) => {
                       onChange({
                         ...field,
                         options: {
                           ...field.options,
-                          permissions,
-                        },
+                          layers,
+                        } as MapOptions,
                       });
                     }}
-                    styleContext={styleContext}
-                    title="Permissões Específicas do Campo"
-                    helperText="Defina quais usuários, papéis ou grupos podem acessar este campo"
-                    parentDrawerId="field-option-editor"
                   />
+                )}
+              </div>
+            )}
+
+            {/* Check if the editor config has a controlSection before showing permissions */}
+            {editorConfig.block?.some((section) => section.key === "control") && (
+              <div className="flex px-2 flex-col mt-8">
+                <div
+                  className="flex items-center space-x-2 text-lg p-4"
+                  style={{
+                    borderColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "#E5E7EB"
+                        : "#374151",
+                  }}
+                >
+                  <div className="flex items-center space-x-3 flex-1">
+                    <label className="font-medium">Controle de Permissões</label>
+                  </div>
+                  <div
+                    className="flex items-center space-x-2 cursor-pointer text-blue-500 hover:text-blue-700 transition-colors"
+                    onClick={() => setIsPermissionsOpen(!isPermissionsOpen)}
+                  >
+                    {isPermissionsOpen ? (
+                      <>
+                        <FaChevronUp size={14} />
+                        <span className="text-sm">Recolher</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaChevronDown size={14} />
+                        <span className="text-sm">Expandir</span>
+                      </>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
+                {isPermissionsOpen && (
+                  <div className="px-4 pb-4">
+                    <PermissionsSelector
+                      showBorder={false}
+                      permissions={field.options.permissions}
+                      onChange={(permissions) => {
+                        onChange({
+                          ...field,
+                          options: {
+                            ...field.options,
+                            permissions,
+                          },
+                        });
+                      }}
+                      styleContext={styleContext}
+                      title="Permissões Específicas do Campo"
+                      helperText="Defina quais usuários, papéis ou grupos podem acessar este campo"
+                      parentDrawerId="field-option-editor"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </SideDrawer>
       )}
     </>

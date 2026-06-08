@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, FormLabel, IconButton } from "@chakra-ui/react";
+import { FormControl, FormLabel, IconButton } from "../../../../components/LegacyUi";
 import { FaTrash } from "react-icons/fa";
 import EditableHeader from "../../../../components/EditableHeader";
 import {
@@ -70,8 +70,13 @@ export const ConstantEditor: React.FC<ConstantEditorProps> = ({
         <IconButton
           aria-label="Remove constant"
           icon={<FaTrash />}
-          colorScheme="red"
-          variant="ghost"
+          style={{
+            color:
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "#dc2626"
+                : "#fca5a5",
+            backgroundColor: "transparent",
+          }}
           onClick={onRemove}
         />
       </div>

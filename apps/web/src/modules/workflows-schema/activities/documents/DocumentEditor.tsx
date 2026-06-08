@@ -1,4 +1,4 @@
-import { IconButton } from "@chakra-ui/react";
+import { IconButton } from "../../../../components";
 import { useEffect, useState, useRef, useContext } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { IFormContext } from "@open-urbis/types";

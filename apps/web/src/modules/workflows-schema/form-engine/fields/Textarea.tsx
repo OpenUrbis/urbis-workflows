@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
-import { Textarea as TextAreaBase } from "@chakra-ui/react";
+import React, { useState, useEffect, useCallback, useRef, memo } from "react";
+import { Textarea as DSTextarea } from "@open-urbis/map-ui";
 import debounce from "lodash.debounce";
 import { IField, IFormContext, TextAreaOptions } from "@open-urbis/types";
 import { modelCallback } from "../utils/expressions";
 import { CodeEditor } from "../../components/CodeEditor";
-import { StyleContext } from "../../../../reducers/style.reducer";
 
 export type FieldTextareaProps = {
   field: IField;
@@ -17,7 +16,7 @@ export type FieldTextareaProps = {
   onChange: (value: string) => void;
 };
 
-export const Textarea: React.FC<FieldTextareaProps> = ({
+export const Textarea: React.FC<FieldTextareaProps> = memo(({
   field,
   fieldKey,
   onChange,
@@ -28,9 +27,6 @@ export const Textarea: React.FC<FieldTextareaProps> = ({
   valid,
 }) => {
   const [value, setValue] = useState(propValue);
-  const styleContext = useContext(StyleContext);
-  const lightBgColor = "#fafafa";
-  const darkBgColor = "#2D3748";
 
   useEffect(() => {
     const modelExpression = field?.expressions?.model;
@@ -52,12 +48,21 @@ export const Textarea: React.FC<FieldTextareaProps> = ({
     }
   }, [context, general.$data, field.expressions?.model]);
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   const debouncedOnChange = useCallback(
-    debounce((value) => {
-      onChange(value);
+    debounce((value: any) => {
+      onChangeRef.current(value);
     }, 300),
-    [onChange]
+    []
   );
+
+  useEffect(() => {
+    return () => {
+      debouncedOnChange.cancel();
+    };
+  }, [debouncedOnChange]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { selectionStart, selectionEnd } = e.target;
@@ -112,52 +117,15 @@ export const Textarea: React.FC<FieldTextareaProps> = ({
   }
 
   return (
-    <TextAreaBase
+    <DSTextarea
       key={fieldKey}
       placeholder={options?.placeholder}
-      size="lg"
       onChange={handleChange}
-      className="flex-grow"
+      className="flex-grow min-h-[120px]"
       value={value}
+      readOnly={isReadonly}
       disabled={isReadonly}
-      style={{
-        backgroundColor:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? lightBgColor
-            : darkBgColor,
-        color: styleContext.state.textColor,
-        borderColor:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.200"
-            : "gray.600",
-      }}
-      _hover={{
-        borderColor:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "gray.300"
-            : "gray.500",
-      }}
-      _focus={{
-        borderColor:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "blue.500"
-            : "blue.300",
-        boxShadow:
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "0 0 0 1px var(--chakra-colors-blue-500)"
-            : "0 0 0 1px var(--chakra-colors-blue-300)",
-      }}
-      // Focus management using a delayed approach to prevent scroll jumping
-      // and ensure the component is fully rendered before focusing.
-      // The delay of 0ms still moves the focus call to the next event loop tick,
-      // which is enough to avoid focus-related issues.
-      ref={(input) => {
-        if (input && options.autoFocus) {
-          setTimeout(() => {
-            input.focus();
-          }, 0);
-        }
-      }}
+      autoFocus={options.autoFocus}
     />
   );
-};
+});

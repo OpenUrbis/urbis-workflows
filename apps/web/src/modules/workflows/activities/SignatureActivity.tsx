@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner } from "../../../components/LegacyUi";
 import {
   FaSignature,
   FaHistory,
@@ -493,9 +493,7 @@ export const SignatureActivity: React.FC<SignatureActivityProps> = ({
                 <div className="flex justify-end mt-6">
                   <button
                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "bg-yellow-500 hover:bg-yellow-600 text-white"
-                        : "bg-yellow-600 hover:bg-yellow-700 text-white"
+                      "bg-primary hover:bg-primary/90 text-primary-foreground"
                     } ${
                       signingInProgress ? "opacity-70 cursor-not-allowed" : ""
                     }`}

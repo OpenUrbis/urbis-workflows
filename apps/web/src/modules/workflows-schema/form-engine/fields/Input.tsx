@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
-import { Input as InputBase } from "../../../../components";
+import React, { useState, useEffect, useCallback, useRef, memo } from "react";
+import { Input as DSInput } from "@open-urbis/map-ui";
 import { evalFieldExpression, modelCallback } from "../utils/expressions";
 import debounce from "lodash.debounce";
 import { NumericFormat } from "react-number-format";
-import { MaskedInput } from "../../../../components";
+import { InputMask } from "@react-input/mask";
 import { IField, IFormContext, InputOptions } from "@open-urbis/types";
-import { StyleContext } from "../../../../reducers/style.reducer";
 
 export type FieldInputProps = {
   field: IField;
@@ -18,7 +17,7 @@ export type FieldInputProps = {
   general: IFormContext;
 };
 
-export const Input: React.FC<FieldInputProps> = ({
+export const Input: React.FC<FieldInputProps> = memo(({
   field,
   fieldKey,
   onChange,
@@ -29,15 +28,17 @@ export const Input: React.FC<FieldInputProps> = ({
   valid,
 }) => {
   const [value, setValue] = useState(propValue);
-  const styleContext = useContext(StyleContext);
-  const lightBgColor = "#fafafa";
-  const darkBgColor = "#2D3748";
+  const isLocalEdit = useRef(false);
 
   useEffect(() => {
+    if (isLocalEdit.current) {
+      return;
+    }
+
     const modelExpression = field?.expressions?.model;
     if (modelExpression) {
       const processedExpression = modelExpression.replace(
-        /context\.\$(?!metadata|data)/g,
+        /context\.\.(?!metadata|data)/g,
         `context["${field.key}"]`
       );
 
@@ -53,25 +54,50 @@ export const Input: React.FC<FieldInputProps> = ({
     }
   }, [context, general.$data, field.expressions?.model]);
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  const debouncedModelEval = useCallback(
+    debounce(
+      (
+        fieldRef: IField,
+        currentValue: any,
+        newContext: any,
+        generalRef: IFormContext,
+        validRef: any,
+        cb: (v: any) => void
+      ) => {
+        modelCallback(fieldRef, currentValue, newContext, generalRef, validRef, cb);
+      },
+      150
+    ),
+    []
+  );
+
   const debouncedOnChange = useCallback(
-    debounce((value) => {
-      onChange(value);
+    debounce((value: any) => {
+      isLocalEdit.current = false;
+      onChangeRef.current(value);
     }, 300),
-    [onChange]
+    []
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { selectionStart, selectionEnd } = e.target;
     const newValue = e.target.value;
+    isLocalEdit.current = true;
 
     const modelExpression =
       field?.expressions?.model?.replace(
-        /context\.\$(?!metadata|data)/g,
+        /context\.\.(?!metadata|data)/g,
         `context["${field.key}"]`
       ) ?? "";
 
     if (modelExpression.includes(`context["${field.key}"]`)) {
-      modelCallback(
+      // Update local state immediately for responsive typing
+      setValue(newValue);
+
+      // Debounce the expensive model expression evaluation
+      debouncedModelEval(
         field,
         value,
         { ...context, [field.key]: newValue },
@@ -80,11 +106,6 @@ export const Input: React.FC<FieldInputProps> = ({
         (updatedValue) => {
           setValue(updatedValue);
           debouncedOnChange(updatedValue);
-
-          // Restore cursor position after the update
-          requestAnimationFrame(() => {
-            e.target.setSelectionRange?.(selectionStart, selectionEnd);
-          });
         }
       );
     } else {
@@ -92,6 +113,13 @@ export const Input: React.FC<FieldInputProps> = ({
       debouncedOnChange(newValue);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      debouncedOnChange.cancel();
+      debouncedModelEval.cancel();
+    };
+  }, [debouncedOnChange, debouncedModelEval]);
 
   const isReadonly =
     options.readOnly === true ||
@@ -103,16 +131,29 @@ export const Input: React.FC<FieldInputProps> = ({
     : value;
 
   if (mask && mask.length > 0) {
+    const convertedMask = String(maskValue ?? "")
+      .replace(/9/g, "_")
+      .replace(/a/g, "@")
+      .replace(/\*/g, "#");
+
     return (
-      <MaskedInput
+      <InputMask
+        component={DSInput}
         key={fieldKey}
-        mask={maskValue}
+        mask={convertedMask}
+        replacement={{
+          _: /\d/,
+          "@": /[a-zA-Z]/,
+          "#": /./,
+        }}
         value={value}
         onChange={handleChange}
         placeholder={options?.placeholder}
-        size="lg"
+        className="h-11"
         readOnly={isReadonly}
         disabled={isReadonly}
+        autoFocus={options?.autoFocus}
+        separate
       />
     );
   }
@@ -123,17 +164,8 @@ export const Input: React.FC<FieldInputProps> = ({
     case "percentage":
       return (
         <NumericFormat
-          className={`w-full bg-transparent border border-gray-200 rounded-md px-4 py-2.5 ${
-            isReadonly ? "cursor-not-allowed opacity-50" : ""
-          }`}
-          style={{
-            fontSize: "1.125rem",
-            backgroundColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? lightBgColor
-                : darkBgColor,
-            color: styleContext.state.textColor,
-          }}
+          customInput={DSInput}
+          className="h-11"
           placeholder={options?.placeholder}
           thousandSeparator="."
           decimalSeparator=","
@@ -149,20 +181,22 @@ export const Input: React.FC<FieldInputProps> = ({
             } as React.ChangeEvent<HTMLInputElement>)
           }
           disabled={isReadonly}
+          readOnly={isReadonly}
         />
       );
     default:
       return (
-        <InputBase
+        <DSInput
           key={fieldKey}
           type={options?.type ?? "text"}
           placeholder={options?.placeholder}
-          size="lg"
+          className="h-11"
           onChange={handleChange}
           value={value}
           readOnly={isReadonly}
+          disabled={isReadonly}
           autoFocus={options?.autoFocus}
         />
       );
   }
-};
+});

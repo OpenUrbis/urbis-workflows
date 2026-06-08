@@ -1,31 +1,25 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Spinner,
   Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Textarea,
-  IconButton,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Badge,
   Checkbox,
-  Stack,
-  Box,
-  Text,
-  Divider,
-  Flex,
-  Collapse,
-  InputGroup,
-  InputLeftElement,
-  Select,
-  FormHelperText,
-} from "@chakra-ui/react";
+  Separator,
+  Button as DSButton,
+  Input as DSInput,
+  Select as DSSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea as DSTextarea,
+  Label,
+} from "@open-urbis/map-ui";
 import {
   FaEdit,
   FaPlus,
@@ -41,11 +35,12 @@ import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { useSnackbar } from "../../hooks/snackbar";
 import InfoTooltip from "../../components/InfoTooltip";
 import { SideDrawer } from "../../components/SideDrawer";
+import { Spinner } from "../../components";
 
 const api = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${getAccessToken()}`,
   },
 });
 
@@ -54,7 +49,10 @@ const ClickableBadge: React.FC<React.ComponentProps<typeof Badge>> = ({
   children,
   ...props
 }) => (
-  <Badge {...props} className={`${props.className || ""} cursor-pointer`}>
+  <Badge
+    {...props}
+    className={`text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center cursor-pointer ${props.className || ""}`}
+  >
     {children}
   </Badge>
 );
@@ -116,7 +114,6 @@ export function Groups(): JSX.Element {
         delete: ["N"],
       });
     };
-    
   }, []);
 
   const resetFormAndOpen = () => {
@@ -254,318 +251,159 @@ export function Groups(): JSX.Element {
   );
 
   return (
-    <div className="flex flex-col space-y-2 mb-20">
-      <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col space-y-6 mb-20">
+      <div className="flex justify-between items-center h-10">
         <h2
-          className="text-xl font-bold"
+          className="text-lg font-bold text-foreground m-0 leading-none"
           style={{ color: styleContext.state.textColor }}
         >
           Grupos
         </h2>
-        <Button
-          leftIcon={<FaPlus />}
-          colorScheme="teal"
+        <DSButton
+          type="button"
           onClick={resetFormAndOpen}
-          size="sm"
-          bg={
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "teal.500"
-              : "teal.600"
-          }
-          _hover={{
-            bg:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "teal.600"
-                : "teal.700",
-          }}
-          color="white"
+          className="h-8 rounded-lg px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
         >
+          <FaPlus size={14} />
           Novo Grupo
-        </Button>
+        </DSButton>
       </div>
 
       {isLoading && groups.length === 0 ? (
         <div className="flex justify-center my-8">
-          <Spinner
-            size="lg"
-            color={
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "teal.500"
-                : "teal.400"
-            }
-            thickness="3px"
-          />
+          <Spinner size="xl" />
         </div>
       ) : (
-        <div
-          className="rounded-lg overflow-hidden border"
-          style={{
-            backgroundColor: styleContext.state.backgroundColor,
-            borderColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#E5E7EB"
-                : "#374151",
-          }}
-        >
-          <Table variant="simple" size="md">
-            <Thead>
-              <Tr>
-                <Th
-                  width="40px"
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                ></Th>
-                <Th
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                >
+        <div className="ds-table rounded-lg overflow-hidden border border-border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10 bg-muted/40 h-10 px-3"></TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold tracking-wide text-foreground">
                   Nome
-                </Th>
-                <Th
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                >
+                </TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold tracking-wide text-foreground">
                   Descrição
-                </Th>
-                <Th
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                >
+                </TableHead>
+                <TableHead className="bg-muted/40 h-10 px-4 text-xs font-semibold tracking-wide text-foreground">
                   Funções
-                </Th>
-                <Th
-                  width="100px"
-                  textAlign="right"
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "bg-gray-100"
-                      : "bg-gray-800"
-                  }
-                  style={{ color: styleContext.state.textColor }}
-                >
+                </TableHead>
+                <TableHead className="w-[100px] text-right bg-muted/40 h-10 px-4 text-xs font-semibold tracking-wide text-foreground">
                   Ações
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {groups.map((group) => (
                 <React.Fragment key={group.id}>
-                  <Tr
-                    className="transition-colors duration-200"
-                    _hover={{
-                      bg:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.50"
-                          : "gray.700",
-                    }}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                    }}
-                  >
-                    <Td
+                  <TableRow className="transition-colors duration-200">
+                    <TableCell
                       onClick={() => toggleGroupExpand(group.id)}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-foreground py-2"
                     >
                       {expandedGroups[group.id] ? (
                         <FaChevronDown />
                       ) : (
                         <FaChevronRight />
                       )}
-                    </Td>
-                    <Td
-                      fontWeight="medium"
-                      style={{ color: styleContext.state.textColor }}
-                    >
+                    </TableCell>
+                    <TableCell className="font-medium text-foreground py-2">
                       {group.name}
-                    </Td>
-                    <Td
-                      className="max-w-xs truncate"
-                      style={{
-                        color: styleContext.state.textColor,
-                        opacity: 0.9,
-                      }}
-                    >
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate text-muted-foreground py-2">
                       {group.description}
-                    </Td>
-                    <Td>
+                    </TableCell>
+                    <TableCell className="py-2">
                       <div className="flex flex-wrap gap-1 max-w-md">
                         {group.roles.length > 0 ? (
                           group.roles.slice(0, 3).map((role) => (
                             <InfoTooltip
                               key={role.id}
                               content={
-                                <Box>
-                                  <Text fontWeight="bold" mb={2}>
-                                    Permissões:
-                                  </Text>
+                                <div className="space-y-2 text-foreground">
+                                  <p className="font-bold text-foreground">Permissões:</p>
                                   {role.permissions.map((perm) => (
-                                    <Text key={perm.id} mb={1} fontSize="sm">
-                                      • <code>{perm.code}</code>
-                                      {perm.description &&
-                                        ` - ${perm.description}`}
-                                    </Text>
+                                    <p key={perm.id} className="text-sm text-foreground">
+                                      • <code className="bg-muted px-1 rounded text-foreground">{perm.code}</code>
+                                      {perm.description && ` - ${perm.description}`}
+                                    </p>
                                   ))}
-                                </Box>
+                                </div>
                               }
-                              placement="top"
                               showIcon={false}
                             >
                               <ClickableBadge
-                                colorScheme="teal"
-                                variant="solid"
-                                className="flex items-center py-1 hover:opacity-80 transition-opacity"
-                                borderRadius="md"
-                                bg={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "teal.100"
-                                    : "teal.800"
-                                }
-                                color={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "teal.800"
-                                    : "teal.200"
-                                }
+                                variant="outline"
+                                className="bg-primary/10 text-primary border-primary/20"
                               >
-                                <span className="mx-1">{role.name}</span>
+                                {role.name}
                               </ClickableBadge>
                             </InfoTooltip>
                           ))
                         ) : (
-                          <Text fontSize="xs" color="gray.500">
-                            Sem funções
-                          </Text>
+                          <span className="text-xs text-muted-foreground">Sem funções</span>
                         )}
                         {group.roles.length > 3 && (
                           <InfoTooltip
                             content={
-                              <Box>
-                                <Text fontWeight="bold" mb={2}>
-                                  Funções adicionais:
-                                </Text>
+                              <div className="space-y-2 text-foreground">
+                                <p className="font-bold text-foreground">Funções adicionais:</p>
                                 {group.roles.slice(3).map((role) => (
-                                  <Text key={role.id} mb={1} fontSize="sm">
+                                  <p key={role.id} className="text-sm text-foreground">
                                     • {role.name}
-                                    {role.description &&
-                                      ` - ${role.description}`}
-                                  </Text>
+                                    {role.description && ` - ${role.description}`}
+                                  </p>
                                 ))}
-                              </Box>
+                              </div>
                             }
-                            placement="top"
                             showIcon={false}
                           >
                             <ClickableBadge
-                              colorScheme="gray"
-                              py="1"
-                              px="2"
-                              className="hover:opacity-80 transition-opacity"
-                              borderRadius="md"
-                              bg={
-                                styleContext.state.buttonHoverColorWeight ===
-                                "200"
-                                  ? "gray.200"
-                                  : "gray.600"
-                              }
-                              color={
-                                styleContext.state.buttonHoverColorWeight ===
-                                "200"
-                                  ? "gray.700"
-                                  : "gray.200"
-                              }
+                              variant="secondary"
+                              className="bg-muted text-muted-foreground border-transparent"
                             >
                               +{group.roles.length - 3}
                             </ClickableBadge>
                           </InfoTooltip>
                         )}
                       </div>
-                    </Td>
-                    <Td textAlign="right">
+                    </TableCell>
+                    <TableCell className="text-right py-2">
                       <div className="flex justify-end space-x-2 group">
-                        <IconButton
-                          aria-label="Edit"
-                          icon={<FaEdit />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
+                        <DSButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
                           onClick={() => handleEditClick(group)}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F3F4F6"
-                                : "#4B5563",
-                            color: styleContext.state.textColor,
-                          }}
-                        />
-                        <IconButton
-                          aria-label="Delete"
-                          icon={<FaTrash />}
-                          size="sm"
-                          className="opacity-80 group-hover:opacity-100 transition-opacity"
-                          onClick={() => handleDeleteClick(group.id)}
-                          style={{
-                            backgroundColor:
-                              styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                                ? "#F3F4F6"
-                                : "#4B5563",
-                            color: styleContext.state.textColor,
-                          }}
-                        />
-                      </div>
-                    </Td>
-                  </Tr>
-                  <Tr>
-                    <Td colSpan={5} p={0}>
-                      <Collapse in={expandedGroups[group.id] || false}>
-                        <Box
-                          p={4}
-                          bg={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "gray.50"
-                              : "gray.800"
-                          }
-                          borderBottomWidth="1px"
-                          borderBottomColor={
-                            styleContext.state.buttonHoverColorWeight === "200"
-                              ? "#E5E7EB"
-                              : "#374151"
-                          }
+                          title="Editar"
                         >
-                          <Flex justifyContent="space-between" mb={2}>
-                            <Text
-                              fontWeight="bold"
-                              style={{ color: styleContext.state.textColor }}
-                            >
-                              Detalhes do Grupo
-                            </Text>
+                          <FaEdit size={14} />
+                        </DSButton>
+                        <DSButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleDeleteClick(group.id)}
+                          title="Excluir"
+                        >
+                          <FaTrash size={14} />
+                        </DSButton>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  {expandedGroups[group.id] && (
+                    <TableRow className="bg-muted/30">
+                      <TableCell colSpan={5} className="p-0">
+                        <div className="p-4 border-b border-border">
+                          <div className="flex justify-between items-center mb-2">
+                            <p className="font-bold text-foreground">Detalhes do Grupo</p>
                             <InfoTooltip
                               content={
-                                <Box>
-                                  <Text fontWeight="bold" mb={2}>
-                                    Permissões efetivas:
-                                  </Text>
-                                  <Text fontSize="xs" mb={2}>
-                                    (Combinação de todas as permissões das
-                                    funções deste grupo)
-                                  </Text>
+                                <div className="space-y-2 text-foreground">
+                                  <p className="font-bold text-foreground">Permissões efetivas:</p>
+                                  <p className="text-xs mb-2 text-muted-foreground">
+                                    (Combinação de todas as permissões das funções deste grupo)
+                                  </p>
                                   {Array.from(
                                     new Set(
                                       group.roles.flatMap((role) =>
@@ -573,48 +411,26 @@ export function Groups(): JSX.Element {
                                       )
                                     )
                                   ).map((perm, idx) => (
-                                    <Text key={idx} mb={1} fontSize="sm">
-                                      • <code>{perm.code}</code>
-                                      {perm.description &&
-                                        ` - ${perm.description}`}
-                                    </Text>
+                                    <p key={idx} className="text-sm text-foreground">
+                                      • <code className="bg-muted px-1 rounded text-foreground">{perm.code}</code>
+                                      {perm.description && ` - ${perm.description}`}
+                                    </p>
                                   ))}
-                                </Box>
+                                </div>
                               }
-                              placement="top"
                               showIcon={false}
                             >
                               <ClickableBadge
-                                colorScheme="teal"
-                                py="1"
-                                px="2"
-                                className="hover:opacity-80 transition-opacity"
-                                borderRadius="md"
-                                bg={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "teal.100"
-                                    : "teal.800"
-                                }
-                                color={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "teal.800"
-                                    : "teal.200"
-                                }
+                                variant="outline"
+                                className="bg-primary/10 text-primary border-primary/20"
                               >
                                 {getTotalPermissions(group)} permissões efetivas
                               </ClickableBadge>
                             </InfoTooltip>
-                          </Flex>
-                          <Divider mb={3} />
+                          </div>
+                          <Separator className="my-3" />
 
-                          <Text
-                            fontSize="sm"
-                            fontWeight="medium"
-                            mb={2}
-                            style={{ color: styleContext.state.textColor }}
-                          >
+                          <p className="text-sm font-medium mb-2 text-foreground">
                             <strong>Nível de Acesso:</strong>{" "}
                             {group.accessLevel === 0
                               ? "Público"
@@ -625,140 +441,72 @@ export function Groups(): JSX.Element {
                                   : group.accessLevel === 3
                                     ? "Confidencial"
                                     : "Anônimo"}
-                          </Text>
+                          </p>
 
-                          <Text
-                            fontSize="sm"
-                            fontWeight="medium"
-                            mb={2}
-                            style={{ color: styleContext.state.textColor }}
-                          >
+                          <p className="text-sm font-medium mb-2 text-foreground">
                             Funções neste grupo:
-                          </Text>
+                          </p>
                           {group.roles.length > 0 ? (
-                            <Stack spacing={2}>
+                            <div className="space-y-2">
                               {group.roles.map((role) => (
-                                <Box
+                                <div
                                   key={role.id}
-                                  p={2}
-                                  bg={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "white"
-                                      : "gray.700"
-                                  }
-                                  borderWidth="1px"
-                                  borderRadius="md"
-                                  borderColor={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "#E5E7EB"
-                                      : "#4B5563"
-                                  }
+                                  className="p-2 bg-background border border-border rounded-md shadow-sm"
                                 >
-                                  <Flex
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                  >
-                                    <Text
-                                      fontWeight="medium"
-                                      style={{
-                                        color: styleContext.state.textColor,
-                                      }}
-                                    >
+                                  <div className="flex justify-between items-center">
+                                    <p className="font-medium text-foreground text-sm">
                                       {role.name}
-                                    </Text>
+                                    </p>
                                     <InfoTooltip
                                       content={
-                                        <Box>
-                                          <Text fontWeight="bold" mb={2}>
-                                            Permissões:
-                                          </Text>
+                                        <div className="space-y-2 text-foreground">
+                                          <p className="font-bold text-foreground">Permissões:</p>
                                           {role.permissions.map((perm) => (
-                                            <Text
-                                              key={perm.id}
-                                              mb={1}
-                                              fontSize="sm"
-                                            >
-                                              • <code>{perm.code}</code>
-                                              {perm.description &&
-                                                ` - ${perm.description}`}
-                                            </Text>
+                                            <p key={perm.id} className="text-sm text-foreground">
+                                              • <code className="bg-muted px-1 rounded text-foreground">{perm.code}</code>
+                                              {perm.description && ` - ${perm.description}`}
+                                            </p>
                                           ))}
-                                        </Box>
+                                        </div>
                                       }
-                                      placement="top"
                                       showIcon={false}
                                     >
                                       <ClickableBadge
-                                        colorScheme="orange"
-                                        py="1"
-                                        px="2"
-                                        className="hover:opacity-80 transition-opacity"
-                                        borderRadius="md"
-                                        bg={
-                                          styleContext.state
-                                            .buttonHoverColorWeight === "200"
-                                            ? "orange.100"
-                                            : "orange.800"
-                                        }
-                                        color={
-                                          styleContext.state
-                                            .buttonHoverColorWeight === "200"
-                                            ? "orange.800"
-                                            : "orange.200"
-                                        }
+                                        variant="outline"
+                                        className="bg-primary/10 text-primary border-primary/20"
                                       >
                                         {role.permissions.length} permissões
                                       </ClickableBadge>
                                     </InfoTooltip>
-                                  </Flex>
-                                  <Text
-                                    fontSize="sm"
-                                    color={
-                                      styleContext.state
-                                        .buttonHoverColorWeight === "200"
-                                        ? "gray.600"
-                                        : "gray.400"
-                                    }
-                                    mt={1}
-                                  >
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-1">
                                     {role.description}
-                                  </Text>
-                                </Box>
+                                  </p>
+                                </div>
                               ))}
-                            </Stack>
+                            </div>
                           ) : (
-                            <Text
-                              fontSize="sm"
-                              color={
-                                styleContext.state.buttonHoverColorWeight ===
-                                "200"
-                                  ? "gray.600"
-                                  : "gray.400"
-                              }
-                            >
+                            <p className="text-sm text-muted-foreground italic">
                               Este grupo não possui funções atribuídas.
-                            </Text>
+                            </p>
                           )}
-                        </Box>
-                      </Collapse>
-                    </Td>
-                  </Tr>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </React.Fragment>
               ))}
               {groups.length === 0 && (
-                <Tr>
-                  <Td
+                <TableRow>
+                  <TableCell
                     colSpan={5}
-                    className="text-center py-4"
-                    style={{ color: styleContext.state.textColor }}
+                    className="text-center py-8 text-muted-foreground"
                   >
                     Nenhum grupo encontrado
-                  </Td>
-                </Tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </Tbody>
+            </TableBody>
           </Table>
         </div>
       )}
@@ -777,342 +525,141 @@ export function Groups(): JSX.Element {
             colorScheme: "teal",
           }}
         >
-          <div className="overflow-y-auto">
-            <div
-              className="p-4 border-b"
-              style={{
-                borderColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#E5E7EB"
-                    : "#374151",
-              }}
-            >
-              <FormControl id="name" mb={4} isRequired>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+          <div className="overflow-y-auto h-full pb-24">
+            <div className="p-4 pb-24 border-b border-border">
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Nome do Grupo
-                </FormLabel>
-                <Input
+                </Label>
+                <DSInput
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="Ex: Administradores"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  py={3}
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#14B8A6"
-                        : "#0D9488",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #14B8A6"
-                        : "0 0 0 1px #0D9488",
-                  }}
+                  placeholder="Ex: Equipe de Aprovação"
+                  className="h-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-              </FormControl>
+              </div>
 
-              <FormControl id="description" mb={4}>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Descrição
-                </FormLabel>
-                <Textarea
+                </Label>
+                <DSTextarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Descrição detalhada do grupo..."
-                  borderRadius="md"
-                  borderWidth="1px"
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
-                  _hover={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#D1D5DB"
-                        : "#4B5563",
-                  }}
-                  _focus={{
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#14B8A6"
-                        : "#0D9488",
-                    boxShadow:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "0 0 0 1px #14B8A6"
-                        : "0 0 0 1px #0D9488",
-                  }}
+                  className="min-h-[112px] bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                 />
-              </FormControl>
+              </div>
 
-              <FormControl id="accessLevel" mb={4}>
-                <FormLabel
-                  style={{
-                    color: styleContext.state.textColor,
-                    fontWeight: "medium",
-                  }}
-                >
+              <div className="mb-4">
+                <Label className="mb-2 block text-sm font-medium text-foreground">
                   Nível de Acesso
-                </FormLabel>
-                <Select
-                  name="accessLevel"
-                  value={formData.accessLevel}
-                  onChange={(e) =>
+                </Label>
+                <DSSelect
+                  value={String(formData.accessLevel)}
+                  onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      accessLevel: parseInt(e.target.value),
+                      accessLevel: parseInt(value, 10),
                     })
                   }
-                  size="lg"
-                  style={{
-                    backgroundColor: styleContext.state.backgroundColor,
-                    color: styleContext.state.textColor,
-                    borderColor:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "#E5E7EB"
-                        : "#374151",
-                  }}
                 >
-                  <option value={0}>Público</option>
-                  <option value={1}>Registrado</option>
-                  <option value={2}>Restrito</option>
-                  <option value={3}>Confidencial</option>
-                </Select>
-                <FormHelperText
-                  style={{
-                    color:
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "gray.600"
-                        : "gray.400",
-                  }}
-                >
+                  <SelectTrigger className="h-9 w-full bg-background text-foreground border-border">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[2000]">
+                    <SelectItem value="0">Público</SelectItem>
+                    <SelectItem value="1">Registrado</SelectItem>
+                    <SelectItem value="2">Restrito</SelectItem>
+                    <SelectItem value="3">Confidencial</SelectItem>
+                  </SelectContent>
+                </DSSelect>
+                <p className="mt-1 text-xs text-muted-foreground">
                   Define o nível de acesso necessário para este grupo
-                </FormHelperText>
-              </FormControl>
+                </p>
+              </div>
             </div>
 
             <div className="p-4">
-              <p
-                className="text-sm mb-4 font-medium"
-                style={{ color: styleContext.state.textColor }}
-              >
+              <p className="text-sm mb-4 font-medium text-foreground">
                 Selecione as funções para este grupo:
               </p>
 
-              <div
-                className="relative mb-4"
-                style={{
-                  color: styleContext.state.textColor,
-                }}
-              >
-                <InputGroup size="lg">
-                  <InputLeftElement
-                    pointerEvents="none"
-                    height="100%"
-                    children={<FaSearch className="text-gray-400" />}
-                  />
-                  <Input
-                    placeholder="Buscar funções..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                      backgroundColor: styleContext.state.backgroundColor,
-                      color: styleContext.state.textColor,
-                      borderColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#E5E7EB"
-                          : "#374151",
-                    }}
-                    _hover={{
-                      borderColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#D1D5DB"
-                          : "#4B5563",
-                    }}
-                    _focus={{
-                      borderColor:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "#14B8A6"
-                          : "#0D9488",
-                      boxShadow:
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "0 0 0 1px #14B8A6"
-                          : "0 0 0 1px #0D9488",
-                    }}
-                  />
-                </InputGroup>
+              <div className="relative mb-4">
+                <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                <DSInput
+                  placeholder="Buscar funções..."
+                  value={searchTerm}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchTerm(e.target.value)
+                  }
+                  className="h-9 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+                />
               </div>
 
               {filteredRoles.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-                  <FaSearch size={32} className="mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-1">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <FaSearch size={32} className="mb-4 opacity-60" />
+                  <p className="text-lg font-medium mb-1 text-foreground">
                     Nenhuma função encontrada
                   </p>
                   <p className="text-sm">Tente buscar com outros termos</p>
                 </div>
               ) : (
-                <Box maxH="400px" overflowY="auto">
-                  <Stack spacing={2}>
-                    {filteredRoles.map((role) => (
-                      <Box
-                        key={role.id}
-                        p={3}
-                        borderRadius="lg"
-                        transition="all 0.2s"
-                        cursor="pointer"
-                        onClick={() => handleRoleChange(role.id)}
-                        style={{
-                          backgroundColor: formData.roleIds.includes(role.id)
-                            ? styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                              ? "rgba(20, 184, 166, 0.1)"
-                              : "rgba(13, 148, 136, 0.2)"
-                            : "transparent",
-                        }}
-                        _hover={{
-                          bg: !formData.roleIds.includes(role.id)
-                            ? styleContext.state.buttonHoverColorWeight ===
-                              "200"
-                              ? "rgba(243, 244, 246, 0.8)"
-                              : "rgba(31, 41, 55, 0.5)"
-                            : undefined,
-                        }}
+                <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2">
+                  {filteredRoles.map((role) => (
+                    <div
+                      key={role.id}
+                      className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${
+                        formData.roleIds.includes(role.id)
+                          ? "bg-primary/10 border border-primary/20"
+                          : "hover:bg-muted/50 border border-transparent"
+                      }`}
+                      onClick={() => handleRoleChange(role.id)}
+                    >
+                      <Checkbox
+                        id={role.id}
+                        checked={formData.roleIds.includes(role.id)}
+                        onCheckedChange={() => handleRoleChange(role.id)}
+                        className="!rounded-none shrink-0"
+                      />
+                      <Label
+                        htmlFor={role.id}
+                        className="flex-1 cursor-pointer"
                       >
-                        <div className="flex items-center w-full">
-                          <Checkbox
-                            isChecked={formData.roleIds.includes(role.id)}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              handleRoleChange(role.id);
-                            }}
-                            colorScheme="teal"
-                            size="lg"
-                            className="mr-3"
-                            borderRadius="md"
-                            onClick={(e) => e.stopPropagation()}
-                            sx={{
-                              "span.chakra-checkbox__control": {
-                                borderRadius: "0.375rem",
-                              },
-                            }}
-                          />
-                          <div className="flex-1">
-                            <Text
-                              fontWeight="medium"
-                              color={styleContext.state.textColor}
-                            >
-                              {role.name}
-                            </Text>
-                            <Flex>
-                              <Text
-                                fontSize="xs"
-                                color={
-                                  styleContext.state.buttonHoverColorWeight ===
-                                  "200"
-                                    ? "gray.600"
-                                    : "gray.400"
-                                }
-                              >
-                                {role.permissions.length} permissões
-                              </Text>
-                              {role.description && (
-                                <Text
-                                  fontSize="xs"
-                                  color={
-                                    styleContext.state
-                                      .buttonHoverColorWeight === "200"
-                                      ? "gray.600"
-                                      : "gray.400"
-                                  }
-                                  className="ml-2"
-                                >
-                                  • {role.description}
-                                </Text>
-                              )}
-                            </Flex>
-                          </div>
+                        <div className="text-sm font-medium text-foreground leading-tight">{role.name}</div>
+                        <div className="text-xs text-muted-foreground">{role.description}</div>
+                        <div className="flex mt-1 gap-1">
+                          <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border-primary/20">
+                            {role.permissions.length} permissões
+                          </Badge>
                         </div>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               )}
-              <Text
-                fontSize="sm"
-                color={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.600"
-                    : "gray.400"
-                }
-                mt={4}
-              >
+              <p className="mt-4 text-xs text-muted-foreground">
                 Selecionadas: {formData.roleIds.length} funções
-              </Text>
+              </p>
             </div>
           </div>
 
           <div
-            className="absolute bottom-0 left-0 right-0 p-4 border-t flex justify-end space-x-3 z-10"
-            style={{
-              borderColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#E5E7EB"
-                  : "#374151",
-              backgroundColor: styleContext.state.backgroundColor,
-            }}
+            className="absolute bottom-0 left-0 right-0 h-16 px-6 border-t border-border flex items-center justify-end space-x-3 z-10"
+            style={{ backgroundColor: styleContext.state.backgroundColor }}
           >
-            <Button
-              colorScheme="teal"
+            <DSButton
+              type="button"
               onClick={handleSave}
-              isLoading={isLoading}
-              size="md"
-              bg={
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "teal.500"
-                  : "teal.600"
-              }
-              _hover={{
-                bg:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "teal.600"
-                    : "teal.700",
-              }}
+              disabled={isLoading}
+              className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isEdit ? "Atualizar" : "Criar"} Grupo
-            </Button>
+            </DSButton>
           </div>
         </SideDrawer>
       )}

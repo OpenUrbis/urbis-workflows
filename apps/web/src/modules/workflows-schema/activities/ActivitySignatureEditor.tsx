@@ -2,16 +2,16 @@ import { useContext, useState } from "react";
 import { FieldTypeEnum, IField, IFormContext } from "@open-urbis/types";
 import { FieldEditable } from "../form-engine/FieldEditable";
 import { FaPlus, FaTrash, FaSignature } from "react-icons/fa";
-import {
-  IconButton,
-  FormControl,
-  FormLabel,
-  Tooltip,
-  FormHelperText,
-} from "@chakra-ui/react";
 import { SignatureConfig } from "../../../api/types/schema";
 import { StyleContext } from "../../../reducers";
 import { Input, Textarea } from "../../../components";
+import {
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  IconButton,
+  Tooltip,
+} from "../../../components";
 
 export type SignatureEditorProps = {
   signatures: SignatureConfig[];
@@ -91,7 +91,7 @@ export const ActivitySignatureEditor = ({
             .map((signature) => (
               <div
                 key={signature.id}
-                className={`p-3 border rounded cursor-pointer flex justify-between items-center group transition-colors duration-150`}
+                className={`p-3 border rounded-xl cursor-pointer flex justify-between items-center group transition-colors duration-150`}
                 onClick={() => setSelectedSignatureId(signature.id)}
                 style={{
                   backgroundColor:
@@ -142,7 +142,7 @@ export const ActivitySignatureEditor = ({
                   icon={<FaTrash />}
                   size="sm"
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     handleRemoveSignature(signature.id);
                   }}
@@ -160,26 +160,7 @@ export const ActivitySignatureEditor = ({
         <div className="mt-4">
           <button
             onClick={handleAddSignature}
-            className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
-            style={{
-              backgroundColor:
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#ca8a04"
-                  : "#854d0e",
-              color: "#ffffff",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#a16207"
-                  : "#713f12";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                styleContext.state.buttonHoverColorWeight === "200"
-                  ? "#ca8a04"
-                  : "#854d0e";
-            }}
+            className="w-full px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <FaPlus size={14} />
             <span>Assinatura</span>
@@ -306,42 +287,23 @@ export const ActivitySignatureEditor = ({
             </div>
           )}
         {!selectedSignatureId && (
-          <div className="flex flex-col mt-6 items-center justify-center h-full text-gray-500">
-            <FaSignature size={48} className="mb-4 opacity-50" />
+          <div className="flex flex-col mt-4 items-center justify-center min-h-[220px] text-gray-500">
+            <FaSignature size={36} className="mb-3 opacity-50" />
             <p
-              className="text-xl font-medium mb-2"
+              className="text-lg font-medium mb-1"
               style={{ color: styleContext.state.textColor }}
             >
               Nenhuma assinatura selecionada
             </p>
             <p
-              className="text-sm mb-6"
+              className="text-sm mb-4"
               style={{ color: styleContext.state.textColor }}
             >
               Selecione uma assinatura da lista ao lado ou crie uma nova
             </p>
             <button
               onClick={handleAddSignature}
-              className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium"
-              style={{
-                backgroundColor:
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e",
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#a16207"
-                    : "#713f12";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "#ca8a04"
-                    : "#854d0e";
-              }}
+              className="px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-150 font-medium bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <FaPlus size={14} />
               <span>Assinatura</span>

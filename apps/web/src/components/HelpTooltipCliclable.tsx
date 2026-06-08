@@ -1,15 +1,14 @@
-import React, { useContext } from "react";
+import React from "react";
 import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
-  PopoverCloseButton,
-  PopoverBody,
-  Portal,
-} from "@chakra-ui/react";
-import { StyleContext } from "../reducers";
-import { FaQuestion, FaTimes } from "react-icons/fa";
+  Button,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@open-urbis/map-ui";
+import { FaQuestion } from "react-icons/fa";
 
 export function HelpTooltipClickable({
   tooltip,
@@ -20,44 +19,33 @@ export function HelpTooltipClickable({
   icon?: React.ElementType;
   size?: string;
 }): JSX.Element {
-  const { state } = useContext(StyleContext);
-
   return (
     <div className="pt-1">
-      <Popover placement="auto">
-        <PopoverTrigger>
+      <Dialog>
+        <DialogTrigger asChild>
           <span>
-            <Icon className="cursor-pointer" size={size} />{" "}
+            <Icon className="cursor-pointer" size={size} />
           </span>
-        </PopoverTrigger>
-        <Portal>
-          <PopoverContent
-            bg={state.backgroundColor}
-            className="px-4 py-2.5"
-            width="auto"
-            maxWidth="1500px"
-            borderColor={state.buttonHoverColorWeight === "200" ? "#E5E7EB" : "#374151"}
-          >
-            <PopoverArrow bg={state.backgroundColor} />
-            <div className="absolute right-2 top-2">
-              <PopoverCloseButton
-                className="hover:bg-opacity-10 rounded p-1.5 transition-colors duration-150"
-                style={{
-                  color: state.buttonHoverColorWeight === "200" ? "#6B7280" : "#9CA3AF",
-                  backgroundColor: state.buttonHoverColorWeight === "200" 
-                    ? "rgba(107, 114, 128, 0.1)" 
-                    : "rgba(156, 163, 175, 0.1)",
-                }}
+        </DialogTrigger>
+        <DialogContent className="max-w-3xl bg-background text-foreground border border-border [&>button.absolute.right-4.top-4]:hidden">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Ajuda</DialogTitle>
+          </DialogHeader>
+          <div className="pt-1 pb-2" dangerouslySetInnerHTML={{ __html: tooltip }} />
+          <div className="flex justify-end">
+            <DialogClose asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="border-border text-foreground"
               >
-                <FaTimes size="12px" />
-              </PopoverCloseButton>
-            </div>
-            <PopoverBody>
-              <div className="pt-4 pr-5 pb-2" dangerouslySetInnerHTML={{ __html: tooltip }} />
-            </PopoverBody>
-          </PopoverContent>
-        </Portal>
-      </Popover>
+                Fechar
+              </Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

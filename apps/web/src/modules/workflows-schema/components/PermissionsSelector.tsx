@@ -1,31 +1,18 @@
+import { getAccessToken } from "../../../auth/token";
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Badge,
-  Stack,
-  Text,
-  Box,
-  Checkbox,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Tabs,
-  Spinner,
-  Center,
-} from "@chakra-ui/react";
+import { Badge, Checkbox, Input as DSInput } from "@open-urbis/map-ui";
 import { FaLock, FaSearch, FaTimes } from "react-icons/fa";
 import { User, Role, Group } from "../../../api/types/iam.dto";
 import { IamApiClient } from "../../../api/clients/iam.client";
 import InfoTooltip from "../../../components/InfoTooltip";
 import { SideDrawer } from "../../../components/SideDrawer";
+import { Spinner } from "../../../components";
+import { FormControl, FormHelperText, FormLabel } from "../../../components";
 
 const iamClient = new IamApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    Authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 
@@ -69,6 +56,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
   const [roles, setRoles] = useState<Role[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   // Generate a stable ID for this drawer based on parent + title
   const permissionsDrawerId = React.useMemo(
     () =>
@@ -79,6 +67,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
   // Use useCallback to memoize the fetchEntities function
   const fetchEntities = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
 
     try {
       const [usersResponse, rolesResponse, groupsResponse] = await Promise.all([
@@ -92,6 +81,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
       setGroups(groupsResponse.groups);
     } catch (error) {
       console.error("Failed to fetch entities:", error);
+      setLoadError("Não foi possível carregar usuários, papéis e grupos.");
     } finally {
       setLoading(false);
     }
@@ -127,6 +117,8 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     setIsOpen(true);
     setSearchTerm("");
     setTabIndex(0);
+    setLoadError(null);
+    setLoading(true);
   };
 
   const handleClose = () => {
@@ -243,17 +235,9 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
     const access = getAccess(entity.id);
 
     return (
-      <Box
+      <div
         key={entity.id}
-        p={3}
-        borderRadius="lg"
-        _hover={{
-          bg:
-            styleContext.state.buttonHoverColorWeight === "200"
-              ? "rgba(243, 244, 246, 0.8)"
-              : "rgba(31, 41, 55, 0.5)",
-        }}
-        className="flex items-center justify-between cursor-pointer transition-colors duration-150"
+        className="flex items-center justify-between cursor-pointer transition-colors duration-150 px-3 py-2 rounded-lg text-sm"
         style={{
           backgroundColor: access
             ? styleContext.state.buttonHoverColorWeight === "200"
@@ -262,58 +246,52 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
             : "transparent",
           color: styleContext.state.textColor,
         }}
+        onMouseEnter={(e) => {
+          if (!access) {
+            e.currentTarget.style.backgroundColor =
+              styleContext.state.buttonHoverColorWeight === "200"
+                ? "rgba(243, 244, 246, 0.8)"
+                : "rgba(31, 41, 55, 0.5)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!access) {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }
+        }}
       >
-        <Text fontWeight="medium">{entity.name}</Text>
-        <Stack direction="row" spacing={4}>
-          <Checkbox
-            isChecked={access === "read" || access === "write"}
-            onChange={() => {
-              if (access === "read") {
-                // If read is already checked, uncheck it
-                // Explicitly cast null to any to avoid type errors
-                handleToggle(entity, null as any);
-              } else {
-                // Otherwise check it
-                handleToggle(entity, "read");
-              }
-            }}
-            colorScheme="teal"
-            size="lg"
-            borderRadius="md"
-            className="mr-3"
-            sx={{
-              "span.chakra-checkbox__control": {
-                borderRadius: "0.375rem",
-              },
-            }}
-          >
-            Leitura
-          </Checkbox>
-          <Checkbox
-            isChecked={access === "write"}
-            onChange={() => {
-              if (access === "write") {
-                // If write is already checked, change to read only
-                handleToggle(entity, "read");
-              } else {
-                // Otherwise check it (which includes read access)
-                handleToggle(entity, "write");
-              }
-            }}
-            colorScheme="teal"
-            borderRadius="md"
-            size="lg"
-            className="mr-3"
-            sx={{
-              "span.chakra-checkbox__control": {
-                borderRadius: "0.375rem",
-              },
-            }}
-          >
-            Escrita
-          </Checkbox>
-        </Stack>
-      </Box>
+        <span className="font-medium">{entity.name}</span>
+        <div className="flex items-center gap-6">
+          <div className="inline-flex items-center gap-2 text-xs">
+            <Checkbox
+              checked={access === "read" || access === "write"}
+              onCheckedChange={() => {
+                if (access === "read") {
+                  handleToggle(entity, null as any);
+                } else {
+                  handleToggle(entity, "read");
+                }
+              }}
+              className="!rounded-none"
+            />
+            <span>Leitura</span>
+          </div>
+          <div className="inline-flex items-center gap-2 text-xs">
+            <Checkbox
+              checked={access === "write"}
+              onCheckedChange={() => {
+                if (access === "write") {
+                  handleToggle(entity, "read");
+                } else {
+                  handleToggle(entity, "write");
+                }
+              }}
+              className="!rounded-none"
+            />
+            <span>Escrita</span>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -350,12 +328,10 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                 {permissions?.users?.slice(0, 3).map((user) => (
                   <Badge
                     key={user.id}
-                    colorScheme={"teal"}
-                    variant="solid"
-                    className="flex items-center gap-1 py-1"
-                    borderRadius="md"
+                    variant="outline"
+                    className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center bg-primary/10 text-primary border-primary/20"
                   >
-                    <span className="ml-1 flex-1">
+                    <span className="flex-1">
                       {user.name} ({user.access === "write" ? "E" : "L"})
                     </span>
                     <button
@@ -371,17 +347,15 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                         });
                       }}
                       className="flex-shrink-0 hover:bg-opacity-10 rounded p-1 transition-colors duration-150"
-                      style={{
-                        color: "white",
-                      }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor =
-                          "rgba(255, 255, 255, 0.1)";
+                          "rgba(0, 0, 0, 0.05)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = "transparent";
                       }}
                       aria-label="Remove"
+                      type="button"
                     >
                       <FaTimes size={10} />
                     </button>
@@ -391,38 +365,24 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   <div className="relative group">
                     <InfoTooltip
                       content={
-                        <Box>
-                          <Text fontWeight="bold" mb={2}>
+                        <div>
+                          <p className="mb-2 text-sm font-bold">
                             Usuários adicionais:
-                          </Text>
+                          </p>
                           {(permissions?.users?.length || 0) > 3 &&
                             permissions?.users?.slice(3).map((user) => (
-                              <Text key={user.id} mb={1} fontSize="sm">
+                              <p key={user.id} className="mb-1 text-sm">
                                 • {user.name} (
                                 {user.access === "write" ? "E" : "L"})
-                              </Text>
+                              </p>
                             ))}
-                        </Box>
+                        </div>
                       }
-                      placement="top"
                       showIcon={false}
                     >
                       <Badge
-                        colorScheme="gray"
-                        py="1"
-                        px="2"
-                        className="hover:opacity-80 transition-opacity cursor-pointer"
-                        borderRadius="md"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.600"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
+                        variant="secondary"
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center bg-muted text-muted-foreground border-transparent hover:opacity-80 transition-opacity cursor-pointer"
                       >
                         +{(permissions?.users?.length || 0) - 3}
                       </Badge>
@@ -432,12 +392,10 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                 {permissions?.roles?.slice(0, 3).map((role) => (
                   <Badge
                     key={role.id}
-                    colorScheme={"teal"}
-                    variant="solid"
-                    className="flex items-center gap-1 py-1"
-                    borderRadius="md"
+                    variant="outline"
+                    className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center bg-primary/10 text-primary border-primary/20"
                   >
-                    <span className="ml-1 flex-1">
+                    <span className="flex-1">
                       {role.name} ({role.access === "write" ? "E" : "L"})
                     </span>
                     <button
@@ -453,17 +411,15 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                         });
                       }}
                       className="flex-shrink-0 hover:bg-opacity-10 rounded p-1 transition-colors duration-150"
-                      style={{
-                        color: "white",
-                      }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor =
-                          "rgba(255, 255, 255, 0.1)";
+                          "rgba(0, 0, 0, 0.05)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = "transparent";
                       }}
                       aria-label="Remove"
+                      type="button"
                     >
                       <FaTimes size={10} />
                     </button>
@@ -473,38 +429,24 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   <div className="relative group">
                     <InfoTooltip
                       content={
-                        <Box>
-                          <Text fontWeight="bold" mb={2}>
+                        <div>
+                          <p className="mb-2 text-sm font-bold">
                             Papéis adicionais:
-                          </Text>
+                          </p>
                           {(permissions?.roles?.length || 0) > 3 &&
                             permissions?.roles?.slice(3).map((role) => (
-                              <Text key={role.id} mb={1} fontSize="sm">
+                              <p key={role.id} className="mb-1 text-sm">
                                 • {role.name} (
                                 {role.access === "write" ? "E" : "L"})
-                              </Text>
+                              </p>
                             ))}
-                        </Box>
+                        </div>
                       }
-                      placement="top"
                       showIcon={false}
                     >
                       <Badge
-                        colorScheme="gray"
-                        py="1"
-                        px="2"
-                        className="hover:opacity-80 transition-opacity cursor-pointer"
-                        borderRadius="md"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.600"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
+                        variant="secondary"
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center bg-muted text-muted-foreground border-transparent hover:opacity-80 transition-opacity cursor-pointer"
                       >
                         +{(permissions?.roles?.length || 0) - 3}
                       </Badge>
@@ -514,12 +456,10 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                 {permissions?.groups?.slice(0, 3).map((group) => (
                   <Badge
                     key={group.id}
-                    colorScheme={"teal"}
-                    variant="solid"
-                    className="flex items-center gap-1 py-1"
-                    borderRadius="md"
+                    variant="outline"
+                    className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center bg-primary/10 text-primary border-primary/20"
                   >
-                    <span className="ml-1 flex-1">
+                    <span className="flex-1">
                       {group.name} ({group.access === "write" ? "E" : "L"})
                     </span>
                     <button
@@ -535,17 +475,15 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                         });
                       }}
                       className="flex-shrink-0 hover:bg-opacity-10 rounded p-1 transition-colors duration-150"
-                      style={{
-                        color: "white",
-                      }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor =
-                          "rgba(255, 255, 255, 0.1)";
+                          "rgba(0, 0, 0, 0.05)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = "transparent";
                       }}
                       aria-label="Remove"
+                      type="button"
                     >
                       <FaTimes size={10} />
                     </button>
@@ -555,38 +493,24 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                   <div className="relative group">
                     <InfoTooltip
                       content={
-                        <Box>
-                          <Text fontWeight="bold" mb={2}>
+                        <div>
+                          <p className="mb-2 text-sm font-bold">
                             Grupos adicionais:
-                          </Text>
+                          </p>
                           {(permissions?.groups?.length || 0) > 3 &&
                             permissions?.groups?.slice(3).map((group) => (
-                              <Text key={group.id} mb={1} fontSize="sm">
+                              <p key={group.id} className="mb-1 text-sm">
                                 • {group.name} (
                                 {group.access === "write" ? "E" : "L"})
-                              </Text>
+                              </p>
                             ))}
-                        </Box>
+                        </div>
                       }
-                      placement="top"
                       showIcon={false}
                     >
                       <Badge
-                        colorScheme="gray"
-                        py="1"
-                        px="2"
-                        className="hover:opacity-80 transition-opacity cursor-pointer"
-                        borderRadius="md"
-                        bg={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.200"
-                            : "gray.600"
-                        }
-                        color={
-                          styleContext.state.buttonHoverColorWeight === "200"
-                            ? "gray.700"
-                            : "gray.200"
-                        }
+                        variant="secondary"
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-full inline-flex items-center bg-muted text-muted-foreground border-transparent hover:opacity-80 transition-opacity cursor-pointer"
                       >
                         +{(permissions?.groups?.length || 0) - 3}
                       </Badge>
@@ -627,7 +551,7 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                 />
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-medium">
+                <span className="font-medium text-sm">
                   {totalPermissions > 0
                     ? `Gerenciar Permissões (${totalPermissions})`
                     : "Adicionar Permissões"}
@@ -660,11 +584,11 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
         >
           <div className="p-4">
             <div className="relative">
-              <input
+              <DSInput
                 placeholder="Buscar usuários, papéis ou grupos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 text-base transition-colors duration-200 border rounded-lg"
+                className="w-full pl-10 pr-4 py-2.5 text-sm transition-colors duration-200 border rounded-lg"
                 style={{
                   backgroundColor: styleContext.state.backgroundColor,
                   color: styleContext.state.textColor,
@@ -687,45 +611,72 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
             </p>
           </div>
 
-          {loading ? (
-            <Center py={10}>
-              <Spinner />
-            </Center>
-          ) : (
-            <Tabs
-              isFitted
-              variant="enclosed"
-              index={tabIndex}
-              onChange={setTabIndex}
-              colorScheme="teal"
-            >
-              <TabList
-                className="mx-4"
-                style={{
-                  borderColor:
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "#E5E7EB"
-                      : "#374151",
-                }}
-              >
-                <Tab style={{ color: styleContext.state.textColor }}>
-                  Grupos
-                </Tab>
-                <Tab style={{ color: styleContext.state.textColor }}>
-                  Funções
-                </Tab>
-                <Tab style={{ color: styleContext.state.textColor }}>
-                  Usuários
-                </Tab>
-              </TabList>
+          <div className="min-h-[260px]">
+            {loading ? (
+              <div className="flex justify-center py-10" style={{ color: styleContext.state.textColor }}>
+                <Spinner size="xl" />
+              </div>
+            ) : loadError ? (
+              <div className="px-4 pb-6">
+                <div
+                  className="p-4 text-center rounded-lg text-sm"
+                  style={{
+                    backgroundColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "rgba(243, 244, 246, 0.5)"
+                        : "rgba(31, 41, 55, 0.3)",
+                    color: styleContext.state.textColor,
+                  }}
+                >
+                  {loadError}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div
+                  className="mx-4 mb-4 grid grid-cols-3 rounded-lg border p-1"
+                  style={{
+                    borderColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "#E5E7EB"
+                        : "#374151",
+                    backgroundColor:
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "#F9FAFB"
+                        : "#111827",
+                  }}
+                >
+                  {[
+                    { index: 0, label: "Grupos" },
+                    { index: 1, label: "Funções" },
+                    { index: 2, label: "Usuários" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.index}
+                      type="button"
+                      onClick={() => setTabIndex(tab.index)}
+                      className="rounded-md px-3 py-2 text-xs font-medium transition-colors"
+                      style={{
+                        color: styleContext.state.textColor,
+                        backgroundColor:
+                          tabIndex === tab.index
+                            ? styleContext.state.buttonHoverColorWeight === "200"
+                              ? "#FFFFFF"
+                              : "#1F2937"
+                            : "transparent",
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
 
-              <TabPanels>
-                <TabPanel>
-                  {/* Groups Content */}
+                <div className="px-4 pb-4">
+                {tabIndex === 0 && (
                   <div>
                     {filteredGroups.length === 0 ? (
                       <div
-                        className="p-4 text-center rounded-lg"
+                        className="p-4 text-center rounded-lg text-sm"
                         style={{
                           backgroundColor:
                             styleContext.state.buttonHoverColorWeight === "200"
@@ -739,24 +690,20 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                           : "Nenhum grupo disponível"}
                       </div>
                     ) : (
-                      <Stack spacing={2}>
+                      <div className="space-y-2">
                         {filteredGroups.map((group) =>
-                          renderEntityItem(
-                            group,
-                            getGroupAccess,
-                            handleToggleGroup
-                          )
+                          renderEntityItem(group, getGroupAccess, handleToggleGroup)
                         )}
-                      </Stack>
+                      </div>
                     )}
                   </div>
-                </TabPanel>
-                <TabPanel>
-                  {/* Roles Content */}
+                )}
+
+                {tabIndex === 1 && (
                   <div>
                     {filteredRoles.length === 0 ? (
                       <div
-                        className="p-4 text-center rounded-lg"
+                        className="p-4 text-center rounded-lg text-sm"
                         style={{
                           backgroundColor:
                             styleContext.state.buttonHoverColorWeight === "200"
@@ -770,24 +717,20 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                           : "Nenhuma função disponível"}
                       </div>
                     ) : (
-                      <Stack spacing={2}>
+                      <div className="space-y-2">
                         {filteredRoles.map((role) =>
-                          renderEntityItem(
-                            role,
-                            getRoleAccess,
-                            handleToggleRole
-                          )
+                          renderEntityItem(role, getRoleAccess, handleToggleRole)
                         )}
-                      </Stack>
+                      </div>
                     )}
                   </div>
-                </TabPanel>
-                <TabPanel>
-                  {/* Users Content */}
+                )}
+
+                {tabIndex === 2 && (
                   <div>
                     {filteredUsers.length === 0 ? (
                       <div
-                        className="p-4 text-center rounded-lg"
+                        className="p-4 text-center rounded-lg text-sm"
                         style={{
                           backgroundColor:
                             styleContext.state.buttonHoverColorWeight === "200"
@@ -801,21 +744,19 @@ export const PermissionsSelector: React.FC<PermissionsSelectorProps> = ({
                           : "Nenhum usuário disponível"}
                       </div>
                     ) : (
-                      <Stack spacing={2}>
+                      <div className="space-y-2">
                         {filteredUsers.map((user) =>
-                          renderEntityItem(
-                            user,
-                            getUserAccess,
-                            handleToggleUser
-                          )
+                          renderEntityItem(user, getUserAccess, handleToggleUser)
                         )}
-                      </Stack>
+                      </div>
                     )}
                   </div>
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-          )}
+                )}
+              </div>
+
+              </>
+            )}
+          </div>
         </SideDrawer>
       )}
     </>

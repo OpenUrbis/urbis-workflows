@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import { useLocation, useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import {
@@ -14,7 +15,7 @@ import { QRCodeSVG } from "qrcode.react";
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 

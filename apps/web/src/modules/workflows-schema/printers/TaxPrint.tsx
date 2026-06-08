@@ -1,3 +1,4 @@
+import { getAccessToken } from "../../../auth/token";
 import { useLocation, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { IFormContext } from "@open-urbis/types";
@@ -11,7 +12,7 @@ import { ActivityTypeEnum, TaxTemplate } from "../../../api/types/schema";
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 

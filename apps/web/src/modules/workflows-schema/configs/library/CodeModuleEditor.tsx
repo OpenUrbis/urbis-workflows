@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { FormControl, FormLabel, IconButton } from "@chakra-ui/react";
+import { FormControl, FormLabel, IconButton } from "../../../../components/LegacyUi";
 import { FaTrash } from "react-icons/fa";
 import EditableHeader from "../../../../components/EditableHeader";
 import { CodeModule } from "../../../../api/types/schema";
@@ -53,12 +53,6 @@ export const CodeModuleEditor: React.FC<CodeModuleEditorProps> = ({
                 ? "#dc2626"
                 : "#fca5a5",
             backgroundColor: "transparent",
-          }}
-          _hover={{
-            backgroundColor:
-              styleContext.state.buttonHoverColorWeight === "200"
-                ? "#fee2e2"
-                : "#7f1d1d",
           }}
           onClick={onRemove}
         />

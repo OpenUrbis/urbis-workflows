@@ -170,16 +170,16 @@ export const RenderFieldModelCalculation = ({
 
   // Generate tooltip content
   const generateTooltipContent = () => {
-    let content = `<div class="space-y-3">`;
+    let content = `<div class="space-y-3 text-foreground">`;
 
     // Title
-    content += `<div class="font-bold text-blue-600">Campo Calculado</div>`;
+    content += `<div class="font-semibold">Campo Calculado</div>`;
 
     // Description - Use custom description if available, otherwise use default
     const customDescription = (field.expressions as any).modelDescription;
     content += `
       <div>
-        <p class="text-sm">${customDescription || "Este campo tem seu valor calculado automaticamente com base em outros dados:"}</p>
+        <p class="text-sm text-muted-foreground">${customDescription || "Este campo tem seu valor calculado automaticamente com base em outros dados:"}</p>
       </div>
     `;
 
@@ -187,8 +187,8 @@ export const RenderFieldModelCalculation = ({
     if (dataReferences.length > 0) {
       content += `
         <div class="mt-2">
-          <span class="font-semibold">Dados de outras atividades:</span>
-          <ul class="mt-1 space-y-1 text-sm">
+          <span class="font-medium">Dados de outras atividades:</span>
+          <ul class="mt-1 space-y-1 text-sm text-foreground">
       `;
 
       dataReferences.forEach((ref) => {
@@ -201,9 +201,9 @@ export const RenderFieldModelCalculation = ({
         );
 
         content += `<li class="flex items-center">
-          <span class="inline-block w-2 h-2 mr-2 bg-blue-500 rounded-full"></span>
+          <span class="inline-block w-2 h-2 mr-2 bg-primary rounded-full"></span>
           <span class="font-medium">${activityLabel}</span>
-          ${ref.fieldPath ? ` › <span>${fieldInfo.labels.join(" › ")}</span>` : ""}
+          ${ref.fieldPath ? ` <span class="text-muted-foreground">›</span> <span>${fieldInfo.labels.join(" › ")}</span>` : ""}
         </li>`;
       });
 
@@ -214,8 +214,8 @@ export const RenderFieldModelCalculation = ({
     if (contextReferences.length > 0) {
       content += `
         <div class="mt-2">
-          <span class="font-semibold">Campos deste formulário:</span>
-          <ul class="mt-1 space-y-1 text-sm">
+          <span class="font-medium">Campos deste formulário:</span>
+          <ul class="mt-1 space-y-1 text-sm text-foreground">
       `;
 
       contextReferences.forEach((ref) => {
@@ -223,7 +223,7 @@ export const RenderFieldModelCalculation = ({
         const labelPath = getContextFieldLabelPath(ref.fieldPath);
 
         content += `<li class="flex items-center">
-          <span class="inline-block w-2 h-2 mr-2 bg-green-500 rounded-full"></span>
+          <span class="inline-block w-2 h-2 mr-2 bg-emerald-500 rounded-full"></span>
           ${labelPath.join(" › ")}
         </li>`;
       });

@@ -40,24 +40,42 @@ interface PermissionProviderProps {
 export const PermissionProvider: React.FC<PermissionProviderProps> = ({
   children,
 }) => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const {
+    isAuthenticated,
+    accessToken,
+    isLoading: authLoading,
+  } = useContext(AuthContext);
   const [userIam, setUserIam] = useState<UserIamDetailsResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(isAuthenticated);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const apiClient = new ApiClient({
-    baseURL: import.meta.env.VITE_BACK_END_API || "",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-
   const fetchUserIam = async () => {
-    // Don't fetch if not authenticated
+    // Wait for auth flow resolution before deciding permission state
+    if (authLoading) {
+      setLoading(true);
+      return;
+    }
+
+    // No authenticated user means no IAM permissions to load
     if (!isAuthenticated) {
+      setUserIam(null);
+      setError(null);
       setLoading(false);
       return;
     }
+
+    // Authenticated but token not ready yet: keep loading to avoid false denies
+    if (!accessToken) {
+      setLoading(true);
+      return;
+    }
+
+    const apiClient = new ApiClient({
+      baseURL: import.meta.env.VITE_BACK_END_API || "",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     try {
       setLoading(true);
@@ -104,7 +122,7 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
 
     // Call fetchUserIam
     fetchUserIam();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, accessToken, authLoading]);
 
   const hasPermission = (permission: string): boolean => {
     // If not authenticated, always return false

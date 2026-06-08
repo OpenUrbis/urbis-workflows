@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { StyleContext } from "../reducers";
+import { useLocation } from "react-router-dom";
 import { AuthContext } from "../reducers/auth.reducer";
+import { Button, Card, CardContent } from "@open-urbis/map-ui";
+import { FaExclamationTriangle, FaRedo } from "react-icons/fa";
 
 interface IamErrorProps {
   error?: Error | null;
@@ -12,9 +13,7 @@ export const IamError: React.FC<IamErrorProps> = ({
   error: propError,
   onRetry,
 }) => {
-  const styleContext = useContext(StyleContext);
-  const { isAuthenticated } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { isAuthenticated, signIn } = useContext(AuthContext);
   const location = useLocation();
   const [error, setError] = useState<Error | null>(propError || null);
   const [forcedDisplay, setForcedDisplay] = useState<boolean>(false);
@@ -82,21 +81,15 @@ export const IamError: React.FC<IamErrorProps> = ({
     checkAndClearRedirectFlag();
   }, [isAuthenticated]);
 
-  // The original redirect logic
-  // Only redirect to login if not authenticated and we don't have a stored error
-  // and we're not in the middle of displaying an IAM error
+  // Redirect to OIDC sign-in if not authenticated and we don't have a stored error
   useEffect(() => {
     const hasStoredError = sessionStorage.getItem("iamError");
     const isErrorPage = window.location.pathname === "/iam-error";
 
-    // Only redirect to login if:
-    // 1. Not authenticated
-    // 2. No stored IAM error
-    // 3. Not already on the error page
     if (!isAuthenticated && !hasStoredError && !isErrorPage) {
-      navigate("/login", { replace: true });
+      signIn();
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, signIn]);
 
   // Check for error information in URL parameters when component mounts
   useEffect(() => {
@@ -116,21 +109,6 @@ export const IamError: React.FC<IamErrorProps> = ({
       );
     }
   }, [location]);
-
-  // Determine if in high contrast mode
-  const isHighContrast = styleContext.state.buttonHoverColorWeight === "800";
-
-  // Determine colors based on the style context - using purple/violet palette (same as NotFound)
-  const accentColor = isHighContrast
-    ? "rgb(139, 92, 246)" // Use brighter violet-500 for HC mode for better visibility
-    : "rgb(139, 92, 246)"; // violet-500 for normal mode
-
-  // Use same color palette for all elements but with higher opacity for HC mode
-  const textLargeColor = accentColor;
-  const textColor = styleContext.state.textColor;
-  const secondaryTextColor = isHighContrast
-    ? "rgba(255, 255, 255, 0.95)" // Almost white with high opacity for HC
-    : "rgba(75, 85, 99, 0.8)"; // gray-600 for normal mode
 
   // Handle retry by explicitly clearing session storage and forcing a refresh
   const handleRetry = () => {
@@ -161,93 +139,51 @@ export const IamError: React.FC<IamErrorProps> = ({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-6 py-12 text-center">
-      <div className="w-full max-w-md mx-auto">
-        {/* Visual element - warning icon */}
-        <div className="relative mb-8">
-          <h1
-            className={`text-9xl font-extrabold tracking-tight ${isHighContrast ? "opacity-40" : "opacity-15"}`}
-            style={{ color: textLargeColor }}
-          >
-            IAM
-          </h1>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg
-              className="w-24 h-24"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              style={{ color: accentColor }}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={isHighContrast ? 2 : 1.5}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-        </div>
-
-        <h2
-          className={`text-3xl font-bold mb-4 ${isHighContrast ? "tracking-wide" : ""}`}
-          style={{ color: textColor }}
-        >
-          Erro de Permissões
-        </h2>
-
-        <p className="text-lg mb-4" style={{ color: secondaryTextColor }}>
-          Não foi possível carregar suas permissões de acesso. Isso pode ocorrer
-          devido a problemas de conexão ou sessão expirada.
-        </p>
-
-        {error && (
-          <div
-            className={`mb-6 p-4 rounded-lg text-left text-sm ${isHighContrast ? "border border-violet-400" : ""}`}
-            style={{
-              backgroundColor: isHighContrast
-                ? "rgba(0, 0, 0, 0.3)"
-                : "rgba(0, 0, 0, 0.05)",
-              color: isHighContrast
-                ? "rgba(255, 255, 255, 0.9)"
-                : secondaryTextColor,
-            }}
-          >
-            <p
-              className={`font-medium mb-1 ${isHighContrast ? "text-violet-300" : ""}`}
-            >
-              Detalhes do erro:
+    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+      <Card className="w-full max-w-xl border-muted/80">
+        <CardContent className="p-8 sm:p-10 text-center">
+          <div className="relative mb-6">
+            <p className="text-7xl sm:text-8xl font-black tracking-tight text-muted/40">
+              IAM
             </p>
-            <p className="font-mono">{error.message}</p>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FaExclamationTriangle className="h-12 w-12 text-muted-foreground" />
+            </div>
           </div>
-        )}
 
-        <div className="flex justify-center space-x-4">
-          <button
-            onClick={handleRetry}
-            className="px-6 py-3 rounded-lg text-white font-medium transition-all duration-200 hover:shadow-lg flex items-center hover:brightness-95"
-            style={{
-              backgroundColor: accentColor,
-              border: isHighContrast ? "2px solid white" : "none",
-            }}
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground mb-3">
+            Erro de Permissões
+          </h1>
+
+          <p className="text-sm sm:text-base text-muted-foreground mb-6">
+            Não foi possível carregar suas permissões de acesso. Isso pode
+            ocorrer devido a problemas de conexão ou sessão expirada.
+          </p>
+
+          {error && (
+            <div className="mb-8 rounded-lg border border-muted/80 bg-muted/40 p-4 text-left">
+              <p className="text-xs font-semibold text-muted-foreground mb-1">
+                Detalhes do erro:
+              </p>
+              <p className="font-mono text-xs sm:text-sm text-foreground break-words">
+                {error.message}
+              </p>
+            </div>
+          )}
+
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              size="sm"
+              className="h-10 px-5 rounded-lg"
+              onClick={handleRetry}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={isHighContrast ? 2 : 2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            Tentar novamente
-          </button>
-        </div>
-      </div>
+              <FaRedo className="h-4 w-4 mr-2" />
+              Tentar novamente
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

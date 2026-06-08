@@ -16,7 +16,7 @@ export const Label: React.FC<FieldLabelProps> = ({
   const label = evalLabel(options.label ?? "", context);
 
   return (
-    <div className="flex space-x-2 mb-2" key={fieldKey}>
+    <div className="flex space-x-2 mb-2 text-sm" key={fieldKey}>
       <div dangerouslySetInnerHTML={{ __html: label ?? "" }}></div>
       {isRequired && <div className="text-red-500">*</div>}
     </div>

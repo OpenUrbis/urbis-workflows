@@ -1,4 +1,4 @@
-import { Center, Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components/LegacyUi";
 import {
   FaProjectDiagram,
   FaChevronUp,
@@ -135,30 +135,28 @@ export const OutgoingList: React.FC<{
                   }`}
                   onClick={() => enabled && handleWorkflowClick(workflow)}
                 >
-                  <Center
-                    w="36px"
-                    h="36px"
-                    mr={4}
-                    borderRadius="md"
-                    bg={
-                      enabled
+                  <div
+                    className="flex items-center justify-center mr-4"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 8,
+                      backgroundColor: enabled
                         ? styleContext.state.buttonHoverColorWeight === "200"
-                          ? "green.100"
-                          : "green.800"
+                          ? "#dcfce7"
+                          : "#166534"
                         : styleContext.state.buttonHoverColorWeight === "200"
-                          ? "gray.300"
-                          : "gray.700"
-                    }
-                    color={
-                      enabled
+                          ? "#d1d5db"
+                          : "#374151",
+                      color: enabled
                         ? styleContext.state.buttonHoverColorWeight === "200"
-                          ? "green.800"
-                          : "green.100"
-                        : "white"
-                    }
+                          ? "#166534"
+                          : "#dcfce7"
+                        : "white",
+                    }}
                   >
                     {enabled ? <FaUnlock size={14} /> : <FaLock size={14} />}
-                  </Center>
+                  </div>
                   <div className="flex-1 relative">
                     <div className="font-medium">{workflow.label}</div>
                     <Tooltip

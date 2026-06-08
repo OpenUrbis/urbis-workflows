@@ -1,7 +1,12 @@
 import { useContext } from "react";
 import { IFormContext } from "@open-urbis/types";
 import { StyleContext } from "../../../../reducers";
-import { Tooltip } from "@chakra-ui/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
 import { FaUser, FaLink, FaExclamationTriangle } from "react-icons/fa";
 
 export type FieldLinkProps = {
@@ -23,58 +28,61 @@ export const Link: React.FC<FieldLinkProps> = ({ value, general }) => {
   // If signature doesn't exist, show error state
   if (!signatureExists) {
     return (
-      <div
-        className={`rounded-lg border p-4 mt-4 transition-colors duration-150 ${
-          styleContext.state.buttonHoverColorWeight === "200"
-            ? "border-red-300 bg-red-100"
-            : "border-red-700/30 bg-red-800/20"
-        }`}
-      >
+      <TooltipProvider>
+        <div
+          className={`rounded-lg border p-4 mt-4 transition-colors duration-150 ${
+            styleContext.state.buttonHoverColorWeight === "200"
+              ? "border-red-300 bg-red-100"
+              : "border-red-700/30 bg-red-800/20"
+          }`}
+        >
         <div className="flex items-start">
           <div className="flex-shrink-0">
             <div className="flex flex-col space-y-2">
-              <Tooltip label="Usuário vinculado" placement="top" hasArrow>
-                <div className="flex items-center space-x-2">
-                  <FaUser
-                    className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "text-red-600"
-                        : "text-red-300"
-                    }
-                    size={14}
-                  />
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: styleContext.state.textColor }}
-                  >
-                    {value.from}
-                  </span>
-                </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center space-x-2">
+                    <FaUser
+                      className={
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "text-red-600"
+                          : "text-red-300"
+                      }
+                      size={14}
+                    />
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: styleContext.state.textColor }}
+                    >
+                      {value.from}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>Usuário vinculado</TooltipContent>
               </Tooltip>
-              <Tooltip
-                label="Assinatura não encontrada"
-                placement="bottom"
-                hasArrow
-              >
-                <div className="flex items-center space-x-2">
-                  <FaExclamationTriangle
-                    className={
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "text-red-500"
-                        : "text-red-400"
-                    }
-                    size={12}
-                  />
-                  <span
-                    className={`text-xs font-medium ${
-                      styleContext.state.buttonHoverColorWeight === "200"
-                        ? "text-red-700"
-                        : "text-red-300"
-                    }`}
-                  >
-                    ID: {value.by}
-                  </span>
-                </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center space-x-2">
+                    <FaExclamationTriangle
+                      className={
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "text-red-500"
+                          : "text-red-400"
+                      }
+                      size={12}
+                    />
+                    <span
+                      className={`text-xs font-medium ${
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "text-red-700"
+                          : "text-red-300"
+                      }`}
+                    >
+                      ID: {value.by}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>Assinatura não encontrada</TooltipContent>
               </Tooltip>
             </div>
           </div>
@@ -91,61 +99,69 @@ export const Link: React.FC<FieldLinkProps> = ({ value, general }) => {
             assinatura está correto ou se ela ainda existe no fluxo.
           </div>
         </div>
-      </div>
+        </div>
+      </TooltipProvider>
     );
   }
 
   const signatureLabel = signatureMetadata.label || "Assinatura";
 
   return (
-    <div
-      className={`rounded-lg border p-4 mt-4 transition-colors duration-150 ${
-        styleContext.state.buttonHoverColorWeight === "200"
-          ? "border-blue-300 bg-blue-100 hover:bg-blue-200/70"
-          : "border-blue-700/30 bg-blue-800/20 hover:bg-blue-700/30"
-      }`}
-    >
+    <TooltipProvider>
+      <div
+        className={`rounded-lg border p-4 mt-4 transition-colors duration-150 ${
+          styleContext.state.buttonHoverColorWeight === "200"
+            ? "border-blue-300 bg-blue-100 hover:bg-blue-200/70"
+            : "border-blue-700/30 bg-blue-800/20 hover:bg-blue-700/30"
+        }`}
+      >
       <div className="flex items-start">
         <div className="flex-shrink-0">
           <div className="flex flex-col space-y-2">
-            <Tooltip label="Usuário vinculado" placement="top" hasArrow>
-              <div className="flex items-center space-x-2">
-                <FaUser
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "text-blue-600"
-                      : "text-blue-300"
-                  }
-                  size={14}
-                />
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: styleContext.state.textColor }}
-                >
-                  {value.from}
-                </span>
-              </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center space-x-2">
+                  <FaUser
+                    className={
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "text-blue-600"
+                        : "text-blue-300"
+                    }
+                    size={14}
+                  />
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: styleContext.state.textColor }}
+                  >
+                    {value.from}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Usuário vinculado</TooltipContent>
             </Tooltip>
-            <Tooltip label="Tipo de vínculo" placement="bottom" hasArrow>
-              <div className="flex items-center space-x-2">
-                <FaLink
-                  className={
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "text-blue-500"
-                      : "text-blue-400"
-                  }
-                  size={12}
-                />
-                <span
-                  className={`text-xs font-medium ${
-                    styleContext.state.buttonHoverColorWeight === "200"
-                      ? "text-blue-700"
-                      : "text-blue-300"
-                  }`}
-                >
-                  {signatureLabel}
-                </span>
-              </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center space-x-2">
+                  <FaLink
+                    className={
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "text-blue-500"
+                        : "text-blue-400"
+                    }
+                    size={12}
+                  />
+                  <span
+                    className={`text-xs font-medium ${
+                      styleContext.state.buttonHoverColorWeight === "200"
+                        ? "text-blue-700"
+                        : "text-blue-300"
+                    }`}
+                  >
+                    {signatureLabel}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Tipo de vínculo</TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -161,6 +177,7 @@ export const Link: React.FC<FieldLinkProps> = ({ value, general }) => {
           {signatureMetadata.documentation || "Usuário vinculado ao protocolo"}
         </div>
       </div>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };

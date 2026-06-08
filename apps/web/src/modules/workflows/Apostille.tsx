@@ -1,5 +1,6 @@
+import { getAccessToken } from "../../auth/token";
 import React, { useEffect, useState } from "react";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner } from "../../components/LegacyUi";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Field } from "../workflows-schema/form-engine/Field";
@@ -23,7 +24,7 @@ export function Apostille(): JSX.Element {
         `${import.meta.env.VITE_BACK_END_API}/protocols/${id}`,
         {
           headers: {
-            authorization: `${localStorage.getItem("token")}`,
+            authorization: `${getAccessToken()}`,
           },
         }
       );
@@ -56,7 +57,7 @@ export function Apostille(): JSX.Element {
           },
           {
             headers: {
-              authorization: `${localStorage.getItem("token")}`,
+              authorization: `${getAccessToken()}`,
             },
           }
         );

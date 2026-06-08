@@ -1,3 +1,56 @@
+@import "../../../node_modules/@open-urbis/map-ui/globals.css";
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root,
+  #application {
+    @apply min-h-screen bg-background text-foreground;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    font-family: var(--font-family);
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    color-scheme: light;
+    background-color: hsl(var(--background));
+    accent-color: hsl(var(--primary));
+  }
+
+  .dark input[type="checkbox"],
+  .dark input[type="radio"] {
+    color-scheme: dark;
+  }
+
+  .ds-table td,
+  .ds-table th {
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .ds-table td {
+    background: transparent !important;
+  }
+
+  .ds-table th {
+    background: hsl(var(--muted) / 0.4) !important;
+  }
+}

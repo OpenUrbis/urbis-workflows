@@ -1,4 +1,3 @@
-import { Skeleton } from "@chakra-ui/react";
 import React, { useState } from "react";
 import {
   FaFile,
@@ -14,6 +13,26 @@ import {
 interface ImageGalleryProps {
   uploadedFiles: string[];
 }
+
+const Skeleton = ({
+  isLoaded,
+  className,
+  children,
+}: {
+  isLoaded: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div className={className}>
+      {!isLoaded ? (
+        <div className="h-full w-full animate-pulse rounded-lg bg-muted" />
+      ) : (
+        children
+      )}
+    </div>
+  );
+};
 
 export const ImageGallery: React.FC<ImageGalleryProps> = ({
   uploadedFiles,
@@ -74,9 +93,6 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
       {uploadedFiles.map((filename) => (
         <Skeleton
           isLoaded={!isImage(filename) || loaded[filename]}
-          fadeDuration={0.6}
-          startColor="gray.100"
-          endColor="gray.300"
           className="w-32 h-32 rounded-lg mr-4 mt-4"
         >
           {isImage(filename) ? (

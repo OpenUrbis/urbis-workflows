@@ -1,16 +1,17 @@
-import React, { useEffect, useState, useContext } from "react";
+import { getAccessToken } from "../../auth/token";
+import React, { useEffect, useMemo, useState, useContext } from "react";
 import {
-  Spinner,
-  useSteps,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Tooltip,
-  Badge,
-} from "@chakra-ui/react";
+  Button as DSButton,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Tooltip as DSTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-urbis/map-ui";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { IFormContext } from "@open-urbis/types";
 import { Field } from "../workflows-schema/form-engine/Field";
@@ -30,7 +31,6 @@ import {
 } from "../../api/types/schema";
 import { ActivityStateEnum } from "../../api/types/workflows.dto";
 import { StyleContext } from "../../reducers/style.reducer";
-import { SL } from "../../components";
 import {
   FaTimes,
   FaExclamationTriangle,
@@ -57,14 +57,16 @@ import {
   DocumentActivity,
   TaxActivity,
 } from "./activities";
+import { Spinner } from "../../components";
 import { formatDate, formatId } from "./activities/common";
 import { v4 as uuidv4 } from "uuid";
 import { usePermissions } from "../../reducers/permission.context";
+import { findFieldMatches } from "./utils/field-matcher";
 
 const apiClient = new ApiClient({
   baseURL: import.meta.env.VITE_BACK_END_API || "",
   headers: {
-    authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    authorization: `Bearer ${getAccessToken() || ""}`,
   },
 });
 
@@ -85,13 +87,18 @@ export function Workflows(): JSX.Element {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const styleContext = useContext(StyleContext);
-  const { userIam, hasActivityAccess } = usePermissions();
+  const {
+    userIam,
+    hasActivityAccess,
+    loading: permissionsLoading,
+  } = usePermissions();
   const isCreating = location.pathname.endsWith("/create");
+  const highlightQuery = params.get("highlight") || undefined;
   const [showQRModal, setShowQRModal] = useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   const [workflow, setWorkflow] = useState<WorkflowSchema | undefined>(
-    undefined
+    undefined,
   );
   const [context, setContext] = useState<any>({});
   const [valid, setValid] = useState<any>({});
@@ -117,10 +124,7 @@ export function Workflows(): JSX.Element {
   const [incomingListOpen, setIncomingListOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { activeStep, setActiveStep } = useSteps({
-    index: 0,
-    count: workflow?.schema?.activities?.length ?? 0,
-  });
+  const [activeStep, setActiveStep] = useState(0);
 
   const fetchWorkflow = async () => {
     try {
@@ -129,7 +133,7 @@ export function Workflows(): JSX.Element {
         // Fetch workflow schema for creation
         response = await apiClient.workflowsSchema.findOne(
           id as string,
-          params.get("stage") as WorkflowStageEnum
+          params.get("stage") as WorkflowStageEnum,
         );
         setWorkflow(response);
 
@@ -160,14 +164,14 @@ export function Workflows(): JSX.Element {
       const user = await apiClient.users.getProfile();
       const variables = await loadConstantVariables(
         workflow.schema?.constants ?? [],
-        apiClient
+        apiClient,
       );
       const modules = await loadCodeModules(
         workflow.schema?.code ?? [],
-        apiClient
+        apiClient,
       );
       const signatureMetadata = loadSignatureMetadata(
-        workflow.schema?.activities ?? []
+        workflow.schema?.activities ?? [],
       );
 
       setGeneral({
@@ -188,7 +192,7 @@ export function Workflows(): JSX.Element {
   const updateCreatingContext = (
     namespace: string,
     value: any,
-    activityType: ActivityTypeEnum
+    activityType: ActivityTypeEnum,
   ) => {
     // Only allow context updates when creating a new workflow
     if (!isCreating) return;
@@ -272,7 +276,7 @@ export function Workflows(): JSX.Element {
     if (!id || !isCreating) return;
 
     const confirmed = await confirmation(
-      "Tem certeza que deseja descartar todas as alterações locais não salvas?"
+      "Tem certeza que deseja descartar todas as alterações locais não salvas?",
     );
 
     if (!confirmed) {
@@ -314,7 +318,7 @@ export function Workflows(): JSX.Element {
           acc[incoming.namespace] = context[incoming.namespace];
           return acc;
         },
-        {}
+        {},
       );
 
       const response = await apiClient.workflows.create({
@@ -350,7 +354,7 @@ export function Workflows(): JSX.Element {
     // If it's an object, recursively check all its values
     if (typeof validObj === "object") {
       return Object.values(validObj).some((value) =>
-        checkValidCompletion(value)
+        checkValidCompletion(value),
       );
     }
 
@@ -420,12 +424,21 @@ export function Workflows(): JSX.Element {
             updateCreatingContext(
               selectedIncoming?.namespace as string,
               value,
-              ActivityTypeEnum.INCOMING
+              ActivityTypeEnum.INCOMING,
             );
           }}
           apiClient={apiClient}
           styleContext={styleContext}
+          highlightQuery={highlightQuery}
         />
+      );
+    }
+
+    if (permissionsLoading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <Spinner size="xl" />
+        </div>
       );
     }
 
@@ -601,7 +614,7 @@ export function Workflows(): JSX.Element {
                     updateCreatingContext(
                       activity.namespace,
                       value,
-                      ActivityTypeEnum.FORM
+                      ActivityTypeEnum.FORM,
                     );
                   } else {
                     setContext((prev: any) => ({
@@ -626,16 +639,17 @@ export function Workflows(): JSX.Element {
                 context={formValue?.form ?? {}}
                 value={formValue.form}
                 general={general}
+                highlightQuery={highlightQuery}
               />
             )}
 
             {/* Show submit button for editable forms in existing workflows */}
             {isFormEditable && (
               <div className="mt-6 flex justify-end">
-                <button
+                <DSButton
                   className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 ${
                     canSubmit && !isSubmitting
-                      ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+                      ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                       : "bg-gray-400 cursor-not-allowed text-white"
                   }`}
                   onClick={handleFormSubmit}
@@ -645,10 +659,12 @@ export function Workflows(): JSX.Element {
                   }
                 >
                   {isSubmitting ? (
-                    <Spinner size="sm" color="white" className="mr-2" />
+                    <span className="mr-2">
+                      <Spinner />
+                    </span>
                   ) : null}
                   <span>Enviar</span>
-                </button>
+                </DSButton>
               </div>
             )}
           </>
@@ -720,6 +736,13 @@ export function Workflows(): JSX.Element {
     }));
   }, [context]);
 
+  // Compute which activity/incoming namespaces contain search matches
+  const highlightedNamespaces = useMemo<Set<string>>(() => {
+    if (!highlightQuery || !workflow?.schema) return new Set();
+    const matches = findFieldMatches(workflow.schema, context, highlightQuery);
+    return new Set(matches.map((m) => m.activityNamespace));
+  }, [highlightQuery, workflow?.schema, context]);
+
   // Add new useEffect to handle incomingListOpen state
   useEffect(() => {
     if (workflow?.schema?.incoming) {
@@ -732,18 +755,32 @@ export function Workflows(): JSX.Element {
       const currentActivity = workflow.schema.activities[activeStep];
       if (currentActivity.type === ActivityTypeEnum.FORM) {
         const isComplete = checkValidCompletion(
-          valid[currentActivity.namespace]
+          valid[currentActivity.namespace],
         );
         setCanSubmit(isComplete);
       }
     }
   }, [workflow?.schema?.activities, activeStep, valid]);
 
+  useEffect(() => {
+    const activityCount = workflow?.schema?.activities?.length ?? 0;
+    if (activityCount === 0) {
+      setActiveStep(0);
+      return;
+    }
+
+    if (activeStep >= activityCount) {
+      setActiveStep(activityCount - 1);
+    }
+  }, [workflow?.schema?.activities?.length, activeStep]);
+
   return (
     <div className="flex flex-col space-y-6 sm:px-0 md:px-6 mt-6 mb-24">
       {loading ? (
         <div className="pt-10 text-center">
-          <Spinner size="xl" />
+          <div className="mx-auto h-10 w-10 text-muted-foreground">
+            <Spinner size="xl" />
+          </div>
         </div>
       ) : workflow ? (
         <>
@@ -754,22 +791,29 @@ export function Workflows(): JSX.Element {
             >
               {isCreating && isLocalDraft && (
                 <div className="mb-4 flex items-center justify-center space-x-4">
-                  <Tooltip
-                    label="As alterações feitas neste formulário são salvas automaticamente apenas neste dispositivo. Para salvar permanentemente, clique em 'Solicitar'."
-                    placement="top"
-                    hasArrow
-                  >
-                    <div
-                      className={`flex items-center px-4 py-2 rounded-lg ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-yellow-900 text-yellow-200"
-                      }`}
-                    >
-                      <FaExclamationTriangle className="mr-2" size={14} />
-                      <span>Rascunho salvo apenas neste dispositivo</span>
-                    </div>
-                  </Tooltip>
+                  <TooltipProvider>
+                    <DSTooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`flex items-center px-4 py-2 rounded-lg ${
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-yellow-900 text-yellow-200"
+                          }`}
+                        >
+                          <FaExclamationTriangle className="mr-2" size={14} />
+                          <span className="text-xs">
+                            Rascunho salvo apenas neste dispositivo
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-sm">
+                        As alterações feitas neste formulário são salvas
+                        automaticamente apenas neste dispositivo. Para salvar
+                        permanentemente, clique em "Solicitar".
+                      </TooltipContent>
+                    </DSTooltip>
+                  </TooltipProvider>
                   <button
                     onClick={handleDiscardDraft}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
@@ -779,7 +823,7 @@ export function Workflows(): JSX.Element {
                     }`}
                   >
                     <FaTrash size={14} />
-                    <span>Descartar Rascunho</span>
+                    <span className="text-xs">Descartar Rascunho</span>
                   </button>
                 </div>
               )}
@@ -792,32 +836,35 @@ export function Workflows(): JSX.Element {
                       {workflow.label}
                     </h1>
                     <div className="flex items-center space-x-1">
-                      <Badge
-                        colorScheme={isCreating ? "yellow" : "blue"}
-                        fontSize="sm"
-                        className="mt-2"
+                      <span
+                        className={`mt-2 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                          isCreating
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
                       >
                         {formatId(isCreating ? workflow.id : (id as string))}
-                      </Badge>
-                      <Tooltip
-                        label="Copiado!"
-                        placement="top"
-                        hasArrow
-                        isOpen={isTooltipOpen}
-                      >
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              isCreating ? workflow.id : (id as string)
-                            );
-                            setIsTooltipOpen(true);
-                            setTimeout(() => setIsTooltipOpen(false), 1500);
-                          }}
-                          className="mt-2 p-1 rounded hover:bg-gray-100 transition-colors"
-                        >
-                          <FaLink size={12} />
-                        </button>
-                      </Tooltip>
+                      </span>
+                      <TooltipProvider>
+                        <DSTooltip open={isTooltipOpen}>
+                          <TooltipTrigger asChild>
+                            <DSButton
+                              onClick={() => {
+                                navigator.clipboard.writeText(
+                                  isCreating ? workflow.id : (id as string),
+                                );
+                                setIsTooltipOpen(true);
+                                setTimeout(() => setIsTooltipOpen(false), 1500);
+                              }}
+                              variant="ghost"
+                              className="mt-2 p-1 rounded hover:bg-gray-100 transition-colors"
+                            >
+                              <FaLink size={12} />
+                            </DSButton>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">Copiado!</TooltipContent>
+                        </DSTooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                   {workflow.description && (
@@ -833,21 +880,22 @@ export function Workflows(): JSX.Element {
                         }}
                       />
                       {workflow.description.length > 200 && (
-                        <button
-                          onClick={() =>
+                        <DSButton
+                          onClick={() => {
                             setSelectedDescription({
                               text: workflow.description,
                               label: workflow.label,
-                            })
-                          }
-                          className={
+                            });
+                          }}
+                          variant="ghost"
+                          className={`h-auto p-0 ${
                             styleContext.state.buttonHoverColorWeight === "200"
                               ? "text-blue-600 hover:text-blue-700"
                               : "text-blue-400 hover:text-blue-300"
-                          }
+                          }`}
                         >
                           Ver mais
-                        </button>
+                        </DSButton>
                       )}
                     </div>
                   )}
@@ -864,9 +912,9 @@ export function Workflows(): JSX.Element {
                               {formatDate(
                                 Number(
                                   localStorage.getItem(
-                                    getLastUpdateKey(id as string)
-                                  )
-                                ) || new Date()
+                                    getLastUpdateKey(id as string),
+                                  ),
+                                ) || new Date(),
                               )}
                             </>
                           ) : (
@@ -897,34 +945,36 @@ export function Workflows(): JSX.Element {
 
                 {/* QR Code */}
                 <div className="ml-6">
-                  <Tooltip
-                    label={`Escaneie para acessar ${
-                      isCreating ? "o modelo" : "o protocolo"
-                    }`}
-                    placement="left"
-                    hasArrow
-                  >
-                    <div
-                      onClick={() => setShowQRModal(true)}
-                      className={`p-3 rounded-lg cursor-pointer transition-all ${
-                        styleContext.state.buttonHoverColorWeight === "200"
-                          ? "bg-gray-100"
-                          : "bg-gray-800"
-                      }`}
-                    >
-                      <QRCodeSVG
-                        value={`${window.location.origin}${
-                          isCreating
-                            ? `/workflows-schema/${workflow.id}`
-                            : `/workflows/${id}`
-                        }`}
-                        size={120}
-                        level="H"
-                        marginSize={6}
-                        className="rounded-lg"
-                      />
-                    </div>
-                  </Tooltip>
+                  <TooltipProvider>
+                    <DSTooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          onClick={() => setShowQRModal(true)}
+                          className={`p-3 rounded-lg cursor-pointer transition-all ${
+                            styleContext.state.buttonHoverColorWeight === "200"
+                              ? "bg-gray-100"
+                              : "bg-gray-800"
+                          }`}
+                        >
+                          <QRCodeSVG
+                            value={`${window.location.origin}${
+                              isCreating
+                                ? `/workflows-schema/${workflow.id}`
+                                : `/workflows/${id}`
+                            }`}
+                            size={120}
+                            level="H"
+                            marginSize={6}
+                            className="rounded-lg"
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">
+                        Escaneie para acessar{" "}
+                        {isCreating ? "o modelo" : "o protocolo"}
+                      </TooltipContent>
+                    </DSTooltip>
+                  </TooltipProvider>
                 </div>
               </div>
               {/* End of Header Section */}
@@ -944,6 +994,7 @@ export function Workflows(): JSX.Element {
                     onToggle={setIncomingListOpen}
                     styleContext={styleContext}
                     context={context}
+                    highlightedNamespaces={highlightedNamespaces}
                   />
                   {/* Divider */}
                   <div className="border-b mb-6"></div>
@@ -961,6 +1012,7 @@ export function Workflows(): JSX.Element {
                 styleContext={styleContext}
                 context={context}
                 incoming={workflow.schema?.incoming}
+                highlightedNamespaces={highlightedNamespaces}
               />
 
               {/* Divider after activities */}
@@ -987,7 +1039,7 @@ export function Workflows(): JSX.Element {
             <div className="w-3/4 pl-6">
               {loading ? (
                 <div className="flex items-center justify-center h-64">
-                  <Spinner size="lg" />
+                  <Spinner size="xl" />
                 </div>
               ) : (
                 workflow.schema?.activities?.[activeStep] && (
@@ -1012,53 +1064,52 @@ export function Workflows(): JSX.Element {
           {/* Request Button - Only show when creating */}
           {isCreating && (
             <div className="fixed bottom-16 right-4">
-              <button
+              <DSButton
                 className={`px-6 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 ${
                   canSubmit
-                    ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                     : "bg-gray-400 cursor-not-allowed text-white"
                 }`}
                 onClick={handleProtocol}
-                disabled={loading || !canSubmit}
+                disabled={loading}
                 title={
                   !canSubmit ? "Complete todos os campos obrigatórios" : ""
                 }
               >
                 {loading ? (
-                  <Spinner size="sm" color="white" className="mr-2" />
+                  <span className="mr-2">
+                    <Spinner />
+                  </span>
                 ) : null}
                 <span>Solicitar</span>{" "}
-              </button>
+              </DSButton>
             </div>
           )}
         </>
       ) : null}
 
-      <Modal
-        isOpen={!!selectedDescription}
-        onClose={() => setSelectedDescription(null)}
-        motionPreset="slideInBottom"
-        isCentered
+      <Dialog
+        open={!!selectedDescription}
+        onOpenChange={(open) => !open && setSelectedDescription(null)}
       >
-        <ModalOverlay backdropFilter="blur(4px)" />
-        <ModalContent
-          className="shadow-xl"
+        <DialogContent
+          className="shadow-xl max-w-[600px]"
           style={{
             backgroundColor: styleContext.state.backgroundColor,
-            maxWidth: "600px",
           }}
         >
-          <ModalHeader className="px-6 pt-4 pb-4 border-b">
+          <DialogHeader className="px-6 pt-4 pb-4 border-b">
             <div className="flex justify-between">
-              <span
+              <DialogTitle
                 className="text-xl font-bold mt-2 mr-3"
                 style={{ color: styleContext.state.textColor }}
               >
                 {selectedDescription?.label}
-              </span>
+              </DialogTitle>
               <div>
-                <button
+                <DSButton
                   onClick={() => setSelectedDescription(null)}
+                  variant="ghost"
                   className="hover:bg-opacity-10 rounded p-1.5 transition-colors duration-150"
                   style={{
                     color:
@@ -1072,11 +1123,11 @@ export function Workflows(): JSX.Element {
                   }}
                 >
                   <FaTimes size={12} />
-                </button>
+                </DSButton>
               </div>
             </div>
-          </ModalHeader>
-          <ModalBody className="px-6 py-6 overflow-y-auto">
+          </DialogHeader>
+          <div className="px-6 py-6 overflow-y-auto">
             <div
               className="prose dark:prose-invert max-w-none"
               style={{ color: styleContext.state.textColor }}
@@ -1084,9 +1135,10 @@ export function Workflows(): JSX.Element {
                 __html: selectedDescription?.text || "",
               }}
             />
-          </ModalBody>
-          <ModalFooter className="px-6 pt-4 pb-4 border-t space-x-3">
-            <button
+          </div>
+          <DialogFooter className="px-6 pt-4 pb-4 border-t space-x-3">
+            <DSButton
+              variant="outline"
               className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center space-x-2"
               onClick={() => setSelectedDescription(null)}
               style={{
@@ -1098,38 +1150,25 @@ export function Workflows(): JSX.Element {
               }}
             >
               <span>Fechar</span>
-              <SL
-                bg={
-                  styleContext.state.buttonHoverColorWeight === "200"
-                    ? "gray.100"
-                    : "gray.600"
-                }
-              >
-                esc
-              </SL>
-            </button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            </DSButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* QR Code Modal */}
       {workflow && (
-        <Modal
-          isOpen={showQRModal}
-          onClose={() => setShowQRModal(false)}
-          motionPreset="slideInBottom"
-          isCentered
+        <Dialog
+          open={showQRModal}
+          onOpenChange={(open) => !open && setShowQRModal(false)}
         >
-          <ModalOverlay backdropFilter="blur(4px)" />
-          <ModalContent
-            className="py-4"
+          <DialogContent
+            className="py-4 max-w-[350px]"
             style={{
               backgroundColor: styleContext.state.backgroundColor,
-              maxWidth: "350px",
               maxHeight: "350px",
             }}
           >
-            <ModalBody className="">
+            <div>
               <QRCodeSVG
                 value={`${window.location.origin}${
                   isCreating
@@ -1141,9 +1180,9 @@ export function Workflows(): JSX.Element {
                 marginSize={6}
                 className="rounded-lg"
               />
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

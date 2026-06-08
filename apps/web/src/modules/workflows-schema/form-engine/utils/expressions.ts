@@ -1,13 +1,57 @@
+import { getAccessToken } from "../../../../auth/token";
 import { IField, IFieldOptionsType, IFormContext } from "@open-urbis/types";
 import axios from "axios";
 import { ValidState } from "../Field";
 
-export const babelFieldEspression = (expr: string) =>
-  (window as any).Babel.transform(`(() => {return ${expr}; })()`, {
+const _transpileCache = new Map<string, string>();
+export const babelFieldEspression = (expr: string): string => {
+  const cached = _transpileCache.get(expr);
+  if (cached !== undefined) return cached;
+  const result = (window as any).Babel.transform(`(() => {return ${expr}; })()`, {
     presets: ["env"],
   })
     .code.replace('"use strict";', "")
     .trim();
+  _transpileCache.set(expr, result);
+  return result;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+const _funcCache = new Map<string, Function>();
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+function getCachedFunction(transpiled: string): Function {
+  const cached = _funcCache.get(transpiled);
+  if (cached !== undefined) return cached;
+  // eslint-disable-next-line no-new-func
+  const func = new Function(
+    "context",
+    "valid",
+    "$data",
+    "$modules",
+    "$user",
+    "$variables",
+    "$state",
+    `return ${transpiled};`
+  );
+  _funcCache.set(transpiled, func);
+  return func;
+}
+
+export function deepEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return a === b;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== "object") return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  for (const key of keysA) {
+    if (!Object.prototype.hasOwnProperty.call(b, key)) return false;
+    if (!deepEqual(a[key], b[key])) return false;
+  }
+  return true;
+}
 
 export function evalFieldExpression(
   expr: string,
@@ -17,18 +61,7 @@ export function evalFieldExpression(
 ): any {
   try {
     const transpileExpr = babelFieldEspression(expr);
-
-    // eslint-disable-next-line no-new-func
-    const func = new Function(
-      "context",
-      "valid",
-      "$data",
-      "$modules",
-      "$user",
-      "$variables",
-      "$state",
-      `return ${transpileExpr};`
-    );
+    const func = getCachedFunction(transpileExpr);
     return func(
       context ?? {},
       valid,
@@ -94,7 +127,7 @@ export function integrationCallback(
 
     if (
       (newValue !== undefined &&
-        JSON.stringify(newValue) !== JSON.stringify(value?.$cache)) ||
+        !deepEqual(newValue, value?.$cache)) ||
       (general.$state === "edition" &&
         field.options.enableEdition &&
         value?.$apostille !== true)
@@ -118,7 +151,7 @@ export function integrationCallback(
               },
               {
                 headers: {
-                  authorization: `Bearer ${localStorage.getItem("token")}`,
+                  authorization: `Bearer ${getAccessToken()}`,
                 },
               }
             );
@@ -150,7 +183,7 @@ export function integrationCallback(
             });
           }
         })();
-      } else if (JSON.stringify(newValue) !== JSON.stringify(value)) {
+      } else if (!deepEqual(newValue, value)) {
         onChange(newValue);
       }
     }
@@ -175,7 +208,7 @@ export function validCallback(
 
     if (
       calcValid !== undefined &&
-      JSON.stringify(calcValid) !== JSON.stringify(validContext)
+      !deepEqual(calcValid, validContext)
     ) {
       setValidState(calcValid);
 
@@ -250,13 +283,13 @@ export function modelCallback(
     }
 
     if (field.type === "block") {
-      if (JSON.stringify(newValue) !== JSON.stringify(value?.$ ?? {})) {
+      if (!deepEqual(newValue, value?.$ ?? {})) {
         onChange({
           ...(value ?? {}),
           $: newValue,
         });
       }
-    } else if (JSON.stringify(newValue) !== JSON.stringify(value)) {
+    } else if (!deepEqual(newValue, value)) {
       onChange(newValue);
     }
   }

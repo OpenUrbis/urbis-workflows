@@ -1,4 +1,4 @@
-import { Center, Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components/LegacyUi";
 import {
   FaList,
   FaCheck,
@@ -6,6 +6,7 @@ import {
   FaClock,
   FaLock,
   FaProjectDiagram,
+  FaSearch,
 } from "react-icons/fa";
 import {
   ActivityTemplate,
@@ -30,6 +31,7 @@ export const ActivitiesList: React.FC<{
   styleContext: any;
   context?: any;
   incoming?: Incoming[];
+  highlightedNamespaces?: Set<string>;
 }> = ({
   activities,
   activeStep,
@@ -37,6 +39,7 @@ export const ActivitiesList: React.FC<{
   styleContext,
   context = {},
   incoming = [],
+  highlightedNamespaces,
 }) => {
   const getActivityIndex = (activity: ActivityTemplate) =>
     activities.findIndex((a) => a.id === activity.id);
@@ -252,39 +255,39 @@ export const ActivitiesList: React.FC<{
     if (isActive) {
       if (status === ActivityStatus.COMPLETED) {
         return {
-          bg: isDarkMode ? "green.900" : "green.400",
-          color: "white",
-        };
-      } else {
-        return {
-          bg: isDarkMode ? "gray.700" : "gray.300",
-          color: isDarkMode ? "white" : "gray.600",
+          bg: isDarkMode ? "#14532d" : "#4ade80",
+          color: "#ffffff",
         };
       }
+
+      return {
+        bg: isDarkMode ? "#374151" : "#d1d5db",
+        color: isDarkMode ? "#ffffff" : "#4b5563",
+      };
     }
 
     // Regular status colors
     switch (status) {
       case ActivityStatus.COMPLETED:
         return {
-          bg: isDarkMode ? "green.900" : "green.400",
-          color: "white",
+          bg: isDarkMode ? "#14532d" : "#4ade80",
+          color: "#ffffff",
         };
       case ActivityStatus.ACTIVE:
         return {
-          bg: isDarkMode ? "blue.900" : "blue.400",
-          color: "white",
+          bg: isDarkMode ? "#1e3a8a" : "#60a5fa",
+          color: "#ffffff",
         };
       case ActivityStatus.BLOCKED:
         return {
-          bg: isDarkMode ? "gray.700" : "gray.300",
-          color: isDarkMode ? "gray.400" : "gray.600",
+          bg: isDarkMode ? "#374151" : "#d1d5db",
+          color: isDarkMode ? "#9ca3af" : "#4b5563",
         };
       case ActivityStatus.PENDING:
       default:
         return {
-          bg: isDarkMode ? "gray.700" : "gray.300",
-          color: isDarkMode ? "gray.400" : "gray.600",
+          bg: isDarkMode ? "#374151" : "#d1d5db",
+          color: isDarkMode ? "#9ca3af" : "#4b5563",
         };
     }
   };
@@ -400,32 +403,47 @@ export const ActivitiesList: React.FC<{
           const dependencies = getDependencyInfo(activity);
           const statusLabel = getStatusLabel(status, isBlocked);
 
+          const isCompleted = status === ActivityStatus.COMPLETED;
+
           return (
             <div
               key={activity.id}
               onClick={() => (isBlocked ? null : setActiveStep(activityIndex))}
               className={`flex items-center p-4 rounded-lg transition-colors ${
-                isActive
+                isActive && isCompleted
                   ? styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-200"
-                    : "bg-gray-700"
-                  : styleContext.state.buttonHoverColorWeight === "200"
-                    ? "bg-gray-50 hover:bg-gray-100"
-                    : "bg-gray-900 hover:bg-gray-800"
+                    ? "bg-green-50 hover:bg-green-100"
+                    : "bg-green-950/40 hover:bg-green-950/60"
+                  : isActive
+                    ? styleContext.state.buttonHoverColorWeight === "200"
+                      ? "bg-gray-200"
+                      : "bg-gray-700"
+                    : styleContext.state.buttonHoverColorWeight === "200"
+                      ? "bg-gray-50 hover:bg-gray-100"
+                      : "bg-gray-900 hover:bg-gray-800"
               } ${isBlocked ? "opacity-70 cursor-not-allowed" : "opacity-100 cursor-pointer"}`}
             >
-              <Center
-                w="36px"
-                h="36px"
-                bg={statusColors.bg}
-                color={statusColors.color}
-                borderRadius="12px"
-                mr={4}
+              <div
+                className="flex items-center justify-center mr-4"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 12,
+                  backgroundColor: statusColors.bg,
+                  color: statusColors.color,
+                }}
               >
                 {getStatusIcon(status, isActive)}
-              </Center>
+              </div>
               <div className="flex-1 relative">
-                <div className="font-medium">{activity.label}</div>
+                <div className="font-medium flex items-center gap-1.5">
+                  {activity.label}
+                  {highlightedNamespaces?.has(activity.namespace) && (
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-yellow-400 dark:bg-yellow-500" title="Contém resultado da busca">
+                      <FaSearch size={8} className="text-yellow-900" />
+                    </span>
+                  )}
+                </div>
                 <div className="text-sm opacity-75 flex items-center">
                   <span>{getActivityTypeLabel(activity.type)}</span>
                   {statusLabel && (

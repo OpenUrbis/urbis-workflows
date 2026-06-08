@@ -1,15 +1,18 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   Button,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Tag,
+  Badge,
   Tooltip,
-  Spinner,
-} from "@chakra-ui/react";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@open-urbis/map-ui";
 import { StyleContext } from "../../../reducers";
+import { Spinner } from "../../../components";
 
 interface VersionsMenuProps {
   versions: {
@@ -51,92 +54,93 @@ export const VersionsMenu: React.FC<VersionsMenuProps> = ({
     staging: { label: "homologação", color: "yellow" },
     production: { label: "produção", color: "green" },
   };
+
+  const stageBadgeClassMapper: { [key: string]: string } = {
+    development: "bg-muted text-muted-foreground",
+    staging: "bg-yellow-100 text-yellow-800",
+    production: "bg-green-100 text-green-800",
+  };
+
   return (
     <div>
       {loading ? (
-        <Spinner size="sm" style={{ color: styleContext.state.textColor }} />
+        <Spinner />
       ) : (
-        <Menu>
-          <MenuButton as={Button} style={{ backgroundColor: styleContext.state.backgroundColor, color: styleContext.state.textColor }}>
-            <Tag colorScheme="blue" size="md" borderRadius="full">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2"
+              style={{ backgroundColor: styleContext.state.backgroundColor }}
+            >
+              <Badge variant="secondary" className="rounded-full">
               v{currentVersion.version}
-            </Tag>
-            {currentVersion.stage && (
-              <Tag
-                className="ml-2"
-                colorScheme={stageMapper[currentVersion.stage].color}
-              >
-                {stageMapper[currentVersion.stage].label}
-              </Tag>
-            )}
-          </MenuButton>
-          <MenuList
-            maxH="200px"
-            overflowY="auto"
-            zIndex={10000}
-            bg={styleContext.state.backgroundColor}
-          >
+              </Badge>
+              {currentVersion.stage && (
+                <Badge
+                  variant="outline"
+                  className={`rounded-full border-0 ${stageBadgeClassMapper[currentVersion.stage]}`}
+                >
+                  {stageMapper[currentVersion.stage].label}
+                </Badge>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-80 max-h-[260px] overflow-y-auto" align="end">
             {versions
               .sort(
                 (a, b) =>
                   new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
               )
               .map((version: any) => (
-                <Tooltip
-                  key={version.version}
-                  label={
-                    (version.commitMessage ?? "") +
-                    ` (Data: ${new Date(version.timestamp).toLocaleString(
-                      "pt-br"
-                    )} - Autor: ${version.createdBy})`
-                  }
-                  placement="right"
-                  bg={styleContext.state.backgroundColor}
-                  color={styleContext.state.textColor}
-                >
-                  <MenuItem
-                    onClick={() => handleSelect(version)}
-                    bg={
-                      version.version === currentVersion.version
-                        ? styleContext.state.buttonHoverColorWeight === "200" ? "#dbeafe" : "#1e40af"
-                        : styleContext.state.backgroundColor
-                    }
-                    _hover={{
-                      bg: version.version === currentVersion.version
-                        ? styleContext.state.buttonHoverColorWeight === "200" ? "#bfdbfe" : "#1e3a8a"
-                        : styleContext.state.buttonHoverColorWeight === "200" ? "#f3f4f6" : "#1f2937"
-                    }}
-                    className="font-normal"
-                    style={{ color: styleContext.state.textColor }}
-                  >
-                    <Tag
-                      colorScheme={
-                        version.version === currentVersion.version
-                          ? "blue"
-                          : "gray"
-                      }
-                      size="sm"
-                      borderRadius="full"
-                      className="mr-2"
-                    >
-                      v{version.version}
-                    </Tag>
-                    {version.commitMessage?.slice(0, 25)}
-                    {version.commitMessage?.length > 25 ? "..." : ""}
-                    {(version.stage === "staging" ||
-                      version.stage === "production") && (
-                      <Tag
-                        className="ml-2"
-                        colorScheme={stageMapper[version?.stage]?.color}
+                <TooltipProvider key={version.version}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuItem
+                        onClick={() => handleSelect(version)}
+                        className={`font-normal gap-2 ${
+                          version.version === currentVersion.version
+                            ? "bg-blue-100 text-blue-900 focus:bg-blue-100"
+                            : ""
+                        }`}
                       >
-                        {stageMapper[version?.stage]?.label}
-                      </Tag>
-                    )}
-                  </MenuItem>
-                </Tooltip>
+                        <Badge
+                          variant={
+                            version.version === currentVersion.version
+                              ? "default"
+                              : "secondary"
+                          }
+                          className="rounded-full"
+                        >
+                          v{version.version}
+                        </Badge>
+                        <span className="truncate max-w-[140px]">
+                          {version.commitMessage?.slice(0, 25)}
+                          {version.commitMessage?.length > 25 ? "..." : ""}
+                        </span>
+                        {(version.stage === "staging" ||
+                          version.stage === "production") && (
+                          <Badge
+                            variant="outline"
+                            className={`ml-auto rounded-full border-0 ${stageBadgeClassMapper[version?.stage]}`}
+                          >
+                            {stageMapper[version?.stage]?.label}
+                          </Badge>
+                        )}
+                      </DropdownMenuItem>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-[320px]">
+                      {(version.commitMessage ?? "") +
+                        ` (Data: ${new Date(version.timestamp).toLocaleString(
+                          "pt-br"
+                        )} - Autor: ${version.createdBy})`}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
-          </MenuList>
-        </Menu>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );

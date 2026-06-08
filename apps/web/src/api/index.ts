@@ -1,5 +1,6 @@
 import { CodeModulesApiClient } from "./clients/code-modules.client";
 import { ConstantVariablesApiClient } from "./clients/constant-variables.client";
+import { DashboardApiClient } from "./clients/dashboard.client";
 import { DatasetsApiClient } from "./clients/datasets.client";
 import { FormsApiClient } from "./clients/forms.client";
 import { IntegrationsApiClient } from "./clients/integrations.client";
@@ -17,6 +18,7 @@ export interface ApiConfig {
 export class ApiClient {
   public codeModules: CodeModulesApiClient;
   public constantVariables: ConstantVariablesApiClient;
+  public dashboard: DashboardApiClient;
   public datasets: DatasetsApiClient;
   public forms: FormsApiClient;
   public integrations: IntegrationsApiClient;
@@ -30,6 +32,7 @@ export class ApiClient {
   constructor(config: ApiConfig) {
     this.codeModules = new CodeModulesApiClient(config);
     this.constantVariables = new ConstantVariablesApiClient(config);
+    this.dashboard = new DashboardApiClient(config);
     this.datasets = new DatasetsApiClient(config);
     this.forms = new FormsApiClient(config);
     this.integrations = new IntegrationsApiClient(config);
@@ -77,3 +80,4 @@ export * from "./clients/users.client";
 export * from "./clients/workflows-schema.client";
 export * from "./clients/workflows.client";
 export * from "./clients/base-api.client";
+export * from "./clients/dashboard.client";

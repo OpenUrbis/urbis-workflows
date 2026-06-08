@@ -3,6 +3,7 @@ import {
   SignWorkflowHttpDto,
   CreateWorkflowResponse,
   FindAllWorkflowsResponse,
+  FindAllWorkflowsParams,
   FindOneWorkflowResponse,
   SignWorkflowResponse,
   GenerateDocumentHttpDto,
@@ -71,13 +72,45 @@ export class WorkflowsApiClient extends BaseApiClient {
    * @returns Paginated list of workflows
    */
   async findAll(
-    stage: string = "development",
+    stageOrParams: string | FindAllWorkflowsParams = "development",
     page: number = 1,
     pageSize: number = 10
   ): Promise<FindAllWorkflowsResponse> {
     try {
+      // Support both legacy (stage, page, pageSize) and new params object signatures
+      const params: FindAllWorkflowsParams =
+        typeof stageOrParams === "string"
+          ? { stage: stageOrParams, page, pageSize }
+          : stageOrParams;
+
+      // Strip undefined values so they don't get sent as "undefined" strings
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== "")
+      );
+
       const response = await this.client.get<FindAllWorkflowsResponse>("", {
-        params: { stage, page, pageSize },
+        params: cleanParams,
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Find all workflows across all users (admin endpoint)
+   * Requires workflow:admin:findAll permission.
+   */
+  async findAllAdmin(
+    params: FindAllWorkflowsParams = {},
+  ): Promise<FindAllWorkflowsResponse> {
+    try {
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== "")
+      );
+
+      const response = await this.client.get<FindAllWorkflowsResponse>("/admin", {
+        params: cleanParams,
       });
       return response.data;
     } catch (error) {
@@ -210,11 +243,26 @@ export class WorkflowsApiClient extends BaseApiClient {
   }
 
   /**
-   * Submit a form for a workflow activity
-   * @param id Workflow ID
-   * @param data Form data
-   * @returns Updated workflow with form data
+   * Fetch available field labels for structured query autocomplete.
+   * @param search Optional search term to filter labels
+   * @returns Array of field label descriptors
    */
+  async getFieldLabels(
+    search?: string,
+  ): Promise<{ key: string; label: string; type: "text" | "number" }[]> {
+    try {
+      const params: Record<string, string> = {};
+      if (search) params.search = search;
+      const response = await this.client.get<{ key: string; label: string; type: "text" | "number" }[]>(
+        "/field-labels",
+        { params },
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   async form(
     id: string,
     data: FormWorkflowHttpDto

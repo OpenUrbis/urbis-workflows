@@ -8,7 +8,7 @@ export type FieldTitleProps = {
 
 export const Title: React.FC<FieldTitleProps> = ({ key, options }) => {
   return (
-    <h1 key={key} className="text-xl font-black">
+    <h1 key={key} className="text-lg font-semibold">
       {options.title}
     </h1>
   );

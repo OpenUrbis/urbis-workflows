@@ -1,10 +1,11 @@
-import { Center, Tooltip } from "@chakra-ui/react";
+import { Tooltip } from "../../../components/LegacyUi";
 import {
   FaProjectDiagram,
   FaChevronUp,
   FaChevronDown,
   FaCheckCircle,
   FaArrowRight,
+  FaSearch,
 } from "react-icons/fa";
 import { Incoming } from "../../../api/types/schema";
 import { truncateText } from "./common";
@@ -17,6 +18,7 @@ export const IncomingList: React.FC<{
   onToggle?: (isOpen: boolean) => void;
   styleContext: any;
   context: any;
+  highlightedNamespaces?: Set<string>;
 }> = ({
   incomings,
   selectedIncoming,
@@ -25,6 +27,7 @@ export const IncomingList: React.FC<{
   onToggle,
   styleContext,
   context,
+  highlightedNamespaces,
 }) => {
   const showDependencies = isOpen ?? incomings.length > 0;
   const completedCount = incomings.filter(
@@ -97,30 +100,37 @@ export const IncomingList: React.FC<{
                       : ""
                   }`}
                 >
-                  <Center
-                    w="36px"
-                    h="36px"
-                    bg={
-                      isCompleted
+                  <div
+                    className="flex items-center justify-center mr-4"
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 12,
+                      color: "white",
+                      backgroundColor: isCompleted
                         ? styleContext.state.buttonHoverColorWeight === "200"
-                          ? "green.400"
-                          : "green.900"
+                          ? "#4ade80"
+                          : "#14532d"
                         : styleContext.state.buttonHoverColorWeight === "200"
-                          ? "yellow.400"
-                          : "yellow.900"
-                    }
-                    color="white"
-                    borderRadius="12px"
-                    mr={4}
+                          ? "#facc15"
+                          : "#713f12",
+                    }}
                   >
                     {isCompleted ? (
                       <FaCheckCircle size={14} />
                     ) : (
                       <FaArrowRight size={14} />
                     )}
-                  </Center>
+                  </div>
                   <div className="flex-1">
-                    <div className="font-medium">{workflow.label}</div>
+                    <div className="font-medium flex items-center gap-1.5">
+                      {workflow.label}
+                      {highlightedNamespaces?.has(workflow.namespace) && (
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-yellow-400 dark:bg-yellow-500" title="Contém resultado da busca">
+                          <FaSearch size={8} className="text-yellow-900" />
+                        </span>
+                      )}
+                    </div>
                     <Tooltip
                       label={workflow.documentation}
                       placement="top"
