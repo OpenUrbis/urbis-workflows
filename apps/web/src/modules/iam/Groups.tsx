@@ -19,6 +19,10 @@ import {
   SelectValue,
   Textarea as DSTextarea,
   Label,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from "@open-urbis/map-ui";
 import {
   FaEdit,
@@ -30,7 +34,7 @@ import {
 } from "react-icons/fa";
 import { StyleContext } from "../../reducers";
 import { ApiClient } from "../../api";
-import { Role, Group } from "../../api/types/iam.dto";
+import { Role, Group, Permission } from "../../api/types/iam.dto";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
 import { useSnackbar } from "../../hooks/snackbar";
 import InfoTooltip from "../../components/InfoTooltip";
@@ -63,12 +67,14 @@ export function Groups(): JSX.Element {
   const snackbar = useSnackbar();
   const [groups, setGroups] = useState<Group[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     roleIds: [] as string[],
+    permissionIds: [] as string[],
     accessLevel: 1, // Default to REGISTERED (1)
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -78,16 +84,20 @@ export function Groups(): JSX.Element {
     {}
   );
   const [searchTerm, setSearchTerm] = useState("");
+  const [permissionSearchTerm, setPermissionSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("roles");
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [groupsResponse, rolesResponse] = await Promise.all([
+      const [groupsResponse, rolesResponse, permissionsResponse] = await Promise.all([
         api.iam.getGroups(),
         api.iam.getRoles(),
+        api.iam.getPermissions(),
       ]);
       setGroups(groupsResponse.groups);
       setRoles(rolesResponse.roles);
+      setPermissions(permissionsResponse.permissions);
     } catch (error) {
       console.error("Error fetching data:", error);
       snackbar.error("Não foi possível carregar os grupos e funções.");
@@ -121,9 +131,13 @@ export function Groups(): JSX.Element {
       name: "",
       description: "",
       roleIds: [],
+      permissionIds: [],
       accessLevel: 1, // Default to REGISTERED
     });
     setIsEdit(false);
+    setActiveTab("roles");
+    setSearchTerm("");
+    setPermissionSearchTerm("");
     setIsOpen(true);
   };
 
@@ -147,15 +161,32 @@ export function Groups(): JSX.Element {
     });
   };
 
+  const handlePermissionChange = (permissionId: string) => {
+    setFormData((prev) => {
+      const newPermissionIds = prev.permissionIds.includes(permissionId)
+        ? prev.permissionIds.filter((id) => id !== permissionId)
+        : [...prev.permissionIds, permissionId];
+
+      return {
+        ...prev,
+        permissionIds: newPermissionIds,
+      };
+    });
+  };
+
   const handleEditClick = (group: Group) => {
     setSelectedGroup(group);
     setFormData({
       name: group.name,
       description: group.description,
       roleIds: group.roles.map((r) => r.id),
+      permissionIds: (group.directPermissions || []).map((p) => p.id),
       accessLevel: group.accessLevel || 1, // Use existing accessLevel or default to REGISTERED
     });
     setIsEdit(true);
+    setActiveTab("roles");
+    setSearchTerm("");
+    setPermissionSearchTerm("");
     setIsOpen(true);
   };
 
@@ -230,7 +261,7 @@ export function Groups(): JSX.Element {
     }
   };
 
-  // Count total permissions for each group
+  // Count total permissions for each group (from roles + direct)
   const getTotalPermissions = (group: Group): number => {
     const permissionSet = new Set<string>();
 
@@ -240,7 +271,28 @@ export function Groups(): JSX.Element {
       });
     });
 
+    (group.directPermissions || []).forEach((permission) => {
+      permissionSet.add(permission.id);
+    });
+
     return permissionSet.size;
+  };
+
+  // Get all effective permissions (from roles + direct)
+  const getEffectivePermissions = (group: Group): Permission[] => {
+    const permissionMap = new Map<string, Permission>();
+
+    group.roles.forEach((role) => {
+      role.permissions.forEach((permission) => {
+        permissionMap.set(permission.id, permission);
+      });
+    });
+
+    (group.directPermissions || []).forEach((permission) => {
+      permissionMap.set(permission.id, permission);
+    });
+
+    return Array.from(permissionMap.values());
   };
 
   // Filter roles by search term
@@ -248,6 +300,23 @@ export function Groups(): JSX.Element {
     (role) =>
       role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       role.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Filter permissions by search term and group by domain
+  const filteredPermissions = permissions.filter(
+    (p) =>
+      p.name.toLowerCase().includes(permissionSearchTerm.toLowerCase()) ||
+      p.code.toLowerCase().includes(permissionSearchTerm.toLowerCase())
+  );
+
+  const groupedPermissions = filteredPermissions.reduce(
+    (acc, permission) => {
+      const domain = permission.code.split(":")[0];
+      if (!acc[domain]) acc[domain] = [];
+      acc[domain].push(permission);
+      return acc;
+    },
+    {} as Record<string, Permission[]>
   );
 
   return (
@@ -402,16 +471,10 @@ export function Groups(): JSX.Element {
                                 <div className="space-y-2 text-foreground">
                                   <p className="font-bold text-foreground">Permissões efetivas:</p>
                                   <p className="text-xs mb-2 text-muted-foreground">
-                                    (Combinação de todas as permissões das funções deste grupo)
+                                    (Combinação das permissões das funções e permissões diretas)
                                   </p>
-                                  {Array.from(
-                                    new Set(
-                                      group.roles.flatMap((role) =>
-                                        role.permissions.map((perm) => perm)
-                                      )
-                                    )
-                                  ).map((perm, idx) => (
-                                    <p key={idx} className="text-sm text-foreground">
+                                  {getEffectivePermissions(group).map((perm) => (
+                                    <p key={perm.id} className="text-sm text-foreground">
                                       • <code className="bg-muted px-1 rounded text-foreground">{perm.code}</code>
                                       {perm.description && ` - ${perm.description}`}
                                     </p>
@@ -490,6 +553,37 @@ export function Groups(): JSX.Element {
                               Este grupo não possui funções atribuídas.
                             </p>
                           )}
+
+                          {(group.directPermissions || []).length > 0 && (
+                            <>
+                              <Separator className="my-3" />
+                              <p className="text-sm font-medium mb-2 text-foreground">
+                                Permissões diretas:
+                              </p>
+                              <div className="flex gap-2 flex-wrap">
+                                {group.directPermissions.map((perm) => (
+                                  <InfoTooltip
+                                    key={perm.id}
+                                    content={
+                                      <div className="text-foreground">
+                                        <p className="font-bold text-foreground">{perm.name}</p>
+                                        <p className="text-sm text-muted-foreground">{perm.description}</p>
+                                        <code className="text-xs bg-muted px-1 rounded text-foreground">{perm.code}</code>
+                                      </div>
+                                    }
+                                    showIcon={false}
+                                  >
+                                    <ClickableBadge
+                                      variant="outline"
+                                      className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                    >
+                                      {perm.code}
+                                    </ClickableBadge>
+                                  </InfoTooltip>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -521,7 +615,7 @@ export function Groups(): JSX.Element {
           width="520px"
           storageKey="iam"
           badge={{
-            text: `${formData.roleIds.length} funções selecionadas`,
+            text: `${formData.roleIds.length} funções, ${formData.permissionIds.length} permissões`,
             colorScheme: "teal",
           }}
         >
@@ -584,67 +678,144 @@ export function Groups(): JSX.Element {
             </div>
 
             <div className="p-4">
-              <p className="text-sm mb-4 font-medium text-foreground">
-                Selecione as funções para este grupo:
-              </p>
+              <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0 gap-6">
+                  <TabsTrigger
+                    value="roles"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-2"
+                  >
+                    Funções
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="permissions"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-2"
+                  >
+                    Permissões
+                  </TabsTrigger>
+                </TabsList>
 
-              <div className="relative mb-4">
-                <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
-                <DSInput
-                  placeholder="Buscar funções..."
-                  value={searchTerm}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSearchTerm(e.target.value)
-                  }
-                  className="h-9 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
-                />
-              </div>
-
-              {filteredRoles.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <FaSearch size={32} className="mb-4 opacity-60" />
-                  <p className="text-lg font-medium mb-1 text-foreground">
-                    Nenhuma função encontrada
-                  </p>
-                  <p className="text-sm">Tente buscar com outros termos</p>
-                </div>
-              ) : (
-                <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2">
-                  {filteredRoles.map((role) => (
-                    <div
-                      key={role.id}
-                      className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${
-                        formData.roleIds.includes(role.id)
-                          ? "bg-primary/10 border border-primary/20"
-                          : "hover:bg-muted/50 border border-transparent"
-                      }`}
-                      onClick={() => handleRoleChange(role.id)}
-                    >
-                      <Checkbox
-                        id={role.id}
-                        checked={formData.roleIds.includes(role.id)}
-                        onCheckedChange={() => handleRoleChange(role.id)}
-                        className="!rounded-none shrink-0"
+                <div className="mt-4">
+                  <TabsContent value="roles">
+                    <div className="relative mb-4">
+                      <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                      <DSInput
+                        placeholder="Buscar funções..."
+                        value={searchTerm}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setSearchTerm(e.target.value)
+                        }
+                        className="h-9 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
                       />
-                      <Label
-                        htmlFor={role.id}
-                        className="flex-1 cursor-pointer"
-                      >
-                        <div className="text-sm font-medium text-foreground leading-tight">{role.name}</div>
-                        <div className="text-xs text-muted-foreground">{role.description}</div>
-                        <div className="flex mt-1 gap-1">
-                          <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border-primary/20">
-                            {role.permissions.length} permissões
-                          </Badge>
-                        </div>
-                      </Label>
                     </div>
-                  ))}
+
+                    {filteredRoles.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                        <FaSearch size={32} className="mb-4 opacity-60" />
+                        <p className="text-lg font-medium mb-1 text-foreground">
+                          Nenhuma função encontrada
+                        </p>
+                        <p className="text-sm">Tente buscar com outros termos</p>
+                      </div>
+                    ) : (
+                      <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2">
+                        {filteredRoles.map((role) => (
+                          <div
+                            key={role.id}
+                            className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${
+                              formData.roleIds.includes(role.id)
+                                ? "bg-primary/10 border border-primary/20"
+                                : "hover:bg-muted/50 border border-transparent"
+                            }`}
+                            onClick={() => handleRoleChange(role.id)}
+                          >
+                            <Checkbox
+                              id={role.id}
+                              checked={formData.roleIds.includes(role.id)}
+                              onCheckedChange={() => handleRoleChange(role.id)}
+                              className="!rounded-none shrink-0"
+                            />
+                            <Label
+                              htmlFor={role.id}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <div className="text-sm font-medium text-foreground leading-tight">{role.name}</div>
+                              <div className="text-xs text-muted-foreground">{role.description}</div>
+                              <div className="flex mt-1 gap-1">
+                                <Badge variant="outline" className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border-primary/20">
+                                  {role.permissions.length} permissões
+                                </Badge>
+                              </div>
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <p className="mt-4 text-xs text-muted-foreground">
+                      Selecionadas: {formData.roleIds.length} funções
+                    </p>
+                  </TabsContent>
+
+                  <TabsContent value="permissions">
+                    <div className="relative mb-4">
+                      <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={14} />
+                      <DSInput
+                        placeholder="Buscar permissões..."
+                        value={permissionSearchTerm}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setPermissionSearchTerm(e.target.value)
+                        }
+                        className="h-9 pl-9 bg-background text-foreground border-border focus-visible:ring-2 focus-visible:ring-primary"
+                      />
+                    </div>
+                    <div className="space-y-6 max-h-[400px] overflow-y-auto">
+                      {Object.entries(groupedPermissions).map(
+                        ([cat, perms]) => (
+                          <div key={cat} className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                {cat}
+                              </span>
+                              <Separator className="flex-1" />
+                            </div>
+                            {perms.map((p) => (
+                              <div
+                                key={p.id}
+                                className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-all ${
+                                  formData.permissionIds.includes(p.id)
+                                    ? "bg-primary/10"
+                                    : "hover:bg-muted/50"
+                                }`}
+                                onClick={() => handlePermissionChange(p.id)}
+                              >
+                                <Checkbox
+                                  id={`gp-${p.id}`}
+                                  checked={formData.permissionIds.includes(p.id)}
+                                  onCheckedChange={() => handlePermissionChange(p.id)}
+                                  className="!rounded-none shrink-0"
+                                />
+                                <Label
+                                  htmlFor={`gp-${p.id}`}
+                                  className="flex-1 cursor-pointer"
+                                >
+                                  <div className="text-sm font-medium text-foreground leading-tight">
+                                    {p.name}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    <code>{p.code}</code>
+                                  </div>
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      )}
+                    </div>
+                    <p className="mt-4 text-xs text-muted-foreground">
+                      Selecionadas: {formData.permissionIds.length} permissões diretas
+                    </p>
+                  </TabsContent>
                 </div>
-              )}
-              <p className="mt-4 text-xs text-muted-foreground">
-                Selecionadas: {formData.roleIds.length} funções
-              </p>
+              </Tabs>
             </div>
           </div>
 

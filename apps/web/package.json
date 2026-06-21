@@ -10,7 +10,7 @@
     "@emotion/styled": "^11.11.0",
     "@monaco-editor/react": "^4.6.0",
     "@open-urbis/types": "*",
-    "@open-urbis/map-ui": "file:/Users/renantashiro/Projects/urbis/urbis-map/packages/ui",
+    "@open-urbis/map-ui": "*",
     "@react-input/mask": "^2.0.4",
     "@types/node": "^20.1.4",
     "@types/qrcode.react": "^3.0.0",

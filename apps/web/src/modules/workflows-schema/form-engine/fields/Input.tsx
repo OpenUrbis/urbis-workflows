@@ -27,7 +27,7 @@ export const Input: React.FC<FieldInputProps> = memo(({
   general,
   valid,
 }) => {
-  const [value, setValue] = useState(propValue);
+  const [value, setValue] = useState(propValue ?? "");
   const isLocalEdit = useRef(false);
 
   useEffect(() => {
@@ -125,10 +125,12 @@ export const Input: React.FC<FieldInputProps> = memo(({
     options.readOnly === true ||
     (general?.$state === "edition" && options.enableEdition !== true);
 
+  const safeValue = value ?? "";
+
   const mask = options?.mask;
   const maskValue = mask
-    ? evalFieldExpression(`"${mask}"`, value, {}, {})
-    : value;
+    ? evalFieldExpression(`"${mask}"`, safeValue, {}, {})
+    : safeValue;
 
   if (mask && mask.length > 0) {
     const convertedMask = String(maskValue ?? "")
@@ -146,7 +148,7 @@ export const Input: React.FC<FieldInputProps> = memo(({
           "@": /[a-zA-Z]/,
           "#": /./,
         }}
-        value={value}
+        value={safeValue}
         onChange={handleChange}
         placeholder={options?.placeholder}
         className="h-11"
@@ -174,7 +176,7 @@ export const Input: React.FC<FieldInputProps> = memo(({
           decimalScale={options.decimalScale ?? 2}
           fixedDecimalScale={true}
           allowNegative={false}
-          value={value}
+          value={safeValue}
           onValueChange={(values) =>
             handleChange({
               target: { value: values.value },
@@ -192,7 +194,7 @@ export const Input: React.FC<FieldInputProps> = memo(({
           placeholder={options?.placeholder}
           className="h-11"
           onChange={handleChange}
-          value={value}
+          value={safeValue}
           readOnly={isReadonly}
           disabled={isReadonly}
           autoFocus={options?.autoFocus}

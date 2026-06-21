@@ -219,6 +219,9 @@ export const useFieldDynamic = (
     field.expressions?.visible
   );
 
+  const isRequired = field?.options?.required === true;
+  const isLeafField = !["block", "integration", "preset", "subtitle", "table", "title"].includes(field.type);
+
   const isInitialRun = useRef(true);
 
   useEffect(() => {
@@ -229,6 +232,21 @@ export const useFieldDynamic = (
     } else if (!isInitialRun.current) {
       // Fields without expressions don't need to re-run callbacks
       // after the initial mount — context changes are irrelevant to them.
+      // Exception: required leaf fields need to re-evaluate validity
+      // when context changes (e.g. field goes from empty to filled).
+      if (isRequired && isLeafField) {
+        const serialized = JSON.stringify(context);
+        if (serialized === prevContextRef.current) return;
+        prevContextRef.current = serialized;
+        validCallback(
+          field,
+          context,
+          general,
+          validContext,
+          setValidState,
+          onValidChangeRef.current
+        );
+      }
       return;
     }
     isInitialRun.current = false;

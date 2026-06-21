@@ -1,4 +1,5 @@
 import { getAccessToken } from "../../auth/token";
+import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -19,13 +20,6 @@ import {
   FaCog,
 } from "react-icons/fa";
 import { IFormContext } from "@open-urbis/types";
-import {
-  Select as DSSelect,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@open-urbis/map-ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,6 +81,7 @@ import { WorkflowConstants } from "./configs/WorkflowConstants";
 import { WorkflowLibrary } from "./configs/WorkflowLibrary";
 import { WorkflowDependencies } from "./configs/WorkflowDependencies";
 import { WorkflowOutgoingDependencies } from "./configs/WorkflowOutgoingDependencies";
+import { Integrations } from "./components/Integrations";
 import {
   loadCodeModules,
   loadConstantVariables,
@@ -140,7 +135,7 @@ const calculateReverseVersionNumber = (
   index: number,
   total: number,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): number => {
   const reversedIndex = total - index - 1;
   return pageSize * (page - 1) + (reversedIndex + 1);
@@ -211,6 +206,12 @@ const tabConfig = [
     icon: <FaProjectDiagram className="text-purple-500" />,
     label: "Fluxos Subsequentes",
     shortcut: "S",
+  },
+  {
+    id: "integrations",
+    icon: <FaCog className="text-orange-500" />,
+    label: "Integrações SEI",
+    shortcut: "I",
   },
 ];
 
@@ -308,11 +309,14 @@ export function WorkflowSchemaEditor(): JSX.Element {
     $variables: {},
   });
   const [showDependencyGraph, setShowDependencyGraph] = useState(false);
+  const [seiLegalHypothesis, setSeiLegalHypothesis] = useState<
+    { id: string; description: string }[]
+  >([]);
   const [showConfigDrawer, setShowConfigDrawer] = useState(false);
   // Create a stable ID for the config drawer
   const configDrawerId = React.useMemo(
     () => `workflow-config-${id || "new"}`,
-    [id]
+    [id],
   );
 
   const fetchVersions = async (workflowId: string) => {
@@ -328,12 +332,12 @@ export function WorkflowSchemaEditor(): JSX.Element {
             index,
             versionsResponse.pagination.total,
             versionsResponse.pagination.page,
-            versionsResponse.pagination.pageSize
+            versionsResponse.pagination.pageSize,
           ),
           commitMessage: version.commit,
           timestamp: new Date(version.createdAt).toISOString(),
           createdBy: version.createdBy.name,
-        })
+        }),
       );
 
       setVersionInfos(versionInfos);
@@ -342,7 +346,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
           0,
           versionsResponse.pagination.total,
           versionsResponse.pagination.page,
-          versionsResponse.pagination.pageSize
+          versionsResponse.pagination.pageSize,
         ),
       });
     } catch (error) {
@@ -367,7 +371,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   const checkForConflicts = async (
     backendData: WorkflowSchema,
-    storageId: string
+    storageId: string,
   ) => {
     const savedStateStr = localStorage.getItem(getTempWorkflowKey(storageId));
     const lastUpdateStr = localStorage.getItem(getLastUpdateKey(storageId));
@@ -400,15 +404,15 @@ export function WorkflowSchemaEditor(): JSX.Element {
       const variables = await loadConstantVariables(
         workflow.schema?.constants ?? [],
         apiClient,
-        snackbar
+        snackbar,
       );
       const modules = await loadCodeModules(
         workflow.schema?.code ?? [],
         apiClient,
-        snackbar
+        snackbar,
       );
       const signatureMetadata = loadSignatureMetadata(
-        workflow.schema?.activities ?? []
+        workflow.schema?.activities ?? [],
       );
 
       setEditorGeneral({
@@ -446,7 +450,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     try {
       const workflow = await apiClient.workflowsSchema.findOneVersion(
         workflowSchema.id,
-        versionInfo.id
+        versionInfo.id,
       );
       setWorkflowSchema({
         ...workflow,
@@ -536,7 +540,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
       };
       localStorage.setItem(
         getTempWorkflowKey(storageId),
-        JSON.stringify(newState)
+        JSON.stringify(newState),
       );
       localStorage.setItem(getLastUpdateKey(storageId), Date.now().toString());
       setIsLocalDraft(true);
@@ -600,7 +604,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!workflowSchema || !workflowSchema.schema?.activities) return;
 
     const confirmDelete = await confirmation(
-      "Tem certeza que deseja remover esta atividade?"
+      "Tem certeza que deseja remover esta atividade?",
     );
 
     if (!confirmDelete) return;
@@ -623,7 +627,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   const handleUpdateActivity = (
     index: number,
-    updates: Partial<ActivityTemplate>
+    updates: Partial<ActivityTemplate>,
   ) => {
     if (!workflowSchema || !workflowSchema.schema?.activities) return;
 
@@ -648,7 +652,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
       users: { id: string; name: string; access: "read" | "write" }[];
       roles: { id: string; name: string; access: "read" | "write" }[];
       groups: { id: string; name: string; access: "read" | "write" }[];
-    }
+    },
   ) => {
     if (!workflowSchema || !workflowSchema.schema?.activities) return;
 
@@ -669,7 +673,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
-    index: number
+    index: number,
   ) => {
     setDraggingIndex(index);
     e.dataTransfer.effectAllowed = "move";
@@ -677,7 +681,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
   const handleDragOver = (
     e: React.DragEvent<HTMLDivElement>,
-    index: number
+    index: number,
   ) => {
     e.preventDefault();
     if (!workflowSchema?.schema?.activities || draggingIndex === null) return;
@@ -717,7 +721,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!workflowSchema || !id || id === "new") return;
 
     const response = await confirmation(
-      "Tem certeza que deseja remover este assunto?"
+      "Tem certeza que deseja remover este assunto?",
     );
 
     if (!response) {
@@ -745,7 +749,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
         const message = await prompt(
           id === "new"
             ? "Insira uma mensagem descrevendo o novo assunto"
-            : "Insira a mensagem de alteração da versão"
+            : "Insira a mensagem de alteração da versão",
         );
 
         if (!message?.trim()) {
@@ -773,6 +777,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
             : {
                 accessLevel: PrivacyLevelEnum.PUBLIC,
               },
+        integrations: workflowSchema.schema.integrations ?? {},
       };
 
       if (id !== "new") {
@@ -805,7 +810,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!id) return;
 
     const response = await confirmation(
-      "Tem certeza que deseja descartar todas as alterações locais não salvas?"
+      "Tem certeza que deseja descartar todas as alterações locais não salvas?",
     );
 
     if (!response) {
@@ -849,7 +854,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!id || id === "new") return;
 
     const commitMessage = await prompt(
-      "Insira a mensagem de publicação em homologação:"
+      "Insira a mensagem de publicação em homologação:",
     );
     if (!commitMessage?.trim()) return;
 
@@ -877,7 +882,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     if (!id || id === "new") return;
 
     const commitMessage = await prompt(
-      "Insira a mensagem de publicação em produção:"
+      "Insira a mensagem de publicação em produção:",
     );
     if (!commitMessage?.trim()) return;
 
@@ -923,22 +928,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
     });
   };
 
-  // Add function to handle workflow access level changes
-  const handleUpdateWorkflowAccessLevel = (accessLevel: PrivacyLevelEnum) => {
-    if (!workflowSchema) return;
-
-    updateSubject({
-      ...workflowSchema,
-      schema: {
-        ...workflowSchema.schema,
-        control: {
-          ...workflowSchema.schema?.control,
-          accessLevel,
-        },
-      },
-    });
-  };
-
   useEffect(() => {
     fetchSubject();
   }, []);
@@ -949,6 +938,38 @@ export function WorkflowSchemaEditor(): JSX.Element {
       $data: context,
     }));
   }, [context]);
+
+  useEffect(() => {
+    setEditorGeneral((prev) => ({
+      ...prev,
+      $variables: {
+        ...prev.$variables,
+        seiLegalHypothesis,
+      },
+    }));
+  }, [seiLegalHypothesis]);
+
+  useEffect(() => {
+    const seiConfig = workflowSchema?.schema?.integrations?.sei;
+    if (seiConfig?.IdUnidade) {
+      axios
+        .get(
+          `${import.meta.env.VITE_BACK_END_API}/integrations/sei/legal-hypothesis`,
+          {
+            params: { IdUnidade: seiConfig.IdUnidade },
+            headers: { authorization: `Bearer ${getAccessToken()}` },
+          },
+        )
+        .then((response) => {
+          setSeiLegalHypothesis(
+            Array.isArray(response.data) ? response.data : [],
+          );
+        })
+        .catch(() => {
+          // silently ignore - the Integrations page will show its own error
+        });
+    }
+  }, [workflowSchema?.schema?.integrations?.sei?.IdUnidade]);
 
   // Add a new useEffect to refresh secondary data when switching to the activities tab
   useEffect(() => {
@@ -981,6 +1002,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
         S: withNoModifiers(() => setSelectedTab("outgoing")),
         A: withNoModifiers(() => setSelectedTab("variables")),
         Z: withNoModifiers(() => setSelectedTab("functions")),
+        I: withNoModifiers(() => setSelectedTab("integrations")),
         M: () => {
           if (!loading) {
             handleSave();
@@ -992,7 +1014,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     return () => {
       hotkeyContext.dispatch({
         type: "UNSET_HOTKEY",
-        delete: ["Q", "W", "E", "A", "Z", "M"],
+        delete: ["Q", "W", "E", "A", "Z", "I", "M"],
       });
     };
   }, [loading, workflowSchema, selectedTab]);
@@ -1131,7 +1153,9 @@ export function WorkflowSchemaEditor(): JSX.Element {
                       >
                         <FaExclamationTriangle className="mr-2" size={14} />
                         <Tooltip label="Este rascunho está salvo apenas neste dispositivo e navegador. As alterações serão perdidas se você limpar os dados do navegador ou acessar de outro dispositivo. Use o botão Salvar para enviar as alterações ao servidor ou Descartar para remover as alterações locais.">
-                          <span className="text-xs">Rascunho salvo apenas neste dispositivo</span>
+                          <span className="text-xs">
+                            Rascunho salvo apenas neste dispositivo
+                          </span>
                         </Tooltip>
                       </div>
                       <button
@@ -1372,7 +1396,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                                   <div className="text-xl">
                                     <Tooltip
                                       label={getActivityTypeLabel(
-                                        activity.type
+                                        activity.type,
                                       )}
                                     >
                                       <span>
@@ -1417,7 +1441,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                                 </div>
                               </div>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                       <div className="mt-4 space-y-2">
@@ -1475,7 +1499,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           <Input
                             value={selectedActivity.namespace}
                             onChange={(
-                              e: React.ChangeEvent<HTMLInputElement>
+                              e: React.ChangeEvent<HTMLInputElement>,
                             ) =>
                               handleUpdateActivity(selectedActivityIndex, {
                                 namespace: e.target.value,
@@ -1486,49 +1510,6 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           />
                           <FormHelperText>
                             Identificador único para esta atividade
-                          </FormHelperText>
-                        </FormControl>
-
-                        <FormControl>
-                          <FormLabel>Nível de Acesso</FormLabel>
-                          <DSSelect
-                            value={String(selectedActivity.accessLevel)}
-                            onValueChange={(value) => {
-                              handleUpdateActivity(selectedActivityIndex, {
-                                ...selectedActivity,
-                                accessLevel: Number(value) as PrivacyLevelEnum,
-                              });
-                            }}
-                          >
-                            <SelectTrigger
-                              className="h-11 bg-background text-foreground"
-                              style={{ color: styleContext.state.textColor }}
-                            >
-                              <SelectValue placeholder="Selecione o nível de acesso" />
-                            </SelectTrigger>
-                            <SelectContent
-                              className="z-[1601] bg-background text-foreground"
-                              style={{ color: styleContext.state.textColor }}
-                            >
-                              <SelectItem value={String(PrivacyLevelEnum.PUBLIC)}>
-                                Público
-                              </SelectItem>
-                              <SelectItem value={String(PrivacyLevelEnum.REGISTERED)}>
-                                Registrado
-                              </SelectItem>
-                              <SelectItem value={String(PrivacyLevelEnum.RESTRICTED)}>
-                                Restrito
-                              </SelectItem>
-                              <SelectItem value={String(PrivacyLevelEnum.CONFIDENTIAL)}>
-                                Confidencial
-                              </SelectItem>
-                              <SelectItem value={String(PrivacyLevelEnum.ANONYMIZED)}>
-                                Anônimo
-                              </SelectItem>
-                            </SelectContent>
-                          </DSSelect>
-                          <FormHelperText>
-                            Define quem pode acessar esta atividade
                           </FormHelperText>
                         </FormControl>
                       </div>
@@ -1552,7 +1533,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           onChange={(permissions) =>
                             handleUpdatePermissions(
                               selectedActivityIndex,
-                              permissions
+                              permissions,
                             )
                           }
                           styleContext={styleContext}
@@ -1563,7 +1544,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
 
                       {renderActivityEditor(
                         selectedActivity,
-                        selectedActivityIndex
+                        selectedActivityIndex,
                       )}
                     </div>
                   ) : selectedTab === "incoming" ? (
@@ -1669,6 +1650,33 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         }
                       />
                     </div>
+                  ) : selectedTab === "integrations" ? (
+                    <div
+                      className="w-full rounded-2xl border p-4 md:p-6"
+                      style={{
+                        backgroundColor: styleContext.state.backgroundColor,
+                        borderColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    >
+                      <Integrations
+                        data={workflowSchema.schema.integrations?.sei}
+                        onChange={(seiData) =>
+                          updateSubject({
+                            ...workflowSchema,
+                            schema: {
+                              ...workflowSchema.schema,
+                              integrations: {
+                                ...workflowSchema.schema.integrations,
+                                sei: seiData,
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
                   ) : (
                     <div
                       className="w-full rounded-2xl border p-4 md:p-6"
@@ -1685,9 +1693,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         <p className="text-gray-500 text-lg mb-6">
                           Crie uma nova atividade para começar a editar
                         </p>
-                        <ActivityMenuButton
-                          onAddActivity={handleAddActivity}
-                        />
+                        <ActivityMenuButton onAddActivity={handleAddActivity} />
                       </div>
                     </div>
                   )}
@@ -1721,7 +1727,12 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         <span>
                           {isLocalDraft ? "Salvar Rascunho" : "Salvar"}
                         </span>{" "}
-                        <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">M</SL>
+                        <SL
+                          bg="primary"
+                          className="text-[hsl(var(--primary-foreground))]"
+                        >
+                          M
+                        </SL>
                       </button>
                       <Menu>
                         <MenuButton
@@ -1807,7 +1818,12 @@ export function WorkflowSchemaEditor(): JSX.Element {
                   >
                     <FaSave size={14} />
                     <span>Criar Assunto</span>{" "}
-                    <SL bg="primary" className="text-[hsl(var(--primary-foreground))]">M</SL>
+                    <SL
+                      bg="primary"
+                      className="text-[hsl(var(--primary-foreground))]"
+                    >
+                      M
+                    </SL>
                   </button>
                 )}
               </div>
@@ -1907,57 +1923,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
               Configurações de Acesso
             </h3>
 
-            <FormControl className="mb-6">
-              <FormLabel
-                className="text-foreground"
-                style={{ color: styleContext.state.textColor }}
-              >
-                Nível de Acesso Global
-              </FormLabel>
-              <DSSelect
-                value={String(
-                  workflowSchema?.schema?.control?.accessLevel ??
-                    PrivacyLevelEnum.PUBLIC
-                )}
-                onValueChange={(value) => {
-                  handleUpdateWorkflowAccessLevel(
-                    Number(value) as PrivacyLevelEnum
-                  );
-                }}
-              >
-                <SelectTrigger
-                  className="h-11 bg-background text-foreground"
-                  style={{ color: styleContext.state.textColor }}
-                >
-                  <SelectValue placeholder="Selecione o nível de acesso global" />
-                </SelectTrigger>
-                <SelectContent
-                  className="z-[1601] bg-background text-foreground"
-                  style={{ color: styleContext.state.textColor }}
-                >
-                  <SelectItem value={String(PrivacyLevelEnum.PUBLIC)}>
-                    Público
-                  </SelectItem>
-                  <SelectItem value={String(PrivacyLevelEnum.REGISTERED)}>
-                    Registrado
-                  </SelectItem>
-                  <SelectItem value={String(PrivacyLevelEnum.RESTRICTED)}>
-                    Restrito
-                  </SelectItem>
-                  <SelectItem value={String(PrivacyLevelEnum.CONFIDENTIAL)}>
-                    Confidencial
-                  </SelectItem>
-                  <SelectItem value={String(PrivacyLevelEnum.ANONYMIZED)}>
-                    Anônimo
-                  </SelectItem>
-                </SelectContent>
-              </DSSelect>
-              <FormHelperText>
-                Define o nível de acesso padrão para todo o fluxo de trabalho
-              </FormHelperText>
-            </FormControl>
-
-            <div className="mt-8">
+            <div>
               <PermissionsSelector
                 showBorder={false}
                 permissions={workflowSchema?.schema?.control?.permissions}

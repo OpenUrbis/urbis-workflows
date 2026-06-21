@@ -57,6 +57,7 @@ import {
   DocumentActivity,
   TaxActivity,
 } from "./activities";
+import { SeiTracking } from "./SeiTracking";
 import { Spinner } from "../../components";
 import { formatDate, formatId } from "./activities/common";
 import { v4 as uuidv4 } from "uuid";
@@ -1033,6 +1034,9 @@ export function Workflows(): JSX.Element {
                   stage={workflow.stage ?? WorkflowStageEnum.DEVELOPMENT}
                 />
               )}
+
+              {/* SEI Tracking Section - only for existing workflows */}
+              {!isCreating && id && <SeiTracking workflowId={id} />}
             </div>
 
             {/* Activity Content */}

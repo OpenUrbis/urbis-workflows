@@ -91,15 +91,17 @@ export const OutgoingList: React.FC<{
       >
         <button
           onClick={() => setShowDependentWorkflows(!showDependentWorkflows)}
-          className={`w-full flex items-center justify-between p-3 mb-3 rounded-lg ${
+          className={`w-full flex items-center justify-between mb-6 px-3 rounded-lg ${
             styleContext.state.buttonHoverColorWeight === "200"
               ? "hover:bg-gray-100"
               : "hover:bg-gray-800"
           }`}
         >
           <div className="flex items-center space-x-2">
-            <FaProjectDiagram size={14} />
-            <span className="text-sm font-medium">Fluxos Subsequentes</span>
+            <FaProjectDiagram size={14} className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-500">
+              Fluxos Subsequentes
+            </span>
             <span
               className={`text-sm px-2 py-0.5 rounded-full ${
                 styleContext.state.buttonHoverColorWeight === "200"
@@ -110,7 +112,9 @@ export const OutgoingList: React.FC<{
               {outgoing.length}
             </span>
           </div>
-          {showDependentWorkflows ? <FaChevronUp /> : <FaChevronDown />}
+          <div className="text-gray-500">
+            {showDependentWorkflows ? <FaChevronUp /> : <FaChevronDown />}
+          </div>
         </button>
       </Tooltip>
 

@@ -81,13 +81,6 @@ export const WorkflowsSchema: React.FC = () => {
   }, [stage]);
 
   useEffect(() => {
-    const stageFromUrl = searchParams.get("stage");
-    if (stageFromUrl && stageFromUrl !== stage) {
-      setStage(stageFromUrl);
-    }
-  }, [searchParams, stage]);
-
-  useEffect(() => {
     const params = new URLSearchParams(searchParams);
     if (stage) {
       params.set("stage", stage);
@@ -97,7 +90,8 @@ export const WorkflowsSchema: React.FC = () => {
     if (params.toString() !== searchParams.toString()) {
       setSearchParams(params, { replace: true });
     }
-  }, [stage, searchParams, setSearchParams]);
+    // eslint-disable-next-line
+  }, [stage]);
 
   useEffect(() => {
     if (workflows.length === 0) {

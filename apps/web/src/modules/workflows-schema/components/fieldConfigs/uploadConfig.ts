@@ -77,14 +77,6 @@ const seiIntegrationField: IField = {
       expressions: {},
     },
     {
-      key: "legalHypothesis",
-      type: FieldTypeEnum.Integration,
-      options: {},
-      expressions: {
-        integration: `{ method: 'GET', url: '${import.meta.env.VITE_BACK_END_API}/protocols/integrations/sei/legal-hypothesis' }`,
-      },
-    },
-    {
       key: "privateHypotesisId",
       type: FieldTypeEnum.Select,
       options: {
@@ -93,7 +85,7 @@ const seiIntegrationField: IField = {
       expressions: {
         visible: "context.accessLevel === 'private'",
         options:
-          "{ items: Object.values(context.legalHypothesis).map((h) => ({ key: h.name, value: h.id })) }",
+          "{ items: ($variables.seiLegalHypothesis || []).map((h) => ({ key: h.description, value: h.id })) }",
       },
     },
     {
