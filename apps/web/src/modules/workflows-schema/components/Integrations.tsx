@@ -1,5 +1,6 @@
 import { getAccessToken } from "../../../auth/token";
 import { Spinner } from "../../../components/LegacyUi";
+import { HelpTooltipClickable } from "../../../components";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSnackbar } from "../../../hooks/snackbar";
@@ -270,7 +271,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {unitDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredUnits.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhuma unidade encontrada</div>
                 ) : (
@@ -322,7 +323,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {processDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredProcesses.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
                 ) : (
@@ -369,7 +370,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
           <SelectTrigger className="h-11 bg-background text-foreground">
             <SelectValue placeholder="Selecione o nível de acesso" />
           </SelectTrigger>
-          <SelectContent className="z-[1601] bg-background text-foreground">
+          <SelectContent className="z-50 bg-background text-foreground">
             <SelectItem value="0">Público</SelectItem>
             <SelectItem value="1">Restrito</SelectItem>
             <SelectItem value="2">Sigiloso</SelectItem>
@@ -399,7 +400,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                   className="h-11 bg-background text-foreground"
                 />
                 {legalDropdownOpen && (
-                  <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+                  <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                     {filteredLegal.length === 0 ? (
                       <div className="px-3 py-2 text-sm text-muted-foreground">Nenhuma hipótese encontrada</div>
                     ) : (
@@ -452,7 +453,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {coverDocDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredCoverDocs.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
                 ) : (
@@ -486,7 +487,16 @@ export const Integrations: React.FC<IntegrationsProps> = ({
 
       {/* Folha de rosto */}
       <div className="space-y-2">
-        <Label htmlFor="coverLetter">Folha de rosto</Label>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="coverLetter">Folha de rosto</Label>
+          <HelpTooltipClickable
+            tooltip={
+              '<p class="mb-2"><strong>Conteúdo HTML</strong> da folha de rosto enviada ao SEI na abertura do processo.</p>' +
+              '<p class="mb-2">Use tags HTML (ex.: <code>&lt;p&gt;</code>, <code>&lt;table&gt;</code>, <code>&lt;strong&gt;</code>) para formatar o texto.</p>' +
+              '<p class="mb-2"><strong>Template / variáveis:</strong> o conteúdo é processado e os placeholders <code>{{ caminho }}</code> são substituídos pelos dados do contexto. Use a mesma estrutura do modal <strong>Dados do Contexto</strong>: <code>activity</code> (id, state, createdAt, createdBy, <code>form</code>). Os campos do formulário ficam em <code>activity.form</code>. Ex.: <code>{{ activity.form.localidade }}</code>, <code>{{ activity.id }}</code>.</p>'
+            }
+          />
+        </div>
         <CodeEditor
           language="html"
           height="200px"
@@ -498,6 +508,46 @@ export const Integrations: React.FC<IntegrationsProps> = ({
             });
           }}
         />
+      </div>
+
+      {/* Despacho (template do resumo para agendar publicação ao encerrar processo) */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="publicationSummaryTemplate">Despacho</Label>
+          <HelpTooltipClickable
+            tooltip={
+              '<p class="mb-2">Texto usado como <strong>Resumo</strong> na chamada <strong>agendarPublicacao</strong> do SEI quando o processo for encerrado (todas as atividades concluídas).</p>' +
+              '<p class="mb-2">O agendamento de publicação é disparado após o encerramento do processo. Configure também o veículo de publicação abaixo quando necessário.</p>' +
+              '<p class="mb-2"><strong>Template / variáveis:</strong> o conteúdo é processado e os placeholders <code>{{ caminho }}</code> são substituídos pelos dados do contexto. Use a mesma estrutura do modal <strong>Dados do Contexto</strong>: <code>activity</code> (id, state, createdAt, createdBy, <code>form</code>). Os campos do formulário ficam em <code>activity.form</code>. Ex.: <code>{{ activity.form.localidade }}</code>, <code>{{ activity.id }}</code>.</p>'
+            }
+          />
+        </div>
+        <CodeEditor
+          language="html"
+          height="200px"
+          value={integrations?.publicationSummaryTemplate ?? ""}
+          onChange={(code) => {
+            setIntegrations({
+              ...integrations,
+              publicationSummaryTemplate: code,
+            });
+          }}
+        />
+        <div className="space-y-2 pt-2">
+          <Label htmlFor="IdVeiculoPublicacao">Id do veículo de publicação (SEI)</Label>
+          <DSInput
+            id="IdVeiculoPublicacao"
+            placeholder="Opcional. Informado em agendarPublicacao ao encerrar."
+            value={integrations?.IdVeiculoPublicacao ?? ""}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setIntegrations({
+                ...integrations,
+                IdVeiculoPublicacao: e.target.value || undefined,
+              });
+            }}
+            className="h-11 bg-background text-foreground"
+          />
+        </div>
       </div>
 
       {/* Tipo do documento */}
@@ -520,7 +570,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {docDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredDocs.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
                 ) : (
@@ -576,7 +626,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {taxDocDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredTaxDocs.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
                 ) : (

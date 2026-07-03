@@ -28,6 +28,8 @@ const APP_MENU_ITEMS: { label: string; href: string; active?: boolean }[] = [
   },
 ];
 
+const DROPDOWN_CONTENT_Z = "z-[2100]";
+
 function Header(): JSX.Element {
   const { isAuthenticated, user, signIn, signOut } = useContext(AuthContext);
   const hotkeyContext = useContext(HotkeyContext);
@@ -36,8 +38,12 @@ function Header(): JSX.Element {
   const [isDarkMode, setIsDarkMode] = useState(() =>
     document.documentElement.classList.contains("dark"),
   );
+  const [viabilizaMenuOpen, setViabilizaMenuOpen] = useState(false);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const displayName = user?.socialName || user?.name || user?.email || "Usuário";
+  const displayName =
+    user?.socialName || user?.name || user?.email || "Usuário";
   const initials =
     (user?.socialName || user?.name || user?.email || "")
       .trim()
@@ -156,27 +162,20 @@ function Header(): JSX.Element {
     navigate(href);
   }
 
-  // Setup hotkeys when permissions are loaded
+  // Setup hotkeys: 1 = Viabiliza, 2 = Administração, 3 = menu do usuário; user uses arrow keys to select
   useEffect(() => {
-    // Only set up hotkeys if authenticated and permissions are loaded
     if (isAuthenticated && !loading) {
-      // Only set hotkeys for items the user has permission to access
-      const hotkeyMap: Record<string, any> = {};
-
-      filteredNavItems.forEach((item) => {
-        if (item.shortcut && !item.mobile) {
-          hotkeyMap[item.shortcut] = withNoModifiers(() =>
-            handleRedirect(item.path),
-          );
-        }
-      });
-
+      const hotkeyMap: Record<string, any> = {
+        "1": withNoModifiers(() => setViabilizaMenuOpen(true)),
+        "2": withNoModifiers(() => setAdminMenuOpen(true)),
+        "3": withNoModifiers(() => setUserMenuOpen(true)),
+      };
       hotkeyContext.dispatch({
         type: "SET_HOTKEY",
         payload: hotkeyMap,
       });
     }
-  }, [loading, filteredNavItems, isAuthenticated]);
+  }, [loading, isAuthenticated]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -197,7 +196,10 @@ function Header(): JSX.Element {
         handlers={hotkeyContext.state.hotkeyHandlers}
         allowChanges={true}
       />
-      <div onClickCapture={handleInternalNavCapture}>
+      <div
+        className="relative z-[2000]"
+        onClickCapture={handleInternalNavCapture}
+      >
         <UrbisHeader
           logoSrc={isDarkMode ? "/logo_escuro.svg" : "/logo.png"}
           logoAlt="Logotipo da Prefeitura de São Paulo"
@@ -215,7 +217,10 @@ function Header(): JSX.Element {
           showLogin={!isAuthenticated}
           rightSlot={
             <div className="hidden md:flex items-center gap-2">
-              <DropdownMenu>
+              <DropdownMenu
+                open={viabilizaMenuOpen}
+                onOpenChange={setViabilizaMenuOpen}
+              >
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
@@ -225,8 +230,11 @@ function Header(): JSX.Element {
                     Viabiliza
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 bg-popover">
-                  <DropdownMenuLabel>Navegação</DropdownMenuLabel>
+                <DropdownMenuContent
+                  align="end"
+                  className={`w-64 bg-popover ${DROPDOWN_CONTENT_Z}`}
+                >
+                  <DropdownMenuLabel>Navegação (1)</DropdownMenuLabel>
                   <DropdownMenuSeparator />
 
                   {isAuthenticated && canViewWorkflowSchemas ? (
@@ -292,7 +300,10 @@ function Header(): JSX.Element {
               </DropdownMenu>
 
               {isAuthenticated && administrativeItems.length > 0 ? (
-                <DropdownMenu>
+                <DropdownMenu
+                  open={adminMenuOpen}
+                  onOpenChange={setAdminMenuOpen}
+                >
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
@@ -302,8 +313,11 @@ function Header(): JSX.Element {
                       Administração
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 bg-popover">
-                    <DropdownMenuLabel>Administrativo</DropdownMenuLabel>
+                  <DropdownMenuContent
+                    align="end"
+                    className={`w-64 bg-popover ${DROPDOWN_CONTENT_Z}`}
+                  >
+                    <DropdownMenuLabel>Administrativo (2)</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {administrativeItems.map((item) => (
                       <DropdownMenuItem
@@ -322,7 +336,10 @@ function Header(): JSX.Element {
               ) : null}
 
               {isAuthenticated ? (
-                <DropdownMenu>
+                <DropdownMenu
+                  open={userMenuOpen}
+                  onOpenChange={setUserMenuOpen}
+                >
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
@@ -339,9 +356,15 @@ function Header(): JSX.Element {
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-72 bg-popover">
-                    <DropdownMenuLabel>{displayName}</DropdownMenuLabel>
-                    {user?.email ? (
+                  <DropdownMenuContent
+                    align="end"
+                    className={`w-72 bg-popover ${DROPDOWN_CONTENT_Z}`}
+                  >
+                    <DropdownMenuLabel>Menu do usuário (3)</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                      {displayName}
+                    </DropdownMenuLabel>
+                    {user?.email && user.email !== displayName ? (
                       <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
                         {user.email}
                       </DropdownMenuLabel>
@@ -352,7 +375,8 @@ function Header(): JSX.Element {
                       className="cursor-pointer"
                       onSelect={(event) => {
                         event.preventDefault();
-                        window.location.href = "https://conta.urbis.prefeitura.sp.gov.br";
+                        window.location.href =
+                          "https://conta.urbis.prefeitura.sp.gov.br";
                       }}
                     >
                       Minha conta
