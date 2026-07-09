@@ -11,10 +11,6 @@ export interface ProtocolIntegrations {
     PlateIdSerie?: number;
     TaxDocumentIdSerie?: number;
     coverLetter?: string;
-    /** Template do resumo usado em agendarPublicacao ao encerrar o processo no SEI */
-    publicationSummaryTemplate?: string;
-    /** Id do veículo de publicação (SEI), usado em agendarPublicacao ao encerrar */
-    IdVeiculoPublicacao?: string;
   };
   register?: {
     sei?: {

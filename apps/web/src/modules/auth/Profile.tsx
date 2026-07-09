@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { SL } from "../../components/ShortcutLabel";
 import { HotkeyContext } from "../../reducers/hotkeys.reducer";
+import { StyleContext } from "../../reducers";
 import { MyRepresentations } from "./MyRepresentation";
 import { MyRepresentatives } from "./MyRepresentatives";
-import { FaUserFriends, FaUserPlus, FaChevronRight } from "react-icons/fa";
+import { FaUserFriends, FaUserPlus } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
-import { Button, Card } from "@open-urbis/map-ui";
 
 export function Profile(): JSX.Element {
+  const styleContext = useContext(StyleContext);
   const hotkeyContext = useContext(HotkeyContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [subpage, setSubpage] = useState<string>(() => searchParams.get("tab") || "myrepresentations");
@@ -74,49 +75,41 @@ export function Profile(): JSX.Element {
         Representações
       </h1>
 
-      <Card className="flex flex-grow border rounded-lg overflow-hidden border-border bg-card text-card-foreground">
-        <div className="flex flex-col py-4 w-3/12 border-r border-border bg-card">
+      <div className="flex flex-grow border rounded-lg overflow-hidden border-border bg-card text-card-foreground">
+        <div
+          className="flex flex-col py-4 w-3/12 border-r border-border bg-card"
+        >
           {menus.map((menu) => (
-            <div className="px-3 py-1" key={menu.key}>
-              <Button
-                type="button"
-                variant="ghost"
+            <div
+              className={`px-6 py-3 transition-colors duration-150 ${
+                subpage === menu.link
+                  ? styleContext.state.buttonHoverColorWeight === "200"
+                    ? "bg-gray-200"
+                    : "bg-gray-700"
+                  : styleContext.state.buttonHoverColorWeight === "200"
+                    ? "hover:bg-gray-100"
+                    : "hover:bg-gray-800"
+              }`}
+              key={menu.key}
+            >
+              <button
                 onClick={() => setSubpageAndSync(menu.link)}
-                className={`flex justify-between w-full items-center h-auto px-4 py-2.5 font-normal rounded-lg transition-colors duration-150 ${
-                  subpage === menu.link
-                    ? "bg-primary/10 text-primary hover:bg-primary/20"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
+                className="flex justify-between w-full items-center text-card-foreground"
               >
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  <span
-                    className={
-                      subpage === menu.link
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    }
-                  >
-                    {menu.icon}
-                  </span>
-                  <span className="text-sm font-medium truncate">
-                    {menu.name}
-                  </span>
+                <div className="flex items-center space-x-3">
+                  {menu.icon}
+                  <span className="text-sm font-medium">{menu.name}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <SL>{menu.key}</SL>
-                  {subpage === menu.link && (
-                    <FaChevronRight size={10} className="text-primary" />
-                  )}
-                </div>
-              </Button>
+                <SL>{menu.key}</SL>
+              </button>
             </div>
           ))}
         </div>
-        <div className="flex flex-col p-6 w-9/12 overflow-y-auto bg-background text-foreground">
+        <div className="flex flex-col p-6 w-9/12 overflow-y-auto">
           {subpage === "myrepresentations" && <MyRepresentations />}
           {subpage === "myrepresentatives" && <MyRepresentatives />}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
