@@ -78,7 +78,7 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
   const handleBlockChange = useCallback((k: string, v: any) => {
     setLocalValue((current: any) => {
       const newLocalValue = { ...current, [k]: v };
-      queueMicrotask(() => onChangeRef.current(newLocalValue));
+      onChangeRef.current(newLocalValue);
       return newLocalValue;
     });
   }, []);
@@ -86,7 +86,7 @@ export const FieldEditable: React.FC<FieldEditableProps> = ({
   const handleBlockValidChange = useCallback((k: string, v: any) => {
     setLocalValid((current: any) => {
       const newLocalValid = { ...current, [k]: v };
-      queueMicrotask(() => onValidChangeRef.current(newLocalValid));
+      onValidChangeRef.current(newLocalValid);
       return newLocalValid;
     });
   }, []);

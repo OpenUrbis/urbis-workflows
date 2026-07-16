@@ -1,5 +1,6 @@
 import { getAccessToken } from "../../../auth/token";
 import { Spinner } from "../../../components/LegacyUi";
+import { HelpTooltipClickable } from "../../../components";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSnackbar } from "../../../hooks/snackbar";
@@ -23,6 +24,14 @@ enum LoadingTypes {
   SEI_LEGAL_HYPOTHESIS = 4,
 }
 
+/** SEI Serie Aplicabilidade: T=internos e externos, I=internos, E=externos, F=formulários */
+const SEI_APPLICABILITY_LABELS: Record<string, string> = {
+  T: "Documentos internos e externos",
+  I: "Documentos internos",
+  E: "Documentos externos",
+  F: "Formulários",
+};
+
 export type IntegrationsProps = {
   data: ProtocolIntegrations["sei"] | undefined;
   onChange: (data: ProtocolIntegrations["sei"]) => void;
@@ -43,7 +52,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
     { id: string; description: string }[]
   >([]);
   const [seiDocumentsTypes, setSeiDocumentsTypes] = useState<
-    { id: string; description: string }[]
+    { id: string; description: string; applicability?: string }[]
   >([]);
   const [seiLegalHypothesis, setSeiLegalHypothesis] = useState<
     { id: string; description: string }[]
@@ -74,6 +83,22 @@ export const Integrations: React.FC<IntegrationsProps> = ({
   const [taxDocSearch, setTaxDocSearch] = useState("");
   const [taxDocDropdownOpen, setTaxDocDropdownOpen] = useState(false);
   const taxDocContainerRef = useRef<HTMLDivElement>(null);
+
+  const [formDocSearch, setFormDocSearch] = useState("");
+  const [formDocDropdownOpen, setFormDocDropdownOpen] = useState(false);
+  const formDocContainerRef = useRef<HTMLDivElement>(null);
+
+  const [signatureDocSearch, setSignatureDocSearch] = useState("");
+  const [signatureDocDropdownOpen, setSignatureDocDropdownOpen] = useState(false);
+  const signatureDocContainerRef = useRef<HTMLDivElement>(null);
+
+  const [despachoDocSearch, setDespachoDocSearch] = useState("");
+  const [despachoDocDropdownOpen, setDespachoDocDropdownOpen] = useState(false);
+  const despachoDocContainerRef = useRef<HTMLDivElement>(null);
+
+  const [uploadDocSearch, setUploadDocSearch] = useState("");
+  const [uploadDocDropdownOpen, setUploadDocDropdownOpen] = useState(false);
+  const uploadDocContainerRef = useRef<HTMLDivElement>(null);
 
   const handleFetchSeiUnits = async () => {
     setLoading(LoadingTypes.SEI_UNITS);
@@ -194,12 +219,15 @@ export const Integrations: React.FC<IntegrationsProps> = ({
     // eslint-disable-next-line
   }, [integrations?.IdUnidade, integrations?.NivelAcesso]);
 
-  // Helper to filter items (max 50 visible)
+  // Helper to filter items (max 50 visible); preserves extra fields (e.g. applicability)
   const filterItems = useCallback(
-    (items: { id: string; description: string }[], search: string) => {
+    <T extends { id: string; description: string }>(
+      items: T[],
+      search: string,
+    ): { filtered: T[]; total: number } => {
       if (!search) return { filtered: items.slice(0, 50), total: items.length };
       const q = search.toLowerCase();
-      const matches: { id: string; description: string }[] = [];
+      const matches: T[] = [];
       let total = 0;
       for (const item of items) {
         if (item.description.toLowerCase().includes(q)) {
@@ -224,6 +252,14 @@ export const Integrations: React.FC<IntegrationsProps> = ({
     () => filterItems(seiDocumentsTypes, docSearch), [seiDocumentsTypes, docSearch, filterItems]);
   const { filtered: filteredTaxDocs, total: totalFilteredTaxDocs } = useMemo(
     () => filterItems(seiDocumentsTypes, taxDocSearch), [seiDocumentsTypes, taxDocSearch, filterItems]);
+  const { filtered: filteredFormDocs, total: totalFilteredFormDocs } = useMemo(
+    () => filterItems(seiDocumentsTypes, formDocSearch), [seiDocumentsTypes, formDocSearch, filterItems]);
+  const { filtered: filteredSignatureDocs, total: totalFilteredSignatureDocs } = useMemo(
+    () => filterItems(seiDocumentsTypes, signatureDocSearch), [seiDocumentsTypes, signatureDocSearch, filterItems]);
+  const { filtered: filteredDespachoDocs, total: totalFilteredDespachoDocs } = useMemo(
+    () => filterItems(seiDocumentsTypes, despachoDocSearch), [seiDocumentsTypes, despachoDocSearch, filterItems]);
+  const { filtered: filteredUploadDocs, total: totalFilteredUploadDocs } = useMemo(
+    () => filterItems(seiDocumentsTypes, uploadDocSearch), [seiDocumentsTypes, uploadDocSearch, filterItems]);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -235,6 +271,10 @@ export const Integrations: React.FC<IntegrationsProps> = ({
       if (coverDocContainerRef.current && !coverDocContainerRef.current.contains(target)) setCoverDocDropdownOpen(false);
       if (docContainerRef.current && !docContainerRef.current.contains(target)) setDocDropdownOpen(false);
       if (taxDocContainerRef.current && !taxDocContainerRef.current.contains(target)) setTaxDocDropdownOpen(false);
+      if (formDocContainerRef.current && !formDocContainerRef.current.contains(target)) setFormDocDropdownOpen(false);
+      if (signatureDocContainerRef.current && !signatureDocContainerRef.current.contains(target)) setSignatureDocDropdownOpen(false);
+      if (despachoDocContainerRef.current && !despachoDocContainerRef.current.contains(target)) setDespachoDocDropdownOpen(false);
+      if (uploadDocContainerRef.current && !uploadDocContainerRef.current.contains(target)) setUploadDocDropdownOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -245,12 +285,17 @@ export const Integrations: React.FC<IntegrationsProps> = ({
   }, [integrations, onChange]);
 
   return (
-    <div className="flex flex-col md:w-1/2 mx-auto space-y-6">
+    <div className="flex flex-col md:w-1/2 mx-auto space-y-8">
       <h2 className="text-xl md:text-2xl font-bold mb-2 text-center">
-        SEI
+        Integração SEI
       </h2>
 
-      {/* Unidade */}
+      {/* 1. Processo */}
+      <section className="space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+          Processo
+        </h3>
+        <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="IdUnidade">Unidade</Label>
         {loading === LoadingTypes.SEI_UNITS ? (
@@ -270,7 +315,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {unitDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredUnits.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhuma unidade encontrada</div>
                 ) : (
@@ -322,7 +367,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {processDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredProcesses.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
                 ) : (
@@ -369,7 +414,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
           <SelectTrigger className="h-11 bg-background text-foreground">
             <SelectValue placeholder="Selecione o nível de acesso" />
           </SelectTrigger>
-          <SelectContent className="z-[1601] bg-background text-foreground">
+          <SelectContent className="z-50 bg-background text-foreground">
             <SelectItem value="0">Público</SelectItem>
             <SelectItem value="1">Restrito</SelectItem>
             <SelectItem value="2">Sigiloso</SelectItem>
@@ -399,7 +444,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                   className="h-11 bg-background text-foreground"
                 />
                 {legalDropdownOpen && (
-                  <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+                  <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                     {filteredLegal.length === 0 ? (
                       <div className="px-3 py-2 text-sm text-muted-foreground">Nenhuma hipótese encontrada</div>
                     ) : (
@@ -431,10 +476,17 @@ export const Integrations: React.FC<IntegrationsProps> = ({
             )}
           </div>
         )}
+        </div>
+      </section>
 
-      {/* Tipo do documento da folha de rosto */}
+      {/* 2. Folha de rosto */}
+      <section className="space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+          Folha de rosto
+        </h3>
+        <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="CoverLetterIdSerie">Tipo do documento da folha de rosto</Label>
+        <Label htmlFor="CoverLetterIdSerie">Tipo do documento</Label>
         {loading === LoadingTypes.SEI_DOCUMENTS_TYPES ? (
           <div className="text-center py-2"><Spinner /></div>
         ) : (
@@ -452,7 +504,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {coverDocDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredCoverDocs.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
                 ) : (
@@ -460,7 +512,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                     {filteredCoverDocs.map((type) => (
                       <div
                         key={`cover-${type.id}`}
-                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground truncate"
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           setIntegrations({ ...integrations, CoverLetterIdSerie: Number(type.id) });
@@ -468,7 +520,12 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                           setCoverDocDropdownOpen(false);
                         }}
                       >
-                        {type.description}
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
                       </div>
                     ))}
                     {totalFilteredCoverDocs > 50 && (
@@ -484,9 +541,18 @@ export const Integrations: React.FC<IntegrationsProps> = ({
         )}
       </div>
 
-      {/* Folha de rosto */}
+      {/* Conteúdo folha de rosto */}
       <div className="space-y-2">
-        <Label htmlFor="coverLetter">Folha de rosto</Label>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="coverLetter">Conteúdo</Label>
+          <HelpTooltipClickable
+            tooltip={
+              '<p class="mb-2"><strong>Conteúdo HTML</strong> da folha de rosto enviada ao SEI na abertura do processo.</p>' +
+              '<p class="mb-2">Use tags HTML (ex.: <code>&lt;p&gt;</code>, <code>&lt;table&gt;</code>, <code>&lt;strong&gt;</code>) para formatar o texto.</p>' +
+              '<p class="mb-2"><strong>Template / variáveis:</strong> o conteúdo é processado e os placeholders <code>{{ caminho }}</code> são substituídos pelos dados do contexto. Use a mesma estrutura do modal <strong>Dados do Contexto</strong>: <code>activity</code> (id, state, createdAt, createdBy, <code>form</code>). Os campos do formulário ficam em <code>activity.form</code>. Ex.: <code>{{ activity.form.localidade }}</code>, <code>{{ activity.id }}</code>.</p>'
+            }
+          />
+        </div>
         <CodeEditor
           language="html"
           height="200px"
@@ -499,10 +565,77 @@ export const Integrations: React.FC<IntegrationsProps> = ({
           }}
         />
       </div>
+        </div>
+      </section>
 
-      {/* Tipo do documento */}
+      {/* 3. Tipos de documento (Série) por categoria */}
+      <section className="space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+          Tipos de documento no SEI
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Série (tipo de documento) usado ao espelhar cada categoria no SEI.
+        </p>
+        <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="DocumentIdSerie">Tipo do documento</Label>
+        <Label htmlFor="FormIdSerie">Formulário</Label>
+        {loading === LoadingTypes.SEI_DOCUMENTS_TYPES ? (
+          <div className="text-center py-2"><Spinner /></div>
+        ) : (
+          <div className="relative" ref={formDocContainerRef}>
+            <DSInput
+              placeholder={integrations?.FormIdSerie
+                ? seiDocumentsTypes.find((t) => t.id === String(integrations.FormIdSerie))?.description ?? "Buscar tipo de documento..."
+                : "Buscar tipo de documento..."}
+              value={formDocSearch}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setFormDocSearch(e.target.value);
+                setFormDocDropdownOpen(true);
+              }}
+              onFocus={() => setFormDocDropdownOpen(true)}
+              className="h-11 bg-background text-foreground"
+            />
+            {formDocDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+                {filteredFormDocs.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
+                ) : (
+                  <>
+                    {filteredFormDocs.map((type) => (
+                      <div
+                        key={`form-${type.id}`}
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setIntegrations({ ...integrations, FormIdSerie: Number(type.id) });
+                          setFormDocSearch("");
+                          setFormDocDropdownOpen(false);
+                        }}
+                      >
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {totalFilteredFormDocs > 50 && (
+                      <div className="px-3 py-2 text-xs text-muted-foreground border-t">
+                        Mostrando 50 de {totalFilteredFormDocs} resultados. Refine sua busca.
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Documento gerado */}
+      <div className="space-y-2">
+        <Label htmlFor="DocumentIdSerie">Documento gerado</Label>
         {loading === LoadingTypes.SEI_DOCUMENTS_TYPES ? (
           <div className="text-center py-2"><Spinner /></div>
         ) : (
@@ -520,7 +653,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {docDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredDocs.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
                 ) : (
@@ -528,19 +661,23 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                     {filteredDocs.map((type) => (
                       <div
                         key={`doc-${type.id}`}
-                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground truncate"
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           setIntegrations({
                             ...integrations,
                             DocumentIdSerie: Number(type.id),
-                            PlateIdSerie: Number(type.id),
                           });
                           setDocSearch("");
                           setDocDropdownOpen(false);
                         }}
                       >
-                        {type.description}
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
                       </div>
                     ))}
                     {totalFilteredDocs > 50 && (
@@ -556,9 +693,66 @@ export const Integrations: React.FC<IntegrationsProps> = ({
         )}
       </div>
 
-      {/* Tipo do documento do boleto */}
+      {/* Assinatura */}
       <div className="space-y-2">
-        <Label htmlFor="TaxDocumentIdSerie">Tipo do documento do boleto</Label>
+        <Label htmlFor="SignatureIdSerie">Assinatura</Label>
+        {loading === LoadingTypes.SEI_DOCUMENTS_TYPES ? (
+          <div className="text-center py-2"><Spinner /></div>
+        ) : (
+          <div className="relative" ref={signatureDocContainerRef}>
+            <DSInput
+              placeholder={integrations?.SignatureIdSerie
+                ? seiDocumentsTypes.find((t) => t.id === String(integrations.SignatureIdSerie))?.description ?? "Buscar tipo de documento..."
+                : "Buscar tipo de documento..."}
+              value={signatureDocSearch}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setSignatureDocSearch(e.target.value);
+                setSignatureDocDropdownOpen(true);
+              }}
+              onFocus={() => setSignatureDocDropdownOpen(true)}
+              className="h-11 bg-background text-foreground"
+            />
+            {signatureDocDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+                {filteredSignatureDocs.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
+                ) : (
+                  <>
+                    {filteredSignatureDocs.map((type) => (
+                      <div
+                        key={`signature-${type.id}`}
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setIntegrations({ ...integrations, SignatureIdSerie: Number(type.id) });
+                          setSignatureDocSearch("");
+                          setSignatureDocDropdownOpen(false);
+                        }}
+                      >
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {totalFilteredSignatureDocs > 50 && (
+                      <div className="px-3 py-2 text-xs text-muted-foreground border-t">
+                        Mostrando 50 de {totalFilteredSignatureDocs} resultados. Refine sua busca.
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Boleto */}
+      <div className="space-y-2">
+        <Label htmlFor="TaxDocumentIdSerie">Boleto</Label>
         {loading === LoadingTypes.SEI_DOCUMENTS_TYPES ? (
           <div className="text-center py-2"><Spinner /></div>
         ) : (
@@ -576,7 +770,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
               className="h-11 bg-background text-foreground"
             />
             {taxDocDropdownOpen && (
-              <div className="absolute z-[1601] mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
                 {filteredTaxDocs.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
                 ) : (
@@ -584,7 +778,7 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                     {filteredTaxDocs.map((type) => (
                       <div
                         key={`tax-${type.id}`}
-                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground truncate"
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           setIntegrations({ ...integrations, TaxDocumentIdSerie: Number(type.id) });
@@ -592,7 +786,12 @@ export const Integrations: React.FC<IntegrationsProps> = ({
                           setTaxDocDropdownOpen(false);
                         }}
                       >
-                        {type.description}
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
                       </div>
                     ))}
                     {totalFilteredTaxDocs > 50 && (
@@ -607,6 +806,206 @@ export const Integrations: React.FC<IntegrationsProps> = ({
           </div>
         )}
       </div>
+
+      {/* Upload / anexo */}
+      <div className="space-y-2">
+        <Label htmlFor="UploadIdSerie">Upload (anexo)</Label>
+        {loading === LoadingTypes.SEI_DOCUMENTS_TYPES ? (
+          <div className="text-center py-2"><Spinner /></div>
+        ) : (
+          <div className="relative" ref={uploadDocContainerRef}>
+            <DSInput
+              placeholder={integrations?.UploadIdSerie
+                ? seiDocumentsTypes.find((t) => t.id === String(integrations.UploadIdSerie))?.description ?? "Buscar tipo de documento..."
+                : "Buscar tipo de documento..."}
+              value={uploadDocSearch}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setUploadDocSearch(e.target.value);
+                setUploadDocDropdownOpen(true);
+              }}
+              onFocus={() => setUploadDocDropdownOpen(true)}
+              className="h-11 bg-background text-foreground"
+            />
+            {uploadDocDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+                {filteredUploadDocs.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
+                ) : (
+                  <>
+                    {filteredUploadDocs.map((type) => (
+                      <div
+                        key={`upload-${type.id}`}
+                        className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setIntegrations({ ...integrations, UploadIdSerie: Number(type.id) });
+                          setUploadDocSearch("");
+                          setUploadDocDropdownOpen(false);
+                        }}
+                      >
+                        <div className="truncate">{type.description}</div>
+                        {type.applicability && (
+                          <div className="text-xs text-muted-foreground">
+                            {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {totalFilteredUploadDocs > 50 && (
+                      <div className="px-3 py-2 text-xs text-muted-foreground border-t">
+                        Mostrando 50 de {totalFilteredUploadDocs} resultados. Refine sua busca.
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+        </div>
+      </section>
+
+      {/* 4. Despacho (encerramento) */}
+      <section className="space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+          Despacho (encerramento)
+        </h3>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="publicationSummaryTemplate">Conteúdo do despacho</Label>
+              <HelpTooltipClickable
+                tooltip={
+                  '<p class="mb-2">Texto usado como <strong>Resumo</strong> na chamada <strong>agendarPublicacao</strong> do SEI quando o processo for encerrado (todas as atividades concluídas).</p>' +
+                  '<p class="mb-2">O agendamento de publicação é disparado após o encerramento do processo. Configure também o veículo de publicação abaixo quando necessário.</p>' +
+                  '<p class="mb-2"><strong>Template / variáveis:</strong> o conteúdo é processado e os placeholders <code>{{ caminho }}</code> são substituídos pelos dados do contexto. Use a mesma estrutura do modal <strong>Dados do Contexto</strong>: <code>activity</code> (id, state, createdAt, createdBy, <code>form</code>). Os campos do formulário ficam em <code>activity.form</code>. Ex.: <code>{{ activity.form.localidade }}</code>, <code>{{ activity.id }}</code>.</p>'
+                }
+              />
+            </div>
+            <CodeEditor
+              language="html"
+              height="200px"
+              value={integrations?.publicationSummaryTemplate ?? ""}
+              onChange={(code) => {
+                setIntegrations({
+                  ...integrations,
+                  publicationSummaryTemplate: code,
+                });
+              }}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="DespachoIdSerie">Tipo do documento</Label>
+            {loading === LoadingTypes.SEI_DOCUMENTS_TYPES ? (
+              <div className="text-center py-2"><Spinner /></div>
+            ) : (
+              <div className="relative" ref={despachoDocContainerRef}>
+                <DSInput
+                  placeholder={integrations?.DespachoIdSerie
+                    ? seiDocumentsTypes.find((t) => t.id === String(integrations.DespachoIdSerie))?.description ?? "Buscar tipo de documento..."
+                    : "Buscar tipo de documento..."}
+                  value={despachoDocSearch}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setDespachoDocSearch(e.target.value);
+                    setDespachoDocDropdownOpen(true);
+                  }}
+                  onFocus={() => setDespachoDocDropdownOpen(true)}
+                  className="h-11 bg-background text-foreground"
+                />
+                {despachoDocDropdownOpen && (
+                  <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-background shadow-lg">
+                    {filteredDespachoDocs.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">Nenhum tipo encontrado</div>
+                    ) : (
+                      <>
+                        {filteredDespachoDocs.map((type) => (
+                          <div
+                            key={`despacho-${type.id}`}
+                            className="px-3 py-2 text-sm cursor-pointer hover:bg-muted text-foreground"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setIntegrations({ ...integrations, DespachoIdSerie: Number(type.id) });
+                              setDespachoDocSearch("");
+                              setDespachoDocDropdownOpen(false);
+                            }}
+                          >
+                            <div className="truncate">{type.description}</div>
+                            {type.applicability && (
+                              <div className="text-xs text-muted-foreground">
+                                {SEI_APPLICABILITY_LABELS[type.applicability] ?? type.applicability}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {totalFilteredDespachoDocs > 50 && (
+                          <div className="px-3 py-2 text-xs text-muted-foreground border-t">
+                            Mostrando 50 de {totalFilteredDespachoDocs} resultados. Refine sua busca.
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="StaMotivoPublicacao">Motivo da publicação</Label>
+              <HelpTooltipClickable
+                tooltip={
+                  '<p class="mb-2">Usado como <strong>StaMotivo</strong> na chamada <strong>agendarPublicacao</strong> do SEI ao encerrar o processo.</p>' +
+                  '<p><strong>Valores:</strong> 1 = Publicação, 2 = Retificação, 3 = Republicação, 4 = Apostilamento.</p>'
+                }
+              />
+            </div>
+            <Select
+              value={String(integrations?.StaMotivoPublicacao ?? 1)}
+              onValueChange={(value) => {
+                setIntegrations({
+                  ...integrations,
+                  StaMotivoPublicacao: Number(value) as 1 | 2 | 3 | 4,
+                });
+              }}
+            >
+              <SelectTrigger id="StaMotivoPublicacao" className="h-11 bg-background text-foreground">
+                <SelectValue placeholder="Selecione o motivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Publicação</SelectItem>
+                <SelectItem value="2">Retificação</SelectItem>
+                <SelectItem value="3">Republicação</SelectItem>
+                <SelectItem value="4">Apostilamento</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="IdVeiculoPublicacao">Id do veículo de publicação (SEI)</Label>
+              <HelpTooltipClickable
+                tooltip={
+                  '<p class="mb-2"><strong>Identificador do veículo de publicação</strong> no SEI, usado em <strong>agendarPublicacao</strong> ao encerrar o processo.</p>' +
+                  '<p class="mb-2">Para obter o valor: consulte a administração do SEI ou a documentação do seu órgão (configuração de veículos de publicação / diário oficial). O ID é fornecido pelo SEI.</p>' +
+                  '<p>Opcional: se não informado, o agendamento de publicação não será disparado.</p>'
+                }
+              />
+            </div>
+            <DSInput
+              id="IdVeiculoPublicacao"
+              placeholder="Ex.: ID do veículo no SEI (consultar administração SEI)"
+              value={integrations?.IdVeiculoPublicacao ?? ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setIntegrations({
+                  ...integrations,
+                  IdVeiculoPublicacao: e.target.value || undefined,
+                });
+              }}
+              className="h-11 bg-background text-foreground"
+            />
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

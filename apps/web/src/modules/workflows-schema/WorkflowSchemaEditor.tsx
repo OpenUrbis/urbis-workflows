@@ -118,6 +118,10 @@ const clearNewSubjectId = () => {
   localStorage.removeItem(NEW_WORKFLOW_ID_KEY);
 };
 
+// Stable empty object for uninitialized form context to avoid new {} on every
+// render, which would trigger useFieldDynamic effects and cause freezes.
+const EMPTY_FORM: Record<string, unknown> = Object.freeze({});
+
 interface StoredSubject {
   data: WorkflowSchema;
   timestamp: number;
@@ -1023,13 +1027,16 @@ export function WorkflowSchemaEditor(): JSX.Element {
     switch (activity.type) {
       case ActivityTypeEnum.FORM: {
         const formTemplate = activity.template as FormTemplate;
+        const formValue = context[activity.namespace]?.form ?? EMPTY_FORM;
+        const formValid = valid[activity.namespace] ?? EMPTY_FORM;
         return (
           <FieldEditable
+            key={activity.id ?? activity.namespace ?? `activity-${index}`}
             field={formTemplate.form}
-            value={context[activity.namespace]?.form ?? {}}
-            context={context[activity.namespace]?.form ?? {}}
-            valid={valid[activity.namespace] ?? {}}
-            validContext={valid[activity.namespace] ?? {}}
+            value={formValue}
+            context={formValue}
+            valid={formValid}
+            validContext={formValid}
             onChange={(value) =>
               setContext({
                 ...context,
@@ -1197,7 +1204,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 </div>
               </div>
               <div className="flex">
-                <div className="w-1/4 border-r pr-4 text-sm">
+                <div className="w-1/4 border-r pr-4 text-sm shrink-0">
                   <div className="mb-6">
                     <h2
                       className="text-base font-semibold mb-3"
