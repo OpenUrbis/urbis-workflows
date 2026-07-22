@@ -140,7 +140,7 @@ export const ActivityDependenciesSelector: React.FC<
                 />
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-medium text-sm">
+                <span className="font-medium">
                   {selectedDependencies.length > 0
                     ? `Gerenciar Dependências (${selectedDependencies.length})`
                     : "Adicionar Dependências"}

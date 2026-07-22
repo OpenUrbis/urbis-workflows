@@ -4,15 +4,13 @@ import React, { useContext, useEffect, useState } from "react";
 import { useSnackbar } from "../../hooks/snackbar";
 import { StyleContext } from "../../reducers";
 import { Spinner } from "../../components/LegacyUi";
-import { FaFileAlt, FaHistory, FaLink, FaSyncAlt } from "react-icons/fa";
+import { FaLink, FaSyncAlt } from "react-icons/fa";
 
 interface SeiMirroredDocument {
   documentId: string;
   activityId: string;
   seiDocumentId?: string;
   seiDocumentLink?: string;
-  /** SEI publication ID from agendarPublicacao (e.g. for despacho) */
-  seiPublicationId?: string;
   type: string;
   accessLevel: number;
   legalHypothesisId?: string | number;
@@ -31,7 +29,7 @@ interface SeiIntegrationState {
   processId?: string;
   processLink?: string;
   processFormatted?: string;
-  status?: "PENDING" | "OPEN" | "ERROR" | "CLOSED";
+  status?: "PENDING" | "OPEN" | "ERROR";
   error?: string;
   documents?: SeiMirroredDocument[];
   tracking?: SeiTrackingEntry[];
@@ -56,7 +54,6 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   document: "Documento",
   tax: "Taxa",
   upload: "Arquivo Anexado",
-  despacho: "Despacho",
 };
 
 export const SeiTracking: React.FC<SeiTrackingProps> = ({
@@ -168,28 +165,22 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
               backgroundColor:
                 seiState.status === "OPEN"
                   ? "rgba(34, 197, 94, 0.15)"
-                  : seiState.status === "CLOSED"
-                    ? "rgba(59, 130, 246, 0.15)"
-                    : seiState.status === "ERROR"
-                      ? "rgba(239, 68, 68, 0.15)"
-                      : "rgba(107, 114, 128, 0.15)",
+                  : seiState.status === "ERROR"
+                    ? "rgba(239, 68, 68, 0.15)"
+                    : "rgba(107, 114, 128, 0.15)",
               color:
                 seiState.status === "OPEN"
                   ? "#16a34a"
-                  : seiState.status === "CLOSED"
-                    ? "#2563eb"
-                    : seiState.status === "ERROR"
-                      ? "#dc2626"
-                      : "#6b7280",
+                  : seiState.status === "ERROR"
+                    ? "#dc2626"
+                    : "#6b7280",
             }}
           >
             {seiState.status === "OPEN"
               ? "Aberto"
-              : seiState.status === "CLOSED"
-                ? "Encerrado"
-                : seiState.status === "ERROR"
-                  ? "Erro"
-                  : "Pendente"}
+              : seiState.status === "ERROR"
+                ? "Erro"
+                : "Pendente"}
           </span>
           {seiState.processFormatted && (
             <span
@@ -229,40 +220,25 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
       {/* Mirrored Documents */}
       {seiState.documents && seiState.documents.length > 0 && (
         <div>
-          <div className="flex items-center space-x-2 mb-3 px-3">
-            <FaFileAlt size={14} className="text-gray-500" />
-            <span className="text-sm font-medium text-gray-500">
-              Documentos Espelhados
-            </span>
-            <span
-              className={`text-sm px-2 py-0.5 rounded-full ${
-                isDark ? "bg-purple-900 text-purple-100" : "bg-purple-100 text-purple-800"
-              }`}
-            >
-              {seiState.documents.length}
-            </span>
-          </div>
-          <div
-            className="overflow-x-auto rounded-lg border"
-            style={{
-              borderColor: isDark ? "#374151" : "#E5E7EB",
-              backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-            }}
+          <h4
+            className="text-sm font-semibold mb-2"
+            style={{ color: styleContext.state.textColor }}
           >
+            Documentos Espelhados ({seiState.documents.length})
+          </h4>
+          <div className="overflow-x-auto">
             <table className="w-full text-sm" style={{ color: styleContext.state.textColor }}>
               <thead>
                 <tr
                   style={{
-                    backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.04)",
                     borderBottomWidth: 1,
                     borderColor: isDark ? "#374151" : "#E5E7EB",
                   }}
                 >
-                  <th className="text-left py-2.5 px-3 font-medium">Tipo</th>
-                  <th className="text-left py-2.5 px-3 font-medium">Arquivo</th>
-                  <th className="text-left py-2.5 px-3 font-medium">Acesso</th>
-                  <th className="text-left py-2.5 px-3 font-medium">Data</th>
-                  <th className="text-left py-2.5 px-3 font-medium">Publicação</th>
+                  <th className="text-left py-2 px-2 font-medium">Tipo</th>
+                  <th className="text-left py-2 px-2 font-medium">Arquivo</th>
+                  <th className="text-left py-2 px-2 font-medium">Acesso</th>
+                  <th className="text-left py-2 px-2 font-medium">Data</th>
                 </tr>
               </thead>
               <tbody>
@@ -270,26 +246,23 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
                   <tr
                     key={idx}
                     style={{
-                      borderBottomWidth: idx < seiState.documents!.length - 1 ? 1 : 0,
-                      borderColor: isDark ? "#374151" : "#E5E7EB",
+                      borderBottomWidth: 1,
+                      borderColor: isDark ? "#1f2937" : "#F3F4F6",
                     }}
                   >
-                    <td className="py-2.5 px-3">
+                    <td className="py-2 px-2">
                       {DOC_TYPE_LABELS[doc.type] || doc.type}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-xs">
+                    <td className="py-2 px-2 font-mono text-xs">
                       {doc.fileName || doc.documentId}
                     </td>
-                    <td className="py-2.5 px-3">
+                    <td className="py-2 px-2">
                       {ACCESS_LEVEL_LABELS[doc.accessLevel] || doc.accessLevel}
                     </td>
-                    <td className="py-2.5 px-3 text-xs">
+                    <td className="py-2 px-2 text-xs">
                       {doc.syncedAt
                         ? new Date(doc.syncedAt).toLocaleString("pt-BR")
                         : "-"}
-                    </td>
-                    <td className="py-2.5 px-3 font-mono text-xs">
-                      {doc.seiPublicationId ?? "-"}
                     </td>
                   </tr>
                 ))}
@@ -302,39 +275,25 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
       {/* Tracking History */}
       {seiState.tracking && seiState.tracking.length > 0 && (
         <div>
-          <div className="flex items-center space-x-2 mb-3 px-3">
-            <FaHistory size={14} className="text-gray-500" />
-            <span className="text-sm font-medium text-gray-500">
-              Tramitação
-            </span>
-            <span
-              className={`text-sm px-2 py-0.5 rounded-full ${
-                isDark ? "bg-purple-900 text-purple-100" : "bg-purple-100 text-purple-800"
-              }`}
-            >
-              {seiState.tracking.length}
-            </span>
-          </div>
-          <div
-            className="overflow-x-auto rounded-lg border"
-            style={{
-              borderColor: isDark ? "#374151" : "#E5E7EB",
-              backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-            }}
+          <h4
+            className="text-sm font-semibold mb-2"
+            style={{ color: styleContext.state.textColor }}
           >
+            Tramitação ({seiState.tracking.length})
+          </h4>
+          <div className="overflow-x-auto">
             <table className="w-full text-sm" style={{ color: styleContext.state.textColor }}>
               <thead>
                 <tr
                   style={{
-                    backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.04)",
                     borderBottomWidth: 1,
                     borderColor: isDark ? "#374151" : "#E5E7EB",
                   }}
                 >
-                  <th className="text-left py-2.5 px-3 font-medium">Data</th>
-                  <th className="text-left py-2.5 px-3 font-medium">Ação</th>
-                  <th className="text-left py-2.5 px-3 font-medium">Unidade</th>
-                  <th className="text-left py-2.5 px-3 font-medium">Usuário</th>
+                  <th className="text-left py-2 px-2 font-medium">Data</th>
+                  <th className="text-left py-2 px-2 font-medium">Ação</th>
+                  <th className="text-left py-2 px-2 font-medium">Unidade</th>
+                  <th className="text-left py-2 px-2 font-medium">Usuário</th>
                 </tr>
               </thead>
               <tbody>
@@ -342,18 +301,18 @@ export const SeiTracking: React.FC<SeiTrackingProps> = ({
                   <tr
                     key={idx}
                     style={{
-                      borderBottomWidth: idx < seiState.tracking!.length - 1 ? 1 : 0,
-                      borderColor: isDark ? "#374151" : "#E5E7EB",
+                      borderBottomWidth: 1,
+                      borderColor: isDark ? "#1f2937" : "#F3F4F6",
                     }}
                   >
-                    <td className="py-2.5 px-3 text-xs whitespace-nowrap">
+                    <td className="py-2 px-2 text-xs whitespace-nowrap">
                       {entry.timestamp
                         ? new Date(entry.timestamp).toLocaleString("pt-BR")
                         : "-"}
                     </td>
-                    <td className="py-2.5 px-3">{entry.action}</td>
-                    <td className="py-2.5 px-3">{entry.unit || "-"}</td>
-                    <td className="py-2.5 px-3">{entry.user || "-"}</td>
+                    <td className="py-2 px-2">{entry.action}</td>
+                    <td className="py-2 px-2">{entry.unit || "-"}</td>
+                    <td className="py-2 px-2">{entry.user || "-"}</td>
                   </tr>
                 ))}
               </tbody>

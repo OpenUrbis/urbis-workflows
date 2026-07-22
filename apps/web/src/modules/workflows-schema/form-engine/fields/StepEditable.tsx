@@ -49,10 +49,6 @@ const formsClient = new FormsApiClient({
   },
 });
 
-// Stable empty object for missing step value/valid to avoid new {} on every render,
-// which would trigger useFieldDynamic effects in children and cause freezes (see Field vs FieldEditable).
-const EMPTY_STEP_VALUE: Record<string, unknown> = Object.freeze({});
-
 export type FieldStepEditableProps = {
   field: IField[];
   general: IFormContext;
@@ -199,18 +195,6 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
   // Add refs for scroll handling
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  // Reset active step when form/value identity changes (e.g. switching activity tabs)
-  // so we always show step 0 with the correct pre-filled context
-  const prevValueRef = useRef(value);
-  const prevFieldRef = useRef(field);
-  useEffect(() => {
-    if (prevValueRef.current !== value || prevFieldRef.current !== field) {
-      prevValueRef.current = value;
-      prevFieldRef.current = field;
-      setActiveStep(0);
-    }
-  }, [value, field]);
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
@@ -682,8 +666,8 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
               validContext={valid}
               general={general}
               field={flattenedFields[activeStep]}
-              value={value?.[flattenedFields[activeStep]?.key] ?? EMPTY_STEP_VALUE}
-              valid={valid?.[flattenedFields[activeStep]?.key] ?? EMPTY_STEP_VALUE}
+              value={value?.[flattenedFields[activeStep]?.key] ?? {}}
+              valid={valid?.[flattenedFields[activeStep]?.key] ?? {}}
               onChange={handleFieldChange}
               onValidChange={handleFieldValidChange}
             />
@@ -694,8 +678,8 @@ export const StepEditable: React.FC<FieldStepEditableProps> = ({
               validContext={valid}
               general={general}
               field={flattenedFields[activeStep]}
-              value={value?.[flattenedFields[activeStep]?.key] ?? EMPTY_STEP_VALUE}
-              valid={valid?.[flattenedFields[activeStep]?.key] ?? EMPTY_STEP_VALUE}
+              value={value?.[flattenedFields[activeStep]?.key] ?? {}}
+              valid={valid?.[flattenedFields[activeStep]?.key] ?? {}}
               onChange={handleFieldChange}
               onValidChange={handleFieldValidChange}
               onConfigChange={handleFieldConfigChange}

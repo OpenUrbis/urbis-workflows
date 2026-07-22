@@ -59,7 +59,6 @@ export function TaxesPanel({ filters }: { filters: DashboardFilters }) {
       headers: { Authorization: `Bearer ${getAccessToken()}` },
     });
     const params: Record<string, string> = {};
-    if (filters.stage && filters.stage !== "__all__") params.stage = filters.stage;
     if (filters.dateFrom) params.dateFrom = filters.dateFrom;
     if (filters.dateTo) params.dateTo = filters.dateTo;
     client.dashboard

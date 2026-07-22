@@ -33,6 +33,14 @@ jobs:
           echo "VITE_BACK_END_PDF=${{ secrets.VITE_BACK_END_PDF }}" >> $GITHUB_ENV
           echo "VITE_ENV=${{ secrets.VITE_ENV }}" >> $GITHUB_ENV
           echo "VITE_MAP=${{ secrets.VITE_MAP }}" >> $GITHUB_ENV
+
+          # Novas variáveis OIDC e Accounts (todas já como secrets)
+          echo "VITE_OIDC_AUTHORITY=${{ secrets.VITE_OIDC_AUTHORITY }}" >> $GITHUB_ENV
+          echo "VITE_OIDC_CLIENT_ID=${{ secrets.VITE_OIDC_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "VITE_OIDC_REDIRECT_URI=${{ secrets.VITE_OIDC_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "VITE_OIDC_SILENT_REDIRECT_URI=${{ secrets.VITE_OIDC_SILENT_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "VITE_ACCOUNTS_URL=${{ secrets.VITE_ACCOUNTS_URL }}" >> $GITHUB_ENV
+          echo "VITE_BACK_END_FILES=${{ secrets.VITE_BACK_END_FILES }}" >> $GITHUB_ENV
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -59,3 +67,4 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DELIGHTFUL_MUSHROOM_042635B0F }}
           action: "close"
+

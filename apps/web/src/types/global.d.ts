@@ -8,20 +8,9 @@ export interface ProtocolIntegrations {
     IdHipoteseLegal?: string | number;
     CoverLetterIdSerie?: number;
     DocumentIdSerie?: number;
-    /** @deprecated Use DocumentIdSerie for document and plate */
     PlateIdSerie?: number;
     TaxDocumentIdSerie?: number;
-    FormIdSerie?: number;
-    SignatureIdSerie?: number;
-    DespachoIdSerie?: number;
-    UploadIdSerie?: number;
     coverLetter?: string;
-    /** Template do resumo usado em agendarPublicacao ao encerrar o processo no SEI */
-    publicationSummaryTemplate?: string;
-    /** Id do veículo de publicação (SEI), usado em agendarPublicacao ao encerrar */
-    IdVeiculoPublicacao?: string;
-    /** Motivo da publicação: 1=Publicação, 2=Retificação, 3=Republicação, 4=Apostilamento */
-    StaMotivoPublicacao?: 1 | 2 | 3 | 4;
   };
   register?: {
     sei?: {

@@ -45,7 +45,7 @@ export const WorkflowsSchema: React.FC = () => {
   const { isAuthenticated, signIn } = useContext(AuthContext);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hasPermission, loading: permissionsLoading } = usePermissions();
+  const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
   const canCreateWorkflow = hasPermission("workflow:write:create");
 
@@ -79,19 +79,6 @@ export const WorkflowsSchema: React.FC = () => {
   useEffect(() => {
     fetchWorkflows();
   }, [stage]);
-
-  // When permissions finish loading and user has edit permission, default stage to
-  // "development" if we had previously defaulted to "production" (no stage in URL)
-  useEffect(() => {
-    if (
-      !permissionsLoading &&
-      canEditWorkflowSchema &&
-      stage === "production" &&
-      !searchParams.get("stage")
-    ) {
-      setStage("development");
-    }
-  }, [permissionsLoading, canEditWorkflowSchema, stage, searchParams]);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
@@ -186,14 +173,7 @@ export const WorkflowsSchema: React.FC = () => {
       <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">
         Carta de Assuntos
       </h1>
-      {showEdit && (
-        <StageSelectorButton
-          stage={stage}
-          setStage={setStage}
-          permissionsLoading={permissionsLoading}
-          isAuthenticated={isAuthenticated}
-        />
-      )}
+      {showEdit && <StageSelectorButton stage={stage} setStage={setStage} />}
       {loading ? (
         <LoadingSpinner />
       ) : (
@@ -357,33 +337,18 @@ const WorkflowContent = ({
 const StageSelectorButton = ({
   stage,
   setStage,
-  permissionsLoading,
-  isAuthenticated,
 }: {
   stage: string;
   setStage: (stage: string) => void;
-  permissionsLoading: boolean;
-  isAuthenticated: boolean;
 }) => {
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
   const canEditWorkflowSchema = hasPermission("workflow-schema:write:update");
 
-  // While permissions are loading and user is authenticated, show placeholder
-  // so we don't hide the staging buttons prematurely (auth/permissions load async)
-  const showStagingButtons = canEditWorkflowSchema;
-  const showPlaceholder = permissionsLoading && isAuthenticated;
-
   return (
     <div className="flex justify-between items-center w-full">
       <div className="flex items-center space-x-2">
-        {showPlaceholder ? (
-          <div className="flex items-center space-x-2 h-9" aria-hidden>
-            <div className="h-9 w-[140px] rounded-full bg-muted/60 animate-pulse" />
-            <div className="h-9 w-[120px] rounded-full bg-muted/60 animate-pulse" />
-            <div className="h-9 w-[110px] rounded-full bg-muted/60 animate-pulse" />
-          </div>
-        ) : showStagingButtons ? (
+        {canEditWorkflowSchema ? (
           <>
             <Button
               onClick={() => setStage("development")}
