@@ -118,6 +118,10 @@ const clearNewSubjectId = () => {
   localStorage.removeItem(NEW_WORKFLOW_ID_KEY);
 };
 
+// Stable empty object for uninitialized form context to avoid new {} on every
+// render, which would trigger useFieldDynamic effects and cause freezes.
+const EMPTY_FORM: Record<string, unknown> = Object.freeze({});
+
 interface StoredSubject {
   data: WorkflowSchema;
   timestamp: number;
@@ -308,7 +312,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
     $user: undefined,
     $variables: {},
   });
-  const [showDependencyGraph, setShowDependencyGraph] = useState(false);
+  // const [showDependencyGraph, setShowDependencyGraph] = useState(false);
   const [seiLegalHypothesis, setSeiLegalHypothesis] = useState<
     { id: string; description: string }[]
   >([]);
@@ -1023,13 +1027,16 @@ export function WorkflowSchemaEditor(): JSX.Element {
     switch (activity.type) {
       case ActivityTypeEnum.FORM: {
         const formTemplate = activity.template as FormTemplate;
+        const formValue = context[activity.namespace]?.form ?? EMPTY_FORM;
+        const formValid = valid[activity.namespace] ?? EMPTY_FORM;
         return (
           <FieldEditable
+            key={activity.id ?? activity.namespace ?? `activity-${index}`}
             field={formTemplate.form}
-            value={context[activity.namespace]?.form ?? {}}
-            context={context[activity.namespace]?.form ?? {}}
-            valid={valid[activity.namespace] ?? {}}
-            validContext={valid[activity.namespace] ?? {}}
+            value={formValue}
+            context={formValue}
+            valid={formValid}
+            validContext={formValid}
             onChange={(value) =>
               setContext({
                 ...context,
@@ -1057,20 +1064,33 @@ export function WorkflowSchemaEditor(): JSX.Element {
           />
         );
       }
-      case ActivityTypeEnum.DOCUMENT:
+      case ActivityTypeEnum.DOCUMENT: {
+        const documentTemplate = activity.template as DocumentTemplate;
         return (
           <ActivityDocumentEditor
-            documents={(activity.template as DocumentTemplate).documents}
+            documents={documentTemplate.documents}
             general={editorGeneral}
             onChange={(newDocuments) => {
               handleUpdateActivity(index, {
                 template: {
+                  ...documentTemplate,
                   documents: newDocuments,
+                } as DocumentTemplate,
+              });
+            }}
+            integrationsSei={workflowSchema?.schema?.integrations?.sei}
+            seiIntegration={documentTemplate.seiIntegration}
+            onSeiIntegrationChange={(seiIntegration) => {
+              handleUpdateActivity(index, {
+                template: {
+                  ...documentTemplate,
+                  seiIntegration,
                 } as DocumentTemplate,
               });
             }}
           />
         );
+      }
       case ActivityTypeEnum.SIGNATURE: {
         const signatureTemplate = activity.template as SignaturesTemplate;
         return (
@@ -1081,7 +1101,18 @@ export function WorkflowSchemaEditor(): JSX.Element {
               onChange={(newSignatures) => {
                 handleUpdateActivity(index, {
                   template: {
+                    ...signatureTemplate,
                     signatures: newSignatures,
+                  } as SignaturesTemplate,
+                });
+              }}
+              integrationsSei={workflowSchema?.schema?.integrations?.sei}
+              seiIntegration={signatureTemplate.seiIntegration}
+              onSeiIntegrationChange={(seiIntegration) => {
+                handleUpdateActivity(index, {
+                  template: {
+                    ...signatureTemplate,
+                    seiIntegration,
                   } as SignaturesTemplate,
                 });
               }}
@@ -1089,7 +1120,8 @@ export function WorkflowSchemaEditor(): JSX.Element {
           </div>
         );
       }
-      case ActivityTypeEnum.TAX:
+      case ActivityTypeEnum.TAX: {
+        const taxTemplate = activity.template as TaxTemplate;
         return (
           <ActivityTaxEditor
             activity={activity}
@@ -1100,8 +1132,19 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 template: value.template,
               });
             }}
+            integrationsSei={workflowSchema?.schema?.integrations?.sei}
+            seiIntegration={taxTemplate.seiIntegration}
+            onSeiIntegrationChange={(seiIntegration) => {
+              handleUpdateActivity(index, {
+                template: {
+                  ...taxTemplate,
+                  seiIntegration,
+                },
+              });
+            }}
           />
         );
+      }
       default:
         return <div>Activity type not supported</div>;
     }
@@ -1197,7 +1240,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                 </div>
               </div>
               <div className="flex">
-                <div className="w-1/4 border-r pr-4 text-sm">
+                <div className="w-1/4 border-r pr-4 text-sm shrink-0">
                   <div className="mb-6">
                     <h2
                       className="text-base font-semibold mb-3"
@@ -1319,7 +1362,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                         >
                           Atividades
                         </h2>
-                        <Tooltip
+                        {/* <Tooltip
                           label="Visualizar grafo de dependências"
                           placement="top"
                           hasArrow
@@ -1336,7 +1379,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
                           >
                             <FaProjectDiagram size={16} />
                           </button>
-                        </Tooltip>
+                        </Tooltip> */}
                       </div>
                       <div className="space-y-2">
                         {workflowSchema.schema?.activities?.map(
@@ -1895,7 +1938,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
       </Modal>
 
       {/* Dependency Graph Visualization Modal */}
-      <DependencyGraphVisualization
+      {/* <DependencyGraphVisualization
         isOpen={showDependencyGraph}
         onClose={() => setShowDependencyGraph(false)}
         activities={workflowSchema?.schema?.activities || []}
@@ -1903,7 +1946,7 @@ export function WorkflowSchemaEditor(): JSX.Element {
         outgoing={workflowSchema?.schema?.outgoing || []}
         styleContext={styleContext}
         currentActivityId={selectedActivity?.id}
-      />
+      /> */}
 
       {/* Advanced Configuration Drawer */}
       <SideDrawer

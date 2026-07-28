@@ -18,8 +18,11 @@ import {
   ActivityTypeEnum,
   TaxTemplate,
   ActivityTemplate,
+  SeiIntegrationActivityConfig,
 } from "../../../api/types/schema";
 import { StyleContext } from "../../../reducers";
+import { SeiDocumentTypeSelector } from "../components/SeiDocumentTypeSelector";
+import { ProtocolIntegrations } from "../../../types/global";
 import {
   defaultTaxLogic,
   TaxCalculationEditor,
@@ -33,6 +36,10 @@ interface TaxActivityEditorProps {
   context?: Record<string, any>;
   general: IFormContext;
   onChange: (value: { template: TaxTemplate }) => void;
+  /** When set, show SEI document type selector for sync; uses schema integrations as fallback */
+  integrationsSei?: ProtocolIntegrations["sei"];
+  seiIntegration?: SeiIntegrationActivityConfig;
+  onSeiIntegrationChange?: (config: SeiIntegrationActivityConfig | undefined) => void;
 }
 
 export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
@@ -40,6 +47,9 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
   context,
   general,
   onChange,
+  integrationsSei,
+  seiIntegration,
+  onSeiIntegrationChange,
 }) => {
   const [selectedTaxId, setSelectedTaxId] = useState<string>("");
   const [selectedTab, setSelectedTab] = useState("calculation");
@@ -140,6 +150,26 @@ export const ActivityTaxEditor: React.FC<TaxActivityEditorProps> = ({
 
   return (
     <div className="flex flex-col w-full">
+      {integrationsSei?.IdUnidade &&
+        integrationsSei?.IdTipoProcedimento &&
+        onSeiIntegrationChange != null && (
+        <div className="mb-6 p-4 rounded-lg border bg-muted/30">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            Sincronização SEI
+          </h3>
+          <SeiDocumentTypeSelector
+            label="Tipo de documento no SEI (boleto)"
+            value={seiIntegration?.IdSerie}
+            onChange={(idSerie) =>
+              onSeiIntegrationChange(
+                idSerie != null ? { IdSerie: idSerie } : undefined
+              )
+            }
+            integrationsSei={integrationsSei}
+            fallbackKey="TaxDocumentIdSerie"
+          />
+        </div>
+      )}
       <div className="flex mb-8">
         <div className="w-1/4 border-r pr-4">
           <h2

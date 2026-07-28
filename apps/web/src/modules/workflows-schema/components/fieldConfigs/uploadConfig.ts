@@ -93,7 +93,8 @@ const seiIntegrationField: IField = {
       type: FieldTypeEnum.Input,
       options: {
         type: "number",
-        label: "Nível de prioridade na ordem de envio dos documentos",
+        label: "Prioridade na ordem de envio ao SEI",
+        tooltip: "Menor número = maior prioridade (enviado primeiro). Ex.: 1 antes de 2.",
       },
       expressions: {},
     },
