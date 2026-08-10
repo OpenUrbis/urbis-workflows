@@ -6,6 +6,8 @@ export * from "./LabelEditable";
 export * from "./Link";
 export * from "./Paragraph";
 export * from "./Map";
+export * from "./MapPickerField";
+export * from "./MapPerimeterField";
 export * from "./ParagraphEditable";
 export * from "./Radio";
 export * from "./Select";

@@ -14,6 +14,8 @@ import {
   FieldCheckboxProps,
   FieldInputProps,
   FieldMapProps,
+  FieldMapPickerProps,
+  FieldMapPerimeterProps,
   FieldRadioProps,
   FieldSelectProps,
   FieldTableProps,
@@ -23,6 +25,8 @@ import {
   Integration,
   Link,
   Map,
+  MapPickerField,
+  MapPerimeterField,
   Paragraph,
   Radio,
   Select,
@@ -167,6 +171,46 @@ export const FIELD_COMPONENT_MAP: {
   ),
   map: ({ fieldKey, options, value }: FieldMapProps) => (
     <Map fieldKey={fieldKey} options={options} value={value} />
+  ),
+  mapPicker: ({
+    field,
+    options,
+    value,
+    onChange,
+    valid,
+    general,
+    onValidChange,
+  }: FieldMapPickerProps) => (
+    <MapPickerField
+      field={field}
+      fieldKey={field.key}
+      options={options}
+      value={value}
+      onChange={onChange}
+      valid={valid}
+      general={general}
+      onValidChange={onValidChange}
+    />
+  ),
+  mapPerimeter: ({
+    field,
+    options,
+    value,
+    onChange,
+    valid,
+    general,
+    onValidChange,
+  }: FieldMapPerimeterProps) => (
+    <MapPerimeterField
+      field={field}
+      fieldKey={field.key}
+      options={options}
+      value={value}
+      onChange={onChange}
+      valid={valid}
+      general={general}
+      onValidChange={onValidChange}
+    />
   ),
   table: ({
     options,

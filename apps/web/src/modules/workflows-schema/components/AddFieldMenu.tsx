@@ -83,6 +83,10 @@ const fieldTypeGroups: FieldTypeGroup[] = [
       [FieldTypeEnum.Integration, "Integração", FaLink],
       [FieldTypeEnum.Link, "Vínculo", FaLink],
       [FieldTypeEnum.Map, "Mapa", FaMap],
+      ["mapPicker" as FieldTypeEnum, "DWG", FaMap],
+      // Literal "mapPerimeter" — if FieldTypeEnum.MapPerimeter is undefined (stale types),
+      // using the enum here made type undefined and broke schema JSON.
+      ["mapPerimeter" as FieldTypeEnum, "Perímetro", FaMap],
     ],
   },
   {
@@ -161,6 +165,24 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
       readOnly: false,
       enableEdition: false,
     };
+
+    const newKey = () => (Math.random() + 1).toString(36).substring(7);
+
+    // Perímetro: retorno explícito para garantir `type: "mapPerimeter"` no JSON.
+    // Só comparar pela string — evita `undefined === undefined` se o enum estiver velho.
+    if (type != null && String(type) === "mapPerimeter") {
+      return {
+        type: "mapPerimeter" as FieldTypeEnum,
+        key: newKey(),
+        options: {
+          ...baseOptions,
+          label: "Perímetro",
+          height: "500px",
+          width: "100%",
+        } as IFieldOptionsType,
+        expressions: {},
+      };
+    }
 
     let options: IFieldOptionsType;
     switch (type) {
@@ -244,6 +266,22 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
           source: "",
         };
         break;
+      case "mapPicker" as FieldTypeEnum:
+        options = {
+          ...baseOptions,
+          height: "400px",
+          width: "100%",
+        };
+        break;
+      case "mapPerimeter" as FieldTypeEnum:
+      case FieldTypeEnum.MapPerimeter:
+        options = {
+          ...baseOptions,
+          label: "Perímetro",
+          height: "500px",
+          width: "100%",
+        };
+        break;
       case FieldTypeEnum.Array:
         options = {
           ...baseOptions,
@@ -259,9 +297,15 @@ export const AddFieldMenu: React.FC<AddFieldMenuProps> = ({
         options = baseOptions;
     }
 
+    const resolvedType =
+      type === ("mapPerimeter" as FieldTypeEnum) ||
+      type === FieldTypeEnum.MapPerimeter
+        ? ("mapPerimeter" as FieldTypeEnum)
+        : type;
+
     return {
-      type,
-      key: (Math.random() + 1).toString(36).substring(7),
+      type: resolvedType,
+      key: newKey(),
       options,
       expressions: {},
       ...(type === FieldTypeEnum.Array || type === FieldTypeEnum.Block

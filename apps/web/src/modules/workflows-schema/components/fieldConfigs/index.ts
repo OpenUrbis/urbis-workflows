@@ -12,6 +12,8 @@ import { createUploadConfig } from "./uploadConfig";
 import { createLinkConfig } from "./linkConfig";
 import { createIntegrationConfig } from "./integrationConfig";
 import { createMapConfig } from "./mapConfig";
+import { createMapPickerConfig } from "./mapPickerConfig";
+import { createMapPerimeterConfig } from "./mapPerimeterConfig";
 import { createBlockConfig } from "./blockConfig";
 import { createPresetConfig } from "./presetConfig";
 import { createArrayConfig } from "./arrayConfig";
@@ -42,6 +44,10 @@ export const createFieldConfig = (field: IField): IField => {
       return createIntegrationConfig();
     case FieldTypeEnum.Map:
       return createMapConfig();
+    case "mapPicker" as any:
+      return createMapPickerConfig();
+    case FieldTypeEnum.MapPerimeter:
+      return createMapPerimeterConfig();
     case FieldTypeEnum.Block:
       return createBlockConfig();
     case FieldTypeEnum.Preset:

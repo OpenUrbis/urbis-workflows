@@ -85,6 +85,8 @@ export const InputFieldTypes = [
   "checkbox",
   "input",
   "map",
+  "mapPicker",
+  "mapPerimeter",
   "radio",
   "select",
   "textarea",

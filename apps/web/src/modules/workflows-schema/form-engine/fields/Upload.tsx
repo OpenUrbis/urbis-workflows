@@ -1,6 +1,6 @@
 import { getAccessToken } from "../../../../auth/token";
 import axios from "axios";
-import React, { useCallback, useState, useContext } from "react";
+import React, { useCallback, useEffect, useRef, useState, useContext } from "react";
 import { useSnackbar } from "../../../../hooks/snackbar";
 import { downloadFile } from "../utils/utils";
 import { IField, IFormContext, UploadOptions } from "@open-urbis/types";
@@ -64,6 +64,9 @@ const getFileIcon = (filename: string) => {
 const FILES_API_BASE =
   import.meta.env.VITE_BACK_END_FILES ?? "https://api.mapa.urbis.sampa.br";
 
+const isImageFileKey = (key: string) =>
+  /\.(jpg|jpeg|png|gif|webp)$/i.test(key);
+
 // Helper to get friendly file name from S3 key or original name
 const getFriendlyFileName = (key: string, originalName?: string) => {
   if (originalName) return originalName;
@@ -96,6 +99,27 @@ export const Upload: React.FC<FieldUploadProps> = ({
   const [uploadedFiles, setUploadedFiles] = useState<string[]>(
     Array.isArray(value) ? value : value?.length > 0 ? [value] : [],
   );
+
+  const showGallery = options.gallery === true;
+  const imageFiles = showGallery
+    ? uploadedFiles.filter((key) => isImageFileKey(key))
+    : [];
+  const nonImageFiles = showGallery
+    ? uploadedFiles.filter((key) => !isImageFileKey(key))
+    : [];
+
+  // For rendering originals when the bucket isn't publicly readable,
+  // we fetch the same signed URL returned by `downloadFile()`.
+  const [imageSrcByKey, setImageSrcByKey] = useState<
+    Record<string, string | null>
+  >({});
+  const [imageLoadingByKey, setImageLoadingByKey] = useState<
+    Record<string, boolean>
+  >({});
+  const [imageErroredByKey, setImageErroredByKey] = useState<
+    Record<string, boolean>
+  >({});
+
   const [fileDetails, setFileDetails] = useState<{
     [key: string]: {
       size: number;
@@ -106,6 +130,83 @@ export const Upload: React.FC<FieldUploadProps> = ({
   }>({});
   const [inputKey, setInputKey] = useState(Date.now());
   const [isDragging, setIsDragging] = useState(false);
+
+  const getDownloadUrl = useCallback(async (key: string) => {
+    const { data } = await axios.get<{ downloadURL: string }>(
+      `${FILES_API_BASE}/files/download-url`,
+      {
+        params: { key },
+        headers: {
+          authorization: `Bearer ${getAccessToken() ?? ""}`,
+        },
+      },
+    );
+    return data.downloadURL;
+  }, []);
+
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const uploadedFilesRef = useRef<string[]>(uploadedFiles);
+  useEffect(() => {
+    uploadedFilesRef.current = uploadedFiles;
+  }, [uploadedFiles]);
+
+  const MAX_DOWNLOAD_ATTEMPTS = 6;
+  const DOWNLOAD_RETRY_DELAY_MS = 2000;
+
+  const fetchImageSrcWithRetry = useCallback(
+    async (key: string) => {
+      // If the file was removed while retrying, stop updating state.
+      if (!uploadedFilesRef.current.includes(key)) return;
+
+      setImageLoadingByKey((prev) => ({ ...prev, [key]: true }));
+      setImageErroredByKey((prev) => ({ ...prev, [key]: false }));
+
+      for (let attempt = 1; attempt <= MAX_DOWNLOAD_ATTEMPTS; attempt += 1) {
+        if (!uploadedFilesRef.current.includes(key)) return;
+        if (!isMountedRef.current) return;
+
+        try {
+          const url = await getDownloadUrl(key);
+          if (!uploadedFilesRef.current.includes(key)) return;
+          if (!isMountedRef.current) return;
+
+          setImageSrcByKey((prev) => ({ ...prev, [key]: url }));
+          setImageErroredByKey((prev) => ({ ...prev, [key]: false }));
+          return;
+        } catch {
+          // Wait and retry. This is mainly for eventual-consistency cases right after upload.
+          if (attempt < MAX_DOWNLOAD_ATTEMPTS) {
+            await new Promise((r) => setTimeout(r, DOWNLOAD_RETRY_DELAY_MS));
+          }
+        }
+      }
+
+      // Exhausted attempts
+      setImageSrcByKey((prev) => ({ ...prev, [key]: null }));
+      setImageErroredByKey((prev) => ({ ...prev, [key]: true }));
+    },
+    [getDownloadUrl],
+  );
+
+  useEffect(() => {
+    if (!showGallery) return;
+    if (imageFiles.length === 0) return;
+
+    imageFiles.forEach((key) => {
+      const hasSrc = !!imageSrcByKey[key];
+      const isLoading = !!imageLoadingByKey[key];
+      if (!hasSrc && !isLoading) {
+        fetchImageSrcWithRetry(key);
+      }
+    });
+  }, [showGallery, imageFiles, imageSrcByKey, imageLoadingByKey, fetchImageSrcWithRetry]);
 
   const uploadFileToServer = useCallback(
     async (file: File) => {
@@ -300,7 +401,113 @@ export const Upload: React.FC<FieldUploadProps> = ({
       {/* File list */}
       {uploadedFiles.length > 0 && (
         <div className="mb-4 space-y-3">
-          {uploadedFiles.map((key) => {
+          {showGallery && imageFiles.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {imageFiles.map((key) => {
+                const progress = uploadProgress[key] || 0;
+                const isUploading = progress > 0 && progress < 100;
+                const details = fileDetails[key];
+                const friendlyName = getFriendlyFileName(
+                  key,
+                  details?.originalName,
+                );
+
+                const isLoaded = !!imageSrcByKey[key];
+                const isErrored = !!imageErroredByKey[key];
+                const isLoading = !isLoaded && !!imageLoadingByKey[key];
+
+                return (
+                  <div
+                    key={key}
+                    title={friendlyName}
+                    className={`relative rounded-lg overflow-hidden border ${
+                      isLightMode
+                        ? "border-gray-200 bg-white"
+                        : "border-gray-700 bg-gray-800/50"
+                    } aspect-square group`}
+                  >
+                    <img
+                      src={imageSrcByKey[key] ?? undefined}
+                      alt={friendlyName}
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-150 ${
+                        isLoaded && !isErrored ? "opacity-100" : "opacity-0"
+                      }`}
+                        onError={() => {
+                          // If the signed URL is not yet valid (e.g. eventual consistency),
+                          // clear src so the retry logic can fetch again.
+                          setImageErroredByKey((prev) => ({ ...prev, [key]: true }));
+                          setImageSrcByKey((prev) => ({ ...prev, [key]: null }));
+                        }}
+                    />
+
+                    {!isLoaded && !isErrored && (
+                      <div
+                        className={`absolute inset-0 animate-pulse ${
+                          isLightMode ? "bg-muted" : "bg-gray-800/70"
+                        }`}
+                      />
+                    )}
+
+                    {isErrored && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <FiImage size={28} />
+                          <span
+                            className={`text-xs font-medium px-2 text-center ${
+                              isLightMode
+                                ? "text-gray-600"
+                                : "text-gray-300"
+                            }`}
+                          >
+                            Imagem indisponivel
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span className="text-white text-sm font-medium">
+                          {progress}%
+                        </span>
+                      </div>
+                    )}
+
+                    {!isUploading && (
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                        <button
+                          onClick={() => downloadFile(key)}
+                          type="button"
+                          className={`p-1.5 rounded-full transition-colors ${
+                            isLightMode
+                              ? "text-gray-500 hover:text-primary hover:bg-primary/10"
+                              : "text-gray-300 hover:text-primary hover:bg-primary/10"
+                          }`}
+                          title="Baixar arquivo"
+                        >
+                          <FiDownload size={16} />
+                        </button>
+                        <button
+                          onClick={() => removeUploadedFile(key)}
+                          type="button"
+                          disabled={isReadonly}
+                          className={`p-1.5 rounded-full transition-colors ${
+                            isLightMode
+                              ? "text-gray-500 hover:text-primary hover:bg-primary/10"
+                              : "text-gray-300 hover:text-primary hover:bg-primary/10"
+                          } ${isReadonly ? "opacity-50 cursor-not-allowed" : ""}`}
+                          title="Remover arquivo"
+                        >
+                          <FiTrash2 size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {(showGallery ? nonImageFiles : uploadedFiles).map((key) => {
             const progress = uploadProgress[key] || 0;
             const isUploading = progress > 0 && progress < 100;
             const details = fileDetails[key];
