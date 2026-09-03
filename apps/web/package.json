@@ -75,7 +75,7 @@
     "jsdom": "^26.1.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.0",
-    "sass-embedded": "^1.98.0",
+    "sass-embedded": "^1.103.1",
     "typescript": "^5.0.4",
     "vite": "^6.3.1",
     "vitest": "^3.1.1"
