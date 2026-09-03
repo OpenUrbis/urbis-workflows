@@ -73,7 +73,7 @@
     "eslint": "^8.57.1",
     "file-loader": "^6.2.0",
     "jsdom": "^26.1.0",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.26",
     "prettier": "^3.5.0",
     "sass-embedded": "^1.98.0",
     "typescript": "^5.0.4",
