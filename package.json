@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "patch-package": "^8.0.0",
-    "@changesets/cli": "^2.27.1",
+    "@changesets/cli": "^3.0.1",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "turbo": "^2.4.4"
