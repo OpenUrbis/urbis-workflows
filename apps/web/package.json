@@ -29,7 +29,7 @@
     "lodash.debounce": "^4.0.8",
     "lru-cache": "^10.4.0",
     "monaco-editor": "^0.52.0",
-    "oidc-client-ts": "^3.4.1",
+    "oidc-client-ts": "^3.5.0",
     "papaparse": "^5.4.1",
     "proj4": "^2.9.0",
     "qrcode.react": "^4.2.0",
