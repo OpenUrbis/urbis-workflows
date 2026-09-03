@@ -40,7 +40,7 @@ jobs:
 
       # Sets up Node.js with dynamic cache based on package manager
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: ${{ steps.detect-package-manager.outputs.manager }}
