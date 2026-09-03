@@ -42,7 +42,7 @@
     "react-number-format": "^5.4.0",
     "react-oidc-context": "^3.3.0",
     "react-router-dom": "^6.30.3",
-    "react-simple-code-editor": "^0.13.1",
+    "react-simple-code-editor": "^0.14.1",
     "reactflow": "^11.11.4",
     "recharts": "^2.15.4",
     "tailwindcss": "^3.3.2",
