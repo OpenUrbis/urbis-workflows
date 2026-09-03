@@ -20,7 +20,7 @@
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
     "axios": "^1.13.5",
-    "date-fns": "^4.1.0",
+    "date-fns": "^4.4.0",
     "esprima-next": "^6.0.3",
     "framer-motion": "^10.12.16",
     "jsbarcode": "^3.11.6",
