@@ -6,7 +6,7 @@
   "dependencies": {
     "@babel/parser": "^7.25.8",
     "@emotion/react": "^11.11.0",
-    "@emotion/styled": "^11.11.0",
+    "@emotion/styled": "^11.14.1",
     "@monaco-editor/react": "^4.6.0",
     "@open-urbis/map": "1.0.1",
     "@open-urbis/map-ui": "*",
