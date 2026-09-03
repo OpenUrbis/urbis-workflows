@@ -4,10 +4,14 @@
 
 [![CI Pipeline](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml)
 [![Build and Push](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Security Scan](https://img.shields.io/badge/Security-TruffleHog_OSS-success.svg)](https://github.com/trufflesecurity/trufflehog)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE.md)
 [![Version](https://img.shields.io/github/v/release/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/OpenUrbis/urbis-workflows?style=social)](https://github.com/OpenUrbis/urbis-workflows/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/OpenUrbis/urbis-workflows?style=social)](https://github.com/OpenUrbis/urbis-workflows/network/members)
 [![Contribute](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/pulls)
+[![GitHub issues](https://img.shields.io/github/issues/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/issues)
 
 <!-- [![NPM Downloads](https://img.shields.io/npm/dt/urbis-workflows)](https://www.npmjs.com/package/urbis-workflows) -->
 
@@ -62,10 +66,12 @@ npm run build
 
 Explore the documentation to learn how to set up, use, and extend Urbis-Workflows:
 
-- 📖 [Documentação Técnica (Portal Urbis)](https://docs.urbis.prefeitura.sp.gov.br)
-- 🤝 [Contributing Guide](CONTRIBUTING.md)
-- 📜 [Code of Conduct](CODE_OF_CONDUCT.md)
-- 🛡️ [Security Policy](SECURITY.md)
+- 📖 **Portal de Documentação Técnica:** [https://docs.urbis.prefeitura.sp.gov.br](https://docs.urbis.prefeitura.sp.gov.br)
+- 📝 **Módulo de Formulários & Processos:** [docs/general/forms](https://docs.urbis.prefeitura.sp.gov.br/docs/general/forms)
+- 🛠️ **Guia de Instalação & Setup:** [https://docs.urbis.prefeitura.sp.gov.br/docs/general/development/setup](https://docs.urbis.prefeitura.sp.gov.br/docs/general/development/setup)
+- 🤝 **Guia de Contribuição:** [CONTRIBUTING.md](CONTRIBUTING.md)
+- 📜 **Código de Conduta:** [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- 🛡️ **Política de Segurança:** [SECURITY.md](SECURITY.md)
 
 ---
 
