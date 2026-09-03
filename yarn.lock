@@ -3500,10 +3500,12 @@
   resolved "https://registry.yarnpkg.com/@types/pbf/-/pbf-3.0.5.tgz#a9495a58d8c75be4ffe9a0bd749a307715c07404"
   integrity sha512-j3pOPiEcWZ34R6a6mN07mUkM4o4Lwf6hPNt8eilOeZhTFbxFXmKhvXl9Y28jotFPaI1bpPDJsbCprUoNke6OrA==
 
-"@types/proj4@^2.5.2":
-  version "2.5.6"
-  resolved "https://registry.npmjs.org/@types/proj4/-/proj4-2.5.6.tgz"
-  integrity sha512-zfMrPy9fx+8DchqM0kIUGeu2tTVB5ApO1KGAYcSGFS8GoqRIkyL41xq2yCx/iV3sOLzo7v4hEgViSLTiPI1L0w==
+"@types/proj4@^2.19.0":
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/@types/proj4/-/proj4-2.19.0.tgz#4aa8b5236ce09cc2fb4d3299d0f0c1f35ba37266"
+  integrity sha512-mirdnXu5sW9+IphQ4r+ZVii2JVLDbXgMp1lxqbiCppdgL22EwMwL4Dy/cyHVaJ2y/mi7LUQHghpILd3w3j2bnA==
+  dependencies:
+    proj4 "*"
 
 "@types/prop-types@*":
   version "15.7.14"
@@ -7282,21 +7284,13 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-proj4@^2.11.0:
-  version "2.20.4"
-  resolved "https://registry.yarnpkg.com/proj4/-/proj4-2.20.4.tgz#b8bce000b82e07abdb031894d9362184078fc4be"
-  integrity sha512-/EEBoXjBw+zW1Lofinw0YFQ4OFOqC6XThnwRAgjEHw8WBN+wSy/6aeqRRdjy4b2igy3X0k3RNDuwcYqcQq7nDw==
+proj4@*, proj4@^2.11.0, proj4@^2.22.0:
+  version "2.22.0"
+  resolved "https://registry.yarnpkg.com/proj4/-/proj4-2.22.0.tgz#f4fa16ed0b158923be8713d67bf62e5e1400693f"
+  integrity sha512-MVvH09QrYm3A235rcX39WDiCKanrBiblu28l0KYIn/B2DofmYhvP/LLS43kE66jNDfx/P1l/nah3JmsAq8UgbQ==
   dependencies:
     mgrs "1.0.0"
-    wkt-parser "^1.5.3"
-
-proj4@^2.9.0:
-  version "2.15.0"
-  resolved "https://registry.npmjs.org/proj4/-/proj4-2.15.0.tgz"
-  integrity sha512-LqCNEcPdI03BrCHxPLj29vsd5afsm+0sV1H/O3nTDKrv8/LA01ea1z4QADDMjUqxSXWnrmmQDjqFm1J/uZ5RLw==
-  dependencies:
-    mgrs "1.0.0"
-    wkt-parser "^1.4.0"
+    wkt-parser "^1.5.5"
 
 promise@^7.1.1:
   version "7.3.1"
@@ -9072,15 +9066,10 @@ why-is-node-running@^2.3.0:
     siginfo "^2.0.0"
     stackback "0.0.2"
 
-wkt-parser@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.npmjs.org/wkt-parser/-/wkt-parser-1.4.0.tgz"
-  integrity sha512-qpwO7Ihds/YYDTi1aADFTI1Sm9YC/tTe3SHD24EeIlZxy7Ik6a1b4HOz7jAi0xdUAw487duqpo8OGu+Tf4nwlQ==
-
-wkt-parser@^1.5.3:
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/wkt-parser/-/wkt-parser-1.5.4.tgz#e44b0580cd832f34a3f2288d19423c60780e608d"
-  integrity sha512-heRp3QBynj8SAGepAkE8h2k4KhUGRqzgwlSRgqNhxjmSIeSvE5ZrV8n1uy5jk+iJO2jmfffIwjdAaTirBOOx0A==
+wkt-parser@^1.5.5:
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/wkt-parser/-/wkt-parser-1.5.6.tgz#3a19521914b2a21b7a8203590f5b180b9dba8dfa"
+  integrity sha512-cqHU3lzGt/gt2OqIORP0uVy5yeOX43WABmgFkmJsmcqH3HhQo9PiJG6ftytwGKmpQUbegeX7+pQc2BuNCRfcrw==
 
 word-wrap@^1.2.5:
   version "1.2.5"
