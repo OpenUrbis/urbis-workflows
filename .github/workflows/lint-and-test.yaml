@@ -19,7 +19,7 @@ jobs:
     steps:
       # Checks out the code
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Detects package manager (npm or yarn)
       - name: Detect Package Manager
@@ -40,7 +40,7 @@ jobs:
 
       # Sets up Node.js with dynamic cache based on package manager
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: ${{ steps.detect-package-manager.outputs.manager }}
@@ -63,7 +63,7 @@ jobs:
 
       # Turborepo cache setup
       - name: Setup Turborepo cache
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: |
             .turbo
