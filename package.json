@@ -15,7 +15,7 @@
     "@changesets/cli": "^2.27.1",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "turbo": "^2.4.4"
+    "turbo": "^2.10.12"
   },
   "name": "urbis-workflows",
   "packageManager": "yarn@1.22.22",
