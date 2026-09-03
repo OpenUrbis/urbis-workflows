@@ -24,7 +24,7 @@
     "esprima-next": "^6.0.3",
     "framer-motion": "^10.12.16",
     "jsbarcode": "^3.11.6",
-    "jwt-decode": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "lodash.debounce": "^4.0.8",
     "lru-cache": "^10.4.0",
