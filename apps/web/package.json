@@ -4,7 +4,7 @@
   "version": "1.4.14",
   "author": "Renan Tashiro",
   "dependencies": {
-    "@babel/parser": "^7.25.8",
+    "@babel/parser": "^8.0.4",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@monaco-editor/react": "^4.6.0",
