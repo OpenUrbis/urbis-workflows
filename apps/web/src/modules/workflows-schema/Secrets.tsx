@@ -1,0 +1,645 @@
+import { getAccessToken } from "../../auth/token";
+import React, { FormEvent, useContext, useEffect, useState } from "react";
+import {
+  FaPlus,
+  FaTrash,
+  FaSave,
+  FaKey,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
+import { SL } from "../../components";
+import EditableHeader from "../../components/EditableHeader";
+import { HotkeyContext } from "../../reducers/hotkeys.reducer";
+import { StyleContext } from "../../reducers/style.reducer";
+import { Button, Input, Label } from "@open-urbis/map-ui";
+import { AddSecret } from "./components/AddSecret";
+import { ApiClient } from "../../api";
+import {
+  CreateSecretHttpDto,
+  SecretMetadata,
+  FindOneSecretResponse,
+  UpdateSecretHttpDto,
+} from "../../api/types/integrations.dto";
+import { TreeList } from "./components/TreeList";
+import { VersionsMenu } from "./components/VersionsMenu";
+import { usePermissions } from "../../reducers/permission.context";
+import { Spinner } from "../../components";
+import { useSearchParams } from "react-router-dom";
+
+const api = new ApiClient({
+  baseURL: import.meta.env.VITE_BACK_END_API || "http://localhost:4000",
+  headers: {
+    authorization: `Bearer ${getAccessToken() || ""}`,
+  },
+});
+
+type SelectedSecret = FindOneSecretResponse & {
+  newValue?: string;
+};
+
+type VersionInfo = {
+  id: string;
+  version: number;
+  commitMessage: string;
+  timestamp: string;
+  createdBy: string;
+};
+
+export const Secrets: React.FC = () => {
+  const hotkeyContext = useContext(HotkeyContext);
+  const styleContext = useContext(StyleContext);
+  const { hasPermission } = usePermissions();
+  const [loading, setLoading] = useState(true);
+  const [loadingVersions, setLoadingVersions] = useState(false);
+  const [search, setSearch] = useState("");
+  const [secrets, setSecrets] = useState<SecretMetadata[]>([]);
+  const [selectedSecret, setSelectedSecret] = useState<SelectedSecret | null>(
+    null
+  );
+  const [addingSecret, setAddingSecret] = useState(false);
+  const [currentVersion, setCurrentVersion] = useState<{
+    version: number;
+    stage?: string;
+  }>({ version: 0 });
+  const [versions, setVersions] = useState<VersionInfo[]>([]);
+  const [showDecrypted, setShowDecrypted] = useState(false);
+  const [decryptedValue, setDecryptedValue] = useState<string | null>(null);
+  const [loadingDecrypted, setLoadingDecrypted] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const setAddModeAndSync = (next: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    const currentAdd = searchParams.get("add") === "1";
+    const currentId = searchParams.get("id");
+
+    if (next) {
+      if (!currentAdd) params.set("add", "1");
+      if (currentId) params.delete("id");
+    } else {
+      if (currentAdd) params.delete("add");
+    }
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const setSelectedIdAndSync = (id: string) => {
+    const params = new URLSearchParams(searchParams);
+    const currentId = searchParams.get("id") || "";
+    const currentAdd = searchParams.get("add") === "1";
+
+    if (currentAdd) params.delete("add");
+    if (currentId !== id) params.set("id", id);
+
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  };
+
+  const canViewDecrypted = hasPermission("integration:admin:secrets:findOne");
+
+  const calculateReverseVersionNumber = (
+    index: number,
+    total: number,
+    page: number = 1,
+    pageSize: number = 10
+  ): number => {
+    const reversedIndex = total - index - 1;
+    return pageSize * (page - 1) + (reversedIndex + 1);
+  };
+
+  const fetchSecrets = async () => {
+    try {
+      const response = await api.integrations.findAllSecrets();
+      setSecrets(response.secrets);
+    } catch (error) {
+      console.error("Failed to fetch secrets:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSecrets();
+  }, []);
+
+  useEffect(() => {
+    const add = searchParams.get("add") === "1";
+    const id = searchParams.get("id");
+
+    if (add && !addingSecret) {
+      setSelectedSecret(null);
+      setAddingSecret(true);
+      return;
+    }
+
+    if (!add && addingSecret) {
+      setAddingSecret(false);
+    }
+
+    if (id && secrets.length > 0 && (!selectedSecret || selectedSecret.id !== id)) {
+      const meta = secrets.find((s) => s.id === id);
+      if (meta) {
+        selectSecretCallback(meta);
+      }
+    }
+  }, [searchParams, secrets, selectedSecret, addingSecret]);
+
+  useEffect(() => {
+    hotkeyContext.dispatch({
+      type: "SET_HOTKEY",
+      payload: {
+        N: (e) => !loading && handleAddSecretForm(e),
+      },
+    });
+
+    return () => {
+      hotkeyContext.dispatch({
+        type: "UNSET_HOTKEY",
+        delete: ["N"],
+      });
+    };
+  }, [loading]);
+
+  const searchCallback = (search: string) => {
+    setSearch(search);
+  };
+
+  const fetchSecretVersion = async (version: number, stage?: string) => {
+    setLoading(true);
+
+    if (selectedSecret !== null && selectedSecret.id !== undefined) {
+      const versionInfo = versions.find((v) => v.version === version);
+
+      if (!versionInfo) {
+        setLoading(false);
+        return;
+      }
+
+      const secret = await api.integrations.findOneSecretVersion(
+        selectedSecret.id,
+        versionInfo.id
+      );
+
+      setCurrentVersion({ version, stage });
+      setSelectedSecret({
+        ...secret,
+        id: selectedSecret.id,
+        updatedAt: selectedSecret.updatedAt,
+        updatedBy: selectedSecret.updatedBy,
+      });
+    }
+    setLoading(false);
+  };
+
+  const selectSecretCallback = async (secretConfig: SecretMetadata) => {
+    if (secretConfig !== undefined && secretConfig.id) {
+      setSelectedIdAndSync(secretConfig.id);
+      setLoading(true);
+      // Reset decrypted state when selecting a new secret
+      setShowDecrypted(false);
+      setDecryptedValue(null);
+      try {
+        const secret = await api.integrations.findOneSecret(secretConfig.id);
+        setSelectedSecret(secret);
+        setAddingSecret(false);
+        setAddModeAndSync(false);
+        setLoading(false);
+
+        // Load versions separately
+        setLoadingVersions(true);
+        try {
+          const versionsResponse = await api.integrations.findOneSecretVersions(
+            secretConfig.id
+          );
+
+          const totalVersions = versionsResponse.pagination.total;
+          const versionInfos: VersionInfo[] = versionsResponse.versions.map(
+            (version, index) => ({
+              id: version.id,
+              version: calculateReverseVersionNumber(
+                index,
+                totalVersions,
+                versionsResponse.pagination.page,
+                versionsResponse.pagination.pageSize
+              ),
+              commitMessage: version.commit,
+              timestamp: new Date(version.createdAt).toISOString(),
+              createdBy: version.createdBy.name,
+            })
+          );
+
+          setVersions(versionInfos);
+          setCurrentVersion({
+            version: calculateReverseVersionNumber(
+              0,
+              totalVersions,
+              versionsResponse.pagination.page,
+              versionsResponse.pagination.pageSize
+            ),
+          });
+        } catch (error) {
+          console.error("Failed to fetch versions:", error);
+        } finally {
+          setLoadingVersions(false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch secret:", error);
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleSetSecret = (key: string, value: any) => {
+    if (selectedSecret !== null) {
+      setSelectedSecret((prev: any) => ({
+        ...prev,
+        [key]: value,
+      }));
+    }
+  };
+
+  const handleAddSecretForm = (e: FormEvent | undefined) => {
+    e?.preventDefault();
+    setSelectedSecret(null);
+    setAddingSecret(true);
+    setAddModeAndSync(true);
+  };
+
+  const handleSaveSecret = async () => {
+    if (selectedSecret !== null && selectedSecret.id) {
+      const commitMessage = await prompt(
+        "Insira a mensagem de alteração da versão"
+      );
+
+      if (!commitMessage?.trim()) {
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const updateData: UpdateSecretHttpDto = {
+          label: selectedSecret.label,
+          namespace: selectedSecret.namespace,
+          documentation: selectedSecret.documentation,
+          value: selectedSecret.newValue || "",
+          commit: commitMessage,
+        };
+        await api.integrations.updateSecret(selectedSecret.id, updateData);
+        await fetchSecrets();
+
+        // Load new versions separately
+        setLoadingVersions(true);
+        try {
+          const versionsResponse = await api.integrations.findOneSecretVersions(
+            selectedSecret.id
+          );
+
+          const totalVersions = versionsResponse.pagination.total;
+          const versionInfos: VersionInfo[] = versionsResponse.versions.map(
+            (version, index) => ({
+              id: version.id,
+              version: calculateReverseVersionNumber(
+                index,
+                totalVersions,
+                versionsResponse.pagination.page,
+                versionsResponse.pagination.pageSize
+              ),
+              commitMessage: version.commit,
+              timestamp: new Date(version.createdAt).toISOString(),
+              createdBy: version.createdBy.name,
+            })
+          );
+
+          setVersions(versionInfos);
+          setCurrentVersion({
+            version: calculateReverseVersionNumber(
+              0,
+              totalVersions,
+              versionsResponse.pagination.page,
+              versionsResponse.pagination.pageSize
+            ),
+          });
+        } finally {
+          setLoadingVersions(false);
+        }
+        setSelectedSecret((prev) => ({ ...prev!, newValue: "" }));
+      } catch (error) {
+        console.error("Failed to update secret:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleAddSecret = async (newSecret: Partial<CreateSecretHttpDto>) => {
+    setLoading(true);
+    try {
+      const createData: CreateSecretHttpDto = {
+        label: newSecret.label || "",
+        namespace: newSecret.namespace || "",
+        documentation: newSecret.documentation || "",
+        value: newSecret.value || "",
+        commit: "Created new secret",
+      };
+      await api.integrations.createSecret(createData);
+      await fetchSecrets();
+      setAddingSecret(false);
+    } catch (error) {
+      console.error("Failed to create secret:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveSecret = async () => {
+    if (selectedSecret !== null && selectedSecret.id) {
+      const response = await confirmation(
+        "Tem certeza que deseja remover este segredo?"
+      );
+
+      if (!response) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+        await api.integrations.removeSecret(selectedSecret.id);
+        await fetchSecrets();
+        setSelectedSecret(null);
+      } catch (error) {
+        console.error("Failed to remove secret:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleToggleDecrypted = async () => {
+    if (!selectedSecret || !canViewDecrypted) return;
+
+    if (!showDecrypted) {
+      setLoadingDecrypted(true);
+      try {
+        const decryptedSecret = await api.integrations.findOneDecryptedSecret(
+          selectedSecret.id
+        );
+        setDecryptedValue(decryptedSecret.value);
+        setShowDecrypted(true);
+      } catch (error) {
+        console.error("Failed to fetch decrypted secret:", error);
+      } finally {
+        setLoadingDecrypted(false);
+      }
+    } else {
+      setShowDecrypted(false);
+      setDecryptedValue(null);
+    }
+  };
+
+  return (
+    <div className="flex flex-col space-y-6 mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[80vh]">
+      <div className="flex items-start justify-between mb-6">
+        <h1 className="text-2xl font-semibold mt-4 tracking-tight text-foreground">Segredos</h1>
+        <Button
+          type="button"
+          size="sm"
+          className="mt-4 h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+          onClick={handleAddSecretForm}
+          disabled={loading}
+        >
+          <FaPlus size={16} />
+          <span>Segredo</span>
+          <span className="text-sm opacity-75 ml-2">
+            <SL
+              bg="hsl(var(--primary))"
+              className="text-[hsl(var(--primary-foreground))]"
+            >
+              N
+            </SL>
+          </span>
+        </Button>
+      </div>
+
+      <div className="flex flex-grow border rounded-lg shadow-sm overflow-hidden border-border bg-card text-card-foreground">
+        <div
+          className="w-3/12 border-r border-border bg-card"
+        >
+          <TreeList
+            items={secrets}
+            search={search}
+            onClick={selectSecretCallback}
+            onSearchChange={searchCallback}
+            icon={FaKey}
+            iconColor="blue"
+            density="compact"
+          />
+        </div>
+        <div className="flex flex-col p-6 w-9/12">
+          {loading && !selectedSecret && (
+            <div className="flex-grow flex items-center justify-center">
+              <Spinner size="xl" />
+            </div>
+          )}
+          {!loading && selectedSecret === null && addingSecret && (
+            <AddSecret onAddSecret={handleAddSecret} />
+          )}
+          {!loading && selectedSecret === null && !addingSecret && (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+              <FaKey size={48} className="mb-4 opacity-50" />
+              <p className="text-xl font-medium mb-2 text-foreground">
+                Nenhum segredo selecionado
+              </p>
+              <p className="text-sm mb-6">
+                Selecione um segredo da lista ao lado ou crie um novo
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                className="h-9 rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                onClick={handleAddSecretForm}
+              >
+                <FaPlus size={16} />
+                <span>Segredo</span>
+                <span className="text-sm opacity-75 ml-2">
+                  <SL
+                    bg="hsl(var(--primary))"
+                    className="text-[hsl(var(--primary-foreground))]"
+                  >
+                    N
+                  </SL>
+                </span>
+              </Button>
+            </div>
+          )}
+          {selectedSecret !== null && (
+            <>
+              {loading ? (
+                <div className="flex-grow flex items-center justify-center">
+                  <Spinner size="xl" />
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-col mx-auto w-full mb-8">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-grow flex flex-col items-center">
+                        <EditableHeader
+                          value={selectedSecret.label}
+                          onTextChange={(text) =>
+                            handleSetSecret("label", text)
+                          }
+                          className="text-lg md:text-2xl font-semibold text-center mb-3"
+                        />
+                        <EditableHeader
+                          value={selectedSecret.documentation}
+                          onTextChange={(text) =>
+                            handleSetSecret("documentation", text)
+                          }
+                          className="text-gray-600 dark:text-gray-400 text-center"
+                        />
+                      </div>
+                      <div className="w-48 flex items-center justify-center">
+                        <VersionsMenu
+                          versions={versions}
+                          defaultVersion={currentVersion}
+                          callback={fetchSecretVersion}
+                          loading={loadingVersions}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="w-4/5 mx-auto">
+                    <div className="flex flex-col space-y-4">
+                      <div>
+                        <Label className="block text-sm font-medium mb-1">
+                          ID
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="ID"
+                          className="h-10"
+                          value={selectedSecret.id}
+                          readOnly
+                        />
+                      </div>
+                      <div>
+                        <Label className="block text-sm font-medium mb-1">
+                          Chave
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="dir0/dir1/filename"
+                          className="h-10"
+                          value={selectedSecret.namespace}
+                          onChange={(e) =>
+                            handleSetSecret("namespace", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Label className="block text-sm font-medium mb-1">
+                          Valor atual
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            type="text"
+                            placeholder="O valor do segredo está oculto por segurança"
+                            className="h-10"
+                            readOnly
+                            value={
+                              showDecrypted ? decryptedValue || "" : "********"
+                            }
+                          />
+                          {canViewDecrypted && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={handleToggleDecrypted}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                              disabled={loadingDecrypted}
+                            >
+                              {loadingDecrypted ? (
+                                <Spinner />
+                              ) : showDecrypted ? (
+                                <FaEyeSlash size={16} />
+                              ) : (
+                                <FaEye size={16} />
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Por motivos de segurança, o valor atual do segredo não
+                          é exibido.
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="block text-sm font-medium mb-1">
+                          Novo valor
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="Digite o novo valor do segredo"
+                          className="h-10"
+                          value={selectedSecret.newValue || ""}
+                          onChange={(e) =>
+                            handleSetSecret("newValue", e.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-grow" />
+
+                  <div
+                    className="flex justify-end items-center px-8 py-4 border-t mt-8"
+                    style={{
+                      borderColor:
+                        styleContext.state.buttonHoverColorWeight === "200"
+                          ? "#E5E7EB"
+                          : "#374151",
+                    }}
+                  >
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRemoveSecret}
+                        className="h-9 px-4 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <FaTrash className="text-sm" />
+                        <span>Remover</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="h-9 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 bg-primary hover:bg-primary/90 text-primary-foreground"
+                        onClick={handleSaveSecret}
+                        disabled={loading}
+                      >
+                        <FaSave size={14} />
+                        <span>Salvar</span>
+                        <SL
+                          bg="hsl(var(--primary))"
+                          className="text-[hsl(var(--primary-foreground))]"
+                        >
+                          S
+                        </SL>
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

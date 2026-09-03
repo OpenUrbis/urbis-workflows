@@ -1,0 +1,90 @@
+{
+  "projectName": "urbis-workflows",
+  "projectOwner": "OpenUrbis",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "douglasgc",
+      "name": "Douglas Gabriel Cardoso",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32394842?v=4",
+      "profile": "https://github.com/douglasgc",
+      "contributions": [
+        "code",
+        "doc",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "RenanTashiro",
+      "name": "Renan Tashiro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13706026?v=4",
+      "profile": "https://github.com/RenanTashiro",
+      "contributions": [
+        "code",
+        "projectManagement",
+        "doc",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "FernandoDorstSilva",
+      "name": "Fernando Dorst",
+      "avatar_url": "https://avatars.githubusercontent.com/u/112201931?v=4",
+      "profile": "https://github.com/FernandoDorstSilva",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "laysmorimoto",
+      "name": "laysmorimoto",
+      "avatar_url": "https://avatars.githubusercontent.com/u/171581826?v=4",
+      "profile": "https://github.com/laysmorimoto",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "junior-anzolin",
+      "name": "Junior Anzolin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32394862?v=4",
+      "profile": "https://github.com/junior-anzolin",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "h-pgy",
+      "name": "Henrique Pougy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41967884?v=4",
+      "profile": "https://github.com/h-pgy",
+      "contributions": [
+        "doc",
+        "maintenance"
+      ]
+    },
+    {
+      "login": "mauryascm",
+      "name": "mauryascm",
+      "avatar_url": "https://avatars.githubusercontent.com/u/166533566?v=4",
+      "profile": "https://github.com/mauryascm",
+      "contributions": [
+        "doc",
+        "maintenance",
+        "test",
+        "projectManagement"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": false
+}

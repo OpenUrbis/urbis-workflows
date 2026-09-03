@@ -1,0 +1,687 @@
+import { getAccessToken } from "../../auth/token";
+import axios from "axios";
+import React, { useContext, useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@open-urbis/map-ui";
+import { FaDownload, FaExpand, FaTimes } from "react-icons/fa";
+import { RiBarcodeFill } from "react-icons/ri";
+import { useNavigate, useParams } from "react-router-dom";
+import { IField } from "@open-urbis/types";
+import logoCityHallImg from "../../assets/logo_white.png";
+import { useSnackbar } from "../../hooks/snackbar";
+import { StyleContext } from "../../reducers";
+import { IconButton, Spinner } from "../../components/LegacyUi";
+import { Field } from "../workflows-schema";
+import { VersionsMenu } from "../workflows-schema/components/VersionsMenu";
+import { FieldView } from "../workflows-schema/form-engine/FieldView";
+import { parseFunctions } from "../workflows-schema/form-engine/utils/parsers";
+import { Protocol } from "../../types/global";
+
+export function Document(): JSX.Element {
+  const snackbar = useSnackbar();
+  const styleContext = useContext(StyleContext);
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [protocol, setProtocol] = useState<Protocol | undefined>(undefined);
+  const [maxStepEnable, setMaxStepEnable] = useState(0);
+  const [acceptance, setAcceptance] = useState<any>(null);
+  const [acceptanceForm, setAcceptanceForm] = useState<any>({});
+  const [acceptanceValid, setAcceptanceValid] = useState<any>({});
+  const [openedAcceptance, setOpenedAcceptance] = useState<any>({});
+  const [selectedVersion, setSelectedVersion] = useState<{
+    version: number;
+    diff?: any;
+    field?: IField;
+    protocol?: any;
+  }>();
+  const [activeStep, setActiveStep] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const fetchProtocol = async () => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACK_END_API}/protocols/${id}`,
+      {
+        headers: {
+          authorization: `${getAccessToken()}`,
+        },
+      }
+    );
+
+    setProtocol(response.data);
+
+    if (response.data.status === "WAITING_ACCEPTANCE") {
+      setMaxStepEnable(1);
+      setActiveStep(1);
+    } else if (response.data.status === "WAITING_TAX_PAYMENT") {
+      setActiveStep(2);
+      setMaxStepEnable(2);
+    } else if (response.data.status === "CONCLUDED") {
+      setActiveStep(3);
+      setMaxStepEnable(3);
+    }
+
+    setAcceptance(null);
+
+    response.data.acceptances.forEach((acceptance: any) => {
+      if (
+        acceptance.status === "PENDING" &&
+        acceptance.document === response.data.$user.document
+      ) {
+        setAcceptance(acceptance);
+      }
+    });
+
+    setLoading(false);
+  };
+
+  const handleFetchProtocolVersion = async (version: number) => {
+    setLoading(true);
+
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACK_END_API}/protocols/${id}/versions/${version}`,
+        {
+          headers: {
+            authorization: `${getAccessToken()}`,
+          },
+        }
+      );
+
+      setSelectedVersion({
+        version,
+        diff: response.data.diff,
+        protocol: response.data.protocol,
+        field: response.data.field,
+      });
+    } catch (e) {
+      snackbar.error("Não foi buscar a versão");
+      setLoading(false);
+    }
+
+    setLoading(false);
+  };
+
+  const handleExtraApostille = async () => {
+    navigate(`/apostille-extra/${id}`);
+  };
+
+  const handleApostille = async () => {
+    navigate(`/apostille/${id}`);
+  };
+
+  const handleAccept = async () => {
+    setLoading(true);
+
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_BACK_END_API}/protocols/acceptance/${acceptance.id}/accept`,
+        {
+          ...acceptanceForm,
+        },
+        {
+          headers: {
+            authorization: `${getAccessToken()}`,
+          },
+        }
+      );
+
+      fetchProtocol();
+    } catch (e) {
+      snackbar.error("Não foi possível realizar a assinatura");
+      setLoading(false);
+    }
+  };
+
+  const mockCallPayment = async () => {
+    setLoading(true);
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACK_END_API}/protocols/tax/${id}/browser`,
+      {
+        headers: {
+          authorization: `${getAccessToken()}`,
+        },
+      }
+    );
+
+    const link = document.createElement("a");
+    link.href = response.data.tax;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+
+    await axios.put(
+      `${import.meta.env.VITE_BACK_END_API}/protocols/mock/pay-tax/${id}`,
+      {},
+      {
+        headers: {
+          authorization: `${getAccessToken()}`,
+        },
+      }
+    );
+
+    fetchProtocol();
+  };
+
+  const downloadDocument = async (version?: number) => {
+    setLoading(true);
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACK_END_API}/protocols/document/${id}/browser`,
+      {
+        params: {
+          version,
+        },
+        headers: {
+          authorization: `${getAccessToken()}`,
+        },
+      }
+    );
+    setLoading(false);
+
+    const link = document.createElement("a");
+    link.href = response.data.document;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+  };
+
+  const downloadPlate = async (version?: number) => {
+    setLoading(true);
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACK_END_API}/protocols/plate/${id}/browser`,
+      {
+        params: {
+          version,
+        },
+        headers: {
+          authorization: `${getAccessToken()}`,
+        },
+      }
+    );
+    setLoading(false);
+
+    const link = document.createElement("a");
+    link.href = response.data.plate;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+  };
+
+  useEffect(() => {
+    fetchProtocol();
+  }, []);
+
+  const COLOR_MAPPER: { [key: string]: string } = {
+    PENDING: "gray",
+    ACCEPTED: "green",
+    REJECTED: "red",
+  };
+
+  const LABEL_MAPPER: { [key: string]: string } = {
+    PENDING: "Pendente",
+    ACCEPTED: "Aceito",
+    REJECTED: "Rejeitado",
+  };
+
+  const steps = [
+    { index: 0, title: "Pedido" },
+    { index: 1, title: "Assinaturas" },
+    { index: 2, title: "Taxa" },
+    { index: 3, title: "Documento" },
+  ];
+
+  const formVersions = protocol
+    ? protocol.versions.filter(
+        (version) => version.type === "apostille" || version.type === "create"
+      )
+    : [{ version: 1 }];
+
+  if (!loading) {
+    return (
+      <div className="flex space-y-6 justify-center px-6 mb-24">
+        <div
+          className="flex flex-col mx-6 md:mx-0 justify-center space-y-4"
+          style={{ width: window.innerWidth <= 500 ? "auto" : "882px" }}
+        >
+          <h1 className="text-2xl md:text-3xl font-black text-center pt-6">
+            {protocol?.field.options.title}
+          </h1>
+          <h2 className="text-lg md:text-xl font-bold text-center pb-6">
+            Pedido: {id}
+          </h2>
+
+          <div className="flex justify-end space-x-4 pb-6">
+            {protocol?.status === "CONCLUDED" && (
+              <>
+                <div className="text-end x">
+                  <button
+                    className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                    onClick={handleExtraApostille}
+                  >
+                    Ex Officio
+                  </button>
+                </div>
+                <div className="text-end">
+                  <button
+                    className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                    onClick={handleApostille}
+                  >
+                    Apostilar
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pb-2">
+            {steps.map((s, idx) => {
+              const isActive = activeStep === s.index;
+              const isComplete = activeStep > s.index;
+              return (
+                <div key={s.index} className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveStep(s.index)}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <span
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border-2 text-sm font-semibold"
+                      style={{
+                        backgroundColor: isActive || isComplete ? "#ef4444" : "transparent",
+                        borderColor: isActive || isComplete ? "#ef4444" : (styleContext.state.buttonHoverColorWeight === "200" ? "#E5E7EB" : "#374151"),
+                        color: isActive || isComplete ? "white" : styleContext.state.textColor,
+                      }}
+                    >
+                      {idx + 1}
+                    </span>
+                    <span style={{ color: styleContext.state.textColor }}>
+                      {s.title}
+                    </span>
+                  </button>
+                  {idx < steps.length - 1 && (
+                    <span
+                      className="h-px w-10"
+                      style={{
+                        backgroundColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#E5E7EB"
+                            : "#374151",
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Protocol */}
+          {activeStep === 0 && protocol && (
+            <>
+              <div className="flex ">
+                <div className="flex-grow"></div>
+                <VersionsMenu
+                  defaultVersion={
+                    selectedVersion ?? formVersions[formVersions.length - 1]
+                  }
+                  versions={formVersions}
+                  callback={(version) => handleFetchProtocolVersion(version)}
+                ></VersionsMenu>
+              </div>
+              <FieldView
+                context={protocol.protocol}
+                general={{
+                  $user: protocol.$user,
+                  $variables: protocol.environment,
+                  $data: protocol.protocol,
+                  $modules: parseFunctions(protocol?.function ?? {}),
+                  $history: selectedVersion?.diff ?? protocol.diff,
+                  $state: "view",
+                }}
+                field={selectedVersion?.field ?? protocol.field}
+                value={selectedVersion?.protocol ?? protocol.protocol}
+              ></FieldView>
+            </>
+          )}
+
+          {/* Acceptance  */}
+          {activeStep === 1 && protocol && acceptance?.status === "PENDING" && (
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-center py-6">
+                Realize a assinatura como {acceptance.type}
+              </h1>
+              <Field
+                context={acceptanceForm}
+                validContext={acceptanceValid}
+                general={{
+                  $user: protocol.$user as any,
+                  $variables: protocol.environment,
+                  $data: acceptanceForm,
+                  $modules: parseFunctions(protocol?.function ?? {}),
+                  $state: "create",
+                }}
+                field={
+                  protocol.acceptance[
+                    Object.keys(protocol.acceptance).find((key) =>
+                      key.includes(acceptance.type)
+                    ) as string
+                  ]
+                }
+                value={acceptanceForm}
+                valid={acceptanceValid}
+                onChange={(value) => {
+                  setAcceptanceForm(value);
+                }}
+                onValidChange={(valid) => {
+                  setAcceptanceValid(valid);
+                }}
+              ></Field>
+              <div className="text-center">
+                <button
+                  className={`bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-6 py-2 rounded-md disabled:opacity-80`}
+                  onClick={handleAccept}
+                >
+                  Aceitar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeStep === 1 && (
+            <h1 className="text-xl md:text-2xl font-bold text-center py-6">
+              Lista das assinaturas
+            </h1>
+          )}
+
+          {activeStep === 1 &&
+            protocol?.acceptances &&
+            protocol.acceptances.map((acceptance) => {
+              return (
+                <div className="flex flex-col border rounded-md p-6">
+                  <div className="flex space-x-6">
+                    <div className="flex flex-col space-y-2">
+                      <div>
+                        CPF:{" "}
+                        <span className="font-black ">
+                          {acceptance.document}
+                        </span>
+                      </div>
+                      {acceptance.document !== acceptance.represented && (
+                        <div>
+                          Representado:{" "}
+                          <span className="font-black ">
+                            {acceptance.represented}
+                          </span>
+                        </div>
+                      )}
+                      <div>
+                        Relação:{" "}
+                        <span className="font-bold">{acceptance.type}</span>
+                      </div>
+                      <div>
+                        Emitido em:{" "}
+                        <span className="font-black">
+                          {new Date(acceptance.timestamp).toLocaleString(
+                            "pt-br"
+                          )}
+                        </span>
+                      </div>
+                      <div>
+                        Atualizado em:{" "}
+                        <span className="font-black">
+                          {new Date(acceptance.updatedAt).toLocaleString(
+                            "pt-br"
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex-grow"></div>
+                    <div className="flex flex-col space-y-6">
+                      <div className="flex justify-end">
+                        <span
+                          className="inline-flex rounded-full px-3 py-1 text-sm font-semibold"
+                          style={{
+                            backgroundColor:
+                              acceptance.status === "ACCEPTED"
+                                ? "rgba(34, 197, 94, 0.15)"
+                                : acceptance.status === "REJECTED"
+                                  ? "rgba(239, 68, 68, 0.15)"
+                                  : "rgba(107, 114, 128, 0.15)",
+                            color: styleContext.state.textColor,
+                          }}
+                        >
+                          {LABEL_MAPPER[acceptance.status as any]}
+                        </span>
+                      </div>
+                      {acceptance.status === "ACCEPTED" && (
+                        <div
+                          onClick={() => {
+                            setIsOpen(true);
+                            setOpenedAcceptance(acceptance);
+                          }}
+                          className="flex items-center space-x-2 cursor-pointer"
+                        >
+                          <FaExpand
+                            title="Mostrar formulário de assinatura"
+                            size={20}
+                            className="cursor-pointer"
+                          ></FaExpand>
+                          <span className="">Ver dados da assinatura</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+          {protocol && (
+            <Dialog
+              open={isOpen}
+              onOpenChange={(open) => {
+                if (!open) setIsOpen(false);
+              }}
+            >
+              <DialogContent
+                className="px-4 py-6"
+                style={{ minWidth: 685, maxHeight: "80vh", backgroundColor: styleContext.state.backgroundColor }}
+              >
+                <DialogHeader>
+                  <div className="flex items-center justify-between gap-4">
+                    <DialogTitle asChild>
+                      <span style={{ color: styleContext.state.textColor }}>
+                        Dados da assinatura
+                      </span>
+                    </DialogTitle>
+                    <button
+                      type="button"
+                      aria-label="Close"
+                      onClick={() => setIsOpen(false)}
+                      className="rounded p-1.5 transition-colors duration-150"
+                      style={{
+                        color:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "#6B7280"
+                            : "#9CA3AF",
+                        backgroundColor:
+                          styleContext.state.buttonHoverColorWeight === "200"
+                            ? "rgba(107, 114, 128, 0.1)"
+                            : "rgba(156, 163, 175, 0.1)",
+                      }}
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
+                </DialogHeader>
+
+                <div className="overflow-y-auto break-words">
+                  <FieldView
+                    context={openedAcceptance.value}
+                    field={protocol.acceptance[openedAcceptance.type]}
+                    general={{
+                      $user: protocol.$user,
+                      $variables: protocol.environment,
+                      $data: openedAcceptance.value,
+                      $modules: parseFunctions(protocol?.function ?? {}),
+                      $history: protocol.diff,
+                      $state: "view",
+                    }}
+                    value={openedAcceptance.value}
+                  ></FieldView>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {/* Tax */}
+          {activeStep === 2 && maxStepEnable < 2 && (
+            <div className="flex flex-col space-y-4 justify-center text-center pt-6">
+              <p className="text-lg">
+                É necessário realizar todas as assinaturas para liberar o pagamento
+                da taxa.
+              </p>
+            </div>
+          )}
+
+          {activeStep === 2 && maxStepEnable >= 2 && (
+            <div className="flex flex-col space-y-4 justify-center text-center pt-6">
+              <p className="text-lg">
+                Pague a taxa abaixo para liberar seu documento. Caso já pagou
+                aguarde até dois dias úteis para seu pagamento ser processado.
+              </p>
+              <p className="text-lg">
+                Assim que identificarmos seu pagamento, enviaremos um e-mail com
+                o seu documento e também poderá consultar aqui acessando o seu
+                protocolo por "Pedidos".
+              </p>
+              <div
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80 cursor-pointer"
+                onClick={mockCallPayment}
+              >
+                <RiBarcodeFill className="inline" size={42} /> Baixar boleto
+              </div>
+            </div>
+          )}
+
+          {/* Document */}
+          {activeStep === 3 && maxStepEnable < 3 && (
+            <div className="flex flex-col space-y-4 justify-center text-center pt-6">
+              <p className="text-lg">
+                Os seguinte documentos são prévias. Realize as assinaturas e
+                pagamento da taxa para liberar o seu documento válido.
+              </p>
+            </div>
+          )}
+
+          {activeStep === 3 && (
+            <div className="flex flex-col space-y-4 justify-center text-center pt-6 cursor-pointer">
+              <div
+                onClick={() => downloadDocument()}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80"
+              >
+                <img
+                  className="inline mr-2"
+                  src={logoCityHallImg}
+                  alt=""
+                  width="30px"
+                />{" "}
+                Baixar documento
+              </div>
+            </div>
+          )}
+          {activeStep === 3 && protocol?.plate && (
+            <div className="flex flex-col space-y-4 justify-center text-center cursor-pointer">
+              <div
+                onClick={() => downloadPlate()}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xl py-4 px-6 rounded-xl disabled:opacity-80"
+              >
+                <img
+                  className="inline mr-2"
+                  src={logoCityHallImg}
+                  alt=""
+                  width="30px"
+                />{" "}
+                Baixar placa
+              </div>
+            </div>
+          )}
+          {activeStep === 3 && protocol && (
+            <>
+              {protocol?.integrations?.register?.sei?.LinkAcesso && (
+                <div className="flex space-x-2">
+                  <span>Processo SEI:</span>
+                  <a
+                    className="text-blue-500"
+                    href={protocol?.integrations?.register?.sei?.LinkAcesso}
+                    target="__blank"
+                  >
+                    Acesse Aqui
+                  </a>
+                </div>
+              )}
+              <div className="grid grid-cols-4 gap-4 bg-gray-100 p-4 pt-10">
+                <div className="font-bold">Tipo</div>
+                <div className="font-bold">Mudança</div>
+                <div className="font-bold">Autor</div>
+                <div className="font-bold">Data</div>
+                {protocol.versions
+                  .sort(
+                    (a, b) =>
+                      new Date(a.timestamp).getTime() -
+                      new Date(b.timestamp).getTime()
+                  )
+                  .map((version, index) => (
+                    <React.Fragment key={index}>
+                      <div className="py-2 border-b border-gray-300">
+                        {version.type}
+                        {version.type === "document" && (
+                          <IconButton
+                            aria-label="Retry Preset"
+                            icon={<FaDownload />}
+                            onClick={() => downloadDocument(version.version)}
+                            className="ml-2"
+                            disabled={loading}
+                          />
+                        )}
+                        {version.type === "plate" && (
+                          <IconButton
+                            aria-label="Retry Preset"
+                            icon={<FaDownload />}
+                            onClick={() => downloadPlate(version.version)}
+                            className="ml-2"
+                            disabled={loading}
+                          />
+                        )}
+                      </div>
+                      <div className="py-2 border-b border-gray-300">
+                        {version.commitMessage}
+                      </div>
+                      <div className="py-2 border-b border-gray-300">
+                        {version.createdBy}
+                      </div>
+                      <div className="py-2 border-b border-gray-300">
+                        {new Date(version.timestamp).toLocaleString("pt-br")}
+                      </div>
+                    </React.Fragment>
+                  ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  } else {
+    return (
+      <div className="pt-10 text-center">
+        <Spinner size="xl" />
+      </div>
+    );
+  }
+}

@@ -1,0 +1,70 @@
+name: Deploy CI/CD
+
+on:
+  push:
+    # branches:
+    #   - master
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - master
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      - name: Get Latest Tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "VITE_VERSION=$TAG" >> $GITHUB_ENV
+      - name: Set Environment Variables
+        id: set_env_vars
+        run: |
+          echo "VITE_BACK_END_API=${{ secrets.VITE_BACK_END_API }}" >> $GITHUB_ENV
+          echo "VITE_BACK_END_PDF=${{ secrets.VITE_BACK_END_PDF }}" >> $GITHUB_ENV
+          echo "VITE_ENV=${{ secrets.VITE_ENV }}" >> $GITHUB_ENV
+          echo "VITE_MAP=${{ secrets.VITE_MAP }}" >> $GITHUB_ENV
+
+          # Novas variáveis OIDC e Accounts (todas já como secrets)
+          echo "VITE_OIDC_AUTHORITY=${{ secrets.VITE_OIDC_AUTHORITY }}" >> $GITHUB_ENV
+          echo "VITE_OIDC_CLIENT_ID=${{ secrets.VITE_OIDC_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "VITE_OIDC_REDIRECT_URI=${{ secrets.VITE_OIDC_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "VITE_OIDC_SILENT_REDIRECT_URI=${{ secrets.VITE_OIDC_SILENT_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "VITE_ACCOUNTS_URL=${{ secrets.VITE_ACCOUNTS_URL }}" >> $GITHUB_ENV
+          echo "VITE_BACK_END_FILES=${{ secrets.VITE_BACK_END_FILES }}" >> $GITHUB_ENV
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DELIGHTFUL_MUSHROOM_042635B0F }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          action: "upload"
+          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
+          app_location: "." # App source code path
+          api_location: "" # Api source code path - optional
+          config_file_location: "."
+          output_location: "apps/web/dist" # Built app content directory - optional
+          ###### End of Repository/Build Configurations ######
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DELIGHTFUL_MUSHROOM_042635B0F }}
+          action: "close"
+

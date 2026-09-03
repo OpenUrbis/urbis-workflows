@@ -1,0 +1,26 @@
+{
+    "navigationFallback": {
+      "rewrite": "/index.html",
+      "exclude": ["/assets/*.{png,jpg,jpeg,gif,svg,bmp,ico}", "/assets/*.css", "/assets/*.js"]
+    },
+    "routes": [
+      {
+        "route": "/assets/*",
+        "headers": {
+          "cache-control": "public, max-age=31536000, immutable"
+        }
+      },
+      {
+        "route": "/*",
+        "allowedRoles": ["anonymous", "authenticated"]
+      }
+    ],
+    "mimeTypes": {
+      ".json": "application/json",
+      ".svg": "image/svg+xml"
+    },
+    "platform": {
+      "apiRuntime": "node:18"
+    },
+    "trailingSlash": "auto"
+  }
