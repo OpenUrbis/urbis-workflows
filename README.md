@@ -1,12 +1,12 @@
 # Urbis Workflows
 
-![Capa do Repositório](docs/cover.svg)
+![Capa do Repositório](https://raw.githubusercontent.com/OpenUrbis/urbis-map/main/apps/docs/public/cover.png)
 
 [![CI Pipeline](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml)
 [![Build and Push](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Version](https://img.shields.io/github/v/release/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/releases)
-[![Contribute](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/OpenUrbis/urbis-workflows/blob/main/docs/CONTRIBUTING.md)
+[![Contribute](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/OpenUrbis/urbis-workflows)](https://github.com/OpenUrbis/urbis-workflows/pulls)
 
 <!-- [![NPM Downloads](https://img.shields.io/npm/dt/urbis-workflows)](https://www.npmjs.com/package/urbis-workflows) -->
@@ -21,7 +21,7 @@ This is a community-maintained example. If you experience a problem, please subm
 
 Urbis-Workflows is an open-source monorepo created to provide a flexible and modular workflow management system for municipal administrations. It aims to optimize processes, automate tasks, and improve overall efficiency in city governance.
 
-- **Website**: [urbis.sampa.br](http://urbis.sampa.br/)
+- **Website**: [mapa.urbis.prefeitura.sp.gov.br](https://mapa.urbis.prefeitura.sp.gov.br/)
 - **GitHub Repository**: [github.com/OpenUrbis/urbis-workflows](https://github.com/OpenUrbis/urbis-workflows)
 
 ---
@@ -62,11 +62,10 @@ npm run build
 
 Explore the documentation to learn how to set up, use, and extend Urbis-Workflows:
 
-- [Full Documentation](http://docs.urbis.sampa.br/) (Full Documentation)
-- [Contributing Guide](docs/CONTRIBUTING.md) (How to contribute to the project)
-- [Commit Guidelines](docs/commit-guidelines.md) (How to format commit messages)
-- [Pull request Guidelines](docs/pull-request-guidelines.md) (How to format commit messages)
-- [Deploy Guidelines](docs/DEPLOY.md) (How to Deploy)
+- 📖 [Documentação Técnica (Portal Urbis)](https://docs.urbis.prefeitura.sp.gov.br)
+- 🤝 [Contributing Guide](CONTRIBUTING.md)
+- 📜 [Code of Conduct](CODE_OF_CONDUCT.md)
+- 🛡️ [Security Policy](SECURITY.md)
 
 ---
 
@@ -107,7 +106,7 @@ We welcome community contributions! Read our [Contributing Guidelines](CONTRIBUT
 
 ## License
 
-Urbis-Workflows is licensed under the . You are free to use, modify, and distribute this software under the terms of the GPL v3, ensuring that any derivative works remain open source.
+Urbis-Workflows is licensed under the [AGPL v3](LICENSE.md). You are free to use, modify, and distribute this software under the terms of the AGPL v3, ensuring that any derivative works remain open source.
 
 ---
 
@@ -116,7 +115,7 @@ Urbis-Workflows is licensed under the . You are free to use, modify, and distrib
 We’re building a community around Urbis-Workflows! Join the conversation and help us improve the project:
 
 Stay tuned for updates on our official channels (coming soon).
-For now, feel free to reach out via contas@urbis.sampa.br or open a discussion in the section.
+For now, feel free to reach out via [contas@urbis.prefeitura.sp.gov.br](mailto:contas@urbis.prefeitura.sp.gov.br) or open a discussion in the section.
 
 ---
 
@@ -156,4 +155,4 @@ A huge thanks to all our contributors! Your efforts make Urbis-Workflows better 
 
 ## Contact
 
-For questions, feedback, or support, reach out to us at [contas@urbis.sampa.br](mailto:contas@urbis.sampa.br).
+For questions, feedback, or support, reach out to us at [contas@urbis.prefeitura.sp.gov.br](mailto:contas@urbis.prefeitura.sp.gov.br).

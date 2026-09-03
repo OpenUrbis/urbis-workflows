@@ -1,4 +1,4 @@
-name: Gitleaks Security Scan
+name: Security Secret Scan
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  gitleaks:
-    name: Detect Secret Leaks
+  trufflehog:
+    name: Detect Secret Leaks (TruffleHog OSS)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: TruffleHog OSS Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
