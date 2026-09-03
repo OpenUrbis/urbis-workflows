@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@open-urbis/eslint-config": "*",
-    "@preact/signals-react-transform": "^0.8.1",
+    "@preact/signals-react-transform": "^0.8.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
