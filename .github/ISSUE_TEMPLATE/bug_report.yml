@@ -1,0 +1,40 @@
+name: "🐛 Relato de Bug"
+description: "Crie um relatório para nos ajudar a identificar e corrigir um problema."
+title: "fix: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por dedicar seu tempo para relatar um bug e melhorar o OpenUrbis!
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descrição do Problema"
+      description: "Uma explicação clara e concisa sobre qual é o erro observado."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Passos para Reproduzir"
+      description: "Passos detalhados para reproduzir o comportamento."
+      placeholder: |
+        1. Acesse '...'
+        2. Clique em '...'
+        3. Observe o erro '...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Comportamento Esperado"
+      description: "O que você esperava que acontecesse."
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Ambiente / Sistema Operacional"
+      description: "Node.js version, SO, Navegador, Docker version (se aplicável)."
+      placeholder: "Ex: Node 20.x, macOS Sequoia, Chrome 125"

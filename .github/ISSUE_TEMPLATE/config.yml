@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "💬 Central de Ajuda do Portal Urbis"
+    url: "https://urbis.prefeitura.sp.gov.br"
+    about: "Para dúvidas de uso, solicitações de serviços ou reporte de problemas como cidadão."
+  - name: "🔒 Relato de Vulnerabilidade de Segurança"
+    url: "https://github.com/OpenUrbis/urbis-agent/security/advisories/new"
+    about: "Para relatar vulnerabilidades ou falhas de segurança de forma privada e responsável."

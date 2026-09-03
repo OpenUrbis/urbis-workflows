@@ -1,0 +1,28 @@
+name: "✨ Sugestão de Funcionalidade"
+description: "Sugira uma ideia ou melhoria para o ecossistema Urbis."
+title: "feat: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Agradecemos sua proposta para expandir e aprimorar as capacidades do OpenUrbis!
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problema ou Necessidade"
+      description: "Qual problema sua sugestão resolve ou qual processo público ela otimiza?"
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Solução Proposta"
+      description: "Descreva a funcionalidade ou mudança desejada de forma detalhada."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternativas Consideradas"
+      description: "Quaisquer abordagens ou soluções alternativas que você tenha avaliado."
