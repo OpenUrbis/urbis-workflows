@@ -24,7 +24,7 @@ const APP_MENU_ITEMS: { label: string; href: string; active?: boolean }[] = [
   { label: "Doc. técnica", href: "https://docs.urbis.prefeitura.sp.gov.br/" },
   {
     label: "Legis",
-    href: "https://docs.urbis.prefeitura.sp.gov.br/docs/legis",
+    href: "https://legis.urbis.prefeitura.sp.gov.br",
   },
 ];
 

@@ -206,13 +206,13 @@ const RouteDefinitions = () => (
       />
     </Route>
 
-    {/* Workflow Schema routes - public landing page */}
+    {/* Workflow Schema routes */}
     <Route
       path="/workflows-schema"
       element={
-        <PublicOrPrivateWrapper>
+        <PrivateWrapper>
           <WorkflowsSchema />
-        </PublicOrPrivateWrapper>
+        </PrivateWrapper>
       }
     />
 
