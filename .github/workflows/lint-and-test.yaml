@@ -19,7 +19,7 @@ jobs:
     steps:
       # Checks out the code
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Detects package manager (npm or yarn)
       - name: Detect Package Manager
