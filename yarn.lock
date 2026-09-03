@@ -1746,11 +1746,11 @@
   integrity sha512-jQ2O0qLA9o9gE62qzl+4Fbo+Yu+CoX0/ujcAfYPSv85HV22lyGq4R/07Sty88+3kVaEDQUm+l4zqbZPm2zcmDQ==
 
 "@open-urbis/map-ui@*":
-  version "0.0.0"
-  resolved "https://registry.yarnpkg.com/@open-urbis/map-ui/-/map-ui-0.0.0.tgz#20d61f478946d6ed2831f8c46a2019e8b7782e7c"
-  integrity sha512-Q3J9LtPwSwY7PO5a9HDARHLb0ePIe73DfHXfhPRIuJ/mHQbdQYWn37rxDwaOfUFsih+LkA1P3RlSVfqIyFL/YA==
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@open-urbis/map-ui/-/map-ui-1.0.1.tgz#f8b2c6a9938c4c9725f8642f222e22dd8e3b90c3"
+  integrity sha512-yWUUutYzhEB1QWxg1Byy+Vc/RD0Qs5dV7iFXZHMunszxZjvl1iqTSwEUTdHM3OMZW1VtyipSmeS94C3GERW1wg==
   dependencies:
-    "@preact/signals-react" "^3.0.1"
+    "@preact/signals" "2.0.3"
     "@radix-ui/number" "^1.1.1"
     "@radix-ui/primitive" "^1.1.3"
     "@radix-ui/react-checkbox" "^1.3.3"
@@ -1971,11 +1971,6 @@
   resolved "https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@preact/signals-core@^1.13.0":
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/@preact/signals-core/-/signals-core-1.13.0.tgz#ed770df2855701e7b42828fae5a348edeee9a3df"
-  integrity sha512-slT6XeTCAbdql61GVLlGU4x7XHI7kCZV5Um5uhE4zLX4ApgiiXc0UYFvVOKq06xcovzp7p+61l68oPi563ARKg==
-
 "@preact/signals-core@^1.14.0", "@preact/signals-core@^1.7.0", "@preact/signals-core@^1.8.0":
   version "1.14.0"
   resolved "https://registry.yarnpkg.com/@preact/signals-core/-/signals-core-1.14.0.tgz#3a13742301a94161790e84d0f2cbf9b5455593f7"
@@ -1990,14 +1985,6 @@
     "@babel/helper-plugin-utils" "^7.27.1"
     "@preact/signals-react" "^3.8.0"
     debug "^4.3.4"
-    use-sync-external-store "^1.2.0"
-
-"@preact/signals-react@^3.0.1":
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/@preact/signals-react/-/signals-react-3.9.0.tgz#913bca91a88e8ac5fafc4f56a43411d717c31496"
-  integrity sha512-C0Qn4AiAYEAHbg7/UEMgdJd+GNDnP/OxI1tk+8WDco9QFIh4gbW+r9V2K4M6OAB6A/ztHW/uZ8/kwBnxNSB94g==
-  dependencies:
-    "@preact/signals-core" "^1.13.0"
     use-sync-external-store "^1.2.0"
 
 "@preact/signals-react@^3.8.0", "@preact/signals-react@^3.9.0":
@@ -7234,15 +7221,10 @@ potpack@^2.0.0:
   resolved "https://registry.yarnpkg.com/potpack/-/potpack-2.1.0.tgz#fe548e2f9061e9937f17191c1ab6dd98ca30e02f"
   integrity sha512-pcaShQc1Shq0y+E7GqJqvZj8DTthWV1KeHGdi0Z6IAin2Oi3JnLCOfwnCo84qc+HAp52wT9nK9H7FAJp5a44GQ==
 
-preact@^10.17.0:
+preact@^10.17.0, preact@^10.26.5:
   version "10.29.0"
   resolved "https://registry.yarnpkg.com/preact/-/preact-10.29.0.tgz#a6e5858670b659c4d471c6fea232233e03b403e8"
   integrity sha512-wSAGyk2bYR1c7t3SZ3jHcM6xy0lcBcDel6lODcs9ME6Th++Dx2KU+6D3HD8wMMKGA8Wpw7OMd3/4RGzYRpzwRg==
-
-preact@^10.26.5:
-  version "10.28.4"
-  resolved "https://registry.yarnpkg.com/preact/-/preact-10.28.4.tgz#8ffab01c5c0590535bdaecdd548801f44c6e483a"
-  integrity sha512-uKFfOHWuSNpRFVTnljsCluEFq57OKT+0QdOiQo8XWnQ/pSvg7OpX5eNOejELXJMWy+BwM2nobz0FkvzmnpCNsQ==
 
 prelude-ls@^1.2.1:
   version "1.2.1"
