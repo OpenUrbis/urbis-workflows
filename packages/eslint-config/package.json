@@ -2,7 +2,7 @@
   "name": "@open-urbis/eslint-config",
   "version": "0.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",

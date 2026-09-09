@@ -7,7 +7,7 @@
     "./header": "./components/header.ts",
     "./setup-counter": "./utils/counter.ts"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "lint": "eslint \"**/*.ts\""
   },
