@@ -5,10 +5,24 @@ import {
   createContext,
   useEffect,
   useCallback,
+  useRef,
+  useState,
 } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { AuthProvider as OidcProvider, useAuth } from "react-oidc-context";
+import {
+  AuthProvider as OidcProvider,
+  hasAuthParams,
+  useAuth,
+} from "react-oidc-context";
 import { oidcConfig } from "../auth/oidc-config";
+
+function getPath(uri: string): string {
+  try {
+    return new URL(uri, window.location.origin).pathname;
+  } catch {
+    return "/callback";
+  }
+}
 
 function decodeJwtPayload(token?: string): Record<string, unknown> | null {
   if (!token) return null;
@@ -50,6 +64,7 @@ interface AuthContextType {
   signIn: () => void;
   signOut: () => void;
   isLoading: boolean;
+  isRestoringSession: boolean;
 }
 
 export const DefaultRouteContext = createContext<string>("/workflows-schema");
@@ -60,6 +75,7 @@ export const AuthContext = createContext<AuthContextType>({
   signIn: () => {},
   signOut: () => {},
   isLoading: true,
+  isRestoringSession: true,
 });
 
 interface AuthProviderProps {
@@ -100,31 +116,71 @@ const AuthBridge: FC<AuthProviderProps> = ({ children }) => {
         email,
       }
     : null;
-  const isLoading = auth.isLoading;
+  const isAuthCallbackRoute =
+    window.location.pathname === getPath(oidcConfig.redirect_uri);
+  const isProcessingAuthResponse = hasAuthParams();
+  const [isRestoringSession, setIsRestoringSession] = useState(
+    () => !isAuthCallbackRoute && !isProcessingAuthResponse,
+  );
+  const silentSigninState = useRef<"idle" | "pending" | "settled">("idle");
+  const isLoading = auth.isLoading || isRestoringSession;
 
   const signIn = useCallback(() => {
-    auth.signinRedirect();
-  }, [auth]);
+    void auth.signinRedirect();
+  }, [auth.signinRedirect]);
 
   const signOut = useCallback(() => {
-    auth.signoutRedirect();
-  }, [auth]);
+    void auth.signoutRedirect();
+  }, [auth.signoutRedirect]);
 
-  // Attempt silent sign-in on mount if not authenticated and not loading
+  // Restore an existing provider session before any protected route starts
+  // an interactive redirect. The ref makes this safe under React StrictMode.
   useEffect(() => {
-    if (!isAuthenticated && !isLoading && !auth.activeNavigator) {
-      auth.signinSilent().catch(() => {
-        // Silent sign-in failed — user will need to log in explicitly
-      });
+    if (isAuthCallbackRoute || isProcessingAuthResponse) {
+      setIsRestoringSession(false);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    if (auth.isAuthenticated) {
+      setIsRestoringSession(false);
+      return;
+    }
+
+    if (silentSigninState.current === "pending") return;
+
+    if (silentSigninState.current === "settled" || auth.error) {
+      setIsRestoringSession(false);
+      return;
+    }
+
+    if (auth.isLoading || auth.activeNavigator) return;
+
+    silentSigninState.current = "pending";
+
+    void auth
+      .signinSilent()
+      .catch(() => {
+        // No active provider session: protected guards will fall back to login.
+      })
+      .finally(() => {
+        silentSigninState.current = "settled";
+        setIsRestoringSession(false);
+      });
+  }, [auth, isAuthCallbackRoute, isProcessingAuthResponse]);
 
   const defaultRoute = "/workflows-schema";
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, accessToken, user, signIn, signOut, isLoading }}
+      value={{
+        isAuthenticated,
+        accessToken,
+        user,
+        signIn,
+        signOut,
+        isLoading,
+        isRestoringSession,
+      }}
     >
       <DefaultRouteContext.Provider value={defaultRoute}>
         {children}
@@ -146,15 +202,20 @@ interface PrivateWrapperProps {
 }
 
 export const PrivateWrapper: FC<PrivateWrapperProps> = ({ children }) => {
-  const { isAuthenticated, isLoading, signIn } = useContext(AuthContext);
+  const {
+    isAuthenticated,
+    isLoading,
+    isRestoringSession,
+    signIn,
+  } = useContext(AuthContext);
 
   useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
+    if (!isAuthenticated && !isLoading && !isRestoringSession) {
       signIn();
     }
-  }, [isAuthenticated, isLoading, signIn]);
+  }, [isAuthenticated, isLoading, isRestoringSession, signIn]);
 
-  if (isLoading) return null;
+  if (isLoading || isRestoringSession) return null;
 
   return isAuthenticated ? children : null;
 };

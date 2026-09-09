@@ -14,6 +14,7 @@ import {
   FindOneDecryptedSecretResponse,
 } from "../types/integrations.dto";
 import { CacheService, CacheOptions } from "../services/cache.service";
+import { createAuthenticatedAxios } from "./base-api.client";
 
 export class IntegrationsApiClient {
   private client: AxiosInstance;
@@ -24,12 +25,9 @@ export class IntegrationsApiClient {
     headers?: Record<string, string>;
     cacheOptions?: CacheOptions;
   }) {
-    this.client = axios.create({
+    this.client = createAuthenticatedAxios({
       baseURL: `${config.baseURL}/integrations`,
-      headers: {
-        "Content-Type": "application/json",
-        ...config.headers,
-      },
+      headers: config.headers,
     });
 
     // Initialize cache as a static instance if it doesn't exist

@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { CacheService, CacheOptions } from "../services/cache.service";
+import { createAuthenticatedAxios } from "./base-api.client";
 import {
   UpdateProfileHttpDto,
   SetCustomUserFieldsHttpDto,
@@ -21,12 +22,9 @@ export class UsersApiClient {
     headers?: Record<string, string>;
     cacheOptions?: CacheOptions;
   }) {
-    this.client = axios.create({
+    this.client = createAuthenticatedAxios({
       baseURL: `${config.baseURL}/users`,
-      headers: {
-        "Content-Type": "application/json",
-        ...config.headers,
-      },
+      headers: config.headers,
     });
 
     if (!UsersApiClient.cache) {

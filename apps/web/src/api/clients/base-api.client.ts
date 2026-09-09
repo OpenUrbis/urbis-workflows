@@ -3,6 +3,45 @@ import { UserIamDetailsResponse } from "../types/iam.dto";
 import { userIamStore } from "../services/user-iam-store";
 import { getAccessToken } from "../../auth/token";
 
+interface AuthenticatedAxiosConfig {
+  baseURL: string;
+  headers?: Record<string, string>;
+}
+
+/**
+ * Create an API client whose Authorization header always uses the current OIDC
+ * user. This is intentionally request-scoped so a silent renew is immediately
+ * reflected by every API client, including instances created before the renew.
+ */
+export function createAuthenticatedAxios(
+  config: AuthenticatedAxiosConfig,
+): AxiosInstance {
+  const { Authorization, authorization, ...staticHeaders } = config.headers || {};
+  const client = axios.create({
+    baseURL: config.baseURL,
+    headers: {
+      "Content-Type": "application/json",
+      ...staticHeaders,
+    },
+  });
+
+  client.interceptors.request.use((requestConfig) => {
+    const token = getAccessToken();
+    requestConfig.headers = requestConfig.headers ?? {};
+
+    if (token) {
+      requestConfig.headers.Authorization = `Bearer ${token}`;
+    } else {
+      delete requestConfig.headers.Authorization;
+      delete requestConfig.headers.authorization;
+    }
+
+    return requestConfig;
+  });
+
+  return client;
+}
+
 export interface ApiClientConfig {
   baseURL: string;
   headers?: Record<string, string>;
@@ -18,24 +57,9 @@ export abstract class BaseApiClient {
   private removeListener: (() => void) | null = null;
 
   constructor(config: ApiClientConfig) {
-    // Strip any static Authorization header — the interceptor below handles it dynamically
-    const { Authorization, authorization, ...staticHeaders } = config.headers || {};
-
-    this.client = axios.create({
+    this.client = createAuthenticatedAxios({
       baseURL: `${config.baseURL}${config.path ? "/" + config.path : ""}`,
-      headers: {
-        "Content-Type": "application/json",
-        ...staticHeaders,
-      },
-    });
-
-    // Attach a fresh access token on every request so we never use a stale/empty token
-    this.client.interceptors.request.use((reqConfig) => {
-      const token = getAccessToken();
-      if (token) {
-        reqConfig.headers.Authorization = `Bearer ${token}`;
-      }
-      return reqConfig;
+      headers: config.headers,
     });
 
     // Get the initial userIam value from the store

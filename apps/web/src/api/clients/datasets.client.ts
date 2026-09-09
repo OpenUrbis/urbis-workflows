@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { CacheService, CacheOptions } from "../services/cache.service";
+import { createAuthenticatedAxios } from "./base-api.client";
 import {
   CreateDatasetHttpDto,
   UpdateDatasetHttpDto,
@@ -24,12 +25,9 @@ export class DatasetsApiClient {
     headers?: Record<string, string>;
     cacheOptions?: CacheOptions;
   }) {
-    this.client = axios.create({
+    this.client = createAuthenticatedAxios({
       baseURL: `${config.baseURL}/datasets`,
-      headers: {
-        "Content-Type": "application/json",
-        ...config.headers,
-      },
+      headers: config.headers,
     });
 
     if (!DatasetsApiClient.cache) {

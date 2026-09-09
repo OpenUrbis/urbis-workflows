@@ -12,6 +12,7 @@ import {
   CopyCodeModuleHttpDto,
 } from "../types/code-modules.dto";
 import { CacheService, CacheOptions } from "../services/cache.service";
+import { createAuthenticatedAxios } from "./base-api.client";
 
 export class CodeModulesApiClient {
   private client: AxiosInstance;
@@ -22,12 +23,9 @@ export class CodeModulesApiClient {
     headers?: Record<string, string>;
     cacheOptions?: CacheOptions;
   }) {
-    this.client = axios.create({
+    this.client = createAuthenticatedAxios({
       baseURL: `${config.baseURL}/code-modules`,
-      headers: {
-        "Content-Type": "application/json",
-        ...config.headers,
-      },
+      headers: config.headers,
     });
 
     // Initialize cache as a static instance if it doesn't exist

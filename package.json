@@ -26,7 +26,6 @@
   "resolutions": {
     "@babel/core": "^7.29.6",
     "@remix-run/router": "^1.23.3",
-    "ajv": "^8.18.0",
     "axios": "^1.18.0",
     "brace-expansion": "^2.1.4",
     "browserslist": "^4.28.7",

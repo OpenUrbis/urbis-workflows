@@ -21,18 +21,23 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   fallbackPath = "/not-found",
 }) => {
   const styleContext = useContext(StyleContext);
-  const { isAuthenticated, isLoading: authLoading, signIn } = useContext(AuthContext);
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    isRestoringSession,
+    signIn,
+  } = useContext(AuthContext);
   const { hasPermission, loading, error } = usePermissions();
 
-  // If not authenticated and not loading, trigger OIDC sign-in
+  // Only start interactive login after silent session restoration settles.
   useEffect(() => {
-    if (!isAuthenticated && !authLoading) {
+    if (!isAuthenticated && !authLoading && !isRestoringSession) {
       signIn();
     }
-  }, [isAuthenticated, authLoading, signIn]);
+  }, [isAuthenticated, authLoading, isRestoringSession, signIn]);
 
-  // While auth is loading, show nothing
-  if (authLoading) return null;
+  // While auth is loading or restoring the provider session, show nothing
+  if (authLoading || isRestoringSession) return null;
 
   // If not authenticated (sign-in redirect in progress), show nothing
   if (!isAuthenticated) return null;

@@ -13,6 +13,7 @@ import {
   FindAllWorkflowsSchemaResponse,
 } from "../types/workflows-schema.dto";
 import { CacheService, CacheOptions } from "../services/cache.service";
+import { createAuthenticatedAxios } from "./base-api.client";
 
 export class WorkflowsSchemaApiClient {
   private client: AxiosInstance;
@@ -23,12 +24,9 @@ export class WorkflowsSchemaApiClient {
     headers?: Record<string, string>;
     cacheOptions?: CacheOptions;
   }) {
-    this.client = axios.create({
+    this.client = createAuthenticatedAxios({
       baseURL: `${config.baseURL}/workflows-schema`,
-      headers: {
-        "Content-Type": "application/json",
-        ...config.headers,
-      },
+      headers: config.headers,
     });
 
     if (!WorkflowsSchemaApiClient.cache) {

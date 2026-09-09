@@ -12,6 +12,7 @@ import {
   CopyConstantVariableResponse,
 } from "../types/constant-variables.dto";
 import { CacheService, CacheOptions } from "../services/cache.service";
+import { createAuthenticatedAxios } from "./base-api.client";
 
 export class ConstantVariablesApiClient {
   private client: AxiosInstance;
@@ -22,12 +23,9 @@ export class ConstantVariablesApiClient {
     headers?: Record<string, string>;
     cacheOptions?: CacheOptions;
   }) {
-    this.client = axios.create({
+    this.client = createAuthenticatedAxios({
       baseURL: `${config.baseURL}/constant-variables`,
-      headers: {
-        "Content-Type": "application/json",
-        ...config.headers,
-      },
+      headers: config.headers,
     });
 
     // Initialize cache as a static instance if it doesn't exist

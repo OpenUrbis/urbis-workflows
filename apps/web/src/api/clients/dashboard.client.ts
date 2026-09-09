@@ -1,4 +1,5 @@
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
+import { createAuthenticatedAxios } from "./base-api.client";
 import {
   DashboardTimeRangeQuery,
   GetWorkflowOverviewResponse,
@@ -18,12 +19,9 @@ export class DashboardApiClient {
     baseURL: string;
     headers?: Record<string, string>;
   }) {
-    this.client = axios.create({
+    this.client = createAuthenticatedAxios({
       baseURL: `${config.baseURL}/dashboard`,
-      headers: {
-        "Content-Type": "application/json",
-        ...config.headers,
-      },
+      headers: config.headers,
     });
   }
 
