@@ -79,18 +79,32 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({
       },
     });
 
+    setLoading(true);
+    let lastErr: any = null;
+
+    // Retry up to 2 times for transient network issues
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const response = await apiClient.iam.getCurrentUserIamDetails();
+        setUserIam(response);
+        setError(null);
+        // Clear any existing IAM error when successful
+        sessionStorage.removeItem("iamError");
+        sessionStorage.removeItem("iamErrorRedirectNeeded");
+        setLoading(false);
+        return;
+      } catch (err) {
+        lastErr = err;
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
+        }
+      }
+    }
+
     try {
-      setLoading(true);
-      const response = await apiClient.iam.getCurrentUserIamDetails();
-      setUserIam(response);
-      setError(null);
-      // Clear any existing IAM error when successful
-      sessionStorage.removeItem("iamError");
-      sessionStorage.removeItem("iamErrorRedirectNeeded");
-    } catch (err) {
-      console.error("Failed to fetch user IAM details:", err);
+      console.error("Failed to fetch user IAM details after retries:", lastErr);
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch user IAM details";
+        lastErr instanceof Error ? lastErr.message : "Failed to fetch user IAM details";
 
       // Create a standard error object
       const standardError = new Error(errorMessage);
