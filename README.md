@@ -35,6 +35,19 @@ Urbis-Workflows is an open-source monorepo created to provide a flexible and mod
 
 ---
 
+## 🌐 Ecossistema de Repositórios (OpenUrbis no GitHub)
+
+| Repositório | Stack / Tecnologias | Descrição & Finalidade |
+| :--- | :--- | :--- |
+| [**`OpenUrbis/urbis-agent`**](https://github.com/OpenUrbis/urbis-agent) | Markdown, Bash, Python, MCPs | Central de inteligência, guia mestre de arquitetura, mapeamento de clusters Azure AKS e orquestração de submódulos. |
+| [**`OpenUrbis/urbis-map`**](https://github.com/OpenUrbis/urbis-map) | Next.js, React 18, Angular, NestJS, Deck.gl, Tailwind | Monorepo Turborepo com o portal Mosaico, Web GIS (Mapa Urbis), Legis, Contas, Docs e API Gateway. |
+| [**`OpenUrbis/urbis-datalake`**](https://github.com/OpenUrbis/urbis-datalake) | Python 3.11+, Dagster, PostGIS, GeoPandas, GeoServer | Datalake geoespacial com pipelines de ingestão, higienização e catálogo de dados em arquitetura medalhão. |
+| [**`OpenUrbis/urbis-workflows`**](https://github.com/OpenUrbis/urbis-workflows) *(este repositório)* | React, Next.js, Radix UI, Tailwind | Frontend do **Viabiliza**: formulários inteligentes, caixas de entrada de processos e interface administrativa. |
+| [**`OpenUrbis/urbis-workflows-api`**](https://github.com/OpenUrbis/urbis-workflows-api) | NestJS, TypeScript, PostgreSQL, TypeORM | Backend e API Gateway do **Viabiliza**: validações de regras urbanísticas, integração com o SEI e motor de processos. |
+| [**`OpenUrbis/urbis-projeto-inteligente`**](https://github.com/OpenUrbis/urbis-projeto-inteligente) | .NET 8, C#, AutoCAD ObjectARX, accoreconsole, GeoJSON | Motor para extração geométrica, validação topológica, conversão CAD (DWG/DXF) e aplicação de chancela digital. |
+
+---
+
 ## Installation
 
 To get started with Urbis-Workflows, install the dependencies using your preferred package manager:
