@@ -139,7 +139,7 @@ Urbis-Workflows is licensed under the [AGPL v3](LICENSE.md). You are free to use
 We’re building a community around Urbis-Workflows! Join the conversation and help us improve the project:
 
 Stay tuned for updates on our official channels (coming soon).
-For now, feel free to reach out via [contas@urbis.prefeitura.sp.gov.br](mailto:contas@urbis.prefeitura.sp.gov.br) or open a discussion in the section.
+For now, feel free to reach out via [codataurbis@prefeitura.sp.gov.br](mailto:codataurbis@prefeitura.sp.gov.br) or open a discussion in the section.
 
 ---
 
@@ -179,4 +179,4 @@ A huge thanks to all our contributors! Your efforts make Urbis-Workflows better 
 
 ## Contact
 
-For questions, feedback, or support, reach out to us at [contas@urbis.prefeitura.sp.gov.br](mailto:contas@urbis.prefeitura.sp.gov.br).
+For questions, feedback, or support, reach out to us at [codataurbis@prefeitura.sp.gov.br](mailto:codataurbis@prefeitura.sp.gov.br).
