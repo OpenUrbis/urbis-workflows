@@ -25,8 +25,14 @@ This is a community-maintained example. If you experience a problem, please subm
 
 Urbis-Workflows is an open-source monorepo created to provide a flexible and modular workflow management system for municipal administrations. It aims to optimize processes, automate tasks, and improve overall efficiency in city governance.
 
-- **Website**: [mapa.urbis.prefeitura.sp.gov.br](https://mapa.urbis.prefeitura.sp.gov.br/)
-- **GitHub Repository**: [github.com/OpenUrbis/urbis-workflows](https://github.com/OpenUrbis/urbis-workflows)
+- 📝 **Aplicação Web (Viabiliza)**: [viabiliza.urbis.prefeitura.sp.gov.br](https://viabiliza.urbis.prefeitura.sp.gov.br/)
+- 👤 **Cadastro & Acesso**: [viabiliza.urbis.prefeitura.sp.gov.br/sign-up](https://viabiliza.urbis.prefeitura.sp.gov.br/sign-up)
+- 🔌 **API Swagger (OpenAPI)**: [api.urbis.sampa.br/swagger](https://api.urbis.sampa.br/swagger) | [api.urbis.prefeitura.sp.gov.br/swagger](https://api.urbis.prefeitura.sp.gov.br/swagger)
+- 🗺️ **Mapa Urbis (Web GIS)**: [mapa.urbis.prefeitura.sp.gov.br](https://mapa.urbis.prefeitura.sp.gov.br/)
+- 📖 **Documentação Técnica Oficial**: [docs.urbis.prefeitura.sp.gov.br](https://docs.urbis.prefeitura.sp.gov.br/)
+- ⚖️ **Legis (Legislação e Normas)**: [legis.urbis.prefeitura.sp.gov.br](https://legis.urbis.prefeitura.sp.gov.br/)
+- 🏠 **Mosaico (Portal Integrado)**: [urbis.prefeitura.sp.gov.br](https://urbis.prefeitura.sp.gov.br/)
+- 💻 **Repositório Backend (API)**: [github.com/OpenUrbis/urbis-workflows-api](https://github.com/OpenUrbis/urbis-workflows-api)
 
 ---
 
