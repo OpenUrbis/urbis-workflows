@@ -42,7 +42,8 @@ Urbis-Workflows is an open-source monorepo created to provide a flexible and mod
 | [**`OpenUrbis/urbis-agent`**](https://github.com/OpenUrbis/urbis-agent) | Markdown, Bash, Python, MCPs | Central de inteligência, guia mestre de arquitetura, mapeamento de clusters Azure AKS e orquestração de submódulos. |
 | [**`OpenUrbis/urbis`**](https://github.com/OpenUrbis/urbis) | Next.js, React 18, Angular, NestJS, Deck.gl, Tailwind | Monorepo Turborepo com o portal Mosaico, Web GIS (Mapa Urbis), Legis, Contas, Docs e API Gateway. |
 | [**`OpenUrbis/urbis-datalake`**](https://github.com/OpenUrbis/urbis-datalake) | Python 3.11+, Dagster, PostGIS, GeoPandas, GeoServer | Datalake geoespacial com pipelines de ingestão, higienização e catálogo de dados em arquitetura medalhão. |
-| [**`OpenUrbis/urbis-workflows`**](https://github.com/OpenUrbis/urbis-workflows) *(este repositório)* | React, Next.js, Radix UI, Tailwind | Frontend do **Viabiliza**: formulários inteligentes, caixas de entrada de processos e interface administrativa. |
+| [**`OpenUrbis/urbis-ckan`**](https://github.com/OpenUrbis/urbis-ckan) | Python, CKAN 2.10, PostgreSQL, Solr, Docker | Portal de Dados Abertos e catálogo de metadados territoriais do Município de São Paulo. |
+| [**`OpenUrbis/urbis-workflows`**](https://github.com/OpenUrbis/urbis-workflows) | React, Next.js, Radix UI, Tailwind | Frontend do **Viabiliza**: formulários inteligentes, caixas de entrada de processos e interface administrativa. |
 | [**`OpenUrbis/urbis-workflows-api`**](https://github.com/OpenUrbis/urbis-workflows-api) | NestJS, TypeScript, PostgreSQL, TypeORM | Backend e API Gateway do **Viabiliza**: validações de regras urbanísticas, integração com o SEI e motor de processos. |
 | [**`OpenUrbis/urbis-projeto-inteligente`**](https://github.com/OpenUrbis/urbis-projeto-inteligente) | .NET 8, C#, AutoCAD ObjectARX, accoreconsole, GeoJSON | Motor para extração geométrica, validação topológica, conversão CAD (DWG/DXF) e aplicação de chancela digital. |
 
@@ -173,7 +174,7 @@ A huge thanks to all our contributors! Your efforts make Urbis-Workflows better 
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OpenUrbis/urbis-agent,OpenUrbis/urbis,OpenUrbis/urbis-datalake,OpenUrbis/urbis-workflows,OpenUrbis/urbis-workflows-api,OpenUrbis/urbis-projeto-inteligente&type=Date)](https://star-history.com/#OpenUrbis/urbis-agent&OpenUrbis/urbis&OpenUrbis/urbis-datalake&OpenUrbis/urbis-workflows&OpenUrbis/urbis-workflows-api&OpenUrbis/urbis-projeto-inteligente&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=OpenUrbis/urbis-agent,OpenUrbis/urbis,OpenUrbis/urbis-datalake,OpenUrbis/urbis-ckan,OpenUrbis/urbis-workflows,OpenUrbis/urbis-workflows-api,OpenUrbis/urbis-projeto-inteligente&type=Date)](https://star-history.com/#OpenUrbis/urbis-agent&OpenUrbis/urbis&OpenUrbis/urbis-datalake&OpenUrbis/urbis-ckan&OpenUrbis/urbis-workflows&OpenUrbis/urbis-workflows-api&OpenUrbis/urbis-projeto-inteligente&Date)
 
 ---
 
