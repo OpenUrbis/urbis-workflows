@@ -1,6 +1,6 @@
 # Urbis Workflows
 
-![Capa do Repositório](https://raw.githubusercontent.com/OpenUrbis/urbis-map/main/apps/docs/public/cover.png)
+![Capa do Repositório](cover.png)
 
 [![CI Pipeline](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/lint-and-test.yaml)
 [![Build and Push](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml/badge.svg)](https://github.com/OpenUrbis/urbis-workflows/actions/workflows/build-and-deploy.yaml)
