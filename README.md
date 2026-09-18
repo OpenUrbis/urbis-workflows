@@ -173,7 +173,7 @@ A huge thanks to all our contributors! Your efforts make Urbis-Workflows better 
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OpenUrbis/urbis-workflows&type=Date)](https://star-history.com/#OpenUrbis/urbis-workflows&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=OpenUrbis/urbis-agent,OpenUrbis/urbis-map,OpenUrbis/urbis-datalake,OpenUrbis/urbis-workflows,OpenUrbis/urbis-workflows-api,OpenUrbis/urbis-projeto-inteligente&type=Date)](https://star-history.com/#OpenUrbis/urbis-agent&OpenUrbis/urbis-map&OpenUrbis/urbis-datalake&OpenUrbis/urbis-workflows&OpenUrbis/urbis-workflows-api&OpenUrbis/urbis-projeto-inteligente&Date)
 
 ---
 
