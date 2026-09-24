@@ -1,5 +1,5 @@
 # build stage
-FROM node:20-alpine AS build
+FROM node:25-alpine AS build
 
 ARG VITE_VERSION
 ENV VITE_VERSION=$VITE_VERSION
@@ -20,7 +20,7 @@ WORKDIR /app/apps/web
 RUN yarn build
 
 # production stage
-FROM nginx:1.27-alpine
+FROM nginx:1.29-alpine
 
 EXPOSE 80
 
